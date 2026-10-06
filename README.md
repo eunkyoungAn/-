@@ -59,3 +59,22 @@ pnpm preview
 배포 파일의 경로, manifest, service worker, JavaScript 문법과 기존 자동화 테스트를 확인했습니다.
 실제 Gemini API 생성은 개인 API 키로 별도 확인해야 합니다.
 GitHub 업로드 및 공개 배포는 사용자가 위 절차에 따라 진행합니다.
+
+## 메일 발송 설정 (Google Apps Script)
+
+결과 탭(기업분석·자소서 초안)의 **메일로 받기**는 Google Apps Script 웹앱이 웹앱 소유자의 Gmail로 발송합니다.
+GitHub Pages에는 서버가 없어서, 배포하는 사람의 Google 계정이 한 번 필요합니다. 앱을 쓰는 사람은 로그인이 필요 없습니다.
+
+1. https://script.google.com 에서 **새 프로젝트**를 만듭니다.
+2. `apps-script/Code.gs` 내용을 `Code.gs`에 붙여넣습니다.
+3. (선택) 프로젝트 설정에서 `appsscript.json` 표시를 켜고 `apps-script/appsscript.json`으로 교체합니다.
+4. 함수 목록에서 `authorize`를 실행하고 메일 발송 권한을 승인합니다.
+5. **배포 → 새 배포 → 웹 앱**: 실행 사용자 `나`, 액세스 `모든 사용자`로 배포합니다.
+6. 표시되는 웹 앱 URL(`https://script.google.com/macros/s/…/exec`)을 복사합니다.
+7. 저장소의 `mail-config.json`을 열어 `{ "mailEndpoint": "복사한 URL" }` 형태로 저장(커밋)합니다. 다시 빌드할 필요 없습니다.
+8. 코드를 수정한 뒤에는 **배포 관리 → 연필 → 새 버전 → 배포**를 해야 기존 주소에 반영됩니다.
+
+주의
+- 메일은 소유자 계정에서 발송되며 Google 일일 한도가 적용됩니다. `Code.gs`는 하루 전체 80통, 같은 주소 5통으로 제한합니다(`DAILY_TOTAL_LIMIT`, `DAILY_PER_RECIPIENT`).
+- 웹앱 주소를 아는 사람은 누구나 발송을 요청할 수 있으므로 한도를 유지하세요. 이메일 주소는 메일 발송에만 쓰이고 저장하지 않습니다.
+- `mail-config.json`이 비어 있으면 앱에서 "메일 발송이 아직 설정되지 않았습니다"라고 안내합니다.

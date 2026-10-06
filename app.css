@@ -230,9 +230,6 @@
   .relative {
     position: relative;
   }
-  .static {
-    position: static;
-  }
   .inset-0 {
     inset: calc(var(--spacing) * 0);
   }
@@ -8500,6 +8497,17 @@ input::placeholder,textarea::placeholder {
   .run-note {
     font-size: 12px;
   }
+}
+.mail-row {
+  display: flex;
+  gap: .6rem;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  margin: 0 0 1rem;
+}
+.mail-row .field {
+  flex: 1 1 14rem;
+  margin: 0;
 }
 @property --tw-translate-x {
   syntax: "*";
