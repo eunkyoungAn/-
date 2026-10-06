@@ -1,0 +1,18 @@
+import assert from "node:assert/strict";
+import {listModels,generate,parseResult,COMPANY_KEYS,pause} from "./lib/gemini.mjs";
+import {buildCompanyPrompt,buildCoverLetterPrompt} from "./lib/prompts.mjs";
+const sample=Object.fromEntries(COMPANY_KEYS.map(k=>[k,["1) 확인된 항목"]]));
+const payload={candidates:[{finishReason:"STOP",content:{parts:[{text:JSON.stringify(sample)}]}}]};
+assert.deepEqual(parseResult(payload,"company"),sample);
+assert.throws(()=>parseResult({candidates:[{finishReason:"MAX_TOKENS"}]},"company"));
+assert.throws(()=>parseResult({candidates:[{content:{parts:[{text:"{}"}]}}]},"company"));
+assert.throws(()=>parseResult({candidates:[{content:{parts:[{text:"false"}]}}]},"company"));
+assert.match(buildCompanyPrompt({"기업명":"테스트기업"}),/테스트기업/);
+assert.match(buildCoverLetterPrompt({"나의 행동":"자료 정리"},"기업 맥락"),/자료 정리/);
+let calls=[];globalThis.fetch=async(url,options)=>{calls.push({url,options});return {ok:true,json:async()=>payload}};
+assert.deepEqual(await generate("test-key","models/gemini-3.1-flash-lite","test prompt","company",new AbortController().signal),sample);
+assert.ok(!calls[0].url.includes("test-key"));assert.equal(calls[0].options.headers["x-goog-api-key"],"test-key");
+globalThis.fetch=async()=>({ok:false,status:429});await assert.rejects(()=>generate("x","models/gemini-3.1-flash-lite","p","company",new AbortController().signal),e=>e.status===429);
+globalThis.fetch=async()=>({ok:true,json:async()=>({models:[{name:"models/gemini-test",supportedGenerationMethods:["generateContent"]},{name:"models/gemini-image",supportedGenerationMethods:["generateContent"]}]})});assert.equal((await listModels("x")).length,1);
+const ac=new AbortController();ac.abort();await assert.rejects(()=>pause(1000,ac.signal),e=>e.name==="AbortError");
+console.log("PASS: result validation, key headers, quota errors, model filtering, cancellation, source prompts.");
