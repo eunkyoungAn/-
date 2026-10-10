@@ -52,8 +52,10 @@ def main(lmp_path, lfs_path, socx_path, out_dir="."):
     panel = panel.merge(names, on="iso3", how="left", validate="m:1")
     for part in (pes, unemp, socx_):
         panel = panel.merge(part, on=["iso3", "year"], how="left", validate="1:1")
-    # 행이 아예 없던 국가-연도 표시 (SOCX: AUS/CAN/JPN 2023-24)
-    panel["socx_row_absent"] = panel["socx_gdp_status"].isna().astype("int8")
+    # SOCX 수록기간(2010-2024) 안에서 행이 아예 없던 국가-연도 (AUS/CAN/JPN 2023-24)
+    # 2004-2009는 다운로드 범위 밖이므로 0
+    in_range = panel["year"].between(socx_["year"].min(), socx_["year"].max())
+    panel["socx_row_absent"] = (in_range & panel["socx_gdp_status"].isna()).astype("int8")
     panel = panel[panel.year.isin(YEARS)]
     for c in [c for c in panel if c.endswith("_status")]:
         panel[c] = panel[c].fillna("")
@@ -66,7 +68,7 @@ def main(lmp_path, lfs_path, socx_path, out_dir="."):
         "pes_gdp_status": "PES 관측상태", "unemp": "실업률 15-64세 남녀전체, %",
         "unemp_status": "실업률 관측상태(공란 원자료 그대로)",
         "socx_gdp": "전체 공공사회지출, GDP 대비 % (기초통계용)",
-        "socx_gdp_status": "SOCX 관측상태", "socx_row_absent": "SOCX 원자료에 행 없음=1",
+        "socx_gdp_status": "SOCX 관측상태", "socx_row_absent": "SOCX 수록기간 내 원자료 행 없음=1",
     }
     out = Path(out_dir)
     panel.to_csv(out / "pes_panel_21.csv", index=False, encoding="utf-8-sig")
