@@ -1,8 +1,7 @@
 *==============================================================
 * PES·행정 지출의 실업률 상승·하락에 대한 비대칭 반응
-* 입력: pes_panel_21.dta (01_preprocess.py로 생성, 21개국 x 2010-2024)
-* 주의: 현재 PES 지출은 2020-2024년뿐이므로 추정은 2021-2024년
-*       84개 관측치의 예비분석이다.
+* 입력: pes_panel_21.dta (01_preprocess.py로 생성, 21개국 x 2004-2024 = 441행)
+* PES 지출 2004-2024, 실업률 2010-2024 -> 시차모형 추정기간 2012-2024
 *==============================================================
 version 17
 clear all
@@ -19,7 +18,7 @@ use "pes_panel_21.dta", clear
 isid iso3 year
 encode iso3, gen(country_id)
 xtset country_id year, yearly
-assert _N == 315
+assert _N == 441
 
 * 상태코드 공란(AUS/AUT/BEL/CAN 2023-24)은 수치가 있으므로 결측이 아님
 tab unemp_status, missing
@@ -44,7 +43,8 @@ label var Lup   "전년 실업률 상승 폭"
 label var Ldown "전년 실업률 하락 폭"
 label var dsocx "공공사회지출 비중 변화 (기초통계용)"
 
-* 공통 추정표본: 시차모형 기준 (2021-2024, 84행 예상)
+* 공통 추정표본: 시차모형 기준 (2012-2024, 273행 예상)
+* 세 모형 모두 이 동일 표본에서 비교
 gen byte sample = !missing(dpes, up, down, Lup, Ldown)
 count if sample
 
@@ -58,25 +58,25 @@ collapse (count) n_pes=pes_gdp n_unemp=unemp n_socx=socx_gdp ///
 list, noobs sep(0)
 restore
 
-* 3-2 수준 변수 기술통계 (변수별 N이 다름: 105 / 315 / 309)
-tabstat pes_gdp unemp lfpr emp_rate socx_gdp, ///
+* 3-2 수준 변수 기술통계 (변수별 N이 다름: 441 / 315 / 309)
+tabstat pes_gdp unemp socx_gdp, ///
     stat(n mean sd min max) col(stat) format(%9.3f)
-* PES가 있는 2020-2024년으로 한정
-tabstat pes_gdp unemp socx_gdp if !missing(pes_gdp), ///
+* 세 변수가 모두 있는 2010-2024년으로 한정
+tabstat pes_gdp unemp socx_gdp if inrange(year, 2010, 2024), ///
     stat(n mean sd min max) col(stat) format(%9.3f)
 
 * 3-3 국가 간/국가 내 변동
-xtsum pes_gdp unemp if inrange(year, 2020, 2024)
+xtsum pes_gdp unemp if inrange(year, 2010, 2024)
 
-* 3-4 국가별 평균 (2020-2024)
-tabstat pes_gdp unemp if inrange(year, 2020, 2024), ///
+* 3-4 국가별 평균 (2010-2024)
+tabstat pes_gdp unemp if inrange(year, 2010, 2024), ///
     by(iso3) stat(mean sd) format(%9.3f) nototal
 
 * 3-5 연도별 21개국 단순평균 (OECD 평균 아님)
-tabstat pes_gdp unemp socx_gdp if inrange(year, 2020, 2024), ///
+tabstat pes_gdp unemp socx_gdp if inrange(year, 2010, 2024), ///
     by(year) stat(n mean) format(%9.3f)
 * SOCX는 2023-24년에 18개국뿐 -> 같은 국가 집합으로도 확인
-tabstat socx_gdp if inrange(year, 2020, 2024) & ///
+tabstat socx_gdp if inrange(year, 2010, 2024) & ///
     !inlist(iso3, "AUS", "CAN", "JPN"), by(year) stat(n mean) format(%9.3f)
 
 * 3-6 변화량 통계와 방향별 횟수
@@ -84,7 +84,7 @@ tabstat dpes du up down if sample, stat(n mean sd min max) col(stat) format(%9.4
 gen byte is_up   = up > 0   if !missing(up)
 gen byte is_down = down > 0 if !missing(down)
 tabstat is_up is_down if sample, by(iso3) stat(sum) nototal
-* 한 방향만 관측된 국가는 제외 사유가 아니라 진단 결과로 기록 (예: ESP)
+* 한 방향만 관측된 국가는 제외 사유가 아니라 진단 결과로 기록
 
 * 3-7 관계 탐색
 pwcorr dpes du up down if sample, obs
@@ -146,7 +146,19 @@ capture noisily wildbootstrap regress dpes up down Lup Ldown ///
     coefficients(up down) rseed(20261010)
 
 *--------------------------------------------------------------
-* 7. 저장
+* 7. 민감도 분석 (주모형 M3 재추정)
+*--------------------------------------------------------------
+* 7-1 코로나19 이전: 2012-2019
+mixed dpes up down Lup Ldown `controls' i.year if sample & year <= 2019 ///
+    || country_id:, noconstant residuals(toeplitz 1, t(year)) vce(robust)
+test (up + down = 0) (Lup + Ldown = 0)
+* 7-2 코로나 영향 시점 제외: 2020-2022 (2022는 2021 변화를 시차로 포함)
+mixed dpes up down Lup Ldown `controls' i.year if sample & !inrange(year, 2020, 2022) ///
+    || country_id:, noconstant residuals(toeplitz 1, t(year)) vce(robust)
+test (up + down = 0) (Lup + Ldown = 0)
+
+*--------------------------------------------------------------
+* 8. 저장
 *--------------------------------------------------------------
 save "pes_panel_21_analysis.dta", replace
 log close
