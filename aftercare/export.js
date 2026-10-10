@@ -1,0 +1,24 @@
+import {today} from './model.js';
+export function download(name,blob){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),10000)}
+function csvCell(v){let s=String(v??'');if(/^[\s]*[=+@-]/.test(s))s="'"+s;return '"'+s.replace(/"/g,'""')+'"'}
+export function exportCSV(list,data,settings,manager,nameFor){const rows=[['구직자','관리번호','현재 사후관리자','관리 시작일','관리 종료일','진행일','서비스','진행 담당자','진행 방법','지원 내용','결과','다음 연락일','다음 조치','후속 완료','증빙 수']];for(const s of list){const p=data.people.find(p=>p.id===s.personId);rows.push([nameFor(p),settings.mask?'':p.code,manager(p.managerId),p.start,p.end,s.date,s.type,manager(s.managerId),s.method,settings.notes?s.content:'상세 생략',settings.notes?s.result:'상세 생략',s.nextDate,settings.notes?s.next:'',s.done?'완료':'미완료',s.files.length])}download('내일동행-서비스기록-'+today()+'.csv',new Blob(['\ufeff'+rows.map(r=>r.map(csvCell).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'}))}
+export async function exportPNG(list,data,settings,manager,nameFor){
+ const people=[...new Set(list.map(s=>s.personId))].map(id=>data.people.find(p=>p.id===id));
+ const width=1440,rowH=125,height=340+people.length*rowH+110;
+ if(height>16000)throw Error('이미지는 한 번에 120명 이하로 나눠 저장해주세요. 기간·담당자 조건을 좁혀주세요.');
+ const canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;const c=canvas.getContext('2d');
+ c.fillStyle='#f5f7f0';c.fillRect(0,0,width,height);c.fillStyle='#183f32';c.fillRect(0,0,width,260);
+ c.fillStyle='#c9ddb0';c.font='bold 18px "Malgun Gothic",sans-serif';c.fillText('NAEIL CARE  /  내일동행',65,65);c.fillStyle='#ffffff';c.font='bold 42px "Malgun Gothic",sans-serif';c.fillText('고용서비스 진행 요약',65,135);
+ c.font='22px "Malgun Gothic",sans-serif';c.fillStyle='#c7d8cb';c.fillText(`선택한 지원 ${list.length}건  ·  구직자 ${people.length}명  ·  작성일 ${today()}`,65,193);
+ c.fillStyle='#647561';c.font='18px "Malgun Gothic",sans-serif';c.fillText('구직자 / 현재 사후관리자',65,309);c.fillText('현재 관리 기간',570,309);c.fillText('선택 기간의 지원',1040,309);
+ function line(text,x,y,max){let t=String(text);while(c.measureText(t).width>max&&t.length>1)t=t.slice(0,-2)+'…';c.fillText(t,x,y)}
+ people.forEach((p,i)=>{const y=350+i*rowH,records=list.filter(s=>s.personId===p.id);c.fillStyle='#ffffff';c.fillRect(45,y-10,width-90,110);c.fillStyle='#254735';c.font='bold 24px "Malgun Gothic",sans-serif';line(nameFor(p),65,y+28,460);c.font='18px "Malgun Gothic",sans-serif';c.fillStyle='#6a7c6d';line(manager(p.managerId),65,y+66,460);c.fillText(p.start+' ~ '+p.end,570,y+28);c.font='bold 25px "Malgun Gothic",sans-serif';c.fillStyle='#315e43';c.fillText(records.length+'건',1040,y+28);c.font='16px "Malgun Gothic",sans-serif';c.fillStyle='#6a7c6d';line([...new Set(records.map(s=>s.type))].join(' · '),570,y+66,750)});
+ c.fillStyle='#697b6a';c.font='16px "Malgun Gothic",sans-serif';c.fillText('입력 기록을 요약한 이미지입니다. 실제 진행 장면이나 서비스 수행을 인증하는 증빙이 아닙니다.',65,height-45);
+ const blob=await new Promise(r=>canvas.toBlob(r,'image/png'));if(!blob)throw Error('이미지 생성에 실패했습니다. 조회 범위를 줄여주세요.');download('내일동행-진행요약-'+today()+'.png',blob);
+}
+const enc=new TextEncoder();
+function crc32(a){let c=0xffffffff;for(const v of a){c^=v;for(let j=0;j<8;j++)c=(c>>>1)^((c&1)?0xedb88320:0)}return(c^0xffffffff)>>>0}
+function header(size){const a=new Uint8Array(size),v=new DataView(a.buffer);return{a,u16:(n,x)=>v.setUint16(n,x,true),u32:(n,x)=>v.setUint32(n,x,true)}}
+export function exportZip(list,data){const entries=[];const index=['내일동행 증빙 원본 목록','작성일 '+today(),'원본 파일은 암호화·마스킹되지 않았습니다.',''];let n=0;for(const s of list){const p=data.people.find(p=>p.id===s.personId);for(const f of s.files){const safe=f.name.replace(/[\\/:*?"<>|\x00-\x1f]/g,'_');const path=String(++n).padStart(4,'0')+'_'+s.date+'_'+safe;const raw=atob(f.data.split(',')[1]);entries.push({name:path,bytes:Uint8Array.from(raw,c=>c.charCodeAt(0))});index.push(path+' | '+p.name+' | '+s.type+' | '+s.date)}}if(!n)throw Error('선택한 기록에 첨부 증빙이 없습니다.');entries.push({name:'증빙목록.txt',bytes:enc.encode(index.join('\r\n'))});
+ const local=[],central=[];let offset=0;for(const file of entries){const name=enc.encode(file.name),size=file.bytes.length,crc=crc32(file.bytes),l=header(30),c=header(46);l.u32(0,0x04034b50);l.u16(4,20);l.u16(6,0x0800);l.u32(14,crc);l.u32(18,size);l.u32(22,size);l.u16(26,name.length);local.push(l.a,name,file.bytes);c.u32(0,0x02014b50);c.u16(4,20);c.u16(6,20);c.u16(8,0x0800);c.u32(16,crc);c.u32(20,size);c.u32(24,size);c.u16(28,name.length);c.u32(42,offset);central.push(c.a,name);offset+=30+name.length+size;}const centralSize=central.reduce((a,b)=>a+b.length,0),end=header(22);end.u32(0,0x06054b50);end.u16(8,entries.length);end.u16(10,entries.length);end.u32(12,centralSize);end.u32(16,offset);download('내일동행-증빙원본-'+today()+'.zip',new Blob([...local,...central,end.a],{type:'application/zip'}));
+}

@@ -27,6 +27,7 @@ Gemini API를 이용해 기업 분석과 경험 기반 자기소개서 초안을
 - `.nojekyll`: 정적 파일 배포 설정
 - `source/`: 수정 가능한 React/TypeScript 코드, 프롬프트, 기존 자동화 테스트
 - `PROVENANCE.md`: 원본 확인 및 변경 내역
+- `aftercare/`: 별도 앱 '내일동행 · 고용서비스 사후관리' (주소: `/-/aftercare/`). 이 저장소를 다시 올릴 때 이 폴더를 지우지 마세요.
 
 ## 사용 방법
 
