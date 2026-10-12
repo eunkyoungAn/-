@@ -6,10 +6,11 @@
 <link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="/style.css">
 </head>
 <body>
-<a class="skip-link" href="#workspace">입력 화면으로 이동</a>
+<a class="skip-link" href="#main">입력 화면으로 이동</a>
 <header class="app-header"><div class="header-inner"><div class="brand"><span class="brandmark" aria-hidden="true">人</span><strong>인재추천 워크룸</strong></div><button id="settingsBtn" class="secondary settings-button">AI 연결 설정 <span id="connection" class="connection">확인 중</span></button></div></header>
-<main>
-<div class="page-heading"><p class="eyebrow">안은경 채용매니저의 업무 공간</p><h1>후보자 추천 메일 만들기</h1><p class="intro">자료를 넣고 순서대로 따라오세요.<br class="mobile-break"> 분석과 메일 초안을 함께 준비합니다.</p><div class="utility-actions"><button id="exampleBtn" class="textbutton">가상 예시로 살펴보기 ↗</button><button id="resetBtn" class="textbutton muted-button">입력 지우기</button></div></div>
+<main id="main">
+<div class="page-heading"><p class="eyebrow">안은경 채용매니저의 업무 공간</p><div class="mode-switch" role="tablist" aria-label="업무 선택"><button type="button" role="tab" id="modeRecommend" data-mode="recommend" aria-controls="recommendView" aria-selected="true" class="active">추천 메일</button><button type="button" role="tab" id="modeClosure" data-mode="closure" aria-controls="closureView" aria-selected="false" tabindex="-1">사후관리 종료</button></div><h1 id="heroTitle">후보자 추천 메일 만들기</h1><p class="intro" id="heroIntro">자료를 넣고 순서대로 따라오세요. 분석과 메일 초안을 함께 준비합니다.</p><div class="utility-actions" id="recommendActions"><button id="exampleBtn" class="textbutton">가상 예시로 살펴보기 ↗</button><button id="resetBtn" class="textbutton muted-button">입력 지우기</button></div></div>
+<div id="recommendView" role="tabpanel" aria-labelledby="modeRecommend">
 <nav class="stepper" aria-label="작성 순서">
 <button type="button" data-step="0" class="step-link active" aria-current="step"><span class="step-number">1</span><span>이력서</span></button>
 <button type="button" data-step="1" class="step-link"><span class="step-number">2</span><span>기업·공고</span></button>
@@ -60,9 +61,46 @@
 <div class="result-footer"><button id="editInputsBtn" class="secondary" type="button">입력 내용 수정</button></div>
 </section>
 </div>
+</div>
+<div id="closureView" class="closure-view" role="tabpanel" aria-labelledby="modeClosure" hidden>
+<form id="closureForm" class="workspace" novalidate>
+<div class="step-panel">
+<div class="section-heading"><p class="step-caption">사후관리 종료</p><h2 id="closureTitle" tabindex="-1">서비스 기록을 종료 기록으로 정리합니다</h2><p>종료 유형을 고르고 확인한 내용을 넣어주세요. 입력 내용은 저장되지 않습니다.</p></div>
+<div id="closureNotice" class="notice" role="status" aria-live="polite" hidden></div>
+<div class="two-col"><div class="field"><label for="clName">참여자 이름 또는 관리번호 <span class="optional">선택</span></label><input id="clName" maxlength="100" autocomplete="off" placeholder="예: 최○○ 또는 C-001"></div><div class="field"><label for="clEndDate">사후관리 종료일</label><input id="clEndDate" type="date"></div></div>
+<fieldset class="type-picker"><legend>종료 유형</legend>
+<label class="type-option"><input type="radio" name="clType" value="employed"><span class="type-title">취업</span><span class="type-desc">사업장·취업일·고용형태 확인</span></label>
+<label class="type-option"><input type="radio" name="clType" value="startup"><span class="type-title">창업</span><span class="type-desc">상호·업종·사업자등록 확인</span></label>
+<label class="type-option"><input type="radio" name="clType" value="lost"><span class="type-title">연락 두절</span><span class="type-desc">연락 시도 일자·수단·결과</span></label>
+<label class="type-option"><input type="radio" name="clType" value="declined"><span class="type-title">연락 비희망</span><span class="type-desc">본인 의사 확인 일자·방법</span></label>
+</fieldset>
+<div class="type-fields" data-type="employed" hidden><div class="two-col"><div class="field"><label for="clCompany">사업장명</label><input id="clCompany" maxlength="150" placeholder="예: ○○바이오"></div><div class="field"><label for="clRole">직무</label><input id="clRole" maxlength="150" placeholder="예: 품질관리"></div></div><div class="three-col"><div class="field"><label for="clStartDate">취업일</label><input id="clStartDate" type="date"></div><div class="field"><label for="clEmployment">고용형태</label><select id="clEmployment"><option value="">선택</option><option>정규직</option><option>계약직</option><option>기간제</option><option>시간제</option><option>기타</option></select></div><div class="field"><label for="clVerify">확인 방법</label><select id="clVerify"><option value="">선택</option><option>고용보험 가입 이력</option><option>재직증명서·근로계약서</option><option>기업 담당자 확인</option><option>본인 진술</option></select></div></div></div>
+<div class="type-fields" data-type="startup" hidden><div class="two-col"><div class="field"><label for="clBizName">상호</label><input id="clBizName" maxlength="150"></div><div class="field"><label for="clBizType">업종</label><input id="clBizType" maxlength="150" placeholder="예: 온라인 교육 서비스"></div></div><div class="two-col"><div class="field"><label for="clBizDate">사업자등록일</label><input id="clBizDate" type="date"></div><div class="field"><label for="clBizVerify">확인 방법</label><select id="clBizVerify"><option value="">선택</option><option>사업자등록증</option><option>사업자등록 상태 조회</option><option>본인 진술</option></select></div></div></div>
+<div class="type-fields" data-type="lost" hidden><div class="field"><label for="clAttempts">연락 시도 기록</label><p id="clAttemptsHelp" class="hint">한 줄에 한 번씩 날짜·수단·결과를 적어주세요. 횟수와 날짜 수를 자동으로 세어 드립니다.</p><textarea id="clAttempts" rows="5" maxlength="5000" aria-describedby="clAttemptsHelp" placeholder="2026-09-01 전화 미응답&#10;2026-09-03 문자 발송, 회신 없음&#10;2026-09-08 전화 미응답, 메일 발송"></textarea><p id="clAttemptCount" class="context-note" hidden></p></div></div>
+<div class="type-fields" data-type="declined" hidden><div class="two-col"><div class="field"><label for="clDeclineDate">의사 확인일</label><input id="clDeclineDate" type="date"></div><div class="field"><label for="clDeclineMethod">확인 방법</label><select id="clDeclineMethod"><option value="">선택</option><option>전화</option><option>문자</option><option>메일</option><option>대면</option><option>기타</option></select></div></div><div class="field"><label for="clDeclineWords">본인 의사 요지</label><textarea id="clDeclineWords" rows="3" maxlength="3000" placeholder="예: 당분간 구직 계획이 없어 추가 연락을 원하지 않는다고 함"></textarea></div></div>
+<div class="upload-box"><label for="clFile">서비스 기록 파일 첨부 <span class="optional">선택</span></label><p id="clUploadHelp" class="hint">PDF · Word · 텍스트 / 파일당 8MB 이하. 내용이 아래 칸에 채워집니다.</p><input id="clFile" type="file" accept=".pdf,.docx,.txt" aria-describedby="clUploadHelp"></div>
+<div class="field"><label for="clRecord">서비스 기록</label><p id="clRecordHelp" class="hint">상담 일지, 연락 내역 등 날짜별 기록을 붙여넣어 주세요. AI 정리에 필요하며, 양식 작성에는 선택입니다.</p><textarea id="clRecord" rows="8" maxlength="45000" aria-describedby="clRecordHelp" placeholder="2026-07-02 초기상담: 품질관리 직무 희망&#10;2026-08-14 ○○바이오 추천, 면접 진행&#10;2026-09-01 최종 합격 연락 받음"></textarea></div>
+<details class="extra-options"><summary>내부 종료 기준도 함께 확인하기 <span class="optional">선택</span></summary><div class="field"><label for="clRules">종료 기준 또는 운영 지침</label><textarea id="clRules" rows="4" maxlength="15000" placeholder="예: 연락 두절은 서로 다른 날짜 3회 이상, 2가지 이상 수단으로 시도"></textarea><p class="hint">기준을 넣지 않으면 충족 여부는 판단하지 않고 '기준 확인 필요'로 표시합니다.</p></div></details>
+</div>
+<div class="flow-footer"><button id="clResetBtn" class="secondary" type="button">입력 지우기</button><span class="footer-help">AI 정리 시 입력 자료가 OpenAI API로 전송됩니다.</span><button id="clTemplateBtn" class="secondary" type="button">양식으로 작성</button><button id="clAiBtn" class="primary" type="submit">AI로 정리</button></div>
+</form>
+<section id="closureResult" class="workspace closure-result" aria-labelledby="clResultTitle" hidden>
+<div class="section-heading result-heading"><div><p class="step-caption">종료 기록</p><h2 id="clResultTitle" tabindex="-1">사후관리 종료 정리</h2></div><span id="clResultLabel" class="tag">작성 전</span></div>
+<div class="result-content">
+<article class="verdict"><p class="eyebrow">종료 유형</p><h3 id="clResultType"></h3><p id="clSummary"></p></article>
+<h3 class="section-label">확인 항목</h3><div id="clChecks"></div>
+<article id="clTimelineBlock" class="block"><h3>서비스 경과</h3><ol id="clTimeline" class="timeline"></ol></article>
+<article class="block"><h3>종료 처리 전 확인할 일</h3><ul id="clFollow" class="question-list"></ul></article>
+<div class="field block"><label for="clNote">종료 기록 문안</label><p class="hint">업무 시스템에 붙여넣기 전에 직접 확인하고 수정하세요.</p><textarea id="clNote" rows="14"></textarea></div>
+<div class="email-actions"><button id="clCopyBtn" class="primary" type="button">문안 복사</button><button id="clDownloadBtn" class="secondary" type="button">텍스트로 내려받기</button></div>
+</div>
+<div class="result-footer"><button id="clEditBtn" class="secondary" type="button">입력 내용 수정</button></div>
+</section>
+</div>
 <footer>입력 자료는 자동 저장되지 않습니다.<br class="mobile-break"> 새로고침하거나 창을 닫으면 사라집니다.</footer>
 </main>
 <dialog id="settings" aria-labelledby="settingsTitle"><form method="dialog" class="dialog-heading"><h2 id="settingsTitle">AI 연결 설정</h2><button aria-label="설정 닫기" class="secondary">닫기</button></form><p>자동 분석에 사용할 OpenAI API 키를 입력하세요.</p><div class="field"><label for="apiKey">OpenAI API 키</label><input id="apiKey" type="password" autocomplete="off" placeholder="API 키 입력"></div><details class="extra-options"><summary>사용할 모델 변경</summary><div class="field"><label for="model">모델명</label><input id="model" value="gpt-4.1-mini"><p class="hint">이미지 입력과 구조화 출력을 지원하는 모델이 필요합니다.</p></div></details><p class="hint">API 사용료는 연결한 계정에 적용됩니다. 키는 파일이나 브라우저 저장소에 저장하지 않습니다.</p><button id="saveSettings" class="primary full">설정 적용</button></dialog>
 <dialog id="promptDialog" aria-labelledby="promptTitle"><h2 id="promptTitle">이 대화에서 분석받기</h2><p>아래 내용을 복사해 현재 Codex 대화에 붙여넣으세요. 이력서 이미지는 함께 첨부해주세요.</p><label for="promptText" class="sr-only">분석 요청 내용</label><textarea id="promptText" rows="12" readonly></textarea><div class="email-actions"><button id="copyPrompt" class="primary">요청 복사</button><button id="closePrompt" class="secondary">닫기</button></div></dialog>
 <script src="/app.js"></script>
+<script src="/closure.js"></script>
 </body></html>

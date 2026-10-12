@@ -173,6 +173,43 @@ dialog .full{margin-top:18px}
 .skip-link:focus{top:10px}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 
+/* 업무 전환 (추천 메일 / 사후관리 종료) */
+.mode-switch{display:flex;width:fit-content;gap:4px;padding:4px;margin:0 0 18px;background:#ffffff17;border:1px solid #ffffff26;border-radius:99px}
+.mode-switch button{min-height:38px;padding:6px 18px;border-radius:99px;background:transparent;color:#d6e2f7;font-size:14px;font-weight:600}
+.mode-switch button:hover:not(.active){background:#ffffff14;color:#fff}
+.mode-switch button.active{background:#fff;color:var(--blue-dark);box-shadow:0 2px 8px #10203433}
+
+/* 사후관리 종료 */
+.closure-view>.workspace:first-child{position:relative;margin-top:-34px}
+.closure-result{margin-top:22px}
+.closure-view .notice{margin-bottom:24px}
+.type-picker{border:0;padding:0;margin:26px 0 0;min-width:0}
+.type-picker legend{font-size:16px;font-weight:700;margin-bottom:10px;padding:0}
+.type-picker{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.type-option{position:relative;display:flex;flex-direction:column;gap:2px;margin:0;padding:14px 16px;border:1.5px solid var(--line-2);border-radius:var(--radius-sm);background:#fff;cursor:pointer;transition:border-color .15s,background .15s}
+.type-option:hover{border-color:#aac0ec;background:var(--blue-wash)}
+.type-option input{position:absolute;opacity:0;width:1px;height:1px;min-height:0}
+.type-option:has(input:checked){border-color:var(--blue);background:var(--blue-light);box-shadow:0 0 0 1px var(--blue) inset}
+.type-option:has(input:focus-visible){outline:3px solid #8fb0f5;outline-offset:2px}
+.type-title{font-size:16px;font-weight:700}
+.type-option:has(input:checked) .type-title{color:var(--blue-dark)}
+.type-desc{font-size:13px;line-height:1.5;color:var(--muted);font-weight:500}
+.type-fields{margin-top:22px;padding:22px 24px;border:1px solid #dbe6fb;border-radius:var(--radius-sm);background:var(--blue-wash)}
+.type-fields .two-col+.two-col,.type-fields .two-col+.three-col{margin-top:20px}
+.three-col{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.three-col .field{margin-top:0}
+.closure-view .flow-footer .secondary:nth-last-child(2){margin-left:auto}
+.closure-view .flow-footer .primary{margin-left:0;min-width:160px}
+.check-row{border:1px solid var(--line);border-radius:var(--radius-sm);padding:14px 18px;margin-bottom:10px;background:#fff}
+.check-row .criterion-top{margin-bottom:0;align-items:center}
+.check-row strong{font-size:16px}
+.check-note{margin:6px 0 0;font-size:15px;color:var(--muted);line-height:1.7}
+.timeline{list-style:none;padding:0;margin:0;border-left:2px solid #cfdcf7;margin-left:6px}
+.timeline li{position:relative;padding:0 0 14px 20px;font-size:16px;line-height:1.75}
+.timeline li::before{content:"";position:absolute;left:-7px;top:9px;width:12px;height:12px;border-radius:50%;background:#fff;border:2px solid var(--blue)}
+.timeline-date{display:block;font-size:13px;font-weight:700;color:var(--blue-dark)}
+#clNote{min-height:340px;font-size:16px;line-height:1.9;white-space:pre-wrap}
+
 @media(max-width:700px){
   .header-inner{padding:12px 20px;min-height:64px}
   .brand{font-size:17px;gap:9px}
@@ -186,7 +223,10 @@ dialog .full{margin-top:18px}
   .flow-footer,.result-footer{padding:18px 22px}
   .footer-help{display:none}
   .analysis-options{padding:0 22px 22px}
-  .two-col{grid-template-columns:1fr;gap:22px}
+  .two-col,.three-col{grid-template-columns:1fr;gap:22px}
+  .type-picker{grid-template-columns:1fr 1fr}
+  .type-fields{padding:18px}
+  .closure-view .flow-footer{flex-wrap:wrap}
   .result-heading{padding:26px 22px 18px;flex-direction:column;gap:10px}
   .tag{max-width:100%}
   .tabs{margin:0 22px}
@@ -207,6 +247,8 @@ dialog .full{margin-top:18px}
   .flow-footer{padding:16px 18px;gap:10px}
   .flow-footer button{font-size:15px;padding:11px 14px}
   .flow-footer .primary{min-width:0;flex:1}
+  .closure-view .flow-footer button{flex:1 1 40%}
+  .mode-switch button{padding:6px 14px}
   .analysis-options{padding:0 18px 20px}
   .upload-box{padding:18px 16px}
   .tabs{margin:0 18px}
