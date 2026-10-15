@@ -1,0 +1,249 @@
+<title>에이전트 사무실</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=IBM+Plex+Sans+KR:wght@400;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: a top-down office floor plan — rooms drawn as ink outlines on drafting paper, people at desks, status shown as desk lamps */
+:root{
+  --paper:#EDF1EF; --room:#F8FAF9; --ink:#1E2A2D; --muted:#5E6E70; --line:#B9C6C3;
+  --accent:#2F7D6B; --work:#C9851A; --done:#2F7D6B; --idle:#9AA8A8; --bubble:#FFFFFF;
+  --display:"Do Hyeon","IBM Plex Sans KR",system-ui,sans-serif;
+  --body:"IBM Plex Sans KR",system-ui,-apple-system,"Malgun Gothic",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#141B1D; --room:#1B2427; --ink:#E3ECEA; --muted:#93A4A5; --line:#33444A;
+  --accent:#5BC2A8; --work:#E7A93B; --done:#5BC2A8; --idle:#56676A; --bubble:#25313A; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#141B1D; --room:#1B2427; --ink:#E3ECEA; --muted:#93A4A5; --line:#33444A;
+  --accent:#5BC2A8; --work:#E7A93B; --done:#5BC2A8; --idle:#56676A; --bubble:#25313A; color-scheme:dark}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);line-height:1.55;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:28px 28px;background-position:-1px -1px}
+.wrap{max-width:1180px;margin:0 auto;padding-block:24px 48px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:grid;gap:18px}
+header{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:end;justify-content:space-between}
+h1{font-family:var(--display);font-weight:400;font-size:2.4rem;margin:0;line-height:1.1;text-wrap:balance}
+.sub{color:var(--muted);margin:4px 0 0}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+input,select,button{font:inherit;font-size:.9rem;border:1.5px solid var(--ink);background:var(--room);color:var(--ink);padding:6px 10px;border-radius:4px}
+input{width:190px;max-width:100%}
+button{cursor:pointer;font-weight:600}
+button.primary{background:var(--ink);color:var(--paper)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+.board{background:var(--room);border:2px solid var(--ink);border-radius:4px;padding:14px 16px;display:grid;gap:10px}
+.board .topic{font-family:var(--display);font-size:1.35rem}
+.steps{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.step{font-family:var(--mono);font-size:.72rem;letter-spacing:.03em;padding:6px 4px;text-align:center;border:1.5px solid var(--line);border-radius:3px;color:var(--muted)}
+.step.done{border-color:var(--done);color:var(--done)}
+.step.work{border-color:var(--work);color:var(--work);animation:pulse 1.2s ease-in-out infinite}
+
+.main{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px;align-items:start}
+.floor{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0;border:3px solid var(--ink);background:var(--room)}
+.room{border:1.5px solid var(--ink);padding:12px;position:relative;min-height:170px;display:grid;align-content:start;gap:10px}
+.room h2{margin:0;font-family:var(--mono);font-size:.72rem;font-weight:500;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+.r-boss{grid-column:span 2}.r-res{grid-column:span 2}.r-plan{grid-column:span 2}
+.r-write{grid-column:span 4}.r-qa{grid-column:span 2}
+.desks{display:flex;flex-wrap:wrap;gap:14px}
+.desk{display:grid;justify-items:center;gap:6px;width:112px;text-align:center;cursor:pointer;background:none;border:none;padding:4px;font-weight:400}
+.person{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-size:1.15rem;color:var(--paper);background:var(--c);position:relative;transition:transform .3s}
+.table{width:92px;height:30px;border:1.5px solid var(--ink);border-radius:3px;background:var(--paper);position:relative;margin-top:-10px}
+.lamp{position:absolute;right:6px;top:6px;width:10px;height:10px;border-radius:50%;background:var(--idle)}
+.desk[data-s="work"] .lamp{background:var(--work);box-shadow:0 0 10px var(--work)}
+.desk[data-s="done"] .lamp{background:var(--done)}
+.desk[data-s="work"] .person{animation:bob .6s ease-in-out infinite alternate}
+.desk[data-s="idle"] .person{opacity:.55}
+.name{font-size:.82rem;font-weight:600;line-height:1.25}
+.state{font-family:var(--mono);font-size:.68rem;color:var(--muted)}
+.desk[data-s="work"] .state{color:var(--work)}
+.desk[data-s="done"] .state{color:var(--done)}
+.bubble{position:absolute;bottom:100%;left:50%;transform:translate(-50%,-8px);background:var(--bubble);color:var(--ink);border:1.5px solid var(--ink);border-radius:8px;padding:5px 9px;font-size:.75rem;width:max-content;max-width:180px;z-index:2;line-height:1.35}
+.bubble::after{content:"";position:absolute;top:100%;left:50%;margin-left:-5px;border:5px solid transparent;border-top-color:var(--ink)}
+.dots::after{content:"";animation:dots 1.2s steps(4) infinite}
+
+aside{background:var(--room);border:2px solid var(--ink);border-radius:4px;padding:14px;display:grid;gap:10px;min-width:0}
+aside h2{margin:0;font-family:var(--display);font-weight:400;font-size:1.2rem}
+.log{list-style:none;margin:0;padding:0;display:grid;gap:8px;max-height:460px;overflow:auto;font-size:.85rem}
+.log li{display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:baseline}
+.log time{font-family:var(--mono);font-size:.7rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.log b{font-weight:600}
+.files{display:grid;gap:4px;font-family:var(--mono);font-size:.78rem}
+.files a{color:var(--accent)}
+.note{font-size:.78rem;color:var(--muted);margin:0}
+
+@keyframes bob{to{transform:translateY(-4px)}}
+@keyframes pulse{50%{opacity:.45}}
+@keyframes dots{0%{content:""}25%{content:"."}50%{content:".."}75%{content:"..."}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (max-width:860px){.main{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:640px){
+  .floor{grid-template-columns:minmax(0,1fr)}
+  .room{grid-column:auto!important}
+  .steps{grid-template-columns:repeat(3,1fr)}
+  h1{font-size:1.9rem}
+}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>에이전트 사무실</h1>
+      <p class="sub" id="modeLine">데모: 실제 업무가 어떻게 흘러가는지 보여주는 예시예요</p>
+    </div>
+    <div class="controls">
+      <label for="repo" class="note">저장소</label>
+      <input id="repo" value="eunkyoungAn/-" aria-label="GitHub 저장소 (소유자/이름)">
+      <button id="connect">불러오기</button>
+      <select id="project" aria-label="프로젝트 선택" hidden></select>
+      <button id="demo" class="primary">데모 재생</button>
+    </div>
+  </header>
+
+  <section class="board" aria-label="현재 프로젝트">
+    <div class="topic" id="topic">미리 준비하는 경험노트 작성법 가이드</div>
+    <div class="steps" id="steps"></div>
+  </section>
+
+  <div class="main">
+    <section class="floor" id="floor" aria-label="사무실 배치도"></section>
+    <aside>
+      <h2>업무 기록</h2>
+      <ul class="log" id="log"></ul>
+      <div class="files" id="files"></div>
+      <p class="note">실제 진행 상황은 저장소의 <code>office/</code> 폴더에 생긴 파일을 보고 표시해요.</p>
+    </aside>
+  </div>
+</div>
+
+<script>
+const TEAM = [
+  {id:"boss",  room:"r-boss",  roomName:"팀장실",     name:"팀장",        init:"팀", c:"#3B4F5C", file:"00_brief"},
+  {id:"res",   room:"r-res",   roomName:"리서치팀",   name:"리서치",      init:"리", c:"#3E7CB1", file:"01_research"},
+  {id:"plan",  room:"r-plan",  roomName:"기획팀",     name:"기획",        init:"기", c:"#7A5BA8", file:"02_plan"},
+  {id:"writer",room:"r-write", roomName:"작성실",     name:"콘텐츠",      init:"콘", c:"#B5603A", file:"03_draft", agent:"office-writer"},
+  {id:"lect",  room:"r-write", roomName:"작성실",     name:"강의설계",    init:"강", c:"#4D8C57", file:"03_draft", agent:"office-lecture-designer"},
+  {id:"blog",  room:"r-write", roomName:"작성실",     name:"블로그",      init:"블", c:"#C0577A", file:"03_draft", agent:"office-blogger"},
+  {id:"cover", room:"r-write", roomName:"작성실",     name:"자기소개서",  init:"자", c:"#8C6D2F", file:"03_draft", agent:"office-coverletter-writer"},
+  {id:"qa",    room:"r-qa",    roomName:"검수팀",     name:"검수",        init:"검", c:"#2F7D6B", file:"04_review"},
+];
+const STEPS = [["00_brief","지시서"],["01_research","리서치"],["02_plan","기획"],["03_draft","초안"],["04_review","검수"],["05_final","최종본"]];
+const ROOMS = [["r-boss","팀장실"],["r-res","리서치팀"],["r-plan","기획팀"],["r-write","작성실"],["r-qa","검수팀"]];
+const $ = id => document.getElementById(id);
+
+// build floor
+$("floor").innerHTML = ROOMS.map(([cls,label]) =>
+  `<div class="room ${cls}"><h2>${label}</h2><div class="desks">${
+    TEAM.filter(t=>t.room===cls).map(t=>`
+      <button class="desk" id="d-${t.id}" data-s="idle" aria-label="${t.name}">
+        <span class="person" style="--c:${t.c}">${t.init}</span>
+        <span class="table"><span class="lamp"></span></span>
+        <span class="name">${t.name}</span>
+        <span class="state">대기</span>
+      </button>`).join("")}</div></div>`).join("");
+
+function setDesk(id, s, say){
+  const d = $("d-"+id); if(!d) return;
+  d.dataset.s = s;
+  d.querySelector(".state").textContent = {idle:"대기",work:"작업 중",done:"완료"}[s];
+  d.querySelector(".bubble")?.remove();
+  if(say){ const b=document.createElement("span"); b.className="bubble"+(s==="work"?" dots":""); b.textContent=say; d.querySelector(".person").appendChild(b); }
+}
+function setSteps(doneCount, working){
+  $("steps").innerHTML = STEPS.map(([k,l],i)=>
+    `<div class="step ${i<doneCount?"done":(i===doneCount&&working?"work":"")}">${k.slice(0,2)} ${l}</div>`).join("");
+}
+function log(who,msg){
+  const li=document.createElement("li");
+  const t=new Date().toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+  li.innerHTML=`<time>${t}</time><span><b>${who}</b> ${msg}</span>`;
+  $("log").prepend(li);
+}
+function resetAll(){ TEAM.forEach(t=>setDesk(t.id,"idle")); $("log").innerHTML=""; $("files").innerHTML=""; }
+
+// ---------- demo ----------
+let timer=null;
+const SCRIPT = [
+  [0,"boss","work","주제 접수! 업무지시서 쓰는 중","주제를 접수하고 업무지시서를 작성합니다"],
+  [0,"boss","done","리서치팀, 부탁해요","00_brief.md 작성 완료"],
+  [1,"res","work","경험노트 사례 찾는 중","자료 조사를 시작합니다"],
+  [1,"res","done","출처 12개 정리 완료","01_research.md 저장"],
+  [2,"plan","work","목차 짜는 중","리서치를 읽고 구조를 설계합니다"],
+  [2,"plan","done","5단계 구성으로 확정","02_plan.md 저장"],
+  [3,"writer","work","초안 쓰는 중","기획안대로 가이드 초안을 씁니다"],
+  [3,"writer","done","초안 넘겼어요","03_draft.md 저장"],
+  [4,"qa","work","사실 확인 중","출처와 초안을 대조합니다"],
+  [4,"qa","done","필수 수정 2건","04_review.md: 수정 필요"],
+  [5,"writer","work","검수 반영 중","리뷰를 반영해 최종본을 씁니다"],
+  [5,"writer","done","최종본 완성","05_final.md 저장"],
+  [6,"boss","done","보고 완료!","사용자에게 결과를 보고했습니다"],
+];
+function runDemo(){
+  clearTimeout(timer); resetAll(); setMode("demo");
+  $("topic").textContent="미리 준비하는 경험노트 작성법 가이드 (예시)";
+  let i=0;
+  const tick=()=>{
+    if(i>=SCRIPT.length) return;
+    const [stage,id,s,say,msg]=SCRIPT[i++];
+    if(s==="work") TEAM.forEach(t=>{ if(t.id!==id && $("d-"+t.id).dataset.s!=="idle") setDesk(t.id,$("d-"+t.id).dataset.s); });
+    setDesk(id,s,say); setSteps(s==="done"?Math.min(stage+1,6):stage, s==="work");
+    log(TEAM.find(t=>t.id===id).name, msg);
+    timer=setTimeout(tick, s==="work"?2200:1100);
+  };
+  setSteps(0,false); tick();
+}
+function setMode(m,extra){
+  $("modeLine").textContent = m==="demo" ? "데모: 실제 업무가 어떻게 흘러가는지 보여주는 예시예요" : extra;
+}
+
+// ---------- live from GitHub ----------
+let projects=[], repo="";
+async function gh(path){
+  const r = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`);
+  if(!r.ok) throw new Error(r.status===404?"office 폴더나 저장소를 찾지 못했어요":"GitHub 응답 오류 "+r.status);
+  return r.json();
+}
+async function connect(){
+  repo = $("repo").value.trim();
+  clearTimeout(timer);
+  try{
+    const items = await gh("office");
+    projects = items.filter(x=>x.type==="dir").map(x=>x.name).sort().reverse();
+    if(!projects.length){ setMode("live","아직 진행한 프로젝트가 없어요. /office 주제 로 첫 업무를 시작해 보세요"); return; }
+    $("project").innerHTML = projects.map(p=>`<option>${p}</option>`).join("");
+    $("project").hidden=false;
+    showProject(projects[0]);
+  }catch(e){
+    setMode("live", `불러오지 못했어요: ${e.message}. 이 화면이 GitHub에 접속할 수 없는 곳이라면 데모로 봐 주세요`);
+  }
+}
+async function showProject(name){
+  resetAll();
+  const files = await gh("office/"+encodeURIComponent(name));
+  const names = files.map(f=>f.name);
+  const has = k => names.some(n=>n.startsWith(k));
+  $("topic").textContent = name.replace(/^\d{8}_/,"").replace(/[-_]/g," ");
+  setMode("live", `실제 진행 상황 · ${repo} · ${name}`);
+  // which writer team? read the brief
+  let writer="writer";
+  const brief = files.find(f=>f.name.startsWith("00_brief"));
+  if(brief){ try{ const txt = await (await fetch(brief.download_url)).text();
+    const hit = TEAM.find(t=>t.agent && t.agent!=="office-writer" && txt.includes(t.agent)); if(hit) writer=hit.id; }catch(e){} }
+  const order = [["00_brief","boss"],["01_research","res"],["02_plan","plan"],["03_draft",writer],["04_review","qa"],["05_final",writer]];
+  let done=0; while(done<order.length && has(order[done][0])) done++;
+  order.forEach(([k,id],i)=>{ if(i<done) setDesk(id,"done"); });
+  if(done<order.length){ setDesk(order[done][1],"work", order[done][0]+" 작업 중"); log(TEAM.find(t=>t.id===order[done][1]).name, order[done][0]+" 작업 중"); }
+  else { setDesk("boss","done","보고 완료!"); log("팀장","모든 단계 완료"); }
+  setSteps(done, done<order.length);
+  $("files").innerHTML = files.filter(f=>f.type==="file").map(f=>`<a href="${f.html_url}" target="_blank" rel="noopener">${f.name}</a>`).join("");
+}
+$("connect").onclick=connect;
+$("demo").onclick=runDemo;
+$("project").onchange=e=>showProject(e.target.value);
+TEAM.forEach(t=>$("d-"+t.id).addEventListener("click",()=>log(t.name, {idle:"쉬는 중이에요",work:"열심히 작업 중이에요",done:"맡은 일을 끝냈어요"}[$("d-"+t.id).dataset.s])));
+
+// start: try live, otherwise demo
+setSteps(0,false);
+const isArtifact = !/^(file:|https?:\/\/(localhost|127\.|[^/]*github\.io))/.test(location.href);
+if(isArtifact) runDemo(); else connect().then(()=>{ if(!projects.length) runDemo(); });
+</script>
