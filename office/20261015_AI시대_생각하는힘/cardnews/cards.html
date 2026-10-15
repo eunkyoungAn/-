@@ -1,0 +1,203 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>AI 시대, 생각하는 힘 카드뉴스</title>
+<style>
+@font-face{font-family:Pretendard;font-weight:400;src:url(fonts/Pretendard-Regular.woff2) format('woff2')}
+@font-face{font-family:Pretendard;font-weight:500;src:url(fonts/Pretendard-Medium.woff2) format('woff2')}
+@font-face{font-family:Pretendard;font-weight:600;src:url(fonts/Pretendard-SemiBold.woff2) format('woff2')}
+@font-face{font-family:Pretendard;font-weight:700;src:url(fonts/Pretendard-Bold.woff2) format('woff2')}
+@font-face{font-family:Pretendard;font-weight:800;src:url(fonts/Pretendard-ExtraBold.woff2) format('woff2')}
+@font-face{font-family:Pretendard;font-weight:900;src:url(fonts/Pretendard-Black.woff2) format('woff2')}
+:root{--red:#F0564A;--ink:#111111;--gray:#6B6B6B;--bg:#F2F2F2}
+*{margin:0;box-sizing:border-box}
+body{font-family:Pretendard,sans-serif;background:#ddd;display:flex;flex-direction:column;align-items:center;gap:40px;padding:40px 0}
+.c{width:1080px;height:1350px;position:relative;overflow:hidden;background:#fff;word-break:keep-all}
+.a{animation:up .7s cubic-bezier(.2,.8,.2,1) both;animation-delay:var(--d,0s)}
+@keyframes up{from{opacity:0;transform:translateY(50px)}}
+.pop{animation:pop .5s cubic-bezier(.3,1.6,.5,1) both;animation-delay:var(--d,0s)}
+@keyframes pop{from{transform:scale(0)}}
+.draw{animation:draw .6s ease-out both;animation-delay:var(--d,0s)}
+@keyframes draw{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+.blink{animation:blink 1s steps(1) infinite}@keyframes blink{50%{opacity:0}}
+.phone{position:absolute;width:310px;height:640px;border-radius:46px;background:#fff;border:11px solid #111;box-shadow:0 20px 50px rgba(0,0,0,.15);overflow:hidden;padding:44px 18px 18px;font-size:15px;color:var(--ink)}
+.phone:before{content:"";position:absolute;top:10px;left:50%;transform:translateX(-50%);width:100px;height:26px;border-radius:14px;background:#111}
+.app{display:flex;justify-content:space-between;align-items:center;font-weight:800;color:var(--red);font-size:19px;margin-bottom:14px}
+.app small{font-size:12px;color:#999;font-weight:500}
+.it{background:#F6F6F8;border-radius:12px;padding:12px 14px;margin-bottom:9px;font-size:14px;line-height:1.4}
+.it b{display:block;font-size:15px}
+.mut{color:#999;font-size:12px}
+.mark{position:relative}.mark:after{content:"";position:absolute;inset:-7px;border:4px solid var(--red);border-radius:16px;animation:draw .6s ease-out both;animation-delay:var(--md,1s)}
+.btn{background:var(--red);color:#fff;border-radius:10px;text-align:center;padding:12px;font-weight:700;font-size:14px}
+.lab{display:inline-block;background:#FDE3E1;color:var(--red);font-weight:700;border-radius:20px;padding:3px 10px;font-size:12px;margin:2px}
+.top{position:absolute;inset:0 0 auto 0;height:730px;background:var(--bg)}
+.bot{position:absolute;top:730px;left:0;right:0;bottom:0;padding:0 90px}
+.num{position:absolute;top:-36px;left:90px;width:72px;height:72px;border-radius:50%;background:var(--red);color:#fff;font-size:34px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.bot h2{font-size:66px;font-weight:800;line-height:1.28;letter-spacing:-2px;margin:76px 0 30px;color:var(--ink)}
+.bot p{font-size:32px;line-height:1.6;color:var(--gray);letter-spacing:-.5px;font-weight:400}
+em{font-style:normal;color:var(--red);font-weight:700}
+.bar{display:flex;align-items:flex-end;gap:14px;height:200px;padding:0 10px;border-bottom:2px solid #ddd}
+.bar div{flex:1;background:#ccc;border-radius:6px 6px 0 0;position:relative}
+.bar span{position:absolute;top:-20px;left:0;right:0;text-align:center;font-size:11px;color:#777}
+.ico{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:10px 0}
+.ico i{height:42px;border-radius:10px;background:#E4E4E8}
+.ico i.on{background:var(--red)}
+.cb{display:flex;gap:10px;align-items:center;background:#F6F6F8;border-radius:12px;padding:14px;margin-bottom:14px;font-size:15px;font-weight:700}
+.cb s{text-decoration:none;width:22px;height:22px;border-radius:6px;background:var(--red);color:#fff;font-size:14px;display:flex;align-items:center;justify-content:center;flex:none}
+</style></head><body>
+
+<!-- 1 표지 -->
+<div class="c" style="background:#111111;color:#fff">
+ <div class="a" style="position:absolute;top:70px;left:70px;font-size:30px;font-weight:700"><span style="color:var(--red)">●</span> AI 시대 생각 습관</div>
+ <div class="a" style="--d:.2s;position:absolute;top:170px;left:110px;width:860px;height:520px;background:#2A2B30;border-radius:22px;padding:18px">
+  <div style="background:#fff;border-radius:12px;height:100%;padding:26px;color:var(--ink);font-size:18px">
+   <div class="app" style="font-size:24px">AI 채팅 <small style="font-size:15px">새 대화</small></div>
+   <div style="display:flex;justify-content:flex-end;margin-bottom:16px"><div style="background:var(--red);color:#fff;border-radius:16px 16px 4px 16px;padding:14px 18px;font-weight:600">3분기 실적 보고서 초안 써 줘</div></div>
+   <div class="it" style="font-size:17px;line-height:1.6;padding:18px 20px;max-width:640px"><b style="font-size:18px;margin-bottom:6px">보고서 초안을 작성하고 있어요…</b>1. 개요 — 3분기 주요 성과 요약<br>2. 매출 분석 — 전년 동기 대비 변화<br>3. 향후 과제 — <span class="blink" style="display:inline-block;width:3px;height:20px;background:var(--ink);vertical-align:-3px"></span></div>
+   <div style="position:absolute;left:44px;right:44px;bottom:42px;border:2px solid #E4E4E8;border-radius:14px;padding:14px 18px;color:#aaa;font-size:16px">메시지를 입력하세요</div>
+  </div></div>
+ <div style="position:absolute;top:690px;left:60px;width:960px;height:22px;background:#3A3B40;border-radius:0 0 20px 20px" class="a" ></div>
+ <div class="a" style="--d:.8s;position:absolute;left:70px;top:880px;color:var(--red);font-size:34px;font-weight:700">AI가 답을 주는 시대, 생각은 덜 해도 될까?</div>
+ <div class="a" style="--d:1s;position:absolute;left:70px;top:950px;font-size:96px;font-weight:900;line-height:1.25;letter-spacing:-3px">그래서 더 중요한<br><span style="color:var(--red)">생각하는 힘</span></div>
+</div>
+
+<!-- 2 -->
+<div class="c"><div class="top">
+ <div class="phone a" style="--d:.1s;left:190px;top:60px">
+  <div class="app">AI 채팅 <small>새 대화</small></div>
+  <div class="it"><span class="mut">첨부</span><b>회의록_10월.docx</b></div>
+  <div style="display:flex;justify-content:flex-end;margin:16px 0"><div style="background:var(--red);color:#fff;border-radius:14px 14px 4px 14px;padding:12px 14px;font-weight:700">대신 정리해줘</div></div>
+  <div class="it"><b>정리했어요 ✓</b><span class="mut">핵심 3줄 요약 · 할 일 5개</span></div>
+  <div style="position:absolute;left:18px;right:18px;bottom:22px;border:2px solid #E4E4E8;border-radius:12px;padding:10px 12px;color:#aaa">메시지 입력…</div>
+ </div>
+ <div class="phone a" style="--d:.35s;left:580px;top:60px">
+  <div class="app">설문 결과 <small>666명</small></div>
+  <div class="it mark" style="--md:1s;padding:30px 12px 12px;background:#fff">
+   <div class="mut" style="margin-bottom:24px">AI 사용 빈도별 비판적 사고 점수</div>
+   <div class="bar"><div style="height:90%"><span>낮음</span></div><div style="height:70%"><span>중간</span></div><div style="height:50%;background:var(--red)"><span>높음</span></div></div>
+   <div style="display:flex;justify-content:space-between;margin-top:8px" class="mut"><span>AI 사용 빈도 ↑</span><span>점수 ↓</span></div>
+  </div>
+  <div class="it" style="margin-top:22px"><span class="mut">참고</span><b>상관관계 · 인과는 미입증</b></div>
+ </div>
+</div>
+<div class="bot"><div class="num pop" style="--d:1.3s">1</div>
+ <h2 class="a" style="--d:1.5s">자주 맡길수록<br>생각 점수는 낮았다</h2>
+ <p class="a" style="--d:1.75s">666명 조사(Gerlich, 2025). 생각을 AI에 맡길수록(<em>인지 오프로딩</em>) 비판적 사고 점수가 <em>낮게 나타났어요</em>. 단, 인과는 미입증.</p></div></div>
+
+<!-- 3 -->
+<div class="c"><div class="top">
+ <div class="phone a" style="--d:.1s;left:190px;top:60px">
+  <div class="app">실험 설계 <small>54명</small></div>
+  <div class="mut" style="margin-bottom:10px">에세이 쓰기 · 3집단 비교</div>
+  <div class="it"><b>A · LLM 사용</b><span class="mut">뇌 연결성</span><div style="height:10px;width:35%;background:#ccc;border-radius:5px;margin-top:6px"></div></div>
+  <div class="it"><b>B · 검색엔진 사용</b><span class="mut">뇌 연결성</span><div style="height:10px;width:60%;background:#ccc;border-radius:5px;margin-top:6px"></div></div>
+  <div class="it mark" style="--md:1s;background:#FDE3E1"><b>C · 도구 없음</b><span class="mut">뇌 연결성 가장 높음</span><div style="height:10px;width:92%;background:var(--red);border-radius:5px;margin-top:6px"></div></div>
+  <div class="mut" style="margin-top:14px">프리프린트 · 소규모 연구</div>
+ </div>
+ <div class="phone a" style="--d:.35s;left:580px;top:60px">
+  <div class="app">기억 점검</div>
+  <div class="it"><b>내가 쓴 문장 인용해 보기</b><span class="mut">방금 제출한 에세이에서 한 문장</span></div>
+  <div class="it" style="background:#fff;border:2px dashed #ccc;min-height:150px;display:flex;align-items:center;justify-content:center;color:#bbb;font-size:30px;font-weight:800">"&nbsp;&nbsp;?&nbsp;&nbsp;"</div>
+  <div class="it"><b>떠오르지 않아요</b><span class="mut">LLM 사용 집단에서 많이 나타남</span></div>
+ </div>
+</div>
+<div class="bot"><div class="num pop" style="--d:1.3s">2</div>
+ <h2 class="a" style="--d:1.5s">AI로 쓴 글,<br>내 글로 잘 기억 못 했다</h2>
+ <p class="a" style="--d:1.75s">54명 뇌파 실험. <em>도구 없이</em> 쓴 집단의 뇌 연결성이 가장 높았어요. 연구진은 '<em>인지 부채</em>'로 설명. (프리프린트·소규모)</p></div></div>
+
+<!-- 4 -->
+<div class="c"><div class="top">
+ <div class="phone a" style="--d:.1s;left:190px;top:60px;opacity:.45">
+  <div class="app" style="color:#999">직접 쓰기</div>
+  <div class="it"><b>보고서 1장</b>빈 문서에서 처음부터 작성</div>
+  <div class="it" style="height:70px"></div><div class="it" style="height:70px"></div><div class="it" style="height:70px"></div>
+  <div class="mut" style="text-align:center">초안 쓰기 → AI가 대신</div>
+ </div>
+ <div class="phone a" style="--d:.35s;left:580px;top:60px">
+  <div class="app">AI 초안 점검 <small>3단계</small></div>
+  <div class="mark" style="--md:1s;padding:2px">
+   <div class="cb"><s>✓</s>1 · 검증 <span class="mut" style="font-weight:500">사실·출처 확인</span></div>
+   <div class="cb"><s>✓</s>2 · 통합 <span class="mut" style="font-weight:500">내 맥락에 맞추기</span></div>
+   <div class="cb" style="margin-bottom:0"><s>✓</s>3 · 판단 <span class="mut" style="font-weight:500">쓸지 말지 결정</span></div>
+  </div>
+  <div class="it" style="margin-top:24px"><span class="mut">분석</span><b>319명 · 사례 936건</b></div>
+ </div>
+</div>
+<div class="bot"><div class="num pop" style="--d:1.3s">3</div>
+ <h2 class="a" style="--d:1.5s">생각은 사라지지 않고<br><span style="color:var(--red)">역할이 바뀐다</span></h2>
+ <p class="a" style="--d:1.75s">지식노동자 319명 사례 936건 분석. AI를 믿을수록 덜 생각하고, 내 능력을 믿을수록 <em>더 생각했어요</em>.</p></div></div>
+
+<!-- 5 -->
+<div class="c"><div class="top">
+ <div class="phone a" style="--d:.1s;left:190px;top:60px">
+  <div class="app">판례 목록 <small>AI 제안</small></div>
+  <div class="it"><b>판례 A</b><span class="mut">원문 확인됨 ✓</span></div>
+  <div class="it mark" style="--md:1s;background:#FDE3E1"><b>판례 B</b><span style="color:var(--red);font-size:12px;font-weight:700">존재하지 않는 판례</span></div>
+  <div class="it"><b>판례 C</b><span class="mut">원문 확인됨 ✓</span></div>
+  <div class="it" style="background:#FDE3E1"><b>판례 D</b><span style="color:var(--red);font-size:12px;font-weight:700">존재하지 않는 판례</span></div>
+  <div class="mut" style="margin-top:10px">그럴듯한 사건명 · 인용문까지 생성</div>
+ </div>
+ <div class="phone a" style="--d:.35s;left:580px;top:60px">
+  <div class="app">보고서 <small>각주</small></div>
+  <div class="it" style="height:110px;background:#F6F6F8"></div>
+  <div class="it"><b>각주 12</b><span class="mut">Smith(2021), 「…」 p.34</span></div>
+  <div class="it" style="border:3px solid var(--red);background:#fff"><b>각주 13</b><span class="mut">Lee(2019), 「…」</span><span style="display:block;margin-top:6px;color:var(--red);font-weight:800">⚠ 출처 확인 필요</span></div>
+  <div class="it"><b>각주 14</b><span class="mut">Park(2022), 「…」</span></div>
+ </div>
+</div>
+<div class="bot"><div class="num pop" style="--d:1.3s">4</div>
+ <h2 class="a" style="--d:1.5s">AI는 그럴듯하게<br>틀린다</h2>
+ <p class="a" style="--d:1.75s"><em>가짜 판례 6건</em> 제출로 벌금 5,000달러(2023). 딜로이트 호주는 <em>가짜 인용</em>으로 대금 일부 환불(2025).</p></div></div>
+
+<!-- 6 -->
+<div class="c"><div class="top">
+ <div class="phone a" style="--d:.1s;left:190px;top:60px">
+  <div class="app">필수 역량 순위 <small>WEF 2025</small></div>
+  <div class="it mark" style="--md:1s;background:#FDE3E1"><b style="color:var(--red)">1위 · 분석적 사고</b></div>
+  <div class="it" style="margin-top:14px"><span class="mut">상위권</span><b>창의적 사고</b></div>
+  <div class="it" style="height:46px"></div><div class="it" style="height:46px"></div>
+  <div class="it" style="height:46px"></div>
+ </div>
+ <div class="phone a" style="--d:.35s;left:580px;top:60px">
+  <div class="app">고용주 응답 <small>1,000여 곳</small></div>
+  <div class="mut">분석적 사고 = 필수</div>
+  <div class="ico"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i></div>
+  <div style="font-size:30px;font-weight:900;color:var(--red);margin:6px 0 18px">10곳 중 7곳</div>
+  <div class="it"><span class="mut">보조</span><b>창의적 사고 57%</b></div>
+ </div>
+</div>
+<div class="bot"><div class="num pop" style="--d:1.3s">5</div>
+ <h2 class="a" style="--d:1.5s">고용주가 꼽은 1위<br><span style="color:var(--red)">분석적 사고</span></h2>
+ <p class="a" style="--d:1.75s">WEF 2025, 고용주 1,000여 곳 조사. <em>10곳 중 7곳</em>이 <em>분석적 사고</em>를 필수 역량으로 꼽았어요.</p></div></div>
+
+<!-- 7 -->
+<div class="c"><div class="top">
+ <div class="phone a" style="--d:.1s;left:190px;top:60px">
+  <div class="app">메모 <small>AI 묻기 전</small></div>
+  <div class="it" style="background:#FFF8E6;min-height:250px;font-size:15px;line-height:1.7"><b>내 초안</b>· 문제: 신규 고객 이탈<br>· 내 가설: 가입 절차가 길다<br>· 근거: 3단계에서 이탈 多<br>· 대안: 간편 가입 도입<span class="blink" style="display:inline-block;width:2px;height:16px;background:var(--ink);vertical-align:-2px"></span></div>
+  <div class="btn" style="margin-top:12px">이제 AI에게 묻기</div>
+ </div>
+ <div class="phone a" style="--d:.35s;left:580px;top:60px">
+  <div class="app">체크리스트 <small>4/4</small></div>
+  <div class="cb mark" style="--md:.9s"><s>✓</s>내 생각 먼저 적기</div>
+  <div class="cb mark" style="--md:1.2s"><s>✓</s>출처는 원문 확인</div>
+  <div class="cb mark" style="--md:1.5s"><s>✓</s>"왜? 반대 근거는?" 묻기</div>
+  <div class="cb mark" style="--md:1.8s"><s>✓</s>최종 결정은 내가</div>
+ </div>
+</div>
+<div class="bot"><div class="num pop" style="--d:2s">6</div>
+ <h2 class="a" style="--d:2.2s">생각하는 힘 지키는<br>AI 사용법 4가지</h2>
+ <p class="a" style="--d:2.45s"><em>내 생각 먼저</em> 적기 / 출처는 원문 확인 /<br>"왜? 반대 근거는?" 묻기 / <em>최종 결정은 내가</em></p></div></div>
+
+<!-- 8 CTA -->
+<div class="c" style="background:#FDECEA;text-align:center">
+ <div class="a" style="position:absolute;top:110px;left:0;right:0;font-size:84px;font-weight:900;line-height:1.25;letter-spacing:-2.5px;color:var(--ink)">AI는 생각을<br><span style="color:var(--red)">확장하는 도구</span></div>
+ <div class="a" style="--d:.4s;position:absolute;top:400px;left:110px;right:110px;font-size:36px;line-height:1.6;color:var(--ink);font-weight:500">오늘 AI 답 하나, <em>직접 검증</em>해 보셨나요?<br>나만의 검증 습관을 댓글로 나눠 주세요.</div>
+ <div class="a" style="--d:.7s;position:absolute;top:610px;left:150px;right:150px;background:#fff;border-radius:28px;padding:44px;box-shadow:0 10px 30px rgba(240,86,74,.15)">
+  <div style="display:flex;align-items:center;gap:22px;justify-content:center;margin-bottom:36px">
+   <div style="width:96px;height:96px;border-radius:50%;background:var(--red);color:#fff;font-size:44px;font-weight:900;display:flex;align-items:center;justify-content:center">C</div>
+   <div style="text-align:left"><div style="font-size:36px;font-weight:800;color:var(--ink)">@career catcher</div><div style="font-size:24px;color:var(--gray)">AI 시대 생각 습관</div></div></div>
+  <div style="display:flex;gap:20px">
+   <div class="btn" style="flex:1;font-size:30px;padding:24px;border-radius:16px">저장하기</div>
+   <div class="btn" style="flex:1;font-size:30px;padding:24px;border-radius:16px;background:#fff;color:var(--red);border:3px solid var(--red)">댓글 남기기</div></div>
+ </div>
+ <div class="a" style="--d:1s;position:absolute;left:90px;right:90px;bottom:70px;font-size:20px;line-height:1.6;color:var(--gray)">출처: Gerlich 2025, Kosmyna 외 2025, Lee 외 CHI 2025, WEF 2025, Mata v. Avianca, 딜로이트 호주</div>
+</div>
+</body></html>
