@@ -19,7 +19,7 @@ argument-hint: <주제>
    - 강의·교육·워크숍·커리큘럼 → `office-lecture-designer`
    - 블로그·포스팅·홍보글 → `office-blogger`
    - 자기소개서·지원서·첨삭 → `office-coverletter-writer`
-   - 카드뉴스·인스타 콘텐츠 → `office-cardnews-designer`
+   - 카드뉴스·인스타 콘텐츠 → `office-cardnews-designer` (별도 지시가 없으면 `templates/카드뉴스_캐러셀_기본형/`(README 먼저 읽기)과 `office/카드뉴스_디자인가이드.md`를 기준으로 만들게 합니다)
    - 그 외 보고서·가이드·문서 → `office-writer`
    - 결과는 `03_draft.md`로 저장시킵니다.
 4. `office-reviewer` → `04_review.md`
@@ -34,3 +34,9 @@ argument-hint: <주제>
 - 최종 파일 경로와 단계별 파일 목록
 - 어떤 팀이 무엇을 했는지 한 줄씩
 - 세운 가정
+
+## 4. 최종 결과물 생성 전 확인 (반드시 지킬 것)
+1. 원고(`05_final.md` 또는 `06_cardnews.md`)가 나오면 바로 이미지·영상 등 최종물을 만들지 말고 사용자에게 파일을 첨부해 보여 줍니다.
+2. "원고에서 수정할 부분이 있는지 확인해 주세요"라고 요청합니다.
+3. AskUserQuestion으로 버튼을 제시합니다: "이대로 생성하기" / "수정 후 생성하기"(수정사항은 '기타'에 입력).
+4. 사용자가 생성 버튼을 고른 뒤에만 카드뉴스 이미지 등 최종 결과물을 생성합니다.

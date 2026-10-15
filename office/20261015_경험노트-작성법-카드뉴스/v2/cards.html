@@ -1,0 +1,184 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>경험노트 작성법 카드뉴스</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{--red:#F0564A;--ink:#16171B;--gray:#5E6270;--bg:#F3F3F5}
+*{margin:0;box-sizing:border-box}
+body{font-family:Pretendard,sans-serif;background:#ddd;display:flex;flex-direction:column;align-items:center;gap:40px;padding:40px 0}
+.c{width:1080px;height:1350px;position:relative;overflow:hidden;background:#fff;word-break:keep-all}
+/* motion */
+.a{animation:up .7s cubic-bezier(.2,.8,.2,1) both;animation-delay:var(--d,0s)}
+@keyframes up{from{opacity:0;transform:translateY(50px)}}
+.pop{animation:pop .5s cubic-bezier(.3,1.6,.5,1) both;animation-delay:var(--d,0s)}
+@keyframes pop{from{transform:scale(0)}}
+.draw{animation:draw .6s ease-out both;animation-delay:var(--d,0s)}
+@keyframes draw{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+.pulse{animation:pulse 1.2s ease-in-out infinite;animation-delay:var(--d,0s)}
+@keyframes pulse{50%{transform:scale(1.04)}}
+/* phone */
+.phone{position:absolute;width:310px;height:640px;border-radius:46px;background:#fff;border:11px solid #111;box-shadow:0 20px 50px rgba(0,0,0,.15);overflow:hidden;padding:44px 18px 18px;font-size:15px;color:var(--ink)}
+.phone:before{content:"";position:absolute;top:10px;left:50%;transform:translateX(-50%);width:100px;height:26px;border-radius:14px;background:#111}
+.app{display:flex;justify-content:space-between;align-items:center;font-weight:800;color:var(--red);font-size:19px;margin-bottom:14px}
+.app small{font-size:12px;color:#999;font-weight:500}
+.it{background:#F6F6F8;border-radius:12px;padding:12px 14px;margin-bottom:9px;font-size:14px;line-height:1.4}
+.it b{display:block;font-size:15px}
+.mut{color:#999;font-size:12px}
+.mark{position:relative}.mark:after{content:"";position:absolute;inset:-7px;border:4px solid var(--red);border-radius:16px;animation:draw .6s ease-out both;animation-delay:var(--md,1s)}
+.hl{position:absolute;border:4px solid var(--red);border-radius:16px;pointer-events:none}
+.btn{background:var(--red);color:#fff;border-radius:10px;text-align:center;padding:12px;font-weight:700;font-size:14px}
+.lab{display:inline-block;background:#FDE3E1;color:var(--red);font-weight:700;border-radius:20px;padding:3px 10px;font-size:12px;margin:2px}
+/* layout */
+.top{position:absolute;inset:0 0 auto 0;height:730px;background:var(--bg)}
+.bot{position:absolute;top:730px;left:0;right:0;bottom:0;padding:0 90px}
+.num{position:absolute;top:-36px;left:90px;width:72px;height:72px;border-radius:50%;background:var(--red);color:#fff;font-size:34px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.bot h2{font-size:68px;font-weight:900;line-height:1.28;letter-spacing:-2px;margin:80px 0 34px;color:var(--ink)}
+.bot p{font-size:34px;line-height:1.6;color:var(--gray);letter-spacing:-.5px}
+.grid3{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.grid3 div{background:#F6F6F8;border-radius:12px;padding:16px 8px;text-align:center;font-weight:700;font-size:14px}
+</style></head><body>
+
+<!-- 표지 -->
+<div class="c" style="background:#0E0E10;color:#fff">
+ <div class="a" style="position:absolute;top:70px;left:70px;font-size:30px;font-weight:700"><span style="color:var(--red)">●</span> 경험노트 작성법</div>
+ <div class="a" style="--d:.2s;position:absolute;top:180px;left:70px;width:760px;height:470px;background:#2A2B30;border-radius:22px;padding:18px">
+  <div style="background:#fff;border-radius:12px;height:100%;padding:26px;color:var(--ink);font-size:18px">
+   <div class="app" style="font-size:24px">경험노트 <small>전체 24개</small></div>
+   <div class="it"><b>카페 아르바이트 · 재고표 개선</b><span class="mut">#문제해결 #실행력 · 2026.09</span></div>
+   <div class="it"><b>마케팅원론 팀플 · 조장</b><span class="mut">#협업 #리더십 · 2026.06</span></div>
+   <div class="it"><b>공모전 예선 탈락 후 재도전</b><span class="mut">#실패극복 · 2026.04</span></div>
+   <div class="it"><b>동아리 회비 갈등 중재</b><span class="mut">#소통 · 2026.03</span></div>
+  </div></div>
+ <div class="phone a" style="--d:.45s;left:720px;top:300px;transform:scale(.95)">
+  <div class="app">경험노트</div>
+  <div class="it" style="border:2px solid var(--red)"><b>+ 오늘의 경험 기록</b><span class="mut">한 줄이라도 괜찮아요</span></div>
+  <div class="it"><b>S</b>평일 저녁 발주 실수가 잦았다</div>
+  <div class="it"><b>T</b>발주 오류 줄이기</div>
+  <div class="it"><b>A</b>재고표를 엑셀로 바꿈</div>
+  <div class="it"><b>R</b>주 3회 → 0회</div>
+ </div>
+ <div class="a" style="--d:.8s;position:absolute;left:70px;top:900px;color:var(--red);font-size:32px;font-weight:700">취업 준비 시리즈 · 경험 정리 편</div>
+ <div class="a" style="--d:1s;position:absolute;left:70px;top:960px;font-size:80px;font-weight:900;line-height:1.25;letter-spacing:-2.5px">자소서 쓸 때마다<br>"쓸 경험이 없다"는 이유는?</div>
+ <div class="a" style="--d:1.4s;position:absolute;right:70px;bottom:70px;text-align:right;font-size:28px;line-height:1.5;color:#bbb">경험이 없는 게 아니라<br><b style="color:var(--red)">기록이 없는 겁니다</b></div>
+</div>
+
+<!-- 1 -->
+<div class="c"><div class="top">
+ <div class="phone a" style="--d:.1s;left:190px;top:60px">
+  <div class="app">경험노트 <small>소재 고르기</small></div>
+  <div class="mut" style="margin-bottom:10px">어떤 경험이었나요?</div>
+  <div class="grid3"><div>📚 수업 팀플</div><div>☕ 아르바이트</div><div>🎸 동아리</div><div>🤝 봉사</div><div>🏆 공모전</div><div class="mark" style="background:#FDE3E1;color:var(--red)">⚡ 실패·갈등</div></div>
+  <div class="it" style="margin-top:14px"><span class="mut">최근 기록</span><b>공모전 예선 탈락</b></div>
+ </div>
+ <div class="phone a" style="--d:.35s;left:580px;top:60px">
+  <div class="app">경험노트 <small>새 기록</small></div>
+  <span class="lab">⚡ 실패·갈등</span>
+  <div class="it" style="margin-top:10px"><b>공모전 예선 탈락 후 재도전</b>기획서 분량만 늘리다 핵심을 놓쳤다. 심사평을 받아 구조부터 다시 짰다.</div>
+  <div class="it"><span class="mut">날짜</span><b>2026.04.12</b></div>
+  <div class="btn" style="margin-top:20px">저장</div>
+ </div>
+</div>
+<div class="bot"><div class="num pop" style="--d:1.3s">1</div>
+ <h2 class="a" style="--d:1.5s">사소한 경험도<br>전부 소재가 됩니다</h2>
+ <p class="a" style="--d:1.75s">수업 팀플, 아르바이트, 동아리, 봉사, 공모전까지 모두 기록 대상입니다. 성공한 일뿐 아니라 실패하거나 갈등을 겪은 일도 꼭 남기세요. 면접에서 가장 자주 묻는 게 바로 그 경험입니다.</p></div></div>
+
+<!-- 2 -->
+<div class="c"><div class="top">
+ <div class="phone a" style="--d:.1s;left:190px;top:60px">
+  <div class="app">STAR 작성 <small>1/1</small></div>
+  <div class="it"><b>S · 상황</b>평일 저녁, 발주 실수가 잦은 카페</div>
+  <div class="it"><b>T · 과제</b>발주 오류를 줄이는 것</div>
+  <div class="it mark" style="min-height:130px"><b>A · 행동</b>종이 재고표를 엑셀로 바꾸고, 부족 수량이 빨갛게 뜨도록 조건부 서식을 넣었다. 마감 조와 공유했다.</div>
+  <div class="it"><b>R · 결과</b>발주 실수 주 3회 → 0회</div>
+ </div>
+ <div class="phone a" style="--d:.35s;left:580px;top:60px">
+  <div class="app">경험노트</div>
+  <div class="it" style="background:#FDE3E1"><b>카페 재고표 개선</b><span class="mut">작성 완료 · STAR 4/4</span></div>
+  <div style="display:flex;gap:6px;margin:8px 0 14px"><span class="lab">S</span><span class="lab">T</span><span class="lab">A</span><span class="lab">R</span></div>
+  <div class="it"><b>결과</b><span style="font-size:30px;font-weight:900;color:var(--red)">3회 → 0회</span><br><span class="mut">숫자로 남긴 결과</span></div>
+ </div>
+</div>
+<div class="bot"><div class="num pop" style="--d:1.3s">2</div>
+ <h2 class="a" style="--d:1.5s">STAR 네 칸만 채우면<br>경험이 이야기가 됩니다</h2>
+ <p class="a" style="--d:1.75s">상황(S), 맡은 과제(T), 내가 한 행동(A), 결과(R) 순서로 적습니다. 그중 가장 길게 써야 하는 칸은 행동입니다. 결과는 가능하면 숫자로 남기세요.</p></div></div>
+
+<!-- 3 -->
+<div class="c"><div class="top">
+ <div class="phone a" style="--d:.1s;left:190px;top:60px">
+  <div class="app">문장 점검</div>
+  <div class="mut">수정 전</div>
+  <div class="it" style="position:relative;font-size:20px;font-weight:700;padding:30px 14px;color:#999">"팀이 매출을<br>올렸다"
+   <div class="draw" style="--d:1s;position:absolute;left:10px;right:10px;top:48%;height:4px;background:#999"></div></div>
+  <div class="pop" style="--d:1.2s;font-size:60px;color:#999;text-align:center;font-weight:900">✕</div>
+  <div class="mut" style="text-align:center">주어가 '팀'이라 내 역할이 안 보여요</div>
+ </div>
+ <div class="phone a" style="--d:.35s;left:580px;top:60px">
+  <div class="app">문장 점검</div>
+  <div class="mut">수정 후</div>
+  <div class="it mark" style="--md:1.5s;font-size:18px;font-weight:700;padding:20px 14px;line-height:1.5">"<span style="color:var(--red)">내가</span> 재고표를 엑셀로 바꿔 발주 실수를 주 3회에서 0회로 줄였다"</div>
+  <div class="pop" style="--d:1.6s;font-size:60px;color:var(--red);text-align:center;font-weight:900">✓</div>
+  <div class="mut" style="text-align:center">행동과 숫자가 보여요</div>
+ </div>
+</div>
+<div class="bot"><div class="num pop" style="--d:1.8s">3</div>
+ <h2 class="a" style="--d:2s">"우리"가 아니라<br>"나"를 주어로 씁니다</h2>
+ <p class="a" style="--d:2.25s">팀 성과보다 내 행동이 보여야 합니다. "팀이 매출을 올렸다" 대신 "내가 재고표를 엑셀로 바꿔 발주 실수를 주 3회에서 0회로 줄였다"처럼 씁니다.</p></div></div>
+
+<!-- 4 -->
+<div class="c"><div class="top">
+ <div class="phone a" style="--d:.1s;left:190px;top:60px">
+  <div class="app">카페 재고표 개선</div>
+  <div class="it"><b>R · 결과</b>발주 실수 주 3회 → 0회</div>
+  <div class="it mark" style="min-height:110px"><b>💡 배운 점</b>불편을 참기보다 도구를 바꾸면 팀 전체의 실수가 줄어든다.</div>
+  <div class="mut" style="margin:6px 0">역량 태그</div>
+  <span class="lab">#문제해결</span><span class="lab">#실행력</span><span class="lab">+ 추가</span>
+ </div>
+ <div class="phone a" style="--d:.35s;left:580px;top:60px">
+  <div class="app">태그별 보기</div>
+  <div class="it"><b>#문제해결 · 5개</b><span class="mut">카페 재고표 · 팀플 일정표 …</span></div>
+  <div class="it"><b>#협업 · 4개</b><span class="mut">마케팅원론 팀플 · 봉사 …</span></div>
+  <div class="it"><b>#리더십 · 2개</b><span class="mut">팀플 조장 · 동아리 총무</span></div>
+  <div class="it" style="background:#FDE3E1"><span class="mut">자소서 문항</span><b>"문제를 해결한 경험을 쓰시오" → #문제해결</b></div>
+ </div>
+</div>
+<div class="bot"><div class="num pop" style="--d:1.3s">4</div>
+ <h2 class="a" style="--d:1.5s">배운 점과 태그를 달면<br>문항별로 바로 꺼내 씁니다</h2>
+ <p class="a" style="--d:1.75s">마지막 줄에 이 경험으로 배운 것을 한 문장으로 적습니다. #문제해결 #협업 #리더십처럼 역량 태그를 붙여 두면, 자소서 문항에 맞는 경험을 바로 찾을 수 있습니다.</p></div></div>
+
+<!-- 5 -->
+<div class="c"><div class="top">
+ <div class="phone a" style="--d:.1s;left:190px;top:60px">
+  <div class="app">이번 주 <small>10.12 – 10.18</small></div>
+  <div class="it mark" style="--md:1.7s;margin-bottom:16px"><span class="mut">연속 기록</span><b style="font-size:26px;color:var(--red)">5일째</b>
+   <div style="display:flex;justify-content:space-between;margin-top:12px">
+    <span class="pop" style="--d:.9s;width:28px;height:28px;border-radius:50%;background:var(--red)"></span>
+    <span class="pop" style="--d:1.05s;width:28px;height:28px;border-radius:50%;background:var(--red)"></span>
+    <span class="pop" style="--d:1.2s;width:28px;height:28px;border-radius:50%;background:var(--red)"></span>
+    <span class="pop" style="--d:1.35s;width:28px;height:28px;border-radius:50%;background:var(--red)"></span>
+    <span class="pop" style="--d:1.5s;width:28px;height:28px;border-radius:50%;background:var(--red)"></span>
+    <span style="width:28px;height:28px;border-radius:50%;background:#ddd"></span>
+    <span style="width:28px;height:28px;border-radius:50%;background:#ddd"></span></div>
+   <div style="display:flex;justify-content:space-between;margin-top:6px" class="mut"><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span><span>일</span></div></div>
+  <div class="it"><b>✏️ 당일 메모</b>키워드만 적어도 OK</div>
+  <div class="it"><b>📋 주 1회 정리</b>일요일 STAR로 옮기기</div>
+ </div>
+ <div class="phone a" style="--d:.35s;left:580px;top:60px">
+  <div class="app">10월 돌아보기</div>
+  <div class="it"><b>이번 달 기록 12개</b><span class="mut">STAR 정리 완료 9개</span></div>
+  <div class="it"><b>가장 많은 태그</b><span class="lab">#문제해결 5</span><span class="lab">#협업 4</span></div>
+  <div class="it" style="background:#FDE3E1"><b>내 강점 후보</b>문제를 발견하고 도구로 해결하는 사람</div>
+ </div>
+</div>
+<div class="bot"><div class="num pop" style="--d:2s">5</div>
+ <h2 class="a" style="--d:2.2s">당일 메모, 주 1회 정리로<br>기록이 쌓입니다</h2>
+ <p class="a" style="--d:2.45s">일이 끝난 당일에 키워드만이라도 메모하고, 주 1회 STAR로 정리합니다. 한 달에 한 번 태그별로 다시 보면 내 강점이 보입니다. 도구는 노션이든 메모앱이든 괜찮습니다.</p></div></div>
+
+<!-- CTA -->
+<div class="c" style="background:#FDF0EE;text-align:center">
+ <div class="a" style="position:absolute;top:110px;left:0;right:0;font-size:46px;font-weight:800;line-height:1.5;color:var(--ink)">취업 준비생을 위한<br><span style="color:var(--red)">경험노트, 오늘 첫 줄부터</span></div>
+ <div class="phone a" style="--d:.4s;left:250px;top:400px;width:580px;height:1000px;text-align:left;padding:70px 34px;font-size:22px">
+  <div class="app" style="font-size:30px">경험노트 <small style="font-size:18px">오늘</small></div>
+  <div class="it" style="font-size:24px;padding:26px"><b style="font-size:28px">오늘 한 일 하나를<br>STAR로 적어 보세요</b><span class="mut" style="font-size:18px">그게 첫 페이지입니다</span></div>
+  <div class="it" style="font-size:22px"><b>S</b>&nbsp;</div><div class="it" style="font-size:22px"><b>T</b>&nbsp;</div><div class="it" style="font-size:22px"><b>A</b>&nbsp;</div>
+ </div>
+ <div class="a" style="--d:.9s;position:absolute;left:150px;right:150px;bottom:150px"><div class="pulse" style="--d:1.6s;background:#fff;border:3px solid var(--red);border-radius:18px;padding:24px;font-size:32px;font-weight:800;color:var(--ink);box-shadow:0 10px 30px rgba(240,86,74,.25)">↓ 저장해 두고 자소서 시즌에 다시 보기</div></div>
+</div>
+</body></html>
