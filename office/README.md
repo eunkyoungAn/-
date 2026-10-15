@@ -3,7 +3,7 @@
 주제 하나만 던지면 팀장이 업무를 나눠 각 팀이 처리합니다.
 
 ```
-사용자 ──주제──▶ 팀장(office-manager)
+사용자 ──주제──▶ 팀장(/office 명령)
                    ├─▶ 리서치팀  → 01_research.md
                    ├─▶ 기획팀    → 02_plan.md
                    ├─▶ 콘텐츠팀  → 03_draft.md
@@ -19,7 +19,7 @@
 
 ## 팀 추가하기
 `.claude/agents/`에 md 파일을 하나 추가하고(예: `office-designer.md` — PPT 구조 담당),
-`office-manager.md`의 배분 단계에 한 줄 추가하면 됩니다.
+`.claude/commands/office.md`의 배분 단계에 한 줄 추가하면 됩니다.
 
 ## 전문팀
 | 팀 | 에이전트 | 이렇게 던지면 |
@@ -27,3 +27,7 @@
 | 강의설계팀 | office-lecture-designer | `/office 대학생 대상 AI 활용 취업준비 4시간 특강` |
 | 블로그팀 | office-blogger | `/office 자소서 첫 문장 쓰는 법 블로그 글` |
 | 자기소개서팀 | office-coverletter-writer | `/office 삼성전자 마케팅 직무 자소서, 경험: ...` |
+
+## 구조 메모
+Claude Code의 하위 에이전트는 다른 에이전트를 부를 수 없습니다.
+그래서 팀장 역할은 에이전트가 아니라 `/office` 명령(메인 세션)이 맡고, 메인 세션이 각 팀 에이전트를 직접 호출합니다.
