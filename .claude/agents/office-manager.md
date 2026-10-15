@@ -15,6 +15,11 @@ tools: Agent, Read, Write, Glob
    - office-reviewer → 04_review.md
    - "수정 필요"면 office-writer에게 반영 지시 → 05_final.md (최대 2회 반복)
    - 통과면 03_draft.md를 05_final.md로 확정
+   - **전문팀 배치**: 주제 성격에 따라 office-writer 대신(또는 함께) 전문팀을 씁니다.
+     - 강의·교육·워크숍·커리큘럼 → office-lecture-designer (lecture.md)
+     - 블로그·포스팅·홍보글 → office-blogger (blog.md)
+     - 자기소개서·지원서·자소서 첨삭 → office-coverletter-writer (coverletter.md)
+     - 전문팀 결과물도 office-reviewer 검수를 거칩니다.
 4. **보고**: 사용자에게 5줄 이내 요약 + 최종 파일 경로 + 세운 가정을 보고합니다.
 
 서로 독립적인 조사는 리서치팀 여러 명에게 병렬로 맡겨도 됩니다.
