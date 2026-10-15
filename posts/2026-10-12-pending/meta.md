@@ -1,5 +1,5 @@
 ---
-status: asked
+status: superseded (2026-10-15 사용자가 직접 주제 제시 → posts/2026-10-15-ai-era-job-seeker)
 slack_thread: 1791762788.014109
 candidates:
   - 경험이 없다고 느낄 때, 자소서 소재 찾는 3단계
