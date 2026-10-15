@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>생각하는 힘 원고</title>
+<style>
+:root{--bg:#f6f7f5;--paper:#ffffff;--fg:#1f2421;--muted:#5f6b64;--accent:#03a94f;--line:#dfe4e0;
+--body:"Noto Sans KR",system-ui,sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#151816;--paper:#1d211f;--fg:#e8ece9;--muted:#a3ada7;--accent:#35c977;--line:#323833;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#151816;--paper:#1d211f;--fg:#e8ece9;--muted:#a3ada7;--accent:#35c977;--line:#323833;color-scheme:dark}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);padding:16px;line-height:1.7}
+.wrap{max-width:720px;margin:0 auto;display:grid;gap:16px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.bar p{flex-basis:100%;margin:0;color:var(--muted);font-size:13px}
+button{font:inherit;font-size:14px;padding:10px 14px;border-radius:8px;border:1px solid var(--line);background:var(--paper);color:var(--fg);cursor:pointer}
+button.main{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.toast{color:var(--accent);font-size:13px;font-weight:700}
+.meta{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;gap:6px;font-size:14px;overflow-wrap:anywhere}
+.meta b{color:var(--muted);font-weight:500;margin-right:6px}
+article{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:24px 20px;min-width:0;overflow-wrap:anywhere}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap">
+</head><body>
+<div class="wrap">
+  <div class="bar">
+    <button class="main" id="copyBody">본문 서식 포함 복사</button>
+    <button id="copyTitle">제목 복사</button>
+    <button id="copyTags">태그 복사</button>
+    <span class="toast" id="toast" aria-live="polite"></span>
+    <p>네이버 글쓰기에서 본문 칸에 붙여넣으면 굵게·글자 크기·색이 함께 들어갑니다. 붙여넣은 뒤 [임시저장]을 눌러 주세요.</p>
+  </div>
+  <div class="meta">
+    <div><b>제목</b><span id="title">AI가 답을 주는 시대, 왜 '생각하는 힘'이 더 중요해졌을까 | 비판적 사고 | 커리어캐쳐</span></div>
+    <div><b>태그</b><span id="tags">#커리어캐쳐 #CareerCatcher #AI시대 #AI시대생각하는힘 #생각하는힘 #비판적사고 #ChatGPT #인지오프로딩 #인지부채 #AI환각 #분석적사고 #AI활용법 #미래역량 #AI리터러시</span></div>
+  </div>
+<article id="post">
+<p style="text-align:center;font-size:24px;font-weight:bold;color:#03a94f;">"AI가 답을 주는 시대,<br>생각은 덜 해도 될까요?"</p>
+<p style="font-size:16px;">보고서 초안도, 과제 요약도, 거래처 이메일도 이제 AI가 몇 초 만에 써 줍니다. 그렇다면 우리는 이제 생각을 조금 덜 해도 되는 걸까요?</p>
+<p style="font-size:16px;">결론부터 말하면 오히려 반대입니다. AI가 나빠서가 아니라, <b>AI 시대에도 최종 판단은 여전히 사람 몫</b>이기 때문입니다. 연구와 실제 사례로 <b>AI 시대 생각하는 힘</b>이 왜 중요한지 차분히 살펴보겠습니다.</p>
+<p style="font-size:16px;background-color:#f1faf4;padding:12px;"><b>✅ 이 글에서 알 수 있는 것</b><br>① AI에 생각을 맡기면 무슨 일이 생기는지 (연구 결과)<br>② AI 시대에 '생각'의 역할이 어떻게 바뀌는지<br>③ 검증을 건너뛰어 생긴 실제 AI 환각 사고<br>④ 생각하는 힘을 지키는 AI 활용법 4가지</p>
+<p style="text-align:center;font-size:15px;color:#888888;">📷 [사진1: 노트북 화면의 AI 채팅창을 바라보며 고민하는 모습]</p>
+<p style="text-align:center;color:#cccccc;">─────────────</p>
+<p style="font-size:22px;font-weight:bold;">① 생각을 맡기면, 생각에 덜 참여하게 된다</p>
+<p style="font-size:16px;">생각을 외부 도구에 넘기는 것을 <b>'인지 오프로딩'</b>이라고 합니다.</p>
+<p style="font-size:16px;">✔ <b>Gerlich(2025, 학술지 Societies)</b>: 666명 설문과 50명 심층 인터뷰를 분석한 결과, AI 도구를 자주 쓸수록 비판적 사고 점수가 낮게 나타났고, 이 관계를 인지 오프로딩이 매개했습니다. 젊은 층일수록 AI 의존도가 높고 점수는 낮았으며, 학력이 높을수록 AI 사용과 관계없이 점수가 높았습니다.</p>
+<p style="font-size:16px;">✔ <b>MIT 미디어랩(Kosmyna 외, 2025)</b>: 연구진은 18~39세 54명을 LLM, 검색엔진, 도구 없음의 세 집단으로 나눠 에세이를 쓰게 하고 뇌파(EEG)를 측정했습니다. 뇌 연결성은 도구 없이 쓴 집단이 가장 높고 LLM 집단이 가장 낮았습니다. LLM 집단은 자기 글을 잘 기억하거나 인용하지 못했고, 글에 대한 주인의식도 낮았습니다. 연구진은 이를 <b>'인지 부채(cognitive debt)'</b>라는 개념으로 설명합니다.</p>
+<p style="text-align:center;font-size:15px;color:#888888;">📷 [사진2: 세 집단(LLM·검색엔진·도구 없음)의 뇌 참여도 비교 도식]</p>
+<p style="font-size:15px;color:#666666;"><b>꼭 알아둘 한계</b><br>· Gerlich 연구는 상관연구라 "AI를 쓰면 사고력이 떨어진다"는 인과관계는 입증되지 않았습니다.<br>· MIT 연구는 동료평가 전 프리프린트이고 표본이 작습니다(전체 54명, 집단을 바꾼 4회차는 18명). 저자도 "IQ를 측정한 것이 아니다"라며 과장 보도를 바로잡았습니다.</p>
+<p style="font-size:16px;">핵심은 <b style="background-color:#fff3a8;">문제는 AI 사용 자체가 아니라, 생각을 통째로 넘기는 방식</b>이라는 점입니다.</p>
+<p style="text-align:center;color:#cccccc;">─────────────</p>
+<p style="font-size:22px;font-weight:bold;">② 생각의 역할이 바뀌고 있다: 직접 하기에서 검증·판단으로</p>
+<p style="font-size:16px;">Microsoft Research와 카네기멜런대(CMU) 연구팀(Lee 외, CHI 2025)은 지식노동자 319명이 실제 업무에서 AI를 쓴 사례 936건을 분석했습니다.</p>
+<p style="font-size:16px;">1) <b>AI를 믿을수록 비판적 사고를 덜 했습니다.</b> → 과신은 검토를 건너뛰게 만듭니다.<br>2) <b>자기 능력을 믿을수록 비판적 사고를 더 했습니다.</b> → 내 기준이 있어야 AI를 점검할 수 있습니다.<br>3) <b>사고의 중심이 정보 검증·응답 통합·과업 관리로 옮겨 갔습니다.</b> → 생각은 사라지지 않고 역할이 바뀝니다.</p>
+<p style="font-size:16px;">연구진은 장기적으로 AI에 과의존해 독립적 문제 해결 능력이 약해질 위험도 경고했습니다. 다만 이 연구는 응답자의 자기보고에 기반한 한 시점 설문이라는 한계가 있습니다.</p>
+<p style="font-size:16px;">AI 시대의 생각하는 힘은 결국 <b style="background-color:#fff3a8;">의심하고, 확인하고, 엮고, 최종 책임지는 힘</b>입니다.</p>
+<p style="text-align:center;color:#cccccc;">─────────────</p>
+<p style="font-size:22px;font-weight:bold;">③ AI 환각, 검증을 건너뛴 대가</p>
+<p style="font-size:16px;">AI는 틀릴 때도 그럴듯하게 틀립니다. 이를 <b>'AI 환각'</b>이라고 부릅니다.</p>
+<p style="font-size:16px;">✔ <b>Mata v. Avianca(2023, 미국 뉴욕 남부지법)</b>: 변호사들이 ChatGPT가 지어낸 가짜 판례 6건을 그대로 법원에 제출했고, 벌금 5,000달러를 부과받았습니다.<br>✔ <b>딜로이트 호주(2025)</b>: 약 44만 호주달러 규모의 정부 보고서에서 AI 환각으로 생긴 가짜 인용과 각주가 발견되어, 대금 일부를 환불하고 수정본을 다시 게시했습니다.</p>
+<p style="text-align:center;font-size:15px;color:#888888;">📷 [사진3: '출처 확인 필요' 빨간 표시가 붙은 각주 일러스트]</p>
+<p style="font-size:16px;">전문가도 확인을 건너뛰면 신뢰를 잃습니다. <span style="color:#03a94f;font-weight:bold;">확인은 사람의 몫</span>입니다.</p>
+<p style="text-align:center;color:#cccccc;">─────────────</p>
+<p style="font-size:22px;font-weight:bold;">④ 그래서 일터는 분석적 사고를 가진 사람을 찾는다</p>
+<p style="font-size:16px;">세계경제포럼(WEF) 「Future of Jobs Report 2025」는 55개 경제권 고용주 1,000여 곳을 조사했습니다. 핵심 역량 1위는 <b>분석적 사고</b>로, <b>고용주 10곳 중 7곳</b>이 필수 역량으로 꼽았습니다. 창의적 사고(57%)도 상위권에 올랐습니다.</p>
+<p style="font-size:16px;">자동화가 늘수록 사람에게 남는 가치는 결국 <b style="background-color:#fff3a8;">판단력</b>입니다.</p>
+<p style="text-align:center;color:#cccccc;">─────────────</p>
+<p style="font-size:22px;font-weight:bold;">⑤ 생각하는 힘을 지키는 AI 활용법 4가지</p>
+<p style="font-size:16px;background-color:#f1faf4;padding:12px;">☐ <b>내 생각 먼저, 질문은 그다음</b>: 초안이나 아이디어를 먼저 적고 AI에게 보완을 요청하세요. 도구 없이 쓴 집단의 뇌 연결성이 가장 높았던 MIT 실험에서 얻을 수 있는 시사점입니다.<br>☐ <b>출처와 사실은 원문으로 확인</b>: 숫자·인용·판례는 반드시 원래 자료를 찾아보세요.<br>☐ <b>"왜?"와 "반대 근거는?" 되묻기</b>: AI 답을 그대로 받지 말고 검증하고 엮는 과정을 거치세요.<br>☐ <b>최종 결정과 책임은 내가</b>: AI는 조수, 결재권자는 나입니다.</p>
+<p style="text-align:center;font-size:15px;color:#888888;">📷 [사진4: 체크리스트 4개 항목이 적힌 메모장과 노트북]</p>
+<p style="text-align:center;color:#cccccc;">─────────────</p>
+<p style="font-size:22px;font-weight:bold;">마무리: AI는 생각을 대신하지 않고 확장한다</p>
+<p style="font-size:16px;">정리하면, 생각을 통째로 맡길수록 생각에 덜 참여하는 경향이 관찰되었고, 생각의 역할은 검증·통합·판단으로 옮겨 가고 있습니다. 검증을 건너뛴 대가는 실제로 컸고, 일터는 분석적 사고를 가장 원합니다.</p>
+<p style="font-size:16px;">AI 사용이 장기적으로 능력을 떨어뜨린다는 종단연구는 아직 확인되지 않았습니다. 그렇기에 오히려 지금 어떤 습관을 들이느냐가 중요합니다.</p>
+<p style="text-align:center;font-size:18px;font-weight:bold;color:#03a94f;">"AI가 생각을 대신해 줄수록,<br>그 결과를 검증하고 판단하는<br>사람의 생각하는 힘이 더 중요해집니다."</p>
+<p style="font-size:16px;">오늘 AI 답 하나를 직접 검증해 보셨나요? 여러분만의 AI 검증 습관을 댓글로 나눠 주세요.</p>
+<p style="text-align:center;color:#cccccc;">─────────────</p>
+<p style="font-size:14px;color:#888888;"><b>참고 자료</b><br>· Gerlich (2025). Societies 15(1):6.<br>· Kosmyna 외 (2025). Your Brain on ChatGPT (프리프린트). arXiv 2506.08872<br>· Lee 외 (2025). The Impact of Generative AI on Critical Thinking, CHI 2025.<br>· World Economic Forum (2025). Future of Jobs Report 2025.<br>· Mata v. Avianca (2023), 미국 뉴욕 남부지법<br>· 딜로이트 호주 보고서 환불 보도 (2025)</p>
+<p style="text-align:center;font-size:14px;color:#666666;">─────────────<br><b>커리어캐쳐(CareerCatcher)</b><br>AI 활용 진로·취업 교육 · AI 자기소개서 · AI면접 코칭</p>
+</article>
+</div>
+<script>
+const toast=document.getElementById('toast');
+function say(t){toast.textContent=t;setTimeout(()=>toast.textContent='',2500)}
+function selectCopy(el){const r=document.createRange();r.selectNodeContents(el);const s=getSelection();s.removeAllRanges();s.addRange(r);let ok=false;try{ok=document.execCommand('copy')}catch(e){}return ok}
+async function copyRich(el){
+  try{await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([el.innerHTML],{type:'text/html'}),'text/plain':new Blob([el.innerText],{type:'text/plain'})})]);return true}
+  catch(e){return selectCopy(el)}
+}
+async function copyText(el){try{await navigator.clipboard.writeText(el.innerText);return true}catch(e){return selectCopy(el)}}
+document.getElementById('copyBody').onclick=async()=>say(await copyRich(document.getElementById('post'))?'본문 복사됨':'본문이 선택됐어요. 길게 눌러 복사해 주세요');
+document.getElementById('copyTitle').onclick=async()=>say(await copyText(document.getElementById('title'))?'제목 복사됨':'제목이 선택됐어요. 복사해 주세요');
+document.getElementById('copyTags').onclick=async()=>say(await copyText(document.getElementById('tags'))?'태그 복사됨':'태그가 선택됐어요. 복사해 주세요');
+</script>
+</body></html>
