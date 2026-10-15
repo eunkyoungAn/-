@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>익숙한 길 원고</title>
+<style>
+:root{--bg:#f6f7f5;--paper:#ffffff;--fg:#1f2421;--muted:#5f6b64;--accent:#03a94f;--line:#dfe4e0;
+--body:"Noto Sans KR",system-ui,sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#151816;--paper:#1d211f;--fg:#e8ece9;--muted:#a3ada7;--accent:#35c977;--line:#323833;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#151816;--paper:#1d211f;--fg:#e8ece9;--muted:#a3ada7;--accent:#35c977;--line:#323833;color-scheme:dark}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);padding:16px;line-height:1.7}
+.wrap{max-width:720px;margin:0 auto;display:grid;gap:16px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.bar p{flex-basis:100%;margin:0;color:var(--muted);font-size:13px}
+button{font:inherit;font-size:14px;padding:10px 14px;border-radius:8px;border:1px solid var(--line);background:var(--paper);color:var(--fg);cursor:pointer}
+button.main{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.toast{color:var(--accent);font-size:13px;font-weight:700}
+.meta{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;gap:6px;font-size:14px;overflow-wrap:anywhere}
+.meta b{color:var(--muted);font-weight:500;margin-right:6px}
+article{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:24px 20px;min-width:0;overflow-wrap:anywhere}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap">
+</head><body>
+<div class="wrap">
+  <div class="bar">
+    <button class="main" id="copyBody">본문 서식 포함 복사</button>
+    <button id="copyTitle">제목 복사</button>
+    <button id="copyTags">태그 복사</button>
+    <span class="toast" id="toast" aria-live="polite"></span>
+    <p>네이버 글쓰기에서 본문 칸에 붙여넣으면 굵게·글자 크기·색이 함께 들어갑니다. 붙여넣은 뒤 [임시저장]을 눌러 주세요.</p>
+  </div>
+  <div class="meta">
+    <div><b>제목</b><span id="title">익숙한 길이 늘 최선은 아니었습니다 — 커리어에도 '원래 가던 길'이 있다 | 커리어캐쳐</span></div>
+    <div><b>태그</b><span id="tags">#커리어고민 #진로고민 #계획된우연 #크럼볼츠 #커리어전환 #재취업 #경력단절 #이직고민 #동기부여 #커리어캐쳐</span></div>
+  </div>
+<article id="post">
+<p style="text-align:center;font-size:24px;font-weight:bold;color:#03a94f;">"익숙한 길이<br>늘 최선은 아니었습니다"</p>
+<p style="font-size:16px;">남부여성발전센터에 동기부여 강의를 하러 가던 날이었습니다. 그날은 어쩌다 평소와 다른 길로 가게 됐는데, 처음 가본 그 길이 오히려 더 빠르고 편했습니다.</p>
+<p style="font-size:16px;">저는 그날 다른 분들께 새로운 가능성을 이야기하러 가는 길이었습니다. 그런데 정작 저는 늘 가던 길로만 다니고 있었더라고요. 오늘은 그날의 작은 깨달음을 커리어 이야기로 이어가 보려 합니다.</p>
+<p style="text-align:center;font-size:15px;color:#888888;">[사진1: 처음 가보는 낯선 길 풍경 (강사 실제 사진이 있으면 우선 사용)]</p>
+<p style="text-align:center;color:#cccccc;">─────────────</p>
+<p style="font-size:22px;font-weight:bold;">좋아서가 아니라 익숙해서 다닌 길</p>
+<p style="font-size:16px;">그러고 나서 생각해봤습니다. 나는 왜 늘 그 길로만 다녔을까. 더 좋아서 고른 길이었나 하면, 솔직히 그렇지 않았습니다. <b>그냥 익숙해서였습니다.</b></p>
+<p style="font-size:16px;">이건 제가 유난히 게을러서 생기는 일은 아닌 것 같습니다. 행동경제학에서는 사람이 지금 상태를 필요 이상으로 유지하려는 경향을 <b>현상 유지 편향</b>(Samuelson &amp; Zeckhauser, 1988)이라고 부릅니다. 심리학에는 자주 접한 것에 더 호감을 느끼는 <b>단순 노출 효과</b>(Zajonc, 1968)라는 개념도 있고요. 익숙한 것이 편하게 느껴지는 건 꽤 자연스러운 반응입니다. 다만 <b style="background-color:#fff3a8;">편하다는 느낌과 최선이라는 판단은 서로 다른 이야기</b>입니다.</p>
+<p style="text-align:center;font-size:15px;color:#888888;">[사진2: 매일 같은 방향으로 찍힌 발자국, 반복되는 출근길 이미지]</p>
+<p style="text-align:center;color:#cccccc;">─────────────</p>
+<p style="font-size:22px;font-weight:bold;">커리어에도 '원래 가던 길'이 있습니다</p>
+<p style="font-size:16px;">커리어에도 이런 길이 있습니다.</p>
+<p style="font-size:16px;background-color:#f1faf4;padding:12px;">· <b>전공</b>: 대학에서 배운 분야라서<br>· <b>첫 직장</b>: 처음 들어간 업계라서<br>· <b>오래 해온 일</b>: 몇 년을 해왔으니까</p>
+<p style="font-size:16px;">상담을 하다 보면 "제가 해온 게 이거라서요"라는 말을 자주 듣습니다. 저는 이 말이 틀렸다고 생각하지 않습니다. 오래 해온 일에는 쌓인 실력과 사람과 감각이 있고, 그건 분명한 자산입니다.</p>
+<p style="text-align:center;font-size:15px;color:#888888;">[사진3: 갈림길 표지판, 또는 전공 / 첫 직장 / 오래 해온 일 세 갈래 인포그래픽]</p>
+<p style="font-size:16px;">문제는 <b>익숙함이 유일한 기준이 될 때</b>입니다. "해온 게 이거니까"가 모든 결정의 출발점이 되면, 다른 선택지는 검토해보기도 전에 지워집니다. 다른 길이 나빠서 버리는 게 아니라, <b style="background-color:#fff3a8;">살펴보기도 전에 지도에서 빼버리는 거예요.</b> 경력이 끊겼다가 다시 일을 찾는 분이든, 지금 회사에서 다음을 고민하는 분이든 마찬가지입니다.</p>
+<p style="text-align:center;color:#cccccc;">─────────────</p>
+<p style="font-size:22px;font-weight:bold;">다른 길은 '한번 가볼까'에서 시작됩니다 — 계획된 우연 이론</p>
+<p style="font-size:16px;">진로 상담에서 제가 자주 꺼내는 이론이 있습니다. Mitchell, Levin &amp; Krumboltz(1999)가 제안한 <b>계획된 우연(Planned Happenstance) 이론</b>입니다.</p>
+<p style="font-size:16px;">이 이론은 진로에서 우연이 일어나는 건 자연스럽고, 오히려 쓸모 있는 일이라고 봅니다. 그래서 우연을 없애려 애쓰기보다 탐색하는 행동을 늘려서 예상하지 못한 기회를 만날 가능성을 키우자고 이야기합니다. 계획대로 되지 않은 일도 쓸모가 있다고 보는 시선이 저는 참 좋았습니다.</p>
+<p style="font-size:16px;">이 이론에서는 우연을 기회로 바꾸는 다섯 가지 태도를 꼽습니다(원전에서는 '기술(skills)'이라고 부릅니다). 제 말로 풀어보면 이렇습니다.</p>
+<p style="font-size:16px;background-color:#f1faf4;padding:12px;">· <b>호기심</b> — 새로 배울 거리를 먼저 찾아 나서는 마음<br>· <b>인내</b> — 한두 번 막혀도 바로 접지 않고 조금 더 해보는 힘<br>· <b>유연성</b> — 상황이 바뀌면 생각과 계획도 바꿔볼 줄 아는 태도<br>· <b>낙관성</b> — 새로운 기회를 '나도 해볼 수 있는 일'로 바라보는 시선<br>· <b>위험 감수</b> — 결과를 다 알 수 없어도 일단 한 걸음 움직여보는 용기</p>
+<p style="font-size:16px;">거창한 결심이 필요한 항목은 하나도 없습니다. 그날 제가 다른 길로 들어선 것도 큰 각오 때문이 아니었으니까요.</p>
+<p style="text-align:center;font-size:15px;color:#888888;">[사진4: 5가지 태도 요약 인포그래픽]</p>
+<p style="text-align:center;color:#cccccc;">─────────────</p>
+<p style="font-size:22px;font-weight:bold;">새 길이 늘 지름길은 아니지만</p>
+<p style="font-size:16px;">솔직하게 말씀드리면, 다른 길이 늘 더 빠른 건 아닙니다. 돌아가는 길일 때도 있고, 막다른 골목을 만날 때도 있습니다. 커리어도 똑같아서, 새로 시도한 일이 기대와 다를 수 있습니다.</p>
+<p style="font-size:16px;">그래도 <b>한 번 가본 길은 내 지도에 남습니다.</b> 다음에 고민할 때 "그쪽은 이렇더라"라고 말할 수 있는 길이 하나 생기는 거죠. 선택지가 하나 늘어난다는 것, 저는 그것만으로도 가볼 이유가 충분하다고 생각합니다.</p>
+<p style="text-align:center;color:#cccccc;">─────────────</p>
+<p style="font-size:22px;font-weight:bold;">나에게 던지는 질문 3가지</p>
+<p style="font-size:16px;">잠깐 펜을 들고 아래 질문에 답을 적어보셨으면 합니다.</p>
+<p style="font-size:16px;background-color:#f1faf4;padding:12px;">1. 지금 걷고 있는 길은 내가 선택한 길인가요, 익숙해서 걷는 길인가요?<br>2. 궁금했지만 한 번도 가보지 않은 길이 있나요?<br>3. 그 길을 작게 시험해볼 방법은 무엇일까요?</p>
+<p style="font-size:16px;">답이 금방 나오지 않아도 괜찮습니다. 며칠 두고 생각나는 대로 덧붙여 적어도 됩니다.</p>
+<p style="text-align:center;font-size:15px;color:#888888;">[사진5: 노트에 질문을 적는 손, 또는 체크리스트 이미지]</p>
+<p style="text-align:center;color:#cccccc;">─────────────</p>
+<p style="font-size:22px;font-weight:bold;">이번 주, 작은 실험 하나</p>
+<p style="font-size:16px;">질문에 답을 적어보셨다면, 이번 주에 해볼 만한 작은 실험을 골라보세요.</p>
+<p style="font-size:16px;background-color:#f1faf4;padding:12px;">· 궁금한 분야의 현직자 한 명에게 일 이야기를 물어보기<br>· 관심 있는 분야의 채용공고 3개를 끝까지 읽어보기<br>· 출근길이든 장 보러 가는 길이든, 평소와 다른 길로 한 번 가보기</p>
+<p style="font-size:16px;">셋 다 할 필요는 없습니다. <b style="background-color:#fff3a8;">하나만 해도 충분합니다.</b> 막상 해보면 생각보다 문턱이 낮다는 걸 느끼실 수도 있어요.</p>
+<p style="text-align:center;color:#cccccc;">─────────────</p>
+<p style="font-size:16px;">그날 처음 가본 길은 이제 제 지도에 들어 있습니다. 여러분의 이번 주에도 그런 길이 하나 생기길 바랍니다. 어떤 실험을 골랐는지 댓글로 나눠주시면 저도 함께 응원하겠습니다.</p>
+<p style="text-align:center;font-size:14px;color:#666666;">─────────────<br><b>커리어캐쳐 | Clear strategies, Real growth</b></p>
+</article>
+</div>
+<script>
+const toast=document.getElementById('toast');
+function say(t){toast.textContent=t;setTimeout(()=>toast.textContent='',2500)}
+function selectCopy(el){const r=document.createRange();r.selectNodeContents(el);const s=getSelection();s.removeAllRanges();s.addRange(r);let ok=false;try{ok=document.execCommand('copy')}catch(e){}return ok}
+async function copyRich(el){
+  try{await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([el.innerHTML],{type:'text/html'}),'text/plain':new Blob([el.innerText],{type:'text/plain'})})]);return true}
+  catch(e){return selectCopy(el)}
+}
+async function copyText(el){try{await navigator.clipboard.writeText(el.innerText);return true}catch(e){return selectCopy(el)}}
+document.getElementById('copyBody').onclick=async()=>say(await copyRich(document.getElementById('post'))?'본문 복사됨':'본문이 선택됐어요. 길게 눌러 복사해 주세요');
+document.getElementById('copyTitle').onclick=async()=>say(await copyText(document.getElementById('title'))?'제목 복사됨':'제목이 선택됐어요. 복사해 주세요');
+document.getElementById('copyTags').onclick=async()=>say(await copyText(document.getElementById('tags'))?'태그 복사됨':'태그가 선택됐어요. 복사해 주세요');
+</script>
+</body></html>
