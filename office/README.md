@@ -27,6 +27,7 @@
 | 강의설계팀 | office-lecture-designer | `/office 대학생 대상 AI 활용 취업준비 4시간 특강` |
 | 블로그팀 | office-blogger | `/office 자소서 첫 문장 쓰는 법 블로그 글` |
 | 카드뉴스팀 | office-cardnews-designer | `/office 면접 꿀팁 5가지 카드뉴스` 또는 `/office 경험노트 작성법 블로그 글 + 카드뉴스` |
+| 발표자료팀 | office-ppt-designer | `/office 친환경 포장재 프로젝트 결과 보고 발표자료` 또는 `/office 시장 분석 보고서 + 카드뉴스 + 발표자료` (병렬) |
 | 자기소개서팀 | office-coverletter-writer | `/office 삼성전자 마케팅 직무 자소서, 경험: ...` |
 
 ## 구조 메모
@@ -35,3 +36,6 @@ Claude Code의 하위 에이전트는 다른 에이전트를 부를 수 없습�
 
 ## 사무실 화면
 `office/dashboard.html` — 팀원들이 책상에서 일하는 모습을 보여줍니다. GitHub Pages나 내 컴퓨터에서 열면 저장소의 실제 진행 상황을 불러오고, 그 외에는 데모를 재생합니다.
+
+## 디자인 기준
+`office/design/ppt-morph-spec.md` — 발표자료팀이 따르는 「모핑·도식 버전 디자인 명세서」. 흰 배경, #5779FF 강조, 맑은 고딕, 모핑 전환, 품질 기준. 이 파일을 바꾸면 이후 모든 발표자료에 반영됩니다.

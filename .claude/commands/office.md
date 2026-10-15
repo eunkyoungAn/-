@@ -20,12 +20,15 @@ argument-hint: <주제>
    - 블로그·포스팅·홍보글 → `office-blogger`
    - 자기소개서·지원서·첨삭 → `office-coverletter-writer`
    - 카드뉴스·인스타 콘텐츠 → `office-cardnews-designer`
+   - 발표자료·PPT·프레젠테이션 → `office-ppt-designer` (기준: `office/design/ppt-morph-spec.md`, 원고 `03_draft.md` + `slides.pptx`)
    - 그 외 보고서·가이드·문서 → `office-writer`
    - 결과는 `03_draft.md`로 저장시킵니다.
 4. `office-reviewer` → `04_review.md`
 5. 판정이 "수정 필요"면 같은 작성팀을 다시 호출해 리뷰를 반영한 `05_final.md`를 쓰게 하고 검수를 한 번 더 받습니다(최대 2회). "통과"면 `03_draft.md`를 `05_final.md`로 복사합니다.
 
 **추가 작업**: 사용자가 "블로그 글 + 카드뉴스"처럼 두 가지를 원하면, 최종본이 나온 뒤 `office-cardnews-designer`에게 `05_final.md`를 카드뉴스로 바꾸게 해 `06_cardnews.md`로 저장하고 검수팀 확인을 받습니다.
+
+**멀티태스킹**: 추가 산출물이 여럿이면(예: "보고서 + 카드뉴스 + 발표자료") 서로 의존하지 않으므로 한 메시지에서 Agent 도구를 동시에 호출해 병렬로 진행합니다. 카드뉴스 → `06_cardnews.md`, 발표자료 → `office-ppt-designer`가 `07_slides.md` + `slides.pptx`. 검수도 산출물별로 병렬 호출해 `04_review_cardnews.md`, `04_review_slides.md`로 받습니다.
 
 각 단계가 끝나면 파일이 실제로 생겼는지 확인한 뒤 다음 단계로 넘어갑니다.
 

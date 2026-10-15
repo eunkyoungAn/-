@@ -143,6 +143,7 @@ const TEAM = [
   {id:"blog",  room:"r-write", name:"블로그",     breed:"포메 · 인플루언서", fur:"#F4C27A", ear:"#E8A94F", face:"#FFF1D8", acc:"headphones", up:true, agent:"office-blogger"},
   {id:"cover", room:"r-write", name:"자기소개서", breed:"닥스훈트 · 컨설턴트", fur:"#A5612E", ear:"#7C431C", face:"#C98A55", acc:"bowtie", agent:"office-coverletter-writer"},
   {id:"card",  room:"r-design",name:"카드뉴스",   breed:"달마시안 · 디자이너", fur:"#FFFFFF", ear:"#2A2A2A", face:"#FFFFFF", acc:"brush", spots:true, agent:"office-cardnews-designer"},
+  {id:"ppt",   room:"r-design",name:"발표자료",   breed:"사모예드 · 프레젠터", fur:"#FFFFFF", ear:"#F1EEE8", face:"#FFFFFF", acc:"tie", up:true, agent:"office-ppt-designer"},
   {id:"qa",    room:"r-qa",    name:"검수",       breed:"리트리버 · 안전요원", fur:"#E9B96E", ear:"#D29A4A", face:"#F6DDB0", acc:"qa"},
 ];
 const ACC = {
@@ -249,7 +250,9 @@ const SCRIPT = [
   [5,"writer","work","검수 반영 중","리뷰를 반영해 최종본을 씁니다"],
   [5,"writer","done","최종본 완성","05_final.md 저장"],
   [6,"card","work","카드뉴스 8장 그리는 중","최종본을 카드뉴스로 만듭니다"],
+  [6,"ppt","work","모핑 슬라이드 만드는 중","카드뉴스와 동시에 발표자료를 만듭니다"],
   [6,"card","done","카드뉴스 완성!","06_cardnews.md 저장"],
+  [6,"ppt","done","발표자료 완성!","slides.pptx 저장"],
   [6,"boss","done","다들 수고했멍!","사용자에게 결과를 보고했습니다"],
 ];
 let runToken=0;
