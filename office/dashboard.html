@@ -5,17 +5,17 @@
 /* Layout: a top-down office floor plan — rooms drawn as ink outlines on drafting paper, people at desks, status shown as desk lamps */
 :root{
   --paper:#EDF1EF; --room:#F8FAF9; --ink:#1E2A2D; --muted:#5E6E70; --line:#B9C6C3;
-  --accent:#2F7D6B; --work:#C9851A; --done:#2F7D6B; --idle:#9AA8A8; --bubble:#FFFFFF;
+  --accent:#2F7D6B; --work:#C9851A; --done:#2F7D6B; --idle:#9AA8A8; --bubble:#FFFFFF; --wood:#E3C9A0;
   --display:"Do Hyeon","IBM Plex Sans KR",system-ui,sans-serif;
   --body:"IBM Plex Sans KR",system-ui,-apple-system,"Malgun Gothic",sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,monospace;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --paper:#141B1D; --room:#1B2427; --ink:#E3ECEA; --muted:#93A4A5; --line:#33444A;
-  --accent:#5BC2A8; --work:#E7A93B; --done:#5BC2A8; --idle:#56676A; --bubble:#25313A; color-scheme:dark}}
+  --accent:#5BC2A8; --work:#E7A93B; --done:#5BC2A8; --idle:#56676A; --bubble:#25313A; --wood:#6B5236; color-scheme:dark}}
 :root[data-theme="dark"]{
   --paper:#141B1D; --room:#1B2427; --ink:#E3ECEA; --muted:#93A4A5; --line:#33444A;
-  --accent:#5BC2A8; --work:#E7A93B; --done:#5BC2A8; --idle:#56676A; --bubble:#25313A; color-scheme:dark}
+  --accent:#5BC2A8; --work:#E7A93B; --done:#5BC2A8; --idle:#56676A; --bubble:#25313A; --wood:#6B5236; color-scheme:dark}
 body{background:var(--paper);color:var(--ink);font-family:var(--body);line-height:1.55;
   background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
   background-size:28px 28px;background-position:-1px -1px}
@@ -47,8 +47,18 @@ button.primary{background:var(--ink);color:var(--paper)}
 .r-write{grid-column:span 4}.r-qa{grid-column:span 2}
 .desks{display:flex;flex-wrap:wrap;gap:14px}
 .desk{display:grid;justify-items:center;gap:6px;width:112px;text-align:center;cursor:pointer;background:none;border:none;padding:4px;font-weight:400}
-.person{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-size:1.15rem;color:var(--paper);background:var(--c);position:relative;transition:transform .3s}
-.table{width:92px;height:30px;border:1.5px solid var(--ink);border-radius:3px;background:var(--paper);position:relative;margin-top:-10px}
+.person{width:72px;height:72px;display:block;position:relative;transition:transform .3s}
+.person svg{width:100%;height:100%;overflow:visible}
+.tail{transform-origin:52px 50px}
+.desk[data-s="work"] .tail{animation:wag .25s ease-in-out infinite alternate}
+.desk[data-s="done"] .tail{animation:wag .6s ease-in-out 3 alternate}
+.tongue{display:none}
+.desk[data-s="work"] .tongue,.desk[data-s="done"] .tongue{display:inline}
+.desk[data-s="idle"] .eye{transform:scaleY(.25);transform-box:fill-box;transform-origin:center}
+.breed{font-size:.68rem;color:var(--muted)}
+.table{width:96px;height:28px;border:1.5px solid var(--ink);border-radius:6px;background:var(--wood);position:relative;margin-top:-16px;z-index:1}
+.table::before{content:"";position:absolute;left:10px;top:-9px;width:30px;height:12px;border-radius:2px;background:var(--room);border:1.5px solid var(--ink)}
+.desk[data-s="work"] .table::before{background:var(--work)}
 .lamp{position:absolute;right:6px;top:6px;width:10px;height:10px;border-radius:50%;background:var(--idle)}
 .desk[data-s="work"] .lamp{background:var(--work);box-shadow:0 0 10px var(--work)}
 .desk[data-s="done"] .lamp{background:var(--done)}
@@ -72,7 +82,8 @@ aside h2{margin:0;font-family:var(--display);font-weight:400;font-size:1.2rem}
 .files a{color:var(--accent)}
 .note{font-size:.78rem;color:var(--muted);margin:0}
 
-@keyframes bob{to{transform:translateY(-4px)}}
+@keyframes bob{to{transform:translateY(-4px) rotate(-3deg)}}
+@keyframes wag{from{transform:rotate(-18deg)}to{transform:rotate(22deg)}}
 @keyframes pulse{50%{opacity:.45}}
 @keyframes dots{0%{content:""}25%{content:"."}50%{content:".."}75%{content:"..."}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
@@ -88,7 +99,7 @@ aside h2{margin:0;font-family:var(--display);font-weight:400;font-size:1.2rem}
 <div class="wrap">
   <header>
     <div>
-      <h1>에이전트 사무실</h1>
+      <h1>멍멍 에이전트 사무실</h1>
       <p class="sub" id="modeLine">데모: 실제 업무가 어떻게 흘러가는지 보여주는 예시예요</p>
     </div>
     <div class="controls">
@@ -118,15 +129,44 @@ aside h2{margin:0;font-family:var(--display);font-weight:400;font-size:1.2rem}
 
 <script>
 const TEAM = [
-  {id:"boss",  room:"r-boss",  roomName:"팀장실",     name:"팀장",        init:"팀", c:"#3B4F5C", file:"00_brief"},
-  {id:"res",   room:"r-res",   roomName:"리서치팀",   name:"리서치",      init:"리", c:"#3E7CB1", file:"01_research"},
-  {id:"plan",  room:"r-plan",  roomName:"기획팀",     name:"기획",        init:"기", c:"#7A5BA8", file:"02_plan"},
-  {id:"writer",room:"r-write", roomName:"작성실",     name:"콘텐츠",      init:"콘", c:"#B5603A", file:"03_draft", agent:"office-writer"},
-  {id:"lect",  room:"r-write", roomName:"작성실",     name:"강의설계",    init:"강", c:"#4D8C57", file:"03_draft", agent:"office-lecture-designer"},
-  {id:"blog",  room:"r-write", roomName:"작성실",     name:"블로그",      init:"블", c:"#C0577A", file:"03_draft", agent:"office-blogger"},
-  {id:"cover", room:"r-write", roomName:"작성실",     name:"자기소개서",  init:"자", c:"#8C6D2F", file:"03_draft", agent:"office-coverletter-writer"},
-  {id:"qa",    room:"r-qa",    roomName:"검수팀",     name:"검수",        init:"검", c:"#2F7D6B", file:"04_review"},
+  {id:"boss",  room:"r-boss",  name:"팀장",       breed:"시바 · 보스",      fur:"#E39A4C", ear:"#C97A2E", face:"#FFF4E6", acc:"tie"},
+  {id:"res",   room:"r-res",   name:"리서치",     breed:"비글 · 탐정",      fur:"#F1E2CC", ear:"#8A5A34", face:"#FFFFFF", acc:"glasses"},
+  {id:"plan",  room:"r-plan",  name:"기획",       breed:"웰시코기 · 현장소장", fur:"#E8A35A", ear:"#E8A35A", face:"#FFFFFF", acc:"hardhat", up:true},
+  {id:"writer",room:"r-write", name:"콘텐츠",     breed:"푸들 · 작가",      fur:"#D9C3A5", ear:"#C4A882", face:"#EFE2CF", acc:"beret", agent:"office-writer"},
+  {id:"lect",  room:"r-write", name:"강의설계",   breed:"보더콜리 · 교수",  fur:"#3A3A3A", ear:"#2A2A2A", face:"#FFFFFF", acc:"gradcap", agent:"office-lecture-designer"},
+  {id:"blog",  room:"r-write", name:"블로그",     breed:"포메 · 인플루언서", fur:"#F4C27A", ear:"#E8A94F", face:"#FFF1D8", acc:"headphones", up:true, agent:"office-blogger"},
+  {id:"cover", room:"r-write", name:"자기소개서", breed:"말티즈 · 컨설턴트", fur:"#FFFFFF", ear:"#EDE6DE", face:"#FFFFFF", acc:"bowtie", agent:"office-coverletter-writer"},
+  {id:"qa",    room:"r-qa",    name:"검수",       breed:"리트리버 · 안전요원", fur:"#E9B96E", ear:"#D29A4A", face:"#F6DDB0", acc:"qa"},
 ];
+const ACC = {
+  tie:`<path d="M29 55l3-3 3 3-3 9z" fill="#C0392B"/><path d="M30 52h4l-1 2h-2z" fill="#962D22"/>`,
+  glasses:`<g fill="rgba(255,255,255,.35)" stroke="#3B2A20" stroke-width="1.8"><circle cx="25" cy="32" r="5"/><circle cx="39" cy="32" r="5"/></g><path d="M30 32h4" stroke="#3B2A20" stroke-width="1.8"/>`,
+  hardhat:`<path d="M15 24a17 13 0 0 1 34 0z" fill="#F2B632"/><rect x="11" y="22" width="42" height="5" rx="2.5" fill="#DB9A16"/><rect x="30" y="11" width="4" height="12" rx="2" fill="#DB9A16"/>`,
+  qa:`<path d="M15 24a17 13 0 0 1 34 0z" fill="#F07B2D"/><rect x="11" y="22" width="42" height="5" rx="2.5" fill="#D2601A"/><path d="M27 17l4 4 7-7" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round"/>`,
+  beret:`<ellipse cx="30" cy="19" rx="15" ry="6" fill="#B23A48" transform="rotate(-12 30 19)"/><circle cx="30" cy="13" r="2" fill="#B23A48"/>`,
+  gradcap:`<path d="M12 19l20-8 20 8-20 8z" fill="#22303A"/><rect x="23" y="19" width="18" height="6" fill="#22303A"/><path d="M50 19v9" stroke="#F2B632" stroke-width="1.6"/><circle cx="50" cy="29" r="1.8" fill="#F2B632"/>`,
+  headphones:`<path d="M14 34a18 18 0 0 1 36 0" stroke="#5B6CF0" stroke-width="3.5" fill="none"/><rect x="10" y="31" width="7" height="11" rx="3" fill="#5B6CF0"/><rect x="47" y="31" width="7" height="11" rx="3" fill="#5B6CF0"/>`,
+  bowtie:`<path d="M32 54l-7-4v8zM32 54l7-4v8z" fill="#E26DA0"/><circle cx="32" cy="54" r="2" fill="#C04E82"/>`,
+};
+function dog(t){
+  const ears = t.up
+    ? `<path d="M15 26l3-16 11 9z" fill="${t.ear}"/><path d="M49 26l-3-16-11 9z" fill="${t.ear}"/><path d="M18 22l2-8 6 5z" fill="#F4B8B0"/><path d="M46 22l-2-8-6 5z" fill="#F4B8B0"/>`
+    : `<ellipse cx="14" cy="36" rx="6" ry="12" fill="${t.ear}" transform="rotate(18 14 36)"/><ellipse cx="50" cy="36" rx="6" ry="12" fill="${t.ear}" transform="rotate(-18 50 36)"/>`;
+  return `<svg viewBox="0 0 64 64" aria-hidden="true">
+    <path class="tail" d="M50 52q10-4 8-14" stroke="${t.ear}" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <ellipse cx="32" cy="58" rx="14" ry="8" fill="${t.fur}" stroke="rgba(0,0,0,.12)"/>
+    ${ears}
+    <circle cx="32" cy="34" r="18" fill="${t.fur}" stroke="rgba(0,0,0,.12)"/>
+    <ellipse cx="32" cy="42" rx="10" ry="7.5" fill="${t.face}"/>
+    <circle cx="21" cy="39" r="3" fill="#F59BA8" opacity=".55"/><circle cx="43" cy="39" r="3" fill="#F59BA8" opacity=".55"/>
+    <circle class="eye" cx="25" cy="32" r="2.6" fill="#2A1F1A"/><circle class="eye" cx="39" cy="32" r="2.6" fill="#2A1F1A"/>
+    <circle cx="26" cy="31" r=".9" fill="#fff"/><circle cx="40" cy="31" r=".9" fill="#fff"/>
+    <ellipse cx="32" cy="38.5" rx="3.2" ry="2.3" fill="#2A1F1A"/>
+    <path d="M28.5 43q3.5 3 7 0" stroke="#2A1F1A" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+    <path class="tongue" d="M30.5 44.5h3v3a1.5 1.5 0 0 1-3 0z" fill="#F06A7E"/>
+    ${ACC[t.acc]||""}
+  </svg>`;
+}
 const STEPS = [["00_brief","지시서"],["01_research","리서치"],["02_plan","기획"],["03_draft","초안"],["04_review","검수"],["05_final","최종본"]];
 const ROOMS = [["r-boss","팀장실"],["r-res","리서치팀"],["r-plan","기획팀"],["r-write","작성실"],["r-qa","검수팀"]];
 const $ = id => document.getElementById(id);
@@ -136,9 +176,10 @@ $("floor").innerHTML = ROOMS.map(([cls,label]) =>
   `<div class="room ${cls}"><h2>${label}</h2><div class="desks">${
     TEAM.filter(t=>t.room===cls).map(t=>`
       <button class="desk" id="d-${t.id}" data-s="idle" aria-label="${t.name}">
-        <span class="person" style="--c:${t.c}">${t.init}</span>
+        <span class="person">${dog(t)}</span>
         <span class="table"><span class="lamp"></span></span>
         <span class="name">${t.name}</span>
+        <span class="breed">${t.breed}</span>
         <span class="state">대기</span>
       </button>`).join("")}</div></div>`).join("");
 
@@ -164,19 +205,19 @@ function resetAll(){ TEAM.forEach(t=>setDesk(t.id,"idle")); $("log").innerHTML="
 // ---------- demo ----------
 let timer=null;
 const SCRIPT = [
-  [0,"boss","work","주제 접수! 업무지시서 쓰는 중","주제를 접수하고 업무지시서를 작성합니다"],
+  [0,"boss","work","멍! 새 업무 접수","주제를 접수하고 업무지시서를 작성합니다"],
   [0,"boss","done","리서치팀, 부탁해요","00_brief.md 작성 완료"],
-  [1,"res","work","경험노트 사례 찾는 중","자료 조사를 시작합니다"],
+  [1,"res","work","킁킁… 자료 냄새 맡는 중","자료 조사를 시작합니다"],
   [1,"res","done","출처 12개 정리 완료","01_research.md 저장"],
-  [2,"plan","work","목차 짜는 중","리서치를 읽고 구조를 설계합니다"],
+  [2,"plan","work","설계도 그리는 중","리서치를 읽고 구조를 설계합니다"],
   [2,"plan","done","5단계 구성으로 확정","02_plan.md 저장"],
   [3,"writer","work","초안 쓰는 중","기획안대로 가이드 초안을 씁니다"],
   [3,"writer","done","초안 넘겼어요","03_draft.md 저장"],
-  [4,"qa","work","사실 확인 중","출처와 초안을 대조합니다"],
+  [4,"qa","work","안전 점검 중!","출처와 초안을 대조합니다"],
   [4,"qa","done","필수 수정 2건","04_review.md: 수정 필요"],
   [5,"writer","work","검수 반영 중","리뷰를 반영해 최종본을 씁니다"],
   [5,"writer","done","최종본 완성","05_final.md 저장"],
-  [6,"boss","done","보고 완료!","사용자에게 결과를 보고했습니다"],
+  [6,"boss","done","다들 수고했멍!","사용자에게 결과를 보고했습니다"],
 ];
 function runDemo(){
   clearTimeout(timer); resetAll(); setMode("demo");
