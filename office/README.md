@@ -26,6 +26,7 @@
 |---|---|---|
 | 강의설계팀 | office-lecture-designer | `/office 대학생 대상 AI 활용 취업준비 4시간 특강` |
 | 블로그팀 | office-blogger | `/office 자소서 첫 문장 쓰는 법 블로그 글` |
+| 카드뉴스팀 | office-cardnews-designer | `/office 면접 꿀팁 5가지 카드뉴스` 또는 `/office 경험노트 작성법 블로그 글 + 카드뉴스` |
 | 자기소개서팀 | office-coverletter-writer | `/office 삼성전자 마케팅 직무 자소서, 경험: ...` |
 
 ## 구조 메모
