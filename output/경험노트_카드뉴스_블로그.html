@@ -1,0 +1,91 @@
+<title>경험노트 카드뉴스 원고</title>
+<style>
+:root{--bg:#f6f7f5;--paper:#ffffff;--fg:#1f2421;--muted:#5f6b64;--accent:#03a94f;--line:#dfe4e0;--body:"Noto Sans KR",system-ui,sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#151816;--paper:#1d211f;--fg:#e8ece9;--muted:#a3ada7;--accent:#35c977;--line:#323833;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#151816;--paper:#1d211f;--fg:#e8ece9;--muted:#a3ada7;--accent:#35c977;--line:#323833;color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);padding:16px;line-height:1.7;margin:0}
+.wrap{max-width:720px;margin:0 auto;display:grid;gap:16px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.bar p{flex-basis:100%;margin:0;color:var(--muted);font-size:13px}
+button{font:inherit;font-size:14px;padding:10px 14px;border-radius:8px;border:1px solid var(--line);background:var(--paper);color:var(--fg);cursor:pointer}
+button.main{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.toast{color:var(--accent);font-size:13px;font-weight:700}
+.meta{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;gap:6px;font-size:14px}
+.meta b{color:var(--muted);font-weight:500;margin-right:6px}
+article{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:24px 20px;min-width:0;overflow-wrap:anywhere}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap">
+<div class="wrap">
+  <div class="bar">
+    <button class="main" id="copyBody">본문 서식 포함 복사</button>
+    <button id="copyTitle">제목 복사</button>
+    <button id="copyTags">태그 복사</button>
+    <span class="toast" id="toast" aria-live="polite"></span>
+    <p>네이버 글쓰기에서 본문 칸에 붙여넣으면 굵게·글자 크기·색이 함께 들어갑니다. 붙여넣은 뒤 [임시저장]을 눌러 주세요.</p>
+  </div>
+  <div class="meta">
+    <div><b>제목</b><span id="title">"쓸 경험이 없다"면? 오늘부터 쓰는 경험노트 작성법 | STAR 기법 | 커리어캐쳐</span></div>
+    <div><b>태그</b><span id="tags">#커리어캐쳐 #CareerCatcher #경험노트 #경험정리 #경험정리방법 #자기소개서 #자소서경험정리 #STAR기법 #면접준비 #역량키워드 #카드뉴스 #취업준비 #취업준비생 #신입취업 #자소서쓰는법 #진로코칭</span></div>
+  </div>
+<article id="post">
+<p style="text-align:center;font-size:24px;font-weight:bold;color:#03a94f;">"자소서 쓸 때마다<br>쓸 경험이 없다면?"</p>
+<p style="font-size:16px;">경험이 없는 게 아니라 <b style="background-color:#fff3a8;">기록이 없는 겁니다.</b></p>
+<p style="font-size:16px;">오늘부터 바로 쓸 수 있는 <b>경험노트 작성법</b>을 정리했습니다.</p>
+<p style="text-align:center;font-size:15px;color:#888888;">📷 [카드1: 빈 노트와 물음표 – 표지]</p>
+<p style="text-align:center;color:#cccccc;">─────────────</p>
+<p style="font-size:22px;font-weight:bold;">기억은 생각보다 빨리 사라집니다</p>
+<p style="font-size:16px;">몇 달만 지나도 "그때 뭘 했더라?"가 됩니다. <b>수치, 갈등, 내 역할</b> 같은 디테일부터 잊혀요.</p>
+<p style="font-size:16px;">그런데 자소서와 면접에서 설득력을 만드는 게 <b style="background-color:#fff3a8;">바로 그 디테일</b>입니다.</p>
+<p style="text-align:center;font-size:15px;color:#888888;">📷 [카드2: 점점 흐려지는 메모지 3장]</p>
+<p style="text-align:center;color:#cccccc;">─────────────</p>
+<p style="font-size:22px;font-weight:bold;">경험노트란?</p>
+<p style="font-size:16px;">내가 겪은 일을 <b>정해진 틀로 쌓아 두는 개인 아카이브</b>입니다.</p>
+<p style="font-size:16px;">나중에 자소서 문항이나 면접 질문에 바로 꺼내 쓰는 <span style="color:#03a94f;font-weight:bold;">재료 창고</span>라고 보면 됩니다.</p>
+<p style="text-align:center;font-size:15px;color:#888888;">📷 [카드3: 동아리·알바·수업·프로젝트 라벨이 붙은 서랍장]</p>
+<p style="text-align:center;color:#cccccc;">─────────────</p>
+<p style="font-size:22px;font-weight:bold;">사소한 경험도 다 소재입니다</p>
+<p style="font-size:16px;">✔ 수업 팀플<br>✔ 아르바이트<br>✔ 동아리<br>✔ 봉사<br>✔ 공모전<br>✔ 혼자 해낸 프로젝트</p>
+<p style="font-size:16px;">성공한 일뿐 아니라 <b style="background-color:#fff3a8;">실패하거나 갈등을 겪은 일</b>도 꼭 남기세요.</p>
+<p style="text-align:center;font-size:15px;color:#888888;">📷 [카드4: 경험 소재 6가지 아이콘]</p>
+<p style="text-align:center;color:#cccccc;">─────────────</p>
+<p style="font-size:22px;font-weight:bold;">틀은 하나면 충분해요, STAR</p>
+<p style="font-size:16px;background-color:#f1faf4;padding:12px;"><b>S 상황</b> 언제, 어디서, 어떤 배경이었나<br><b>T 과제</b> 내가 맡은 목표나 문제<br><b>A 행동</b> 내가 실제로 한 일 <span style="color:#03a94f;font-weight:bold;">← 가장 중요!</span><br><b>R 결과</b> 바뀐 것, 가능하면 숫자로</p>
+<p style="text-align:center;font-size:15px;color:#888888;">📷 [카드5: STAR 4단 블록]</p>
+<p style="text-align:center;color:#cccccc;">─────────────</p>
+<p style="font-size:22px;font-weight:bold;">작성 팁 ① "우리"보다 "나"를 쓰세요</p>
+<p style="font-size:16px;">팀 성과보다 <b>내 행동</b>이 보여야 합니다.</p>
+<p style="font-size:16px;"><span style="color:#888888;">❌ 나쁜 예: "팀이 매출을 올렸다"</span><br><b style="color:#03a94f;">⭕ 좋은 예: "내가 재고표를 엑셀로 바꿔 발주 실수를 주 3회에서 0회로 줄였다"</b><br><span style="font-size:14px;color:#888888;">※ 예시는 이해를 돕기 위한 가상 사례입니다.</span></p>
+<p style="text-align:center;font-size:15px;color:#888888;">📷 [카드6: 나쁜 예 vs 좋은 예 비교]</p>
+<p style="text-align:center;color:#cccccc;">─────────────</p>
+<p style="font-size:22px;font-weight:bold;">작성 팁 ② 배운 점과 키워드까지 붙이면 완성</p>
+<p style="font-size:16px;">마지막 줄에 <b>"이 경험으로 배운 것"</b> 한 문장을 쓰세요.</p>
+<p style="font-size:16px;">그리고 <span style="color:#03a94f;font-weight:bold;">#문제해결 #협업 #리더십</span>처럼 역량 태그를 달아 두면, 문항별로 바로 찾을 수 있습니다.</p>
+<p style="text-align:center;font-size:15px;color:#888888;">📷 [카드7: 해시태그 스티커가 붙은 노트]</p>
+<p style="text-align:center;color:#cccccc;">─────────────</p>
+<p style="font-size:22px;font-weight:bold;">꾸준히 쓰는 3가지 규칙</p>
+<p style="font-size:16px;background-color:#f1faf4;padding:12px;">☐ 1. 일이 끝난 <b>당일</b>, 키워드만이라도 메모<br>☐ 2. <b>주 1회</b> STAR로 정리<br>☐ 3. <b>한 달에 한 번</b> 태그별로 다시 보기</p>
+<p style="font-size:16px;">도구는 노션이든 메모앱이든 상관없어요.</p>
+<p style="text-align:center;font-size:15px;color:#888888;">📷 [카드8: 캘린더와 1-2-3 체크리스트]</p>
+<p style="text-align:center;color:#cccccc;">─────────────</p>
+<p style="font-size:22px;font-weight:bold;">경험은 쌓고, 이야기는 꺼내 쓰세요</p>
+<p style="font-size:16px;">오늘 한 일 하나를 STAR로 적어 보세요. <b style="background-color:#fff3a8;">그게 첫 페이지입니다.</b></p>
+<p style="font-size:16px;">이 글을 저장해 두고 자소서 시즌에 다시 꺼내 보세요.</p>
+<p style="text-align:center;font-size:15px;color:#888888;">📷 [카드9: 펜으로 첫 줄을 쓰는 손]</p>
+<p style="text-align:center;font-size:18px;font-weight:bold;color:#03a94f;">"오늘 한 일 중,<br>STAR로 적을 수 있는 건 무엇인가요?"</p>
+<p style="text-align:center;font-size:14px;color:#666666;">─────────────<br><b>커리어캐쳐(CareerCatcher) [코치명]</b><br>AI 자기소개서 · AI면접 · 진로 코칭</p>
+</article>
+</div>
+<script>
+const toast=document.getElementById('toast');
+function say(t){toast.textContent=t;setTimeout(()=>toast.textContent='',2500)}
+function selectCopy(el){const r=document.createRange();r.selectNodeContents(el);const s=getSelection();s.removeAllRanges();s.addRange(r);let ok=false;try{ok=document.execCommand('copy')}catch(e){}return ok}
+async function copyRich(el){
+  try{await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([el.innerHTML],{type:'text/html'}),'text/plain':new Blob([el.innerText],{type:'text/plain'})})]);return true}
+  catch(e){return selectCopy(el)}
+}
+async function copyText(el){try{await navigator.clipboard.writeText(el.innerText);return true}catch(e){return selectCopy(el)}}
+document.getElementById('copyBody').onclick=async()=>say(await copyRich(document.getElementById('post'))?'본문 복사됨':'본문이 선택됐어요. 길게 눌러 복사해 주세요')
+document.getElementById('copyTitle').onclick=async()=>say(await copyText(document.getElementById('title'))?'제목 복사됨':'제목이 선택됐어요. 복사해 주세요')
+document.getElementById('copyTags').onclick=async()=>say(await copyText(document.getElementById('tags'))?'태그 복사됨':'태그가 선택됐어요. 복사해 주세요')
+</script>
