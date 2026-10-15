@@ -1,0 +1,109 @@
+<title>경험노트 작성법 원고</title>
+<style>
+:root{--bg:#f6f7f5;--paper:#ffffff;--fg:#1f2421;--muted:#5f6b64;--accent:#03a94f;--line:#dfe4e0;--body:"Noto Sans KR",system-ui,sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#151816;--paper:#1d211f;--fg:#e8ece9;--muted:#a3ada7;--accent:#35c977;--line:#323833;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#151816;--paper:#1d211f;--fg:#e8ece9;--muted:#a3ada7;--accent:#35c977;--line:#323833;color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);padding:16px;line-height:1.7;margin:0}
+.wrap{max-width:720px;margin:0 auto;display:grid;gap:16px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.bar p{flex-basis:100%;margin:0;color:var(--muted);font-size:13px}
+button{font:inherit;font-size:14px;padding:10px 14px;border-radius:8px;border:1px solid var(--line);background:var(--paper);color:var(--fg);cursor:pointer}
+button.main{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.toast{color:var(--accent);font-size:13px;font-weight:700}
+.meta{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;gap:6px;font-size:14px}
+.meta b{color:var(--muted);font-weight:500;margin-right:6px}
+article{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:24px 20px;min-width:0;overflow-wrap:anywhere}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap">
+<div class="wrap">
+  <div class="bar">
+    <button class="main" id="copyBody">본문 서식 포함 복사</button>
+    <button id="copyTitle">제목 복사</button>
+    <button id="copyTags">태그 복사</button>
+    <span class="toast" id="toast" aria-live="polite"></span>
+    <p>네이버 글쓰기에서 본문 칸에 붙여넣으면 굵게·글자 크기·색이 함께 들어갑니다. 붙여넣은 뒤 [임시저장]을 눌러 주세요.</p>
+  </div>
+  <div class="meta">
+    <div><b>제목</b><span id="title">자소서·면접 미리 준비하는 경험노트 작성법 | STAR-L 템플릿 | 커리어캐쳐</span></div>
+    <div><b>태그</b><span id="tags">#커리어캐쳐 #CareerCatcher #경험노트 #경험정리 #경험정리방법 #자기소개서 #자소서경험정리 #STAR기법 #면접준비 #꼬리질문 #역량키워드 #취업준비 #취업준비생 #신입취업 #자소서쓰는법 #진로코칭</span></div>
+  </div>
+<article id="post">
+<p style="text-align:center;font-size:24px;font-weight:bold;color:#03a94f;">"자소서 마감 전날,<br>쓸 경험이 떠오르지 않나요?"</p>
+<p style="font-size:16px;">자소서 문항은 기업마다 표현만 다를 뿐, 묻는 역량은 거의 비슷하게 반복됩니다. 그래서 <b>경험을 미리 정리해 둔 사람</b>은 문항을 보자마자 꺼내 쓸 수 있어요.</p>
+<p style="font-size:16px;">이 글에서는 <b>자소서와 면접에 바로 쓰는 경험노트 작성법</b>을 5단계로 정리하고, 복사해서 쓰는 템플릿까지 함께 담았습니다.</p>
+<p style="font-size:16px;background-color:#f1faf4;padding:12px;"><b>✅ 이 글에서 알 수 있는 것</b><br>① 경험노트를 미리 준비해야 하는 이유<br>② 경험 끌어내기 → 고르기 → 기록하기 → 태깅 → 꼬리질문 대비 5단계<br>③ STAR-L 작성 예시와 경험-문항 매트릭스<br>④ 자주 하는 실수와 최종 체크리스트</p>
+<p style="text-align:center;font-size:15px;color:#888888;">📷 [사진1: 대표 이미지 – 노트에 경험을 정리하는 모습]</p>
+<p style="text-align:center;color:#cccccc;">─────────────</p>
+<p style="font-size:22px;font-weight:bold;">경험노트란? 왜 미리 준비해야 할까</p>
+<p style="font-size:16px;">경험노트는 내가 겪은 일을 <b>상황-행동-결과-배운 점</b> 단위로 기록한 나만의 데이터베이스입니다.</p>
+<p style="font-size:16px;"><b>❌ 미리 준비하지 않으면</b><br>· 마감 직전에 경험을 떠올리느라 시간이 부족해요<br>· 수치와 근거가 빠져 글이 추상적이 돼요<br>· 같은 경험을 여러 문항에 겹쳐 쓰게 돼요<br>· 면접 꼬리질문에서 말이 막히거나 앞뒤가 달라져요</p>
+<p style="font-size:16px;"><b style="color:#03a94f;">⭕ 경험노트가 있으면</b><br>· 문항에 맞는 카드를 골라 다듬기만 하면 돼요<br>· 기간, 인원, 성과 수치가 이미 기록되어 있어요<br>· 문항별로 어떤 경험을 쓸지 관리할 수 있어요<br>· 판단 이유까지 정리되어 있어 일관되게 답할 수 있어요</p>
+<p style="font-size:16px;">자소서가 묻는 역량은 대부분 <b style="background-color:#fff3a8;">지원동기, 직무역량, 문제해결, 협업·갈등, 실패·극복, 도전·주도성, 윤리·원칙</b> 안에서 반복됩니다. 한 번 만든 노트를 여러 기업 지원에 계속 다시 쓸 수 있는 이유예요.</p>
+<p style="text-align:center;color:#cccccc;">─────────────</p>
+<p style="font-size:22px;font-weight:bold;">1단계. 경험 끌어내기 (양이 우선)</p>
+<p style="font-size:16px;">평가하지 말고 최소 <b>20~30개</b>를 적습니다. "이게 경험이 될까?"라는 고민은 다음 단계에서 해요.</p>
+<p style="font-size:16px;"><b>(1) 타임라인법</b><br>학년·학기별로 칸을 만들고 학업 / 대외활동·동아리 / 아르바이트·인턴 / 프로젝트·공모전 / 개인(여행, 운동, 자격증) 순서로 채워 보세요.</p>
+<p style="font-size:16px;"><b>(2) 질문법</b><br>✔ 가장 몰입했던 일은? 밤새워 해본 일은?<br>✔ 누군가와 의견이 부딪쳤던 순간은?<br>✔ 계획이 틀어졌거나 실패했던 일은?<br>✔ 시키지 않았는데 먼저 바꿔본 일은?<br>✔ 칭찬이나 감사 인사를 들은 일은?<br>✔ 숫자로 바뀐 결과(성적, 매출, 참여자 수, 시간 단축)가 있었던 일은?</p>
+<p style="font-size:16px;"><b>(3) 자료 뒤지기</b><br>사진첩, 캘린더, 카톡 단체방, 과제 파일, 수상·수료증을 훑어보면 잊고 있던 경험이 많이 나옵니다.</p>
+<p style="text-align:center;font-size:15px;color:#888888;">📷 [사진2: 학기별 타임라인 예시]</p>
+<p style="text-align:center;color:#cccccc;">─────────────</p>
+<p style="font-size:22px;font-weight:bold;">2단계. 경험 고르기</p>
+<p style="font-size:16px;">각 경험에 아래 기준을 1~3점으로 매겨 상위 <b>8~12개</b>를 핵심 경험으로 정합니다.</p>
+<p style="font-size:16px;background-color:#f1faf4;padding:12px;"><b>주도성</b> 내가 직접 판단하고 행동한 부분이 뚜렷한가?<br><b>구체성</b> 상황과 결과를 사실과 수치로 설명할 수 있는가?<br><b>직무 관련성</b> 지원 직무의 역량과 연결되는가?<br><b>변화</b> 전후 차이(성과, 관계, 나 자신)가 있는가?<br><b>최근성</b> 너무 오래된 경험(고등학교 이전)은 아닌가?</p>
+<p style="font-size:16px;">💡 핵심 경험 안에 <b>성공, 실패, 협업·갈등, 직무 관련 경험</b>이 고르게 들어 있는지 꼭 확인하세요.</p>
+<p style="text-align:center;color:#cccccc;">─────────────</p>
+<p style="font-size:22px;font-weight:bold;">3단계. STAR-L로 기록하기</p>
+<p style="font-size:16px;"><b>S 상황</b> 언제, 어디서, 누구와, 어떤 배경이었는지 2~3문장으로 짧게<br><b>T 과제</b> 해결해야 할 문제와 내 역할을 한 문장으로<br><b>A 행동</b> 내가 한 일과 <b style="background-color:#fff3a8;">그렇게 판단한 이유</b>. 가장 길게, "우리"가 아닌 "나" 중심으로<br><b>R 결과</b> 수치, 전후 비교, 주변 반응. 정확한 수치가 없으면 추정 근거와 함께<br><b>L 배운 점</b> 깨달은 점과 이후 달라진 행동, 직무에 쓸 방법</p>
+<p style="font-size:16px;background-color:#f1faf4;padding:12px;"><b>📝 작성 예시: 카페 아르바이트 재고 관리 개선</b><br><br><b>S</b> 2학년 여름방학, 직원 6명이 일하는 카페에서 3개월간 아르바이트. 우유와 원두가 자주 떨어져 주말마다 메뉴 판매를 중단함.<br><br><b>T</b> 품절 원인을 찾고 발주 방식을 개선하는 것. 점장님께 먼저 제안해 담당을 맡음.<br><br><b>A</b> 4주 동안 요일별 사용량을 엑셀에 기록함. 주말 사용량이 평일의 약 1.8배인데 발주량은 같다는 점을 발견함. 요일별 권장 발주량 표와 마감조 재고 체크리스트를 만들고, 직원들이 쓰기 쉽도록 체크 항목을 5개로 줄임.<br><br><b>R</b> 이후 8주 동안 품절로 인한 판매 중단이 월 4회에서 0회로 줄어듦. 체크리스트는 매장 표준으로 계속 쓰임.<br><br><b>L</b> 감이 아니라 데이터로 원인을 찾는 습관이 생김. 사람들이 실제로 쓰게 하려면 절차가 단순해야 한다는 점을 배움.<br><br><span style="color:#03a94f;">#문제해결 #데이터분석 #주도성 #개선</span><br><span style="font-size:14px;color:#888888;">※ 예시의 수치는 이해를 돕기 위한 가상 사례입니다.</span></p>
+<p style="text-align:center;font-size:15px;color:#888888;">📷 [사진3: STAR-L 경험 카드 예시]</p>
+<p style="text-align:center;color:#cccccc;">─────────────</p>
+<p style="font-size:22px;font-weight:bold;">4단계. 역량 태깅 + 경험-문항 매트릭스</p>
+<p style="font-size:16px;"><b>(1) 태깅</b><br>경험마다 드러나는 역량을 2~4개 붙입니다. 지원 공고의 우대사항, 인재상 표현을 그대로 가져다 쓰면 좋아요.<br><span style="color:#666666;">예: 소통, 협업, 갈등조정, 문제해결, 분석력, 주도성, 책임감, 끈기, 고객지향, 학습능력, 윤리의식</span></p>
+<p style="font-size:16px;"><b>(2) 매트릭스</b><br>경험별로 가장 잘 맞는 문항 유형에 ◎, 쓸 수 있는 유형에 ○를 표시합니다.</p>
+<p style="font-size:16px;background-color:#f1faf4;padding:12px;"><b>카페 재고 개선</b> 문제해결 ◎ / 직무역량 ○ / 도전·주도 ○<br><b>팀 프로젝트 무임승차 갈등</b> 협업·갈등 ◎ / 문제해결 ○<br><b>공모전 1차 탈락 후 재도전</b> 실패·극복 ◎ / 직무역량 ○ / 도전·주도 ○</p>
+<p style="font-size:16px;">빈 유형이 보이면 그 유형에 맞는 경험을 더 찾아야 한다는 신호예요. 그리고 <b>한 자소서 안에서는 같은 경험을 두 문항에 쓰지 않도록</b> 매트릭스로 확인하세요.</p>
+<p style="text-align:center;color:#cccccc;">─────────────</p>
+<p style="font-size:22px;font-weight:bold;">5단계. 면접 꼬리질문 대비</p>
+<p style="font-size:16px;">핵심 경험마다 아래 질문에 한두 줄씩 답을 적어 둡니다.</p>
+<p style="font-size:16px;">1) 왜 그렇게 판단했나요? → 판단 근거, 당시 고려한 기준<br>2) 다른 방법은 없었나요? → 검토한 대안과 고르지 않은 이유<br>3) 본인 역할은 정확히 무엇이었나요? → 팀 성과 중 내 기여 범위<br>4) 결과는 어떻게 확인했나요? → 측정 방법, 수치의 출처<br>5) 반대한 사람은 없었나요? → 상대의 입장과 설득 과정<br>6) 다시 한다면 무엇을 바꾸겠나요? → 아쉬운 점과 개선안<br>7) 우리 직무에 어떻게 쓰겠나요? → 업무와 연결되는 구체적 장면</p>
+<p style="font-size:16px;">그리고 각 경험을 <span style="color:#03a94f;font-weight:bold;">30초 버전(핵심 요약)</span>과 <span style="color:#03a94f;font-weight:bold;">1분 30초 버전(STAR 전체)</span>으로 소리 내어 말하고 녹음해 보세요.</p>
+<p style="text-align:center;font-size:15px;color:#888888;">📷 [사진4: 면접 답변 연습 모습]</p>
+<p style="text-align:center;color:#cccccc;">─────────────</p>
+<p style="font-size:22px;font-weight:bold;">자소서 문항별로 꺼내 쓰는 법</p>
+<p style="font-size:16px;">1) 문항이 묻는 역량을 한 단어로 정리합니다. (예: "어려움을 극복한 경험" → 끈기)<br>2) 매트릭스에서 해당 역량의 ◎ 경험을 고릅니다.<br>3) <b>두괄식</b>으로 씁니다. 결론 → S·T 짧게 → A 중심 → R(수치) → L과 직무 연결<br>4) 500자 안팎이면 S·T는 1~2문장으로 줄이고 A와 R을 남깁니다.<br>5) 제출한 버전은 "기업명/문항/날짜"로 기록하고 면접 전에 다시 읽습니다.</p>
+<p style="text-align:center;color:#cccccc;">─────────────</p>
+<p style="font-size:22px;font-weight:bold;">경험노트 유지·관리 습관</p>
+<p style="font-size:16px;">✔ <b>바로 기록</b> 활동이 끝나면 일주일 안에 카드 만들기<br>✔ <b>월 1회 점검</b> 새 경험 추가, 태그와 매트릭스 업데이트<br>✔ <b>지원 시즌 전</b> 목표 직무 공고 3~5개의 역량 키워드로 태그 재정리<br>✔ <b>증빙 보관</b> 결과물, 사진, 수료증, 피드백 메시지를 카드에 링크</p>
+<p style="text-align:center;color:#cccccc;">─────────────</p>
+<p style="font-size:22px;font-weight:bold;">자주 하는 실수</p>
+<p style="font-size:16px;">· 활동 설명만 길고 <b>내가 한 행동</b>이 빠짐<br>· "열심히", "최선을 다해" 같은 표현만 있고 근거가 없음<br>· 결과를 부풀리거나 확인할 수 없는 수치를 씀 <span style="color:#666666;">(면접에서 바로 드러나요)</span><br>· 실패 경험에서 남 탓을 하거나 배운 점이 빠짐<br>· 모든 경험이 성실성 같은 한 가지 역량에 몰려 있음</p>
+<p style="font-size:22px;font-weight:bold;">최종 체크리스트</p>
+<p style="font-size:16px;background-color:#f1faf4;padding:12px;">☐ 경험 20개 이상 → 핵심 경험 8~12개 선정<br>☐ 핵심 경험 모두 STAR-L 작성<br>☐ 행동(A)에 판단 이유가 있다<br>☐ 결과(R)에 수치나 전후 비교가 있다<br>☐ 성공·실패·협업·직무 경험이 모두 있다<br>☐ 매트릭스에 빈 유형이 없다<br>☐ 꼬리질문 7개 답변 준비<br>☐ 30초 / 1분 30초 버전으로 말해 봤다</p>
+<p style="text-align:center;color:#cccccc;">─────────────</p>
+<p style="font-size:22px;font-weight:bold;">📌 복사해서 쓰는 경험 카드 템플릿</p>
+<p style="font-size:16px;background-color:#f1faf4;padding:12px;"><b>[경험 제목]</b><br>· 기간 / 소속 / 인원 / 내 역할:<br>· 태그: #  #  #<br>· 증빙 링크:<br><br><b>S 상황</b><br><br><b>T 과제</b><br><br><b>A 행동 (+판단 이유)</b><br><br><b>R 결과 (수치, 전후 비교)</b><br><br><b>L 배운 점 / 직무 연결</b><br><br><b>꼬리질문 대비</b><br>· 왜 그렇게 판단했나:<br>· 대안은:<br>· 내 역할 범위:<br>· 결과 측정 방법:<br>· 반대·어려움:<br>· 다시 한다면:<br>· 직무 활용:<br><br><b>사용 이력 (기업/문항/날짜)</b><br>· </p>
+<p style="text-align:center;color:#cccccc;">─────────────</p>
+<p style="font-size:22px;font-weight:bold;">자주 묻는 질문 (FAQ)</p>
+<p style="font-size:16px;"><b>Q. 경험이 너무 평범한데 괜찮을까요?</b><br>A. 괜찮습니다. 평가는 경험의 크기보다 그 안에서 내가 어떻게 판단하고 행동했는지를 봅니다. 아르바이트나 과제도 STAR-L로 정리하면 충분한 재료가 됩니다.</p>
+<p style="font-size:16px;"><b>Q. 경험노트는 언제부터 만들면 좋나요?</b><br>A. 빠를수록 좋습니다. 지원 시즌 전 주말 2~3번(6~10시간)이면 기본 노트를 만들 수 있고, 이후에는 활동이 끝날 때마다 카드를 추가하면 됩니다.</p>
+<p style="text-align:center;color:#cccccc;">─────────────</p>
+<p style="font-size:22px;font-weight:bold;">코치의 한마디</p>
+<p style="font-size:16px;">좋은 자소서는 마감 전날 쓰는 글이 아니라, <b>미리 쌓아 둔 경험에서 꺼내 쓰는 글</b>입니다. 오늘 경험 카드 한 장부터 시작해 보세요.</p>
+<p style="text-align:center;font-size:18px;font-weight:bold;color:#03a94f;">"지금 바로 꺼낼 수 있는 나의 경험,<br>몇 개나 있나요?"</p>
+<p style="text-align:center;font-size:14px;color:#666666;">─────────────<br><b>커리어캐쳐(CareerCatcher) [코치명]</b><br>AI 자기소개서 · AI면접 · 진로 코칭</p>
+</article>
+</div>
+<script>
+const toast=document.getElementById('toast');
+function say(t){toast.textContent=t;setTimeout(()=>toast.textContent='',2500)}
+function selectCopy(el){const r=document.createRange();r.selectNodeContents(el);const s=getSelection();s.removeAllRanges();s.addRange(r);let ok=false;try{ok=document.execCommand('copy')}catch(e){}return ok}
+async function copyRich(el){
+  try{await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([el.innerHTML],{type:'text/html'}),'text/plain':new Blob([el.innerText],{type:'text/plain'})})]);return true}
+  catch(e){return selectCopy(el)}
+}
+async function copyText(el){try{await navigator.clipboard.writeText(el.innerText);return true}catch(e){return selectCopy(el)}}
+document.getElementById('copyBody').onclick=async()=>say(await copyRich(document.getElementById('post'))?'본문 복사됨':'본문이 선택됐어요. 길게 눌러 복사해 주세요')
+document.getElementById('copyTitle').onclick=async()=>say(await copyText(document.getElementById('title'))?'제목 복사됨':'제목이 선택됐어요. 복사해 주세요')
+document.getElementById('copyTags').onclick=async()=>say(await copyText(document.getElementById('tags'))?'태그 복사됨':'태그가 선택됐어요. 복사해 주세요')
+</script>
