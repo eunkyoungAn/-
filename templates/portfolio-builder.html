@@ -63,6 +63,7 @@ input:focus,textarea:focus,select:focus,button:focus-visible,summary:focus-visib
 .need{background:var(--chip);color:var(--accent);font-size:12px;padding:1px 6px;border-radius:3px}
 .ready{box-shadow:0 0 0 3px var(--chip);border-color:var(--accent)!important;color:var(--accent)}
 .paste{order:2;display:grid;gap:8px;padding:12px 14px;border-top:1px solid var(--line);background:var(--soft)}
+.steps{margin:0;padding-left:20px;font-size:13px;display:grid;gap:2px}
 .paste label{font-size:13px;color:var(--fg)}
 .paste textarea{min-height:110px}
 .hint{margin:0;font-size:12px;color:var(--muted)}
@@ -175,7 +176,8 @@ input:focus,textarea:focus,select:focus,button:focus-visible,summary:focus-visib
     </div>
     <div class="doc" id="doc"></div>
     <div class="paste" id="pastebox" hidden>
-      <label for="pasted"><b>② AI 결과 붙여넣기</b> · ChatGPT·Claude가 써 준 완성본을 통째로 붙여넣으세요</label>
+      <ol class="steps"><li>위 프롬프트는 <b>이미 복사됐어요</b> (아래 칸에 넣지 마세요)</li><li><a href="https://chatgpt.com" target="_blank" rel="noopener noreferrer">ChatGPT</a> 또는 <a href="https://claude.ai" target="_blank" rel="noopener noreferrer">Claude</a>에 붙여넣고 보내기</li><li>AI가 <b>답한 글</b>("# 직무 | 이름 포트폴리오"로 시작)을 복사해 아래에 붙여넣기</li></ol>
+      <label for="pasted"><b>AI가 답한 결과</b></label>
       <textarea id="pasted" placeholder="# 직무 | 이름 포트폴리오&#10;..."></textarea>
       <button type="button" class="btn primary" id="applypaste">결과 적용하기 → HTML 저장 가능</button>
     </div>
@@ -468,6 +470,7 @@ $("savehtml").onclick=async()=>{
 };
 $("applypaste").onclick=()=>{
   const t=$("pasted").value.trim();if(!t){$("st").textContent="먼저 AI 결과를 붙여넣어 주세요.";return}
+  if(/\[구직자 입력\]|포트폴리오 컨설턴트다|"projects"\s*:/.test(t)){$("st").textContent="⚠ 붙여넣은 건 프롬프트예요. ChatGPT·Claude에 프롬프트를 보낸 뒤, AI가 답한 글을 복사해서 넣어 주세요.";$("pasted").focus();return}
   md=pii(t.replace(/^```[a-z]*\n?|```$/g,""));render(md);$("pastebox").hidden=true;$("na").hidden=true;$("pasted").value="";
   $("st").textContent=doneMsg("")+" · HTML 저장을 눌러 주세요";$("savehtml").scrollIntoView({behavior:"smooth",block:"center"});
 };
