@@ -66,6 +66,9 @@ input:focus,textarea:focus,select:focus,button:focus-visible,summary:focus-visib
 .doc hr{border:0;border-top:1px solid var(--line);margin:18px 0}
 .need{background:var(--chip);color:var(--accent);font-size:12px;padding:1px 6px;border-radius:3px}
 .ready{box-shadow:0 0 0 3px var(--chip);border-color:var(--accent)!important;color:var(--accent)}
+.paste{order:2;display:grid;gap:8px;padding:12px 14px;border-top:1px solid var(--line);background:var(--soft)}
+.paste label{font-size:13px;color:var(--fg)}
+.paste textarea{min-height:110px}
 .hint{margin:0;font-size:12px;color:var(--muted)}
 .note{font-size:12px;color:var(--muted);padding:0 14px 12px;margin:0}
 </style>
@@ -176,7 +179,12 @@ input:focus,textarea:focus,select:focus,button:focus-visible,summary:focus-visib
       <span class="actions"><button type="button" class="btn" id="copy">노션용 복사</button><button type="button" class="btn primary" id="savehtml">HTML 저장</button></span>
     </div>
     <div class="doc" id="doc"></div>
-    <p class="note" id="na" hidden>이메일·연락처는 프롬프트에서 빠져 있어요. 완성본의 [[EMAIL]], [[PHONE]] 자리에 직접 넣어 주세요. 복사된 프롬프트를 <a href="https://claude.ai" target="_blank" rel="noopener">Claude</a> 또는 <a href="https://chatgpt.com" target="_blank" rel="noopener">ChatGPT</a>에 붙여넣으면 노션 양식대로 완성본이 나와요. 결과를 노션에 붙여넣으세요.</p>
+    <div class="paste" id="pastebox" hidden>
+      <label for="pasted"><b>② AI 결과 붙여넣기</b> · ChatGPT·Claude가 써 준 완성본을 통째로 붙여넣으세요</label>
+      <textarea id="pasted" placeholder="# 직무 | 이름 포트폴리오&#10;..."></textarea>
+      <button type="button" class="btn primary" id="applypaste">결과 적용하기 → HTML 저장 가능</button>
+    </div>
+    <p class="note" id="na" hidden>이메일·연락처는 프롬프트에서 빠져 있어요. 완성본의 [[EMAIL]], [[PHONE]] 자리에 직접 넣어 주세요. <b>① 프롬프트 복사 완료</b> → 복사된 프롬프트를 <a href="https://claude.ai" target="_blank" rel="noopener">Claude</a> 또는 <a href="https://chatgpt.com" target="_blank" rel="noopener">ChatGPT</a>에 붙여넣으면 노션 양식대로 완성본이 나와요. 결과를 아래 ② 칸에 붙여넣으면 HTML로 저장할 수 있어요.</p>
   </section>
 </div>
 
@@ -376,7 +384,7 @@ $("f").addEventListener("submit",async e=>{
   if(!sample){
     const p=buildPrompt();md=p;
     try{await navigator.clipboard.writeText(p);$("st").textContent="AI 프롬프트를 복사했어요"}catch(err){$("st").textContent="아래 프롬프트를 선택해 복사하세요"}
-    $("na").hidden=false;if(innerWidth<=940)document.querySelector(".out").scrollIntoView({behavior:"smooth"});$("doc").innerHTML="";const pre=document.createElement("pre");pre.textContent=p;pre.style.cssText="white-space:pre-wrap;font:inherit;font-size:12px";$("doc").appendChild(pre);return}
+    $("na").hidden=false;$("pastebox").hidden=false;if(innerWidth<=940)document.querySelector(".out").scrollIntoView({behavior:"smooth"});$("doc").innerHTML="";const pre=document.createElement("pre");pre.textContent=p;pre.style.cssText="white-space:pre-wrap;font:inherit;font-size:12px";$("doc").appendChild(pre);return}
   ctl?.abort();ctl=new AbortController();
   $("go").disabled=true;$("st").textContent="작성 중…";if(innerWidth<=940)document.querySelector(".out").scrollIntoView({behavior:"smooth"});
   try{
@@ -462,6 +470,11 @@ $("savehtml").onclick=async()=>{
   if(dl){try{await dl.save({filename:fname,data:html});$("st").textContent="HTML 파일을 저장했어요"}catch(e){$("st").textContent="저장을 취소했어요"}return}
   try{const u=URL.createObjectURL(new Blob([html],{type:"text/html"}));const a=document.createElement("a");a.href=u;a.download=fname;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);$("st").textContent="HTML 파일을 저장했어요 · 브라우저로 열어 보세요"}
   catch(e){$("st").textContent="이 환경에서는 저장할 수 없어요"}
+};
+$("applypaste").onclick=()=>{
+  const t=$("pasted").value.trim();if(!t){$("st").textContent="먼저 AI 결과를 붙여넣어 주세요.";return}
+  md=pii(t.replace(/^```[a-z]*\n?|```$/g,""));render(md);$("pastebox").hidden=true;$("na").hidden=true;$("pasted").value="";
+  $("st").textContent=doneMsg("")+" · HTML 저장을 눌러 주세요";$("savehtml").scrollIntoView({behavior:"smooth",block:"center"});
 };
 $("copy").onclick=async()=>{
   try{await navigator.clipboard.writeText(md);$("st").textContent="복사했어요 · 노션에 붙여넣으면 서식이 적용돼요"}
