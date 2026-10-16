@@ -1,5 +1,6 @@
 status: drafted
-slack_thread: (채팅으로 직접 받은 주제 + 프로그램 화면 캡처 3장)
+slack_thread: https://cc-a-hq.slack.com/archives/C0C6ACW2ML7/p1792129136315149
+slack_ts: 1792129136.315149
 주제: M365 커리어 동기부여 프로그램 후기 (DISC·커리어 자산·강점·코칭휠·취업계획서)
 제목 후보:
 - 커리어 동기부여 프로그램 후기 | DISC·강점·코칭휠·취업계획서 4단계 | 커리어캐쳐
