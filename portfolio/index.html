@@ -1,5 +1,7 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
+<meta name="referrer" content="no-referrer">
 <title>커리어캐쳐 포트폴리오 빌더</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
@@ -19,16 +21,18 @@ body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:14px
 .top h1{margin:0;font-size:22px;font-weight:700;letter-spacing:-.02em}
 .top h1 b{color:var(--accent)}
 .top p{margin:4px 0 0;color:var(--muted);font-size:13px}
+.safe{font-size:12px!important;color:var(--accent)!important}
 .by{font-size:12px;color:var(--muted)}
 .grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:22px;align-items:start}
-@media (max-width:940px){.grid{grid-template-columns:1fr}}
+@media (max-width:940px){.grid{grid-template-columns:1fr}.out{position:static;max-height:none}}
+@media (max-width:940px),(pointer:coarse){input,textarea,select{font-size:16px!important}.btn,.add,.x,summary{min-height:44px}.x{padding:0 10px}.actions .btn{flex:1 1 140px}}
 form{display:grid;gap:14px;min-width:0}
 details{background:var(--panel);border:1px solid var(--line);border-radius:6px}
 summary{cursor:pointer;padding:12px 14px;font-weight:700;display:flex;justify-content:space-between;gap:8px;list-style:none}
 summary::-webkit-details-marker{display:none}
 summary::after{content:"＋";color:var(--accent)}
 details[open] summary::after{content:"－"}
-summary small{font-weight:400;color:var(--muted);margin-left:6px}
+summary small{font-weight:400;color:var(--muted);margin-left:6px;margin-right:auto}
 .body{padding:0 14px 14px;display:grid;gap:10px}
 label{display:grid;gap:3px;font-size:12px;color:var(--muted)}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -41,7 +45,7 @@ input:focus,textarea:focus,select:focus,button:focus-visible,summary:focus-visib
 .x{border:0;background:none;color:var(--muted);cursor:pointer;font:inherit;font-size:12px;padding:2px 4px}
 .add{justify-self:start;border:1px dashed var(--accent);background:none;color:var(--accent);border-radius:4px;padding:6px 12px;font:inherit;font-size:13px;cursor:pointer}
 .actions{display:flex;gap:8px;flex-wrap:wrap}
-.btn{font:inherit;font-weight:700;border-radius:4px;padding:10px 16px;cursor:pointer;border:1px solid var(--line);background:var(--panel);color:var(--fg)}
+.btn{white-space:nowrap;font:inherit;font-weight:700;border-radius:4px;padding:10px 16px;cursor:pointer;border:1px solid var(--line);background:var(--panel);color:var(--fg)}
 .btn.primary{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
 .btn:disabled{opacity:.55;cursor:wait}
 .out{position:sticky;top:12px;background:var(--panel);border:1px solid var(--line);border-radius:6px;min-width:0;max-height:calc(100vh - 24px);display:flex;flex-direction:column}
@@ -69,6 +73,7 @@ input:focus,textarea:focus,select:focus,button:focus-visible,summary:focus-visib
   <div>
     <h1><b>Purple Career</b> 포트폴리오 빌더</h1>
     <p>노션 포트폴리오 양식 순서대로 입력하면, 직무 역량이 드러나는 완성본으로 정리해 드려요.</p>
+    <p class="safe">🔒 입력 내용은 서버에 저장하지 않고 이 브라우저에만 임시 저장돼요. 이메일·연락처는 AI에 보내지 않아요. 공용 PC에서는 사용 후 <b>모두 지우기</b>를 눌러 주세요.</p>
   </div>
   <span class="by">© career catcher</span>
 </div></div>
@@ -155,7 +160,7 @@ input:focus,textarea:focus,select:focus,button:focus-visible,summary:focus-visib
       <button type="button" class="btn" id="copy">노션용 복사</button>
     </div>
     <div class="doc" id="doc"></div>
-    <p class="note" id="na" hidden>복사된 프롬프트를 <a href="https://claude.ai" target="_blank" rel="noopener">Claude</a> 또는 <a href="https://chatgpt.com" target="_blank" rel="noopener">ChatGPT</a>에 붙여넣으면 노션 양식대로 완성본이 나와요. 결과를 노션에 붙여넣으세요.</p>
+    <p class="note" id="na" hidden>이메일·연락처는 프롬프트에서 빠져 있어요. 완성본의 [[EMAIL]], [[PHONE]] 자리에 직접 넣어 주세요. 복사된 프롬프트를 <a href="https://claude.ai" target="_blank" rel="noopener">Claude</a> 또는 <a href="https://chatgpt.com" target="_blank" rel="noopener">ChatGPT</a>에 붙여넣으면 노션 양식대로 완성본이 나와요. 결과를 노션에 붙여넣으세요.</p>
   </section>
 </div>
 
@@ -193,7 +198,10 @@ education:[{sname:"한국대학교",speriod:"2020.03 - 2025.02",smajor:"통계�
 lang:"OPIc IH (2024.06)",other:"ADsP 자격증 (2024.11)"};
 try{const s=JSON.parse(localStorage.getItem("pc-pf2")||"null");load(s||{})}catch(e){load({})}
 $("ex").onclick=()=>load(EX);
-$("clr").onclick=()=>load({});
+$("clr").onclick=()=>{load({});try{localStorage.removeItem("pc-pf2")}catch(e){}$("st").textContent="입력과 이 기기 저장 내용을 지웠어요"};
+function pii(t){const e=$("email").value.trim(),p=$("phone").value.trim();return t.replace(/\[\[EMAIL\]\]/g,e||"[보완 필요: 이메일]").replace(/\[\[PHONE\]\]/g,p||"[보완 필요: 연락처]")}
+function limit(root){root.querySelectorAll("input,textarea").forEach(el=>{if(!el.maxLength||el.maxLength<0)el.maxLength=el.tagName==="TEXTAREA"?2000:200})}
+limit(document);new MutationObserver(()=>limit($("f"))).observe($("f"),{childList:true,subtree:true});
 
 const SAMPLE=`# 데이터 분석가 | 김보라 포트폴리오
 > 안녕하세요. 현장의 데이터로 **매출과 낭비를 함께 줄이는** 데이터 분석가 김보라입니다.
@@ -229,7 +237,7 @@ function render(t){const L=t.split("\n");let h="",i=0;
 render(md);
 
 function buildPrompt(){
-  const s=state();
+  const s=state();delete s.email;delete s.phone;
   return `너는 퍼플커리어(커리어캐쳐)의 포트폴리오 컨설턴트다. 아래 구직자 입력(JSON)으로 노션 포트폴리오 완성본을 한국어 마크다운으로 작성하라.
 
 [구직자 입력]
@@ -246,7 +254,7 @@ ${JSON.stringify(s,null,1)}
 [출력 양식 — 이 순서와 제목을 그대로 지킨다]
 # (지원 직무) | (이름) 포트폴리오
 > 안녕하세요. (직무 정체성을 담은 한 문장 자기소개) (이름)입니다.
-- ✉️ E-Mail / 📞 연락처 / 🔗 링크 (입력된 것만)
+- ✉️ E-Mail: [[EMAIL]] / 📞 [[PHONE]] / 🔗 링크 (이메일·연락처 자리는 [[EMAIL]], [[PHONE]] 표기를 그대로 둔다)
 
 ## 💫 About me
 (전문성과 강점, 성장 의지를 담은 3~4문장. 핵심은 굵게)
@@ -302,12 +310,12 @@ $("f").addEventListener("submit",async e=>{
   if(!sample){
     const p=buildPrompt();md=p;
     try{await navigator.clipboard.writeText(p);$("st").textContent="AI 프롬프트를 복사했어요"}catch(err){$("st").textContent="아래 프롬프트를 선택해 복사하세요"}
-    $("na").hidden=false;$("doc").innerHTML="";const pre=document.createElement("pre");pre.textContent=p;pre.style.cssText="white-space:pre-wrap;font:inherit;font-size:12px";$("doc").appendChild(pre);return}
+    $("na").hidden=false;if(innerWidth<=940)document.querySelector(".out").scrollIntoView({behavior:"smooth"});$("doc").innerHTML="";const pre=document.createElement("pre");pre.textContent=p;pre.style.cssText="white-space:pre-wrap;font:inherit;font-size:12px";$("doc").appendChild(pre);return}
   ctl?.abort();ctl=new AbortController();
-  $("go").disabled=true;$("st").textContent="작성 중…";
+  $("go").disabled=true;$("st").textContent="작성 중…";if(innerWidth<=940)document.querySelector(".out").scrollIntoView({behavior:"smooth"});
   try{
-    const r=await sample(buildPrompt(),{signal:ctl.signal,modelTier:"default",cache:false,onText:({text})=>{md=text;render(md)}});
-    md=r.text;render(md);$("st").textContent="완성 · 노션에 붙여넣으세요";
+    const r=await sample(buildPrompt(),{signal:ctl.signal,modelTier:"default",cache:false,onText:({text})=>{md=pii(text);render(md)}});
+    md=pii(r.text);render(md);$("st").textContent="완성 · 노션에 붙여넣으세요";
   }catch(err){
     if(err?.text){md=err.text;render(md)}
     $("st").textContent=err?.code==="rate_limited"?"요청이 많아요. 잠시 후 다시 눌러 주세요.":err?.code==="not_granted"?"AI 사용 권한이 허용되지 않았어요.":"생성에 실패했어요. 다시 눌러 주세요.";
