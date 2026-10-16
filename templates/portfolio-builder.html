@@ -253,6 +253,9 @@ experiences:[{ename:"스타트업 HR 인턴",eperiod:"2025.02 ~ 2025.07",edesc:"
 education:[{sname:"한국대학교",speriod:"2020.03 - 2025.02",smajor:"심리학 전공 (경영학 복수전공)"}],lang:"",other:"공인노무사 1차 준비 중, 컴퓨터활용능력 1급"}};
 $("ex").onclick=()=>{load(EXS[$("exsel").value]||EX);$("st").textContent="예시를 채웠어요 · 내 내용으로 바꿔 주세요"};
 $("clr").onclick=()=>{load({});try{localStorage.removeItem("pc-pf2")}catch(e){}$("st").textContent="입력과 이 기기 저장 내용을 지웠어요"};
+function missing(){const s=state(),t=md.replace(/\s+/g,"");const names=[...s.projects.map(x=>x.pname),...s.experiences.map(x=>x.ename),...s.education.map(x=>x.sname)].map(x=>(x||"").trim()).filter(Boolean);
+  return names.filter(n=>!t.includes(n.replace(/\s+/g,"").slice(0,8)))}
+function doneMsg(stop){const m=missing();return stop==="max_tokens"?"분량이 길어 중간에 끊겼어요 · 다시 눌러 주세요":m.length?"⚠ 빠진 항목: "+m.join(", ")+" · 다시 생성해 보세요":"완성 · 입력 항목이 모두 들어갔어요"}
 function pii(t){const e=$("email").value.trim(),p=$("phone").value.trim();return t.replace(/\[\[EMAIL\]\]/g,e||"[보완 필요: 이메일]").replace(/\[\[PHONE\]\]/g,p||"[보완 필요: 연락처]")}
 function limit(root){root.querySelectorAll("input,textarea").forEach(el=>{if(!el.maxLength||el.maxLength<0)el.maxLength=el.tagName==="TEXTAREA"?2000:200})}
 limit(document);new MutationObserver(()=>limit($("f"))).observe($("f"),{childList:true,subtree:true});
@@ -299,11 +302,13 @@ ${JSON.stringify(s,null,1)}
 
 [규칙]
 - 입력에 없는 사실·수치·학교·회사는 절대 만들지 않는다. 비었거나 부족하면 "[보완 필요: 무엇을 적으면 좋은지]"로 표시한다.
+- [가장 중요] 입력한 내용을 요약하거나 빼지 않는다. 모든 프로젝트·경험·학력·기술·자격·어학과 그 안의 수치, 고유명사, 과정, 결과를 빠짐없이 옮기고, 문장만 더 전문적으로 다듬는다. 완성본은 입력보다 짧아지면 안 된다.
+- 입력이 한 줄이면 직무 관점에서 의미를 덧붙여 1~2줄로 풀어 쓰되, 입력에 없는 사실은 추가하지 않는다.
 - 지원 직무 관점에서 강점이 드러나게 다듬되, 태도는 형용사 대신 행동 장면으로 쓴다.
 - 채용공고가 있으면 그 키워드가 About me·Skills·프로젝트 성과에 자연스럽게 드러나게 한다.
 - 중요한 부분은 **굵게** 처리한다. 사용 가능한 문법: #, ##, ###, >, -, 표(|), **굵게**, ---. 코드블록 금지.
 - AI 역량은 최근 채용 평가 관점(① 업무에 맞는 도구 선택 ② 프롬프트·워크플로 설계 ③ 결과 검증과 책임 ④ 생산성 성과 ⑤ 윤리·보안)으로 정리한다. "AI를 쓸 줄 안다"가 아니라 "AI로 무엇을 얼마나 바꿨고 어떻게 검증했는지"가 보이게 쓴다. AI 입력이 전혀 없으면 섹션 대신 "[보완 필요: AI 활용 사례 1개와 검증 방법]"만 남긴다.
-- 프로젝트는 성과가 좋은 순으로 정렬한다. 경험은 직무 연관성이 높은 순으로 최대 4개.
+- 프로젝트는 성과가 좋은 순으로 정렬한다. 경험은 직무 연관성이 높은 순으로 정렬하되 입력한 경험은 모두 포함한다.
 
 [출력 양식 — 이 순서와 제목을 그대로 지킨다]
 # (지원 직무) | (이름) 포트폴리오
@@ -337,7 +342,7 @@ ${JSON.stringify(s,null,1)}
 - **구현 내용**: 사용 기술과 핵심 작업 2~3개
 - **성과**: 구체적·정량적으로
 - **문제해결**: 문제 → 원인 분석 → 해결 → 결과
-- **AI 활용**: 어디에 썼고 어떻게 검증했는지 (입력 없으면 생략)
+- **AI 활용**: 어디에 썼고 어떻게 검증했는지 (입력 없으면 이 줄만 생략)
 - **회고/느낀점**: 인사이트 1~2개
 
 ## 🎈 Experiences
@@ -371,7 +376,7 @@ $("f").addEventListener("submit",async e=>{
   $("go").disabled=true;$("st").textContent="작성 중…";if(innerWidth<=940)document.querySelector(".out").scrollIntoView({behavior:"smooth"});
   try{
     const r=await sample(buildPrompt(),{signal:ctl.signal,modelTier:"default",cache:false,onText:({text})=>{md=pii(text);render(md)}});
-    md=pii(r.text);render(md);$("st").textContent="완성 · 노션에 붙여넣으세요";
+    md=pii(r.text);render(md);$("st").textContent=doneMsg("");
   }catch(err){
     if(err?.text){md=err.text;render(md)}
     $("st").textContent=err?.code==="rate_limited"?"요청이 많아요. 잠시 후 다시 눌러 주세요.":err?.code==="not_granted"?"AI 사용 권한이 허용되지 않았어요.":"생성에 실패했어요. 다시 눌러 주세요.";
@@ -387,7 +392,7 @@ async function viaApi(key){
     const res=gem
       ?await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:streamGenerateContent?alt=sse",{method:"POST",signal:ctl.signal,referrerPolicy:"no-referrer",
         headers:{"content-type":"application/json","x-goog-api-key":key},
-        body:JSON.stringify({contents:[{role:"user",parts:[{text:buildPrompt()}]}],generationConfig:{maxOutputTokens:8192}})})
+        body:JSON.stringify({contents:[{role:"user",parts:[{text:buildPrompt()}]}],generationConfig:{maxOutputTokens:32768}})})
       :await fetch("https://api.anthropic.com/v1/messages",{method:"POST",signal:ctl.signal,referrerPolicy:"no-referrer",
         headers:{"content-type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01","anthropic-beta":"server-side-fallback-2026-07-01","anthropic-dangerous-direct-browser-access":"true"},
         body:JSON.stringify({model:"claude-opus-5-5",max_tokens:16000,stream:true,output_config:{effort:"medium"},fallbacks:"default",messages:[{role:"user",content:buildPrompt()}]})});
@@ -402,7 +407,7 @@ async function viaApi(key){
         else if(ev.type==="message_delta"&&ev.delta?.stop_reason)stop=ev.delta.stop_reason;
         else if(ev.type==="error")throw new Error("생성 중 오류가 났어요. 다시 시도해 주세요.")}}
     if(stop==="refusal")throw new Error("AI가 이 요청을 처리하지 않았어요. 입력 내용을 확인해 주세요.");
-    $("st").textContent=stop==="max_tokens"?"분량이 길어 일부만 작성됐어요":"완성 · 노션에 붙여넣으세요";
+    $("st").textContent=doneMsg(stop);
   }catch(err){$("st").textContent=err.name==="AbortError"?"취소했어요":(err.message||"생성에 실패했어요.")}
   finally{$("go").disabled=false}
 }
