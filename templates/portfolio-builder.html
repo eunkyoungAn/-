@@ -61,6 +61,7 @@ input:focus,textarea:focus,select:focus,button:focus-visible,summary:focus-visib
 .doc th{background:var(--soft)}
 .doc hr{border:0;border-top:1px solid var(--line);margin:18px 0}
 .need{background:var(--chip);color:var(--accent);font-size:12px;padding:1px 6px;border-radius:3px}
+.hint{margin:0;font-size:12px;color:var(--muted)}
 .note{font-size:12px;color:var(--muted);padding:0 14px 12px;margin:0}
 </style>
 
@@ -139,6 +140,16 @@ input:focus,textarea:focus,select:focus,button:focus-visible,summary:focus-visib
       <div class="body">
         <label>어학<input id="lang" placeholder="OPIc IH (2022.06)"></label>
         <label>기타 (자격증·수상·봉사 등)<textarea id="other"></textarea></label>
+      </div>
+    </details>
+
+    <details id="keybox">
+      <summary>AI 연결<small>사이트 안에서 바로 생성</small></summary>
+      <div class="body">
+        <label>AI 선택<select id="provider"><option value="gemini">Google Gemini (무료)</option><option value="claude">Claude (유료)</option></select></label>
+        <label>API 키<input id="apikey" type="password" autocomplete="off" spellcheck="false" placeholder="AIza... 또는 sk-ant-..."></label>
+        <p class="hint"><b>무료 키 받기</b>: <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">aistudio.google.com/apikey</a> 접속 → 구글 로그인 → "API 키 만들기" → 복사해서 붙여넣기 (카드 등록 없음, 하루 사용량 제한 있음)</p>
+        <p class="hint">🔒 키는 저장하지 않고 탭을 닫으면 사라져요. 무료 Gemini는 입력 내용이 구글 서비스 개선에 쓰일 수 있어서, 이메일·연락처는 보내지 않아요. 키가 없으면 프롬프트를 복사해 무료 ChatGPT·Claude 웹에 붙여넣는 방식으로 진행돼요.</p>
       </div>
     </details>
 
@@ -302,6 +313,8 @@ $("f").addEventListener("submit",async e=>{
   const s=state();
   if(!s.role.trim()||!s.projects.some(p=>p.pname.trim())){$("st").textContent="지원 직무와 프로젝트 1개 이상은 적어 주세요.";return}
   const sample=await sampleP;
+  const key=$("apikey").value.trim();
+  if(!sample&&key){await viaApi(key);return}
   if(!sample){
     const p=buildPrompt();md=p;
     try{await navigator.clipboard.writeText(p);$("st").textContent="AI 프롬프트를 복사했어요"}catch(err){$("st").textContent="아래 프롬프트를 선택해 복사하세요"}
@@ -316,6 +329,35 @@ $("f").addEventListener("submit",async e=>{
     $("st").textContent=err?.code==="rate_limited"?"요청이 많아요. 잠시 후 다시 눌러 주세요.":err?.code==="not_granted"?"AI 사용 권한이 허용되지 않았어요.":"생성에 실패했어요. 다시 눌러 주세요.";
   }finally{$("go").disabled=false}
 });
+async function viaApi(key){
+  ctl?.abort();ctl=new AbortController();
+  $("go").disabled=true;$("na").hidden=true;$("st").textContent="AI가 작성 중…";
+  if(innerWidth<=940)document.querySelector(".out").scrollIntoView({behavior:"smooth"});
+  let text="";
+  try{
+    const gem=$("provider").value==="gemini";
+    const res=gem
+      ?await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:streamGenerateContent?alt=sse",{method:"POST",signal:ctl.signal,referrerPolicy:"no-referrer",
+        headers:{"content-type":"application/json","x-goog-api-key":key},
+        body:JSON.stringify({contents:[{role:"user",parts:[{text:buildPrompt()}]}],generationConfig:{maxOutputTokens:8192}})})
+      :await fetch("https://api.anthropic.com/v1/messages",{method:"POST",signal:ctl.signal,referrerPolicy:"no-referrer",
+        headers:{"content-type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01","anthropic-beta":"server-side-fallback-2026-07-01","anthropic-dangerous-direct-browser-access":"true"},
+        body:JSON.stringify({model:"claude-opus-5-5",max_tokens:16000,stream:true,output_config:{effort:"medium"},fallbacks:"default",messages:[{role:"user",content:buildPrompt()}]})});
+    if(!res.ok){const code=res.status;throw new Error(code===401||code===403||(gem&&code===400)?"API 키가 올바르지 않아요. 다시 확인해 주세요.":code===429?(gem?"무료 사용량을 다 썼어요. 잠시 후(또는 내일) 다시 시도해 주세요.":"요청이 많아요. 잠시 후 다시 눌러 주세요."):code===400?"요청을 처리하지 못했어요. 입력을 줄이거나 다시 시도해 주세요.":"AI 서버 오류("+code+")예요. 잠시 후 다시 시도해 주세요.")}
+    const rd=res.body.getReader(),dec=new TextDecoder();let buf="",stop="";
+    for(;;){const {done,value}=await rd.read();if(done)break;buf+=dec.decode(value,{stream:true});
+      let i;while((i=buf.indexOf("\n"))>=0){const line=buf.slice(0,i).trim();buf=buf.slice(i+1);
+        if(!line.startsWith("data:"))continue;let ev;try{ev=JSON.parse(line.slice(5))}catch(e){continue}
+        if(gem){const c=ev.candidates?.[0];const t=(c?.content?.parts||[]).map(x=>x.text||"").join("");if(t){text+=t;md=pii(text);render(md)}
+          if(c?.finishReason==="MAX_TOKENS")stop="max_tokens";else if(c?.finishReason==="SAFETY")stop="refusal";if(ev.error)throw new Error("생성 중 오류가 났어요. 다시 시도해 주세요.");continue}
+        if(ev.type==="content_block_delta"&&ev.delta?.type==="text_delta"){text+=ev.delta.text;md=pii(text);render(md)}
+        else if(ev.type==="message_delta"&&ev.delta?.stop_reason)stop=ev.delta.stop_reason;
+        else if(ev.type==="error")throw new Error("생성 중 오류가 났어요. 다시 시도해 주세요.")}}
+    if(stop==="refusal")throw new Error("AI가 이 요청을 처리하지 않았어요. 입력 내용을 확인해 주세요.");
+    $("st").textContent=stop==="max_tokens"?"분량이 길어 일부만 작성됐어요":"완성 · 노션에 붙여넣으세요";
+  }catch(err){$("st").textContent=err.name==="AbortError"?"취소했어요":(err.message||"생성에 실패했어요.")}
+  finally{$("go").disabled=false}
+}
 $("copy").onclick=async()=>{
   try{await navigator.clipboard.writeText(md);$("st").textContent="복사했어요 · 노션에 붙여넣으면 서식이 적용돼요"}
   catch(e){const r=document.createRange();r.selectNodeContents($("doc"));const s=getSelection();s.removeAllRanges();s.addRange(r);$("st").textContent="선택됨 · Ctrl+C로 복사하세요"}
