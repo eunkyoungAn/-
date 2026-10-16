@@ -402,7 +402,7 @@ function htmlDoc(){
   const title=($("doc").querySelector("h1")?.textContent||(($("role").value||"")+" 포트폴리오")).trim();
   const css=`:root{--bg:#fff;--fg:#231d2e;--muted:#6b6478;--line:#e2dcec;--accent:#6b3fa0;--soft:#efe8f8;--chip:#e6dbf5}
 @media (prefers-color-scheme:dark){:root{--bg:#16131c;--fg:#ece7f4;--muted:#a69eb5;--line:#352d42;--accent:#b591e6;--soft:#2a2236;--chip:#3a2d4d}}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font-family:"Malgun Gothic","맑은 고딕","Apple SD Gothic Neo","Noto Sans KR",sans-serif;font-size:15px;line-height:1.7}
+*{box-sizing:border-box}h1,h2,h3,p,li,td{word-break:keep-all;overflow-wrap:anywhere}body{margin:0;background:var(--bg);color:var(--fg);font-family:"Malgun Gothic","맑은 고딕","Apple SD Gothic Neo","Noto Sans KR",sans-serif;font-size:15px;line-height:1.7}
 main{max-width:860px;margin:0 auto;padding:48px max(20px,env(safe-area-inset-left,0px)) 64px}
 header.band{border-top:6px solid var(--accent)}
 h1{font-size:30px;margin:0 0 10px;letter-spacing:-.02em}
