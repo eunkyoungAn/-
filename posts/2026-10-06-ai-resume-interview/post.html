@@ -1,0 +1,93 @@
+<title>AI 자소서·면접 컨설팅 원고</title>
+<style>
+/* 레이아웃: 위쪽 복사 버튼 바 + 네이버 본문폭(약 680px) 원고 미리보기 */
+:root{--bg:#f6f7f5;--paper:#ffffff;--fg:#1f2421;--muted:#5f6b64;--accent:#03a94f;--line:#dfe4e0;
+--body:"Noto Sans KR",system-ui,sans-serif;--display:"Gowun Batang","Noto Serif KR",serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#151816;--paper:#1d211f;--fg:#e8ece9;--muted:#a3ada7;--accent:#35c977;--line:#323833;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#151816;--paper:#1d211f;--fg:#e8ece9;--muted:#a3ada7;--accent:#35c977;--line:#323833;color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);padding:16px;line-height:1.7}
+.wrap{max-width:720px;margin:0 auto;display:grid;gap:16px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.bar p{flex-basis:100%;margin:0;color:var(--muted);font-size:13px}
+button{font:inherit;font-size:14px;padding:10px 14px;border-radius:8px;border:1px solid var(--line);background:var(--paper);color:var(--fg);cursor:pointer}
+button.main{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.toast{color:var(--accent);font-size:13px;font-weight:700}
+.meta{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;gap:6px;font-size:14px}
+.meta b{color:var(--muted);font-weight:500;margin-right:6px}
+article{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:24px 20px;min-width:0}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@700&family=Noto+Sans+KR:wght@400;700&display=swap">
+<div class="wrap">
+  <div class="bar">
+    <button class="main" id="copyBody">본문 서식 포함 복사</button>
+    <button id="copyTitle">제목 복사</button>
+    <button id="copyTags">태그 복사</button>
+    <span class="toast" id="toast" aria-live="polite"></span>
+    <p>네이버 글쓰기에서 본문 칸에 붙여넣으면 굵게·글자 크기·색이 함께 들어갑니다. 붙여넣은 뒤 [임시저장]을 눌러 주세요.</p>
+  </div>
+  <div class="meta">
+    <div><b>제목</b><span id="title">AI 자기소개서 컨설팅·AI면접 연습 2일 후기 | 에너지 분야 취업 준비 | 커리어캐쳐</span></div>
+    <div><b>태그</b><span id="tags">#커리어캐쳐 #CareerCatcher #커리어캐쳐AI면접 #커리어캐쳐코칭 #AI자기소개서 #AI면접 #자소서컨설팅 #AI면접연습 #하이잡AI면접 #에너지공기업취업 #에너지분야자소서 #자소서경험정리 #AI면접답변시간 #면접답변구조화 #AI로자소서쓰기 #공기업취업준비 #진로코칭 #취업컨설팅</span></div>
+  </div>
+<article id="post">
+<p style="text-align:center;font-size:24px;font-weight:bold;color:#03a94f;">"쓸 만한 경험이 없어요."</p>
+<p style="font-size:16px;"><b>커리어캐쳐</b>에서 <b>AI 자기소개서 컨설팅</b>과 <b>AI면접 연습</b>을 2일 동안 진행한 과정을 정리했습니다. 에너지 분야 취업을 준비하는 분들과 함께한 기록입니다.</p>
+<p style="font-size:16px;background-color:#f1faf4;padding:12px;"><b>커리어캐쳐(CareerCatcher)</b>는 AI를 활용한 진로·취업 교육과 자기소개서·면접 컨설팅을 하는 브랜드입니다.<br><br><b>✅ 이 글에서 알 수 있는 것</b><br>① AI로 자기소개서용 경험을 찾는 3단계 방법<br>② 하이잡 AI면접 연습에서 주로 받은 피드백 4가지<br>③ 면접 답변을 60~90초로 구조화하는 요령<br>④ 바로 써 볼 수 있는 커리어캐쳐 AI 자기소개서 도구</p>
+<p style="text-align:center;font-size:15px;color:#888888;">📷 [사진1: 과정 대표 이미지]</p>
+<p style="text-align:center;color:#cccccc;">─────────────</p>
+<p style="font-size:22px;font-weight:bold;">자기소개서, 왜 "경험 찾기"부터 해야 할까?</p>
+<p style="font-size:16px;">자기소개서를 준비할 때 흔히 하는 고민이 "쓸 경험이 없다"는 것이죠.</p>
+<p style="font-size:16px;">하지만 경험이 없는 게 아니라, <b>아직 꺼내지 못했을 뿐</b>인 경우가 많아요.</p>
+<p style="font-size:16px;">좋은 자기소개서는 문장력보다 <b style="background-color:#fff3a8;">재료(경험)</b>에서 갈립니다.</p>
+<p style="text-align:center;color:#cccccc;">─────────────</p>
+<p style="font-size:22px;font-weight:bold;">1일차: AI 자기소개서 컨설팅 – 경험 찾기 3단계</p>
+<p style="font-size:16px;">첫날의 핵심 과제는 자기소개서를 바로 쓰는 것이 아니라 <b>경험 찾기</b>였습니다. AI를 대화 상대로 삼아 지금까지의 활동을 하나씩 꺼냈어요.</p>
+<p style="font-size:16px;"><b>① 경험 끌어내기</b> – AI와 대화하며 학교·대외활동·아르바이트 경험을 최대한 많이 나열<br><b>② 직무 연결하기</b> – 그중 에너지 분야 직무와 연결되는 경험 골라내기<br><b>③ 맞춤형 작성</b> – 희망 기업의 인재상과 직무에 맞춰 자기소개서 작성</p>
+<p style="text-align:center;font-size:15px;color:#888888;">📷 [사진2: 1일차 컨설팅 현장]</p>
+<p style="font-size:16px;">AI가 대신 써 준 자기소개서는 누구나 비슷해집니다. 반면 <b>내 경험에서 출발해 AI로 다듬은 자기소개서</b>는 같은 기업에 지원해도 나만의 이야기가 됩니다.</p>
+<p style="text-align:center;font-size:15px;color:#888888;">📷 [사진3: 경험 정리 워크시트 또는 화면]</p>
+<p style="text-align:center;color:#cccccc;">─────────────</p>
+<p style="font-size:22px;font-weight:bold;">2일차: 하이잡 AI면접 연습 – 피드백 4가지</p>
+<p style="font-size:16px;">둘째 날에는 <b>하이잡</b>으로 AI면접을 직접 연습했습니다. AI면접은 화면 너머의 모습을 그대로 기록하기 때문에, 답변 내용만큼 태도도 중요합니다.</p>
+<p style="text-align:center;font-size:15px;color:#888888;">📷 [사진4: 하이잡 AI면접 연습 화면]</p>
+<p style="font-size:16px;">연습 영상을 함께 보며 주로 이렇게 피드백했어요.</p>
+<p style="font-size:16px;">✔ <b>안정적인 시선 처리</b> – 화면이 아니라 카메라 보기<br>✔ <b>불필요한 움직임 주의</b> – 손동작, 몸 흔들림, 머리 만지기<br>✔ <b>답변 구조화</b> – 결론 먼저, 근거와 경험으로 뒷받침<br>✔ <b>시간 관리</b> – 한 답변 <span style="color:#03a94f;font-weight:bold;">60~90초</span> 이내</p>
+<p style="font-size:16px;">영상으로 내 모습을 확인하면 스스로 몰랐던 습관이 보이기 시작합니다.</p>
+<p style="text-align:center;font-size:15px;color:#888888;">📷 [사진5: 피드백 장면 (얼굴 노출 없이)]</p>
+<p style="text-align:center;color:#cccccc;">─────────────</p>
+<p style="font-size:22px;font-weight:bold;">자기소개서와 AI면접, 하나로 이어집니다</p>
+<p style="font-size:16px;">1일차에 찾은 경험이 자기소개서의 재료가 되고, 그 경험이 2일차 면접 답변의 근거가 됩니다.</p>
+<p style="font-size:16px;"><b>경험을 잘 찾아 두면 서류와 면접을 한 번에 준비</b>할 수 있습니다.</p>
+<p style="text-align:center;color:#cccccc;">─────────────</p>
+<p style="font-size:22px;font-weight:bold;">자주 묻는 질문 (FAQ)</p>
+<p style="font-size:16px;"><b>Q. 커리어캐쳐는 어떤 곳인가요?</b><br>A. 커리어캐쳐(CareerCatcher)는 AI를 활용한 진로·취업 교육과 자기소개서·면접 컨설팅을 하는 브랜드입니다. 이번 과정처럼 AI로 경험을 찾고, AI면접으로 연습하는 실전형 코칭을 진행합니다.</p>
+<p style="font-size:16px;"><b>Q. AI로 자기소개서를 써도 괜찮을까요?</b><br>A. AI가 처음부터 끝까지 쓰게 하면 내용이 비슷해지기 쉽습니다. 내 경험을 꺼내고 정리하는 도구로 쓰고, 최종 문장은 직접 다듬는 것을 권합니다.</p>
+<p style="font-size:16px;"><b>Q. AI면접에서 가장 신경 써야 할 것은요?</b><br>A. 이번 과정에서는 시선 처리, 불필요한 움직임, 답변 구조, 답변 시간(60~90초)을 중심으로 피드백했습니다.</p>
+<p style="font-size:16px;"><b>Q. 하이잡은 어떻게 활용했나요?</b><br>A. 2일차에 하이잡으로 AI면접을 직접 연습하고, 녹화된 모습을 함께 보며 피드백했습니다.</p>
+<p style="text-align:center;color:#cccccc;">─────────────</p>
+<p style="font-size:22px;font-weight:bold;">코치의 한마디</p>
+<p style="font-size:16px;">AI는 답을 대신 써 주는 도구가 아니라, 내 경험을 더 잘 꺼내고 전달하도록 돕는 연습 상대입니다.</p>
+<p style="text-align:center;font-size:18px;font-weight:bold;color:#03a94f;">"지원 직무와 연결되는 경험을,<br>결론부터 60초 안에 말할 수 있나요?"</p>
+<p style="text-align:center;color:#cccccc;">─────────────</p>
+<p style="font-size:22px;font-weight:bold;">📌 커리어캐쳐 AI 자기소개서 도구, 직접 써 보세요</p>
+<p style="font-size:16px;">이번 과정에서 사용한 <b>커리어캐쳐 AI 자기소개서 도구</b>를 공유합니다. 순서대로 따라 하면 경험 정리부터 자기소개서 완성까지 이어집니다.</p>
+<p style="font-size:16px;background-color:#f1faf4;padding:12px;"><b>STEP 1. 기업·경험 찾기</b> <span style="color:#666666;">(경험 찾기가 어렵다면 여기부터)</span><br>지원 기업 정보와 내 경험을 AI로 함께 정리합니다.<br>👉 <a href="https://script.google.com/macros/s/AKfycbwfNRBAoDQ-eDHeUTti7drgyL58p6fgm8-tv5hlf1tZfCfrHDhWztLyWEW6ZEYwoTftXA/exec">기업/경험 찾기 바로가기</a><br><span style="font-size:14px;color:#888888;">※ DART(전자공시) 기업 정보를 AI로 불러오기 때문에 처음 실행 시 4~5분 정도 걸릴 수 있어요.</span></p>
+<p style="font-size:16px;background-color:#f1faf4;padding:12px;"><b>STEP 2. AI 활용 자기소개서 작성</b> <span style="color:#666666;">(기업·경험 정리 후)</span><br>정리한 기업·경험을 바탕으로 맞춤형 자기소개서를 완성합니다.<br>👉 <a href="https://kaleidoscopic-stardust-5d149f.netlify.app/">AI 자기소개서 작성 바로가기</a></p>
+<p style="text-align:center;font-size:14px;color:#666666;">─────────────<br><b>커리어캐쳐(CareerCatcher) [코치명]</b><br>AI 자기소개서 · AI면접 · 진로 코칭</p>
+</article>
+</div>
+<script>
+const toast=document.getElementById('toast');
+function say(t){toast.textContent=t;setTimeout(()=>toast.textContent='',2500)}
+function selectCopy(el){const r=document.createRange();r.selectNodeContents(el);const s=getSelection();s.removeAllRanges();s.addRange(r);let ok=false;try{ok=document.execCommand('copy')}catch(e){}return ok}
+async function copyRich(el){
+  try{const html=el.innerHTML,text=el.innerText;
+    await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([html],{type:'text/html'}),'text/plain':new Blob([text],{type:'text/plain'})})]);return true}
+  catch(e){return selectCopy(el)}
+}
+async function copyText(el){try{await navigator.clipboard.writeText(el.innerText);return true}catch(e){return selectCopy(el)}}
+document.getElementById('copyBody').onclick=async()=>say(await copyRich(document.getElementById('post'))?'본문 복사됨':'본문이 선택됐어요. 길게 눌러 복사해 주세요')
+document.getElementById('copyTitle').onclick=async()=>say(await copyText(document.getElementById('title'))?'제목 복사됨':'제목이 선택됐어요. 복사해 주세요')
+document.getElementById('copyTags').onclick=async()=>say(await copyText(document.getElementById('tags'))?'태그 복사됨':'태그가 선택됐어요. 복사해 주세요')
+</script>
