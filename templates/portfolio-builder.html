@@ -104,6 +104,16 @@ input:focus,textarea:focus,select:focus,button:focus-visible,summary:focus-visib
     </details>
 
     <details open>
+      <summary>AI Competency<small>활용 → 검증 → 성과</small></summary>
+      <div class="body">
+        <label>사용하는 AI 도구와 숙련도<textarea id="aitools" placeholder="ChatGPT·Claude - 매일 사용, 프롬프트 템플릿 직접 설계&#10;GitHub Copilot - 코드 작성 보조&#10;Cursor / n8n / Gemini 등"></textarea></label>
+        <label>AI로 일하는 방식이 바뀐 사례 (전/후)<textarea id="aiuse" placeholder="EDA 보고서 작성 4시간 → 1시간 (AI 초안 + 수치 직접 검증)&#10;반복 업무를 Apps Script + AI로 자동화"></textarea></label>
+        <label>검증·윤리 원칙 <small>(결과를 어떻게 확인하나, 개인정보 처리 등)</small><textarea id="aiethics" placeholder="AI가 쓴 코드는 테스트로 확인 후 반영, 원본 데이터는 업로드하지 않음"></textarea></label>
+        <label>AI 관련 학습·자격·프로젝트 <small>(선택)</small><input id="ailearn" placeholder="LLM API로 챗봇 제작, AI 활용 교육 수료"></label>
+      </div>
+    </details>
+
+    <details open>
       <summary>Projects<small>성과 좋은 순서로</small></summary>
       <div class="body"><div id="projects" style="display:grid;gap:10px"></div>
         <button type="button" class="add" data-add="projects">프로젝트 추가</button></div>
@@ -148,9 +158,9 @@ input:focus,textarea:focus,select:focus,button:focus-visible,summary:focus-visib
 
 <script>
 const $=id=>document.getElementById(id);
-const SIMPLE=["name","role","email","phone","links","jd","about","tools","skills","lang","other"];
+const SIMPLE=["name","role","email","phone","links","jd","about","tools","skills","aitools","aiuse","aiethics","ailearn","lang","other"];
 const LISTS={
-  projects:{title:"프로젝트",fields:[["pname","프로젝트명","input"],["pperiod","작업기간","input","2025.04 ~ 2025.07"],["psum","요약 (무엇을, 왜)","textarea"],["pteam","전체 인원 / 나의 역할·기여도","input","4명 / 데이터 수집·분석 담당 (60%)"],["pimpl","구현·분석 내용과 사용 기술","textarea"],["presult","성과 (숫자로)","textarea","정확도 72% → 85%, 수상 등"],["ptrouble","문제해결 과정과 배운 점","textarea","문제 → 원인 → 시도한 방법 → 결과"]]},
+  projects:{title:"프로젝트",fields:[["pname","프로젝트명","input"],["pperiod","작업기간","input","2025.04 ~ 2025.07"],["psum","요약 (무엇을, 왜)","textarea"],["pteam","전체 인원 / 나의 역할·기여도","input","4명 / 데이터 수집·분석 담당 (60%)"],["pimpl","구현·분석 내용과 사용 기술","textarea"],["presult","성과 (숫자로)","textarea","정확도 72% → 85%, 수상 등"],["ptrouble","문제해결 과정과 배운 점","textarea","문제 → 원인 → 시도한 방법 → 결과"],["pai","AI 활용과 검증 (선택)","textarea","어디에 AI를 썼고, 결과를 어떻게 확인·수정했나"]]},
   experiences:{title:"경험",fields:[["ename","이름 (동아리·회사)","input"],["eperiod","진행기간","input"],["edesc","소개와 맡은 일·성과","textarea"]]},
   education:{title:"학력·교육",fields:[["sname","학교·기관명","input"],["speriod","기간","input","2020.03 - 2025.02"],["smajor","전공·과정명","input"]]}
 };
@@ -173,7 +183,8 @@ $("f").addEventListener("input",save);
 
 const EX={name:"김보라",role:"데이터 분석가",email:"bora@example.com",phone:"010-0000-0000",links:"github.com/example · blog.example.com",jd:"SQL·Python 활용 데이터 추출/분석, 대시보드 구축 경험 우대, 이해관계자 커뮤니케이션",
 about:"통계학 전공. 공모전 3회 참가(1회 수상). Python·SQL 분석과 시각화가 강점. 현장을 이해하고 의사결정에 쓰이는 분석을 하고 싶음",tools:"Slack, Notion, Git/GitHub, Jira",skills:"Python - pandas 전처리·시각화, 프로젝트 3건\nSQL - MySQL로 공모전 데이터 추출\nTableau - 대시보드 2개 제작",
-projects:[{pname:"카페 매출 예측 대시보드",pperiod:"2025.04 ~ 2025.07",psum:"동네 카페 3곳의 판매 데이터로 요일·날씨별 수요를 예측해 발주 낭비를 줄이는 프로젝트",pteam:"4명 / 데이터 전처리·모델링 담당 (50%)",pimpl:"POS 데이터 2년치 정제(Python), 날씨 API 결합, XGBoost 예측 모델, Tableau 대시보드",presult:"예측 오차(MAPE) 24% → 11%, 점주 테스트 후 폐기량 약 20% 감소 보고",ptrouble:"공휴일 매출 튐으로 오차가 큼 → 잔차 분석으로 원인 확인 → 공휴일·이벤트 변수 추가 → 오차 절반 감소. 변수 설계는 현장 인터뷰에서 시작해야 함을 배움"}],
+aitools:"ChatGPT·Claude - 분석 계획·코드 초안, 프롬프트 템플릿 5종 직접 설계\nGitHub Copilot - pandas 전처리 코드 보조",aiuse:"주간 분석 리포트 작성 4시간 → 1시간 (AI 초안 + 수치는 SQL로 재확인)",aiethics:"AI가 만든 코드·수치는 원본 데이터로 교차검증 후 사용, 고객 개인정보는 AI에 입력하지 않음",ailearn:"LLM API로 리뷰 감성분석 미니 프로젝트",
+projects:[{pname:"카페 매출 예측 대시보드",pperiod:"2025.04 ~ 2025.07",psum:"동네 카페 3곳의 판매 데이터로 요일·날씨별 수요를 예측해 발주 낭비를 줄이는 프로젝트",pteam:"4명 / 데이터 전처리·모델링 담당 (50%)",pimpl:"POS 데이터 2년치 정제(Python), 날씨 API 결합, XGBoost 예측 모델, Tableau 대시보드",presult:"예측 오차(MAPE) 24% → 11%, 점주 테스트 후 폐기량 약 20% 감소 보고",ptrouble:"공휴일 매출 튐으로 오차가 큼 → 잔차 분석으로 원인 확인 → 공휴일·이벤트 변수 추가 → 오차 절반 감소. 변수 설계는 현장 인터뷰에서 시작해야 함을 배움",pai:"Claude로 피처 아이디어 20개 도출 → 데이터로 검증해 4개 채택. AI 제안 중 데이터 누수 위험 변수는 제외"}],
 experiences:[{ename:"데이터 분석 연합 동아리 'D.Lab'",eperiod:"2024.03 ~ 2024.12",edesc:"스터디 운영진. 월 1회 케이스 스터디 발표, Kaggle 대회 팀 동메달"}],
 education:[{sname:"한국대학교",speriod:"2020.03 - 2025.02",smajor:"통계학 전공"},{sname:"K-Digital Training",speriod:"2025.03 - 2025.07",smajor:"데이터 분석 실무 과정 수료"}],
 lang:"OPIc IH (2024.06)",other:"ADsP 자격증 (2024.11)"};
@@ -226,6 +237,7 @@ ${JSON.stringify(s,null,1)}
 - 지원 직무 관점에서 강점이 드러나게 다듬되, 태도는 형용사 대신 행동 장면으로 쓴다.
 - 채용공고가 있으면 그 키워드가 About me·Skills·프로젝트 성과에 자연스럽게 드러나게 한다.
 - 중요한 부분은 **굵게** 처리한다. 사용 가능한 문법: #, ##, ###, >, -, 표(|), **굵게**, ---. 코드블록 금지.
+- AI 역량은 최근 채용 평가 관점(① 업무에 맞는 도구 선택 ② 프롬프트·워크플로 설계 ③ 결과 검증과 책임 ④ 생산성 성과 ⑤ 윤리·보안)으로 정리한다. "AI를 쓸 줄 안다"가 아니라 "AI로 무엇을 얼마나 바꿨고 어떻게 검증했는지"가 보이게 쓴다. AI 입력이 전혀 없으면 섹션 대신 "[보완 필요: AI 활용 사례 1개와 검증 방법]"만 남긴다.
 - 프로젝트는 성과가 좋은 순으로 정렬한다. 경험은 직무 연관성이 높은 순으로 최대 4개.
 
 [출력 양식 — 이 순서와 제목을 그대로 지킨다]
@@ -242,6 +254,15 @@ ${JSON.stringify(s,null,1)}
 ### Tech Stack
 - 기술 – 활용 경험·수준
 
+## 🤖 AI Competency
+| 역량 | 내용 |
+|---|---|
+| 활용 도구·숙련도 | |
+| 워크플로 설계 | (프롬프트·자동화 방식) |
+| 성과 (전/후) | |
+| 검증·책임 | |
+| 윤리·보안 | |
+
 ## 💻 Projects
 (프로젝트마다)
 ### 프로젝트명
@@ -251,6 +272,7 @@ ${JSON.stringify(s,null,1)}
 - **구현 내용**: 사용 기술과 핵심 작업 2~3개
 - **성과**: 구체적·정량적으로
 - **문제해결**: 문제 → 원인 분석 → 해결 → 결과
+- **AI 활용**: 어디에 썼고 어떻게 검증했는지 (입력 없으면 생략)
 - **회고/느낀점**: 인사이트 1~2개
 
 ## 🎈 Experiences
