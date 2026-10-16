@@ -49,6 +49,21 @@ em{font-style:normal;color:var(--red);font-weight:700}
 .chip.on{background:var(--red);color:#fff;border-color:var(--red)}
 .ln{height:12px;border-radius:6px;background:#E4E4E8;margin:8px 0}
 .box{text-decoration:none;width:22px;height:22px;border-radius:6px;border:2px solid #ccc;flex:none}
+.top{height:1000px}.bot{top:1000px;bottom:auto;height:570px;padding:0 72px}
+.num{top:-32px;left:72px;width:64px;height:64px;font-size:30px}
+.bot h2{font-size:51px;line-height:1.25;letter-spacing:-1.5px;margin:50px 0 14px}
+.bot p{font-size:32px;line-height:1.5;letter-spacing:-.6px}
+.kb{margin-top:18px;font-size:29px}.ls{margin-top:14px}.li{font-size:27px;line-height:1.5}
+.ls.two{display:grid;grid-template-columns:1fr 1fr;column-gap:20px}.c6 .bot p{font-size:30px}
+.src{font-size:22px;margin-top:8px}
+.bot{display:flex;flex-direction:column;justify-content:center}.bot h2{margin-top:24px}
+.bot p{color:#666}
+.kb{background:#FDECEA;border-radius:16px;border-left:4px solid var(--red);padding:20px 28px;color:var(--ink);font-weight:600;line-height:1.4}
+.li{display:flex;align-items:center;gap:16px;color:var(--ink);font-weight:500;letter-spacing:-.5px}
+.dt{width:12px;height:12px;border-radius:50%;background:var(--red);flex:none}
+.nb{font-style:normal;width:40px;height:40px;border-radius:50%;background:var(--red);color:#fff;font-size:22px;font-weight:800;display:flex;align-items:center;justify-content:center;flex:none}
+.ck{width:32px;height:32px;border-radius:8px;border:3px solid var(--red);flex:none}
+.src{font-weight:500;color:#999}
 </style></head><body>
 
 <!-- 1 표지 -->
@@ -67,6 +82,7 @@ em{font-style:normal;color:var(--red);font-weight:700}
  </div>
  <div class="a" style="--d:.8s;position:absolute;left:70px;top:1180px;color:var(--red);font-size:34px;font-weight:700">동기부여 강의를 하러 가던 날,</div>
  <div class="a" style="--d:1s;position:absolute;left:70px;top:1250px;font-size:96px;font-weight:900;line-height:1.25;letter-spacing:-3px"><span style="color:var(--red)">처음 가본 길</span>이<br><span style="color:var(--red)">더 빨랐다</span></div>
+ <div class="a" style="--d:1.3s;position:absolute;left:70px;right:60px;top:1515px;font-size:27px;font-weight:500;color:rgba(255,255,255,.7);letter-spacing:-.5px">새로운 가능성을 말하러 가던 제가, 늘 같은 길로만 다니고 있었습니다</div>
 </div>
 
 <!-- 2 -->
@@ -90,7 +106,9 @@ em{font-style:normal;color:var(--red);font-weight:700}
 </div>
 <div class="bot"><div class="num pop" style="--d:1.3s">1</div>
  <h2 class="a" style="--d:1.5s">늘 다니던 길,<br>왜 그 길로만 갔을까?</h2>
- <p class="a" style="--d:1.75s">좋아서가 아니라 <em>익숙해서</em>.</p></div></div>
+ <p class="a" style="--d:1.8s">좋아서가 아니라 <em>익숙해서</em>. 더 좋아서 고른 길이었나 돌아보면, 솔직히 그렇지 않았습니다. 익숙한 게 편하게 느껴지는 건 자연스럽지만, 편하다는 느낌과 최선이라는 판단은 서로 다른 이야기입니다.</p>
+ <div class="kb a" style="--d:2.1s">편한 길이 최선의 길은 아닙니다</div>
+</div></div>
 
 <!-- 3 -->
 <div class="c"><div class="top">
@@ -114,7 +132,9 @@ em{font-style:normal;color:var(--red);font-weight:700}
 </div>
 <div class="bot"><div class="num pop" style="--d:1.3s">2</div>
  <h2 class="a" style="--d:1.5s">커리어에도<br><span style="color:var(--red)">'원래 가던 길'</span>이 있다</h2>
- <p class="a" style="--d:1.75s">전공 / 첫 직장 / 오래 해온 일</p></div></div>
+ <p class="a" style="--d:1.8s">전공 / 첫 직장 / 오래 해온 일. 오래 해온 일에는 쌓인 실력과 사람과 감각이 있고, 그건 분명한 자산입니다. 다만 그 길을 고른 이유가 무엇이었는지는 한번 짚어볼 만합니다.</p>
+ <div class="ls"><div class="li a" style="--d:2.1s"><i class="dt"></i><span>전공: 배운 분야라서</span></div><div class="li a" style="--d:2.4s"><i class="dt"></i><span>첫 직장: 처음 들어간 업계라서</span></div><div class="li a" style="--d:2.7s"><i class="dt"></i><span>오래 해온 일: 해왔으니까</span></div></div>
+</div></div>
 
 <!-- 4 -->
 <div class="c"><div class="top">
@@ -136,7 +156,9 @@ em{font-style:normal;color:var(--red);font-weight:700}
 </div>
 <div class="bot"><div class="num pop" style="--d:1.3s">3</div>
  <h2 class="a" style="--d:1.5s">"제가 해온 게<br>이거라서요"</h2>
- <p class="a" style="--d:1.75s">익숙함이 기준이 되면 <em>선택지는 줄어든다</em></p></div></div>
+ <p class="a" style="--d:1.8s">익숙함이 기준이 되면 <em>선택지는 줄어든다</em>. 상담에서 자주 듣는 이 말이 틀린 건 아닙니다. 다만 익숙함이 유일한 기준이 되면, 다른 길은 살펴보기도 전에 지도에서 빠집니다.</p>
+ <div class="kb a" style="--d:2.1s">나빠서가 아니라, 안 봐서 지운 길</div>
+</div></div>
 
 <!-- 5 -->
 <div class="c"><div class="top" style="background:#F7F7F7">
@@ -154,10 +176,12 @@ em{font-style:normal;color:var(--red);font-weight:700}
 </div>
 <div class="bot"><div class="num pop" style="--d:1.3s">4</div>
  <h2 class="a" style="--d:1.5s">다른 길은<br><span style="color:var(--red)">"한번 가볼까"</span>에서</h2>
- <p class="a" style="--d:1.75s">다른 길은 큰 결심보다 <em>"한번 가볼까"</em>에서 시작된다</p></div></div>
+ <p class="a" style="--d:1.8s">다른 길은 큰 결심보다 <em>"한번 가볼까"</em>에서 시작된다. 그날 제가 다른 길로 들어선 것도 큰 각오 때문이 아니었습니다. 거창한 결심 없이도 첫 걸음은 뗄 수 있습니다.</p>
+ <div class="kb a" style="--d:2.1s">큰 각오보다 가벼운 한 걸음</div>
+</div></div>
 
 <!-- 6 -->
-<div class="c"><div class="top">
+<div class="c c6"><div class="top">
  <div class="phone a" style="--d:.1s;left:190px;top:300px">
   <div class="app">5가지 태도</div>
   <div class="it"><b>호기심</b>먼저 찾아 나서기</div>
@@ -173,8 +197,10 @@ em{font-style:normal;color:var(--red);font-weight:700}
 </div>
 <div class="bot"><div class="num pop" style="--d:1.3s">5</div>
  <h2 class="a" style="--d:1.5s">기회를 알아보는<br><span style="color:var(--red)">5가지 태도</span></h2>
- <p class="a" style="--d:1.75s"><em>호기심</em>·인내·유연성·낙관성·위험 감수</p>
- <div class="a" style="--d:2s;position:absolute;left:90px;bottom:380px;font-size:22px;font-weight:500;color:#999">Mitchell, Levin &amp; Krumboltz(1999) 계획된 우연 이론</div></div></div>
+ <p class="a" style="--d:1.8s">계획된 우연 이론은 진로에서 우연이 자연스럽고 쓸모 있는 일이라고 봅니다. 그래서 탐색을 늘려 예상하지 못한 기회를 만날 가능성을 키우자고 말합니다. 그 기회를 알아보는 태도가 다섯 가지입니다.</p>
+ <div class="ls two"><div class="li a" style="--d:2.1s"><i class="dt"></i><span><em>호기심</em>: 먼저 찾아 나서기</span></div><div class="li a" style="--d:2.4s"><i class="dt"></i><span>인내: 막혀도 조금 더</span></div><div class="li a" style="--d:2.7s"><i class="dt"></i><span>유연성: 계획도 바꿔보기</span></div><div class="li a" style="--d:3.0s"><i class="dt"></i><span>낙관성: 나도 해볼 수 있다</span></div><div class="li a" style="--d:3.3s"><i class="dt"></i><span>위험 감수: 일단 한 걸음</span></div></div>
+ <div class="src a" style="--d:3.6s">Mitchell, Levin &amp; Krumboltz(1999) 계획된 우연 이론</div>
+</div></div>
 
 <!-- 7 -->
 <div class="c"><div class="top">
@@ -191,7 +217,9 @@ em{font-style:normal;color:var(--red);font-weight:700}
 </div>
 <div class="bot"><div class="num pop" style="--d:1.3s">6</div>
  <h2 class="a" style="--d:1.5s">새 길이 늘<br>지름길은 아니다</h2>
- <p class="a" style="--d:1.75s">하지만 가본 길은 <em>내 지도에 남는다</em>. 선택지가 하나 늘어난다.</p></div></div>
+ <p class="a" style="--d:1.8s">솔직히 다른 길이 늘 빠른 건 아닙니다. 돌아갈 때도, 막다른 골목을 만날 때도 있습니다. 하지만 가본 길은 <em>내 지도에 남고</em>, 다음에 고민할 때 "그쪽은 이렇더라"라고 말할 수 있습니다.</p>
+ <div class="kb a" style="--d:2.1s">가본 길만큼 선택지가 늘어납니다</div>
+</div></div>
 
 <!-- 8 -->
 <div class="c"><div class="top">
@@ -209,7 +237,9 @@ em{font-style:normal;color:var(--red);font-weight:700}
 </div>
 <div class="bot"><div class="num pop" style="--d:1.3s">7</div>
  <h2 class="a" style="--d:1.5s">나에게 던지는<br>질문 3가지</h2>
- <p class="a" style="--d:1.75s"><em>선택한 길</em>인가, <em>익숙한 길</em>인가? / 궁금했던 길은? / 작게 시험해볼 방법은?</p></div></div>
+ <p class="a" style="--d:1.8s">잠깐 펜을 들고 아래 질문에 답을 적어보세요. 답이 금방 나오지 않아도 괜찮습니다. 며칠 두고 생각나는 대로 덧붙여 적어도 됩니다.</p>
+ <div class="ls"><div class="li a" style="--d:2.1s"><i class="nb">1</i><span><em>선택한 길</em>인가, <em>익숙한 길</em>인가?</span></div><div class="li a" style="--d:2.4s"><i class="nb">2</i><span>궁금했지만 안 가본 길은?</span></div><div class="li a" style="--d:2.7s"><i class="nb">3</i><span>작게 시험해볼 방법은?</span></div></div>
+</div></div>
 
 <!-- 9 -->
 <div class="c"><div class="top">
@@ -229,7 +259,9 @@ em{font-style:normal;color:var(--red);font-weight:700}
 </div>
 <div class="bot"><div class="num pop" style="--d:1.3s">8</div>
  <h2 class="a" style="--d:1.5s">이번 주<br>작은 실험 3가지</h2>
- <p class="a" style="--d:1.75s">현직자 한 명에게 묻기 / 채용공고 3개 읽기 / 다른 길로 가보기.<br><em>하나만 해도 충분해요.</em></p></div></div>
+ <p class="a" style="--d:1.8s">질문에 답을 적어보셨다면, 이번 주에 해볼 실험을 골라보세요. 셋 다 할 필요는 없습니다. <em>하나만 해도 충분해요.</em> 막상 해보면 생각보다 문턱이 낮다고 느끼실 수도 있습니다.</p>
+ <div class="ls"><div class="li a" style="--d:2.1s"><i class="ck"></i><span>현직자 한 명에게 묻기</span></div><div class="li a" style="--d:2.4s"><i class="ck"></i><span>채용공고 3개 끝까지 읽기</span></div><div class="li a" style="--d:2.7s"><i class="ck"></i><span>평소와 다른 길로 가보기</span></div></div>
+</div></div>
 
 <!-- 10 CTA -->
 <div class="c" style="background:#FDECEA;text-align:center">
@@ -243,6 +275,7 @@ em{font-style:normal;color:var(--red);font-weight:700}
    <div class="btn mark" style="--md:1.5s;flex:1;font-size:30px;padding:24px;border-radius:16px">저장하기</div>
    <div class="btn" style="flex:1;font-size:30px;padding:24px;border-radius:16px;background:#fff;color:var(--red);border:3px solid var(--red)">댓글 남기기</div></div>
  </div>
- <div class="a" style="--d:1s;position:absolute;left:90px;right:90px;bottom:380px;font-size:26px;font-weight:600;color:var(--gray)">커리어캐쳐 | Clear strategies, Real growth</div>
+ <div class="a" style="--d:.9s;position:absolute;top:1260px;left:110px;right:110px;font-size:28px;line-height:1.55;color:var(--ink);font-weight:500">그날 처음 가본 길은 이제 제 지도에 들어 있습니다.<br>여러분의 이번 주에도 그런 길이 하나 생기길 바랍니다.</div>
+ <div class="a" style="--d:1.1s;position:absolute;left:90px;right:90px;bottom:380px;font-size:26px;font-weight:600;color:var(--gray)">커리어캐쳐 | Clear strategies, Real growth</div>
 </div>
 </body></html>
