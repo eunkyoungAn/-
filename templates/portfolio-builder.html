@@ -61,6 +61,7 @@ input:focus,textarea:focus,select:focus,button:focus-visible,summary:focus-visib
 .doc th{background:var(--soft)}
 .doc hr{border:0;border-top:1px solid var(--line);margin:18px 0}
 .need{background:var(--chip);color:var(--accent);font-size:12px;padding:1px 6px;border-radius:3px}
+.ready{box-shadow:0 0 0 3px var(--chip);border-color:var(--accent)!important;color:var(--accent)}
 .hint{margin:0;font-size:12px;color:var(--muted)}
 .note{font-size:12px;color:var(--muted);padding:0 14px 12px;margin:0}
 </style>
@@ -155,8 +156,9 @@ input:focus,textarea:focus,select:focus,button:focus-visible,summary:focus-visib
 
     <div class="actions">
       <button type="submit" class="btn primary" id="go">포트폴리오 완성하기</button>
+      <button type="button" class="btn" id="savehtml2">HTML 저장</button>
       <select id="exsel" aria-label="예시 직군" class="btn">
-        <option value="data">예시: 데이터 분석</option><option value="be">예시: 백엔드 개발</option><option value="fe">예시: 프론트엔드</option><option value="ux">예시: UX/UI 디자인</option><option value="pm">예시: 서비스 기획·PM</option><option value="mkt">예시: 디지털 마케팅</option>
+        <option value="data">예시: 데이터 분석</option><option value="be">예시: 백엔드 개발</option><option value="fe">예시: 프론트엔드</option><option value="ux">예시: UX/UI 디자인</option><option value="pm">예시: 서비스 기획·PM</option><option value="mkt">예시: 디지털 마케팅</option><option value="sales">예시: B2B 영업</option><option value="hr">예시: 인사(HR)</option>
       </select>
       <button type="button" class="btn" id="ex">예시로 채우기</button>
       <button type="button" class="btn" id="clr">모두 지우기</button>
@@ -236,7 +238,19 @@ about:"콘텐츠를 만들고 숫자로 확인하는 마케터. 작은 예산으
 aitools:"ChatGPT - 광고 문구 변형안\nCanva AI - 소재 이미지 시안",aiuse:"광고 소재 제작 주 2개 → 주 8개, A/B 테스트 횟수 4배",aiethics:"AI 문구는 과장·허위 표현 체크리스트로 검수 후 사용",ailearn:"",
 projects:[{pname:"지역 베이커리 인스타그램 성장 캠페인",pperiod:"2025.03 ~ 2025.06",psum:"오프라인 단골 위주인 베이커리의 신규 고객 확보",pteam:"2명 / 콘텐츠 기획·광고 운영 (70%)",pimpl:"릴스 주 3회, 메타 광고 A/B 테스트 12회, 방문 쿠폰 전환 추적",presult:"팔로워 800 → 4,200명, 광고 클릭당 비용 41% 절감, 쿠폰 사용 310건",ptrouble:"초기 광고 반응이 낮음 → 소재별 성과 분석으로 제품 클로즈업 영상이 효과적임을 확인 → 소재 방향 전환",pai:"ChatGPT로 광고 문구 20개 변형, 성과 상위 3개만 남기고 과장 표현 수정"}],
 experiences:[{ename:"마케팅 학회",eperiod:"2024.03 ~ 2024.12",edesc:"기업 연계 프로젝트 2건, 최우수 발표"}],
-education:[{sname:"한국대학교",speriod:"2020.03 - 2025.02",smajor:"광고홍보학 전공"}],lang:"",other:"구글 애널리틱스 자격증 (2024.10)"}};
+education:[{sname:"한국대학교",speriod:"2020.03 - 2025.02",smajor:"광고홍보학 전공"}],lang:"",other:"구글 애널리틱스 자격증 (2024.10)"},
+sales:{name:"오태윤",role:"B2B 영업 (기술영업)",email:"taeyun@example.com",phone:"010-0000-0000",links:"linkedin.com/in/example",jd:"신규 고객 발굴, 제안서 작성, CRM 관리, 목표 매출 달성, 고객 커뮤니케이션",
+about:"고객의 문제를 먼저 듣고 숫자로 제안하는 영업인. 거절을 데이터로 바꿔 다음 제안을 개선하는 것을 좋아함",tools:"Salesforce, HubSpot, Notion, Excel, Slack",skills:"CRM 파이프라인 관리 - 리드 150건 관리\n제안서·견적서 작성 - 20건 이상\nExcel - 매출 분석·피벗",
+aitools:"ChatGPT - 고객사 업계 리서치·콜드메일 초안\nClaude - 제안서 구조 잡기",aiuse:"고객사 사전 조사 1시간 → 20분, 콜드메일 회신율 4% → 11%",aiethics:"고객 정보·견적 금액은 AI에 입력하지 않고, AI 리서치는 공식 자료로 사실 확인",ailearn:"",
+projects:[{pname:"중소 제조사 대상 SaaS 신규 영업",pperiod:"2025.01 ~ 2025.06 (인턴)",psum:"재고관리 SaaS를 중소 제조사에 처음 도입시키는 신규 영업",pteam:"영업팀 5명 / 리드 발굴·데모 담당 (기여도 30%)",pimpl:"타깃 리스트 300곳 선정, 콜드메일·전화, 데모 시연 24회, CRM 단계별 관리",presult:"신규 계약 6건, 분기 목표 대비 120%, 데모 → 계약 전환율 25%",ptrouble:"데모 후 계약이 지연됨 → 실패 사유 인터뷰로 '도입 비용 부담' 확인 → 3개월 무료 파일럿 제안 → 계약 3건 추가",pai:"ChatGPT로 업종별 콜드메일 3종 초안, A/B 발송으로 회신율 높은 문구만 유지"}],
+experiences:[{ename:"IT 기업 영업지원 인턴",eperiod:"2025.01 ~ 2025.06",edesc:"CRM 데이터 정리, 영업 리포트 주간 자동화"},{ename:"교내 창업 동아리",eperiod:"2023.03 ~ 2024.02",edesc:"플리마켓 판매 총괄, 매출 340만 원"}],
+education:[{sname:"한국대학교",speriod:"2019.03 - 2025.02",smajor:"경영학 전공"}],lang:"TOEIC Speaking IH",other:"운전면허 1종 보통"},
+hr:{name:"윤소희",role:"인사(HR) 담당자 - 채용·조직문화",email:"sohee@example.com",phone:"010-0000-0000",links:"brunch.co.kr/@example",jd:"채용 운영, 온보딩, 조직문화 프로그램, HR 데이터 관리, 노동법 기초",
+about:"구성원의 경험을 데이터로 이해하고 제도로 개선하는 HR 담당자. 채용부터 온보딩까지 지원자가 기억하는 회사를 만들고 싶음",tools:"Notion, Slack, Google Workspace, 그리팅(ATS), Excel",skills:"채용 운영 - 공고 작성·서류 스크리닝·면접 일정 관리\nExcel·구글 시트 - HR 데이터 정리·대시보드\n설문 설계 - 구성원 만족도 조사",
+aitools:"ChatGPT - 채용 공고 초안, 면접 질문 구조화\nGemini - 설문 서술형 응답 분류",aiuse:"설문 서술형 응답 300건 분류 3일 → 반나절 (표본 50건 직접 대조 검증)",aiethics:"지원자·구성원 개인정보는 익명 처리 후 사용, AI로 합격·불합격을 판단하지 않음",ailearn:"HR AI 활용 교육 수료",
+projects:[{pname:"신입 온보딩 프로그램 개선",pperiod:"2025.02 ~ 2025.07 (인턴)",psum:"입사 3개월 내 퇴사가 많던 신입 온보딩 개선",pteam:"HR팀 3명 / 온보딩 설계·운영 담당 (기여도 50%)",pimpl:"퇴사자·재직자 인터뷰 15명, 30·60·90일 체크인 제도, 버디 매칭, 온보딩 노션 가이드",presult:"3개월 내 조기 퇴사율 18% → 7%, 온보딩 만족도 3.2 → 4.4점(5점)",ptrouble:"버디 제도 참여율이 낮음 → 설문으로 '업무 부담' 확인 → 버디 활동을 업무 시간으로 인정하도록 팀장 설득 → 참여율 40% → 85%",pai:"Gemini로 인터뷰 응답 주제 분류, 핵심 인용은 원문과 대조해 오분류 4건 수정"}],
+experiences:[{ename:"스타트업 HR 인턴",eperiod:"2025.02 ~ 2025.07",edesc:"채용 공고 12건 운영, 면접 일정 조율 80건"},{ename:"교내 학생회 총무부",eperiod:"2023.03 ~ 2023.12",edesc:"행사 인력 50명 배치·관리"}],
+education:[{sname:"한국대학교",speriod:"2020.03 - 2025.02",smajor:"심리학 전공 (경영학 복수전공)"}],lang:"",other:"공인노무사 1차 준비 중, 컴퓨터활용능력 1급"}};
 $("ex").onclick=()=>{load(EXS[$("exsel").value]||EX);$("st").textContent="예시를 채웠어요 · 내 내용으로 바꿔 주세요"};
 $("clr").onclick=()=>{load({});try{localStorage.removeItem("pc-pf2")}catch(e){}$("st").textContent="입력과 이 기기 저장 내용을 지웠어요"};
 function pii(t){const e=$("email").value.trim(),p=$("phone").value.trim();return t.replace(/\[\[EMAIL\]\]/g,e||"[보완 필요: 이메일]").replace(/\[\[PHONE\]\]/g,p||"[보완 필요: 연락처]")}
@@ -414,6 +428,9 @@ footer{color:var(--muted);font-size:12px;margin-top:48px;border-top:1px solid va
   const e=t=>t.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
   return `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${e(title)}</title><style>${css}</style></head><body><header class="band"></header><main>${$("doc").innerHTML}<footer>Made with CareerCatcher Portfolio Builder · purple-career</footer></main></body></html>`;
 }
+function markReady(){["savehtml","savehtml2"].forEach(i=>$(i).classList.add("ready"))}
+new MutationObserver(()=>{const ok=$("doc").textContent.trim()&&!$("doc").querySelector("pre")&&!$("go").disabled&&md!==SAMPLE;["savehtml","savehtml2"].forEach(i=>$(i).classList.toggle("ready",!!ok))}).observe($("st"),{childList:true,characterData:true,subtree:true});
+$("savehtml2").onclick=()=>$("savehtml").click();
 $("savehtml").onclick=async()=>{
   if($("doc").querySelector("pre")||!$("doc").textContent.trim()){$("st").textContent="먼저 포트폴리오를 완성해 주세요.";return}
   const html=htmlDoc();const fname=(($("name").value||"my")+"_portfolio.html").replace(/[\\/:*?"<>|\s]+/g,"_");
