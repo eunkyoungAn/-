@@ -60,6 +60,11 @@ input:focus,textarea:focus,select:focus,button:focus-visible,summary:focus-visib
 .doc th,.doc td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
 .doc th{background:var(--soft)}
 .doc hr{border:0;border-top:1px solid var(--line);margin:18px 0}
+.doc mark{background:var(--chip);color:var(--accent);font-weight:700;padding:0 3px;border-radius:3px}
+.doc details.more{margin:6px 0 14px;border:1px solid var(--line);border-radius:6px;padding:0 12px}
+.doc details.more summary{cursor:pointer;padding:8px 0;font-size:13px;color:var(--accent);font-weight:700}
+.doc details.more[open]{padding-bottom:8px}
+.doc td:first-child{white-space:nowrap;font-weight:700;width:1%}
 .need{background:var(--chip);color:var(--accent);font-size:12px;padding:1px 6px;border-radius:3px}
 .ready{box-shadow:0 0 0 3px var(--chip);border-color:var(--accent)!important;color:var(--accent)}
 .paste{order:2;display:grid;gap:8px;padding:12px 14px;border-top:1px solid var(--line);background:var(--soft)}
@@ -265,6 +270,9 @@ $("ex").onclick=()=>{load(EXS[$("exsel").value]||EX);$("st").textContent="예시
 $("clr").onclick=()=>{load({});try{localStorage.removeItem("pc-pf2")}catch(e){}$("st").textContent="입력과 이 기기 저장 내용을 지웠어요"};
 function missing(){const s=state(),t=md.replace(/\s+/g,"");const names=[...s.projects.map(x=>x.pname),...s.experiences.map(x=>x.ename),...s.education.map(x=>x.sname)].map(x=>(x||"").trim()).filter(Boolean);
   return names.filter(n=>!t.includes(n.replace(/\s+/g,"").slice(0,8)))}
+function usageMsg(gem,u){if(!u||u.i==null)return "";const tot=(u.i||0)+(u.o||0)+(u.t||0);
+  return gem?` · 토큰 ${tot.toLocaleString()}개 사용 (입력 ${(u.i||0).toLocaleString()} / 출력 ${((u.o||0)+(u.t||0)).toLocaleString()}) · 무료 한도 내 0원`
+    :` · 토큰 ${tot.toLocaleString()}개 (입력 ${(u.i||0).toLocaleString()} / 출력 ${(u.o||0).toLocaleString()}) · 약 $${(((u.i||0)*4+(u.o||0)*20)/1e6).toFixed(3)}`}
 function doneMsg(stop){const m=missing();return stop==="max_tokens"?"분량이 길어 중간에 끊겼어요 · 다시 눌러 주세요":m.length?"⚠ 빠진 항목: "+m.join(", ")+" · 다시 생성해 보세요":"완성 · 입력 항목이 모두 들어갔어요"}
 function pii(t){const e=$("email").value.trim(),p=$("phone").value.trim();return t.replace(/\[\[EMAIL\]\]/g,e||"[보완 필요: 이메일]").replace(/\[\[PHONE\]\]/g,p||"[보완 필요: 연락처]")}
 function limit(root){root.querySelectorAll("input,textarea").forEach(el=>{if(!el.maxLength||el.maxLength<0)el.maxLength=el.tagName==="TEXTAREA"?2000:200})}
@@ -287,12 +295,14 @@ const SAMPLE=`# 데이터 분석가 | 김보라 포트폴리오
 (왼쪽을 채우고 '포트폴리오 완성하기'를 누르면 전체 문서가 만들어져요)`;
 let md=SAMPLE;
 function esc(s){return s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]))}
-function inl(s){return esc(s).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/\[보완 필요[^\]]*\]/g,m=>`<span class="need">${m}</span>`)}
-function render(t){const L=t.split("\n");let h="",i=0;
+function inl(s){return esc(s).replace(/==(.+?)==/g,"<mark>$1</mark>").replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/\[보완 필요[^\]]*\]/g,m=>`<span class="need">${m}</span>`)}
+function render(t){const L=t.split("\n");let h="",i=0,open=0;
   while(i<L.length){const l=L[i];
     if(l.startsWith("|")){const r=[];while(i<L.length&&L[i].startsWith("|"))r.push(L[i++]);const c=x=>x.replace(/^\||\|$/g,"").split("|").map(s=>s.trim());
       h+='<div class="tw"><table>'+r.filter((x,k)=>!(k===1&&/^[\s|:-]+$/.test(x))).map((x,k)=>"<tr>"+c(x).map(s=>k?`<td>${inl(s)}</td>`:`<th>${inl(s)}</th>`).join("")+"</tr>").join("")+"</table></div>";continue}
     if(/^\s*[-*] /.test(l)){h+="<ul>";while(i<L.length&&/^\s*[-*] /.test(L[i]))h+="<li>"+inl(L[i++].replace(/^\s*[-*] /,""))+"</li>";h+="</ul>";continue}
+    if(/^\+\+\+\s*\S/.test(l)){h+="<details class=\"more\"><summary>"+inl(l.replace(/^\+\+\+\s*/,""))+"</summary>";open++;i++;continue}
+    if(/^\+\+\+\s*$/.test(l)){if(open>0){h+="</details>";open--}i++;continue}
     if(l.startsWith("> "))h+="<blockquote>"+inl(l.slice(2))+"</blockquote>";
     else if(l.startsWith("### "))h+="<h3>"+inl(l.slice(4))+"</h3>";
     else if(l.startsWith("## "))h+="<h2>"+inl(l.slice(3))+"</h2>";
@@ -316,7 +326,8 @@ ${JSON.stringify(s,null,1)}
 - 입력이 한 줄이면 직무 관점에서 의미를 덧붙여 1~2줄로 풀어 쓰되, 입력에 없는 사실은 추가하지 않는다.
 - 지원 직무 관점에서 강점이 드러나게 다듬되, 태도는 형용사 대신 행동 장면으로 쓴다.
 - 채용공고가 있으면 그 키워드가 About me·Skills·프로젝트 성과에 자연스럽게 드러나게 한다.
-- 중요한 부분은 **굵게** 처리한다. 사용 가능한 문법: #, ##, ###, >, -, 표(|), **굵게**, ---. 코드블록 금지.
+- 성과·수치·핵심 결과는 ==하이라이트==, 중요한 키워드는 **굵게** 처리한다. 사용 가능한 문법: #, ##, ###, >, -, 표(|), **굵게**, ==하이라이트==, 접기 블록(+++ 제목 ~ +++), ---. 코드블록·HTML 금지.
+- 핵심은 표에, 부수적인 설명은 접기 블록(+++)에 넣어 첫 화면이 간결하게 보이게 한다. 접기 블록 안에서도 입력 내용은 빠짐없이 쓴다.
 - AI 역량은 최근 채용 평가 관점(① 업무에 맞는 도구 선택 ② 프롬프트·워크플로 설계 ③ 결과 검증과 책임 ④ 생산성 성과 ⑤ 윤리·보안)으로 정리한다. "AI를 쓸 줄 안다"가 아니라 "AI로 무엇을 얼마나 바꿨고 어떻게 검증했는지"가 보이게 쓴다. AI 입력이 전혀 없으면 섹션 대신 "[보완 필요: AI 활용 사례 1개와 검증 방법]"만 남긴다.
 - 프로젝트는 성과가 좋은 순으로 정렬한다. 경험은 직무 연관성이 높은 순으로 정렬하되 입력한 경험은 모두 포함한다.
 
@@ -344,16 +355,21 @@ ${JSON.stringify(s,null,1)}
 | 윤리·보안 | |
 
 ## 💻 Projects
-(프로젝트마다)
+(프로젝트마다 아래 표 1개 + 접기 블록 1개. 표 안은 한 칸에 1~2줄 핵심만, 성과 숫자는 ==숫자== 로 하이라이트)
 ### 프로젝트명
-- **요약**:
-- **작업기간**:
-- **역할**: 전체 인원 / 나의 역할과 기여도
-- **구현 내용**: 사용 기술과 핵심 작업 2~3개
-- **성과**: 구체적·정량적으로
-- **문제해결**: 문제 → 원인 분석 → 해결 → 결과
-- **AI 활용**: 어디에 썼고 어떻게 검증했는지 (입력 없으면 이 줄만 생략)
+| 항목 | 내용 |
+|---|---|
+| 한 줄 요약 | 무엇을, 누구를 위해 |
+| 기간 · 역할 | 2025.03 ~ 06 · 전체 N명 중 담당 역할 (**기여도 N%**) |
+| 핵심 성과 | ==800 → 4,200명==, ==CPC 41% 절감== 처럼 숫자 위주 |
+| 트러블슈팅 | **문제** → **원인** → **해결** → ==결과 숫자== (한 줄) |
+| 사용 기술 | 핵심 기술·도구 나열 |
++++ 상세 내용 보기
+- **구현 내용**: 핵심 작업을 입력 그대로 모두
+- **트러블슈팅 상세**: 문제 / 원인 분석 / 검토한 대안 / 해결 / 결과
+- **AI 활용**: 어디에 썼고 어떻게 검증했는지 (입력 없으면 이 줄 생략)
 - **회고/느낀점**: 인사이트 1~2개
++++
 
 ## 🎈 Experiences
 ### 이름 (기간)
@@ -412,7 +428,7 @@ async function viaApi(key){
   ctl?.abort();ctl=new AbortController();
   $("go").disabled=true;$("na").hidden=true;$("st").textContent="AI가 작성 중…";
   if(innerWidth<=940)document.querySelector(".out").scrollIntoView({behavior:"smooth"});
-  let text="";
+  let text="",use={};
   try{
     const gem=$("provider").value==="gemini";
     const res=gem
@@ -425,13 +441,16 @@ async function viaApi(key){
     for(;;){const {done,value}=await rd.read();if(done)break;buf+=dec.decode(value,{stream:true});
       let i;while((i=buf.indexOf("\n"))>=0){const line=buf.slice(0,i).trim();buf=buf.slice(i+1);
         if(!line.startsWith("data:"))continue;let ev;try{ev=JSON.parse(line.slice(5))}catch(e){continue}
+        if(gem&&ev.usageMetadata)use={i:ev.usageMetadata.promptTokenCount,o:ev.usageMetadata.candidatesTokenCount,t:ev.usageMetadata.thoughtsTokenCount||0};
+        if(!gem&&ev.type==="message_start")use.i=ev.message?.usage?.input_tokens;
+        if(!gem&&ev.type==="message_delta"&&ev.usage)use.o=ev.usage.output_tokens;
         if(gem){const c=ev.candidates?.[0];const t=(c?.content?.parts||[]).map(x=>x.text||"").join("");if(t){text+=t;md=pii(text);render(md)}
           if(c?.finishReason==="MAX_TOKENS")stop="max_tokens";else if(c?.finishReason==="SAFETY")stop="refusal";if(ev.error)throw new Error("생성 중 오류가 났어요. 다시 시도해 주세요.");continue}
         if(ev.type==="content_block_delta"&&ev.delta?.type==="text_delta"){text+=ev.delta.text;md=pii(text);render(md)}
         else if(ev.type==="message_delta"&&ev.delta?.stop_reason)stop=ev.delta.stop_reason;
         else if(ev.type==="error")throw new Error("생성 중 오류가 났어요. 다시 시도해 주세요.")}}
     if(stop==="refusal")throw new Error("AI가 이 요청을 처리하지 않았어요. 입력 내용을 확인해 주세요.");
-    $("st").textContent=doneMsg(stop);
+    $("st").textContent=doneMsg(stop)+usageMsg(gem,use);
   }catch(err){$("st").textContent=err.name==="AbortError"?"취소했어요":(err.message||"생성에 실패했어요.")}
   finally{$("go").disabled=false}
 }
@@ -452,6 +471,13 @@ ul{padding-left:22px}li{margin:3px 0}
 th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}th{background:var(--soft)}
 hr{border:0;border-top:1px solid var(--line);margin:28px 0}
 .need{background:var(--chip);color:var(--accent);font-size:12px;padding:1px 6px;border-radius:3px}
+mark{background:var(--chip);color:var(--accent);font-weight:700;padding:0 3px;border-radius:3px}
+details.more{margin:8px 0 18px;border:1px solid var(--line);border-radius:8px;padding:0 14px}
+details.more summary{cursor:pointer;padding:10px 0;font-size:14px;color:var(--accent);font-weight:700}
+details.more[open]{padding-bottom:10px}
+td:first-child{white-space:nowrap;font-weight:700;width:1%}
+@media (max-width:520px){td:first-child{white-space:normal}}
+@media print{details.more{border:0;padding:0}details.more summary{display:none}}
 footer{color:var(--muted);font-size:12px;margin-top:48px;border-top:1px solid var(--line);padding-top:14px}
 @media print{body{background:#fff;color:#000}h2{break-after:avoid}h3{break-after:avoid}}`;
   const e=t=>t.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -475,7 +501,7 @@ $("applypaste").onclick=()=>{
   $("st").textContent=doneMsg("")+" · HTML 저장을 눌러 주세요";$("savehtml").scrollIntoView({behavior:"smooth",block:"center"});
 };
 $("copy").onclick=async()=>{
-  try{await navigator.clipboard.writeText(md);$("st").textContent="복사했어요 · 노션에 붙여넣으면 서식이 적용돼요"}
+  try{await navigator.clipboard.writeText(md.replace(/^\+\+\+\s*(\S.*)$/gm,"**▶ $1**").replace(/^\+\+\+\s*$/gm,"").replace(/==(.+?)==/g,"**$1**"));$("st").textContent="복사했어요 · 노션에 붙여넣으면 서식이 적용돼요"}
   catch(e){const r=document.createRange();r.selectNodeContents($("doc"));const s=getSelection();s.removeAllRanges();s.addRange(r);$("st").textContent="선택됨 · Ctrl+C로 복사하세요"}
 };
 </script>
