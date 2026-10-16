@@ -1,218 +1,292 @@
 <title>커리어캐쳐 포트폴리오 빌더</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@700&family=IBM+Plex+Sans+KR:wght@400;600&family=IBM+Plex+Mono&display=swap">
 <style>
-/* Layout: 좌측 입력 시트 / 우측 결과 미리보기, 좁으면 세로로 쌓임 */
+/* Layout: 좌측 입력 시트(섹션 탭 순서 = 노션 양식 순서) / 우측 노션형 미리보기 */
 :root{
-  --bg:#f3f5f2; --panel:#ffffff; --fg:#1d2420; --muted:#5d6a62; --line:#d6ddd8;
-  --accent:#1f6f54; --accent-fg:#ffffff; --soft:#e4efe9;
-  --display:"Gowun Batang",Georgia,serif; --body:"IBM Plex Sans KR",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
+  --bg:#f6f4fa; --panel:#ffffff; --fg:#231d2e; --muted:#6b6478; --line:#e2dcec;
+  --accent:#6b3fa0; --accent-fg:#ffffff; --soft:#efe8f8; --chip:#e6dbf5;
+  --font:"Malgun Gothic","맑은 고딕","Apple SD Gothic Neo","Noto Sans KR",sans-serif;
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121715;--panel:#1a211e;--fg:#e6ece8;--muted:#9aa8a0;--line:#2d3833;--accent:#5cc49b;--accent-fg:#0e1512;--soft:#203029;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#121715;--panel:#1a211e;--fg:#e6ece8;--muted:#9aa8a0;--line:#2d3833;--accent:#5cc49b;--accent-fg:#0e1512;--soft:#203029;color-scheme:dark}
-body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.6;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 48px}
-.wrap{max-width:1180px;margin:0 auto;display:grid;gap:24px}
-header h1{font-family:var(--display);font-size:clamp(26px,4vw,36px);margin:0;text-wrap:balance}
-header p{margin:6px 0 0;color:var(--muted);max-width:65ch}
-.brand{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
-.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:start}
-@media (max-width:900px){.grid{grid-template-columns:1fr}}
-form{display:grid;gap:18px}
-fieldset{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:16px;margin:0;display:grid;gap:12px;min-width:0}
-legend{font-weight:600;padding:0 6px}
-legend small{font-weight:400;color:var(--muted)}
-label{display:grid;gap:4px;font-size:13px;color:var(--muted)}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#16131c;--panel:#1f1a28;--fg:#ece7f4;--muted:#a69eb5;--line:#352d42;--accent:#b591e6;--accent-fg:#1a1422;--soft:#2a2236;--chip:#3a2d4d;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#16131c;--panel:#1f1a28;--fg:#ece7f4;--muted:#a69eb5;--line:#352d42;--accent:#b591e6;--accent-fg:#1a1422;--soft:#2a2236;--chip:#3a2d4d;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:14px;line-height:1.65;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+.top{border-bottom:3px solid var(--accent);padding-block:22px 16px;margin-bottom:22px}
+.top-in,.grid{max-width:1200px;margin:0 auto}
+.top-in{display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap}
+.top h1{margin:0;font-size:22px;font-weight:700;letter-spacing:-.02em}
+.top h1 b{color:var(--accent)}
+.top p{margin:4px 0 0;color:var(--muted);font-size:13px}
+.by{font-size:12px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:22px;align-items:start}
+@media (max-width:940px){.grid{grid-template-columns:1fr}}
+form{display:grid;gap:14px;min-width:0}
+details{background:var(--panel);border:1px solid var(--line);border-radius:6px}
+summary{cursor:pointer;padding:12px 14px;font-weight:700;display:flex;justify-content:space-between;gap:8px;list-style:none}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"＋";color:var(--accent)}
+details[open] summary::after{content:"－"}
+summary small{font-weight:400;color:var(--muted);margin-left:6px}
+.body{padding:0 14px 14px;display:grid;gap:10px}
+label{display:grid;gap:3px;font-size:12px;color:var(--muted)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 @media (max-width:480px){.row{grid-template-columns:1fr}}
-input,textarea,select{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px 10px;width:100%;box-sizing:border-box}
-textarea{min-height:72px;resize:vertical}
-input:focus,textarea:focus,select:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
-.actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-button{font:inherit;font-weight:600;border-radius:6px;padding:10px 18px;cursor:pointer;border:1px solid var(--line);background:var(--panel);color:var(--fg)}
-button.primary{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
-button:disabled{opacity:.55;cursor:wait}
-.out{position:sticky;top:16px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:20px;min-width:0;max-height:calc(100vh - 32px);overflow:auto}
-.out-head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
-.status{font-family:var(--mono);font-size:12px;color:var(--muted)}
-.doc h2{font-family:var(--display);font-size:22px;margin:4px 0 12px;text-wrap:balance}
-.doc h3{font-size:16px;margin:20px 0 8px;padding-bottom:4px;border-bottom:1px solid var(--line)}
-.doc table{border-collapse:collapse;width:100%;font-size:14px;margin:6px 0}
+input,textarea,select{font:inherit;font-size:14px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:7px 9px;width:100%}
+textarea{min-height:64px;resize:vertical}
+input:focus,textarea:focus,select:focus,button:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.item{border:1px solid var(--line);border-left:3px solid var(--chip);border-radius:4px;padding:10px;display:grid;gap:8px}
+.item-h{display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:700;color:var(--accent)}
+.x{border:0;background:none;color:var(--muted);cursor:pointer;font:inherit;font-size:12px;padding:2px 4px}
+.add{justify-self:start;border:1px dashed var(--accent);background:none;color:var(--accent);border-radius:4px;padding:6px 12px;font:inherit;font-size:13px;cursor:pointer}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{font:inherit;font-weight:700;border-radius:4px;padding:10px 16px;cursor:pointer;border:1px solid var(--line);background:var(--panel);color:var(--fg)}
+.btn.primary{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.btn:disabled{opacity:.55;cursor:wait}
+.out{position:sticky;top:12px;background:var(--panel);border:1px solid var(--line);border-radius:6px;min-width:0;max-height:calc(100vh - 24px);display:flex;flex-direction:column}
+.out-h{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--soft);border-radius:6px 6px 0 0}
+.status{font-size:12px;color:var(--muted)}
+.doc{padding:22px 26px 30px;overflow:auto}
+.doc h1{font-size:24px;margin:0 0 6px;letter-spacing:-.02em;text-wrap:balance}
+.doc h2{font-size:18px;margin:26px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--chip);color:var(--accent)}
+.doc h3{font-size:15px;margin:16px 0 6px}
+.doc p{margin:4px 0}
+.doc ul{padding-left:20px;margin:4px 0}
+.doc li{margin:2px 0}
+.doc blockquote{margin:8px 0;padding:8px 12px;background:var(--soft);border-left:3px solid var(--accent);border-radius:0 4px 4px 0}
 .doc .tw{overflow-x:auto}
+.doc table{border-collapse:collapse;width:100%;font-size:13px;margin:6px 0}
 .doc th,.doc td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
 .doc th{background:var(--soft)}
-.doc ul{padding-left:20px;margin:6px 0}
-.doc .need{background:var(--soft);color:var(--accent);font-family:var(--mono);font-size:12px;padding:1px 6px;border-radius:4px}
-.tag{font-family:var(--mono);font-size:11px;background:var(--soft);color:var(--accent);padding:2px 8px;border-radius:999px}
-.note{font-size:13px;color:var(--muted)}
+.doc hr{border:0;border-top:1px solid var(--line);margin:18px 0}
+.need{background:var(--chip);color:var(--accent);font-size:12px;padding:1px 6px;border-radius:3px}
+.note{font-size:12px;color:var(--muted);padding:0 14px 12px;margin:0}
 </style>
 
-<div class="wrap">
-  <header>
-    <div class="brand">CareerCatcher · Portfolio Builder</div>
-    <h1>프로젝트 한 장 포트폴리오 빌더</h1>
-    <p>아는 만큼만 채우고 <b>포트폴리오 생성</b>을 누르세요. 비운 칸은 지어내지 않고 <span class="tag">보완 필요</span>로 표시해요. 결과는 노션에 바로 붙여넣을 수 있어요.</p>
-  </header>
-
-  <div class="grid">
-    <form id="f">
-      <fieldset>
-        <legend>1. 지원 정보</legend>
-        <div class="row">
-          <label>직군<select id="field">
-            <option>개발 (백엔드/프론트/앱)</option><option>데이터·AI</option><option>디자인 (UX/UI)</option><option>기획·PM</option><option>기타</option>
-          </select></label>
-          <label>지원 직무<input id="role" placeholder="예: 백엔드 개발자 (신입)"></label>
-        </div>
-        <label>채용공고 핵심 내용 <small>(선택, 붙여넣기)</small><textarea id="jd" placeholder="자격요건·우대사항을 붙여넣으면 키워드를 매칭해요"></textarea></label>
-      </fieldset>
-
-      <fieldset>
-        <legend>2. 프로젝트 기본</legend>
-        <div class="row">
-          <label>프로젝트명<input id="name"></label>
-          <label>기간<input id="period" placeholder="2025.03~06 (4개월)"></label>
-        </div>
-        <label>형태·팀 구성<input id="team" placeholder="팀 4명 (BE 2, FE 1, 디자인 1)"></label>
-        <label>주제·배경 (누구의 어떤 문제?)<textarea id="topic"></textarea></label>
-        <label>기술 스택<input id="stack" placeholder="Java, Spring Boot, MySQL, Redis, AWS"></label>
-        <label>링크 <small>(GitHub·배포·영상)</small><input id="links"></label>
-      </fieldset>
-
-      <fieldset>
-        <legend>3. 역할과 구현</legend>
-        <label>내가 맡은 일 (편하게 나열)<textarea id="myrole" placeholder="검색 API 개발, DB 설계, 배포 담당…"></textarea></label>
-        <label>기여도<input id="contrib" placeholder="예: 60%"></label>
-        <label>핵심 기능과 구현 방법·기술 선택 이유<textarea id="impl" placeholder="실시간 채팅 - WebSocket 사용, 폴링보다 서버 부하가 적어서"></textarea></label>
-      </fieldset>
-
-      <fieldset>
-        <legend>4. 성과 <small>· 숫자가 있으면 꼭</small></legend>
-        <label>정량 성과 (전/후, 측정 방법)<textarea id="result" placeholder="검색 응답 3.2초 → 0.8초 (JMeter로 측정)"></textarea></label>
-        <label>기타 성과 (수상·사용자 반응·배포)<input id="etc"></label>
-      </fieldset>
-
-      <fieldset>
-        <legend>5. 문제해결과 태도</legend>
-        <label>가장 막혔던 문제와 해결 과정<textarea id="trouble" placeholder="무슨 문제 → 원인은 어떻게 찾았나 → 어떤 대안을 비교했나 → 결과"></textarea></label>
-        <label>협업 장면 (갈등 해결·먼저 제안한 것)<textarea id="collab"></textarea></label>
-        <label>AI 활용과 검증 방법 <small>(선택)</small><textarea id="ai"></textarea></label>
-        <label>아쉬운 점·배운 점<textarea id="retro"></textarea></label>
-      </fieldset>
-
-      <div class="actions">
-        <button type="submit" class="primary" id="go">포트폴리오 생성</button>
-        <button type="button" id="ex">예시로 채우기</button>
-        <button type="button" id="clr">입력 지우기</button>
-      </div>
-    </form>
-
-    <section class="out" aria-live="polite">
-      <div class="out-head">
-        <span class="status" id="st">미리보기 · 예시 결과</span>
-        <button type="button" id="copy">마크다운 복사</button>
-      </div>
-      <div class="doc" id="doc"></div>
-      <p class="note" id="na" hidden>이 화면에서는 AI 생성을 쓸 수 없어요. claude.ai에 로그인한 상태에서 열어 주세요.</p>
-    </section>
+<div class="top"><div class="top-in">
+  <div>
+    <h1><b>Purple Career</b> 포트폴리오 빌더</h1>
+    <p>노션 포트폴리오 양식 순서대로 입력하면, 직무 역량이 드러나는 완성본으로 정리해 드려요.</p>
   </div>
+  <span class="by">© career catcher</span>
+</div></div>
+
+<div class="grid">
+  <form id="f">
+    <details open>
+      <summary>Contact · 기본 정보</summary>
+      <div class="body">
+        <div class="row">
+          <label>이름<input id="name" placeholder="홍길동"></label>
+          <label>지원 직무<input id="role" placeholder="데이터 분석가"></label>
+        </div>
+        <div class="row">
+          <label>이메일<input id="email"></label>
+          <label>연락처<input id="phone" placeholder="010-0000-0000"></label>
+        </div>
+        <label>링크 (블로그·깃허브·링크드인·인스타)<input id="links"></label>
+        <label>채용공고 핵심 내용 <small>(선택, 키워드 매칭용)</small><textarea id="jd"></textarea></label>
+      </div>
+    </details>
+
+    <details open>
+      <summary>About me<small>강점과 성장 방향</small></summary>
+      <div class="body">
+        <label>나의 강점·관심사를 편하게 적어 주세요<textarea id="about" placeholder="통계 전공, 공모전 3회, Python·SQL 분석이 강점, 비즈니스를 이해하는 분석가가 되고 싶음"></textarea></label>
+      </div>
+    </details>
+
+    <details>
+      <summary>Skills<small>협업 툴 / 기술 스택</small></summary>
+      <div class="body">
+        <label>협업 툴<input id="tools" placeholder="Slack, Notion, Git, Figma"></label>
+        <label>기술 스택과 활용 수준<textarea id="skills" placeholder="Python - 프로젝트 3건, pandas 전처리&#10;SQL - 공모전 데이터 추출"></textarea></label>
+      </div>
+    </details>
+
+    <details open>
+      <summary>Projects<small>성과 좋은 순서로</small></summary>
+      <div class="body"><div id="projects" style="display:grid;gap:10px"></div>
+        <button type="button" class="add" data-add="projects">프로젝트 추가</button></div>
+    </details>
+
+    <details>
+      <summary>Experiences<small>동아리·인턴·경력 3~4개</small></summary>
+      <div class="body"><div id="experiences" style="display:grid;gap:10px"></div>
+        <button type="button" class="add" data-add="experiences">경험 추가</button></div>
+    </details>
+
+    <details>
+      <summary>Education<small>학교·교육 이수</small></summary>
+      <div class="body"><div id="education" style="display:grid;gap:10px"></div>
+        <button type="button" class="add" data-add="education">학력·교육 추가</button></div>
+    </details>
+
+    <details>
+      <summary>Language · Other</summary>
+      <div class="body">
+        <label>어학<input id="lang" placeholder="OPIc IH (2022.06)"></label>
+        <label>기타 (자격증·수상·봉사 등)<textarea id="other"></textarea></label>
+      </div>
+    </details>
+
+    <div class="actions">
+      <button type="submit" class="btn primary" id="go">포트폴리오 완성하기</button>
+      <button type="button" class="btn" id="ex">예시로 채우기</button>
+      <button type="button" class="btn" id="clr">모두 지우기</button>
+    </div>
+  </form>
+
+  <section class="out" aria-live="polite">
+    <div class="out-h">
+      <span class="status" id="st">미리보기 · 예시</span>
+      <button type="button" class="btn" id="copy">노션용 복사</button>
+    </div>
+    <div class="doc" id="doc"></div>
+    <p class="note" id="na" hidden>이 화면에서는 AI 생성을 쓸 수 없어요. claude.ai에 로그인한 상태에서 열어 주세요.</p>
+  </section>
 </div>
 
 <script>
-const ids=["field","role","jd","name","period","team","topic","stack","links","myrole","contrib","impl","result","etc","trouble","collab","ai","retro"];
-const labels={field:"직군",role:"지원 직무",jd:"채용공고",name:"프로젝트명",period:"기간",team:"형태·팀 구성",topic:"주제·배경",stack:"기술 스택",links:"링크",myrole:"내가 맡은 일",contrib:"기여도",impl:"핵심 기능·구현·기술 선택 이유",result:"정량 성과",etc:"기타 성과",trouble:"문제해결 과정",collab:"협업 장면",ai:"AI 활용과 검증",retro:"아쉬운 점·배운 점"};
 const $=id=>document.getElementById(id);
-const EX={field:"개발 (백엔드/프론트/앱)",role:"백엔드 개발자 (신입)",jd:"Java/Spring 기반 API 개발 경험, RDBMS 설계 이해, 성능 개선 경험 우대, 협업 커뮤니케이션",name:"동네마켓 - 중고거래 웹서비스",period:"2025.03~06 (4개월)",team:"팀 4명 (BE 2, FE 1, 디자인 1)",topic:"동네 단위 중고거래에서 검색이 느리고 거래 약속이 자주 깨지는 문제",stack:"Java 17, Spring Boot, MySQL, Redis, AWS EC2, GitHub Actions",links:"github.com/example/dongne-market",myrole:"검색 API 개발, 상품·채팅 DB 설계, CI/CD 구축",contrib:"60%",impl:"상품 검색 - MySQL 인덱스 + Redis 캐시, 조회가 많아서\n실시간 채팅 - WebSocket(STOMP), 폴링보다 서버 부하가 적어서",result:"검색 응답 3.2초 → 0.8초 (JMeter 100명 동시 접속 측정)",etc:"교내 캡스톤 우수상, 베타 사용자 120명",trouble:"상품이 1만 건을 넘자 검색이 느려짐 → 슬로우쿼리 로그로 LIKE 전체 스캔 확인 → 풀텍스트 인덱스와 Elasticsearch를 비교, 기간 내 적용 가능한 인덱스+캐시 선택 → 0.8초로 단축",collab:"PR 리뷰가 밀려 리뷰 규칙(24시간 내, 2인 승인)을 제안함 → 머지 대기 2일→0.5일",ai:"테스트 코드 초안을 AI로 만들고 경계값 케이스를 직접 추가해 검증",retro:"초기에 부하테스트를 하지 않아 성능 이슈를 늦게 발견함. 다음엔 설계 단계에서 성능 목표를 정할 것"};
-const SAMPLE=`## 검색 응답 0.8초로 개선한 중고거래 웹서비스 — Spring Boot · Redis · MySQL
-| 항목 | 내용 |
-|---|---|
-| 프로젝트명 / 기간 / 형태 | 동네마켓 / 2025.03~06 / 팀 4명 |
-| 나의 역할 (기여도) | 백엔드 · 검색 API 담당 (60%) |
-| 증명하는 직무역량 | API 개발 · DB 설계 · 성능 개선 · 협업 |
-### 정량적 성과
-| 지표 | Before | After | 측정 방법 |
-|---|---|---|---|
-| 검색 응답시간 | 3.2s | 0.8s | JMeter 동시 100명 |
-### 문제해결 과정
-- **문제**: 상품 1만 건 이후 검색 지연
-- **원인 분석**: 슬로우쿼리 로그로 LIKE 전체 스캔 확인
-- **해결**: 풀텍스트 인덱스 vs Elasticsearch 비교 → 인덱스+Redis 캐시 선택
-- **결과**: 응답 75% 단축
-(왼쪽 양식을 채우고 생성하면 전체 문서가 만들어져요)`;
-let md=SAMPLE;
-
-function esc(s){return s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]))}
-function inline(s){return esc(s).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/\[보완 필요[^\]]*\]/g,m=>`<span class="need">${m}</span>`)}
-function render(text){
-  const L=text.split("\n");let h="",i=0;
-  while(i<L.length){const l=L[i];
-    if(l.startsWith("|")){const rows=[];while(i<L.length&&L[i].startsWith("|")){rows.push(L[i]);i++}
-      const cells=r=>r.replace(/^\||\|$/g,"").split("|").map(c=>c.trim());
-      const body=rows.filter((r,k)=>k!==1||!/^[\s|:-]+$/.test(r));
-      h+='<div class="tw"><table>'+body.map((r,k)=>"<tr>"+cells(r).map(c=>k===0?`<th>${inline(c)}</th>`:`<td>${inline(c)}</td>`).join("")+"</tr>").join("")+"</table></div>";continue}
-    if(/^\s*[-*] /.test(l)){h+="<ul>";while(i<L.length&&/^\s*[-*] /.test(L[i])){h+="<li>"+inline(L[i].replace(/^\s*[-*] /,""))+"</li>";i++}h+="</ul>";continue}
-    if(l.startsWith("### "))h+="<h3>"+inline(l.slice(4))+"</h3>";
-    else if(l.startsWith("## "))h+="<h2>"+inline(l.slice(3))+"</h2>";
-    else if(l.startsWith("# "))h+="<h2>"+inline(l.slice(2))+"</h2>";
-    else if(l.trim())h+="<p>"+inline(l)+"</p>";
-    i++}
-  $("doc").innerHTML=h;
+const SIMPLE=["name","role","email","phone","links","jd","about","tools","skills","lang","other"];
+const LISTS={
+  projects:{title:"프로젝트",fields:[["pname","프로젝트명","input"],["pperiod","작업기간","input","2025.04 ~ 2025.07"],["psum","요약 (무엇을, 왜)","textarea"],["pteam","전체 인원 / 나의 역할·기여도","input","4명 / 데이터 수집·분석 담당 (60%)"],["pimpl","구현·분석 내용과 사용 기술","textarea"],["presult","성과 (숫자로)","textarea","정확도 72% → 85%, 수상 등"],["ptrouble","문제해결 과정과 배운 점","textarea","문제 → 원인 → 시도한 방법 → 결과"]]},
+  experiences:{title:"경험",fields:[["ename","이름 (동아리·회사)","input"],["eperiod","진행기간","input"],["edesc","소개와 맡은 일·성과","textarea"]]},
+  education:{title:"학력·교육",fields:[["sname","학교·기관명","input"],["speriod","기간","input","2020.03 - 2025.02"],["smajor","전공·과정명","input"]]}
+};
+const listEl=k=>$(k);
+function addItem(k,v={}){
+  const box=document.createElement("div");box.className="item";
+  const n=listEl(k).children.length+1;
+  box.innerHTML=`<div class="item-h"><span>${LISTS[k].title} ${n}</span><button type="button" class="x">삭제</button></div>`+
+    LISTS[k].fields.map(([f,l,t,ph])=>`<label>${l}${t==="input"?`<input data-f="${f}" placeholder="${ph||""}">`:`<textarea data-f="${f}" placeholder="${ph||""}"></textarea>`}</label>`).join("");
+  box.querySelectorAll("[data-f]").forEach(el=>el.value=v[el.dataset.f]||"");
+  box.querySelector(".x").onclick=()=>{box.remove();renum(k);save()};
+  listEl(k).appendChild(box);
 }
+function renum(k){[...listEl(k).children].forEach((c,i)=>c.querySelector(".item-h span").textContent=`${LISTS[k].title} ${i+1}`)}
+document.querySelectorAll("[data-add]").forEach(b=>b.onclick=()=>{addItem(b.dataset.add);save()});
+function state(){const s={};SIMPLE.forEach(k=>s[k]=$(k).value);for(const k in LISTS)s[k]=[...listEl(k).children].map(c=>Object.fromEntries([...c.querySelectorAll("[data-f]")].map(e=>[e.dataset.f,e.value])));return s}
+function load(s){SIMPLE.forEach(k=>$(k).value=s[k]||"");for(const k in LISTS){listEl(k).innerHTML="";(s[k]&&s[k].length?s[k]:[{}]).forEach(v=>addItem(k,v))}save()}
+function save(){try{localStorage.setItem("pc-pf2",JSON.stringify(state()))}catch(e){}}
+$("f").addEventListener("input",save);
+
+const EX={name:"김보라",role:"데이터 분석가",email:"bora@example.com",phone:"010-0000-0000",links:"github.com/example · blog.example.com",jd:"SQL·Python 활용 데이터 추출/분석, 대시보드 구축 경험 우대, 이해관계자 커뮤니케이션",
+about:"통계학 전공. 공모전 3회 참가(1회 수상). Python·SQL 분석과 시각화가 강점. 현장을 이해하고 의사결정에 쓰이는 분석을 하고 싶음",tools:"Slack, Notion, Git/GitHub, Jira",skills:"Python - pandas 전처리·시각화, 프로젝트 3건\nSQL - MySQL로 공모전 데이터 추출\nTableau - 대시보드 2개 제작",
+projects:[{pname:"카페 매출 예측 대시보드",pperiod:"2025.04 ~ 2025.07",psum:"동네 카페 3곳의 판매 데이터로 요일·날씨별 수요를 예측해 발주 낭비를 줄이는 프로젝트",pteam:"4명 / 데이터 전처리·모델링 담당 (50%)",pimpl:"POS 데이터 2년치 정제(Python), 날씨 API 결합, XGBoost 예측 모델, Tableau 대시보드",presult:"예측 오차(MAPE) 24% → 11%, 점주 테스트 후 폐기량 약 20% 감소 보고",ptrouble:"공휴일 매출 튐으로 오차가 큼 → 잔차 분석으로 원인 확인 → 공휴일·이벤트 변수 추가 → 오차 절반 감소. 변수 설계는 현장 인터뷰에서 시작해야 함을 배움"}],
+experiences:[{ename:"데이터 분석 연합 동아리 'D.Lab'",eperiod:"2024.03 ~ 2024.12",edesc:"스터디 운영진. 월 1회 케이스 스터디 발표, Kaggle 대회 팀 동메달"}],
+education:[{sname:"한국대학교",speriod:"2020.03 - 2025.02",smajor:"통계학 전공"},{sname:"K-Digital Training",speriod:"2025.03 - 2025.07",smajor:"데이터 분석 실무 과정 수료"}],
+lang:"OPIc IH (2024.06)",other:"ADsP 자격증 (2024.11)"};
+try{const s=JSON.parse(localStorage.getItem("pc-pf2")||"null");load(s||{})}catch(e){load({})}
+$("ex").onclick=()=>load(EX);
+$("clr").onclick=()=>load({});
+
+const SAMPLE=`# 데이터 분석가 | 김보라 포트폴리오
+> 안녕하세요. 현장의 데이터로 **매출과 낭비를 함께 줄이는** 데이터 분석가 김보라입니다.
+
+## 💫 About me
+통계학 전공자로서 **Python·SQL 분석과 시각화**에 강점이 있습니다. 공모전 3회와 실매장 데이터 프로젝트로 **분석 결과가 실제 의사결정에 쓰이는 과정**을 경험했습니다.
+
+## 💻 Projects
+### 카페 매출 예측 대시보드
+- **요약**: 요일·날씨별 수요 예측으로 발주 낭비 감소
+- **작업기간**: 2025.04 ~ 2025.07
+- **역할**: 4명 중 전처리·모델링 담당 (기여도 50%)
+- **성과**: 예측 오차 24% → 11%
+- **회고/느낀점**: 공휴일 변수 추가로 오차를 절반으로 줄이며, 변수 설계는 현장 인터뷰에서 시작해야 함을 배움
+
+(왼쪽을 채우고 '포트폴리오 완성하기'를 누르면 전체 문서가 만들어져요)`;
+let md=SAMPLE;
+function esc(s){return s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]))}
+function inl(s){return esc(s).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/\[보완 필요[^\]]*\]/g,m=>`<span class="need">${m}</span>`)}
+function render(t){const L=t.split("\n");let h="",i=0;
+  while(i<L.length){const l=L[i];
+    if(l.startsWith("|")){const r=[];while(i<L.length&&L[i].startsWith("|"))r.push(L[i++]);const c=x=>x.replace(/^\||\|$/g,"").split("|").map(s=>s.trim());
+      h+='<div class="tw"><table>'+r.filter((x,k)=>!(k===1&&/^[\s|:-]+$/.test(x))).map((x,k)=>"<tr>"+c(x).map(s=>k?`<td>${inl(s)}</td>`:`<th>${inl(s)}</th>`).join("")+"</tr>").join("")+"</table></div>";continue}
+    if(/^\s*[-*] /.test(l)){h+="<ul>";while(i<L.length&&/^\s*[-*] /.test(L[i]))h+="<li>"+inl(L[i++].replace(/^\s*[-*] /,""))+"</li>";h+="</ul>";continue}
+    if(l.startsWith("> "))h+="<blockquote>"+inl(l.slice(2))+"</blockquote>";
+    else if(l.startsWith("### "))h+="<h3>"+inl(l.slice(4))+"</h3>";
+    else if(l.startsWith("## "))h+="<h2>"+inl(l.slice(3))+"</h2>";
+    else if(l.startsWith("# "))h+="<h1>"+inl(l.slice(2))+"</h1>";
+    else if(/^---+$/.test(l.trim()))h+="<hr>";
+    else if(l.trim())h+="<p>"+inl(l)+"</p>";
+    i++}
+  $("doc").innerHTML=h}
 render(md);
 
-function fill(o){ids.forEach(k=>{$(k).value=o[k]||($(k).tagName==="SELECT"?$(k).options[0].text:"")});save()}
-function save(){try{localStorage.setItem("cc-pf",JSON.stringify(Object.fromEntries(ids.map(k=>[k,$(k).value]))))}catch(e){}}
-try{const s=JSON.parse(localStorage.getItem("cc-pf")||"null");if(s)fill(s)}catch(e){}
-$("f").addEventListener("input",save);
-$("ex").onclick=()=>fill(EX);
-$("clr").onclick=()=>fill({});
-
-function prompt(){
-  const data=ids.map(k=>`- ${labels[k]}: ${$(k).value.trim()||"(미입력)"}`).join("\n");
-  return `너는 커리어캐쳐(CareerCatcher)의 포트폴리오 코치다. 아래 구직자 입력으로 노션에 붙여넣을 프로젝트 포트폴리오 1장을 한국어 마크다운으로 작성하라.
+function buildPrompt(){
+  const s=state();
+  return `너는 퍼플커리어(커리어캐쳐)의 포트폴리오 컨설턴트다. 아래 구직자 입력(JSON)으로 노션 포트폴리오 완성본을 한국어 마크다운으로 작성하라.
 
 [구직자 입력]
-${data}
+${JSON.stringify(s,null,1)}
 
 [규칙]
-- 입력에 없는 사실·수치는 절대 만들지 않는다. 비어 있거나 부족하면 "[보완 필요: 무엇을 적으면 좋은지]"로 표시한다.
-- 태도는 형용사 대신 행동 장면으로 쓴다. 문장은 짧은 개조식으로 쓴다.
-- 채용공고가 있으면 핵심 키워드를 뽑아 '증명하는 직무역량'에 매칭한다. 없으면 직군의 일반 핵심역량으로 매칭한다.
-- 직군에 맞게 '구현 내용' 제목을 바꾼다 (디자인: 디자인 의사결정, 데이터: 분석·모델링, 기획: 기획·지표 설계).
-- 마크다운은 ##, ###, 표(|), 목록(-), **굵게**만 사용한다. 코드블록으로 감싸지 않는다.
+- 입력에 없는 사실·수치·학교·회사는 절대 만들지 않는다. 비었거나 부족하면 "[보완 필요: 무엇을 적으면 좋은지]"로 표시한다.
+- 지원 직무 관점에서 강점이 드러나게 다듬되, 태도는 형용사 대신 행동 장면으로 쓴다.
+- 채용공고가 있으면 그 키워드가 About me·Skills·프로젝트 성과에 자연스럽게 드러나게 한다.
+- 중요한 부분은 **굵게** 처리한다. 사용 가능한 문법: #, ##, ###, >, -, 표(|), **굵게**, ---. 코드블록 금지.
+- 프로젝트는 성과가 좋은 순으로 정렬한다. 경험은 직무 연관성이 높은 순으로 최대 4개.
 
-[출력 양식]
-## (성과를 담은 한 줄 요약) — (핵심 기술 2~3개)
-| 항목 | 내용 |  (프로젝트명/기간/형태, 주제·배경, 나의 역할(기여도), 기술 스택, 증명하는 직무역량, 링크)
-### 역할 분담   (팀 역할 한 줄 + 내가 맡은 일을 동사형 3~5개)
-### 구현 내용   (표: 기능 | 구현 방법 | 기술 선택 이유)
-### 정량적 성과 (표: 지표 | Before | After | 측정 방법)
-### 문제해결 과정 (문제 → 원인 분석 → 해결·대안 비교 → 결과 → 배운 점)
-### 협업·태도   (표: 태도 키워드 | 근거 장면)
-### AI 활용과 검증 (입력 없으면 생략)
-### 회고
-### 코치 피드백 (보완하면 더 강해지는 점 3가지)`;
+[출력 양식 — 이 순서와 제목을 그대로 지킨다]
+# (지원 직무) | (이름) 포트폴리오
+> 안녕하세요. (직무 정체성을 담은 한 문장 자기소개) (이름)입니다.
+- ✉️ E-Mail / 📞 연락처 / 🔗 링크 (입력된 것만)
+
+## 💫 About me
+(전문성과 강점, 성장 의지를 담은 3~4문장. 핵심은 굵게)
+
+## ⚒️ Skills
+### Collaboration & Tools
+- 툴 목록
+### Tech Stack
+- 기술 – 활용 경험·수준
+
+## 💻 Projects
+(프로젝트마다)
+### 프로젝트명
+- **요약**:
+- **작업기간**:
+- **역할**: 전체 인원 / 나의 역할과 기여도
+- **구현 내용**: 사용 기술과 핵심 작업 2~3개
+- **성과**: 구체적·정량적으로
+- **문제해결**: 문제 → 원인 분석 → 해결 → 결과
+- **회고/느낀점**: 인사이트 1~2개
+
+## 🎈 Experiences
+### 이름 (기간)
+- 소개 / 역할과 성과
+
+## 🛫 Education
+| 학교·기관 | 기간 | 전공·과정 |
+
+## 💬 Language
+## 🎳 Other
+---
+## 🔍 컨설턴트 피드백
+- 보완하면 더 강해지는 점 3가지`;
 }
 
-let sampleP=window.claude?.use?window.claude.use("sample"):Promise.resolve(null);
-let busy=null;
+const sampleP=window.claude?.use?window.claude.use("sample"):Promise.resolve(null);
+let ctl=null;
 $("f").addEventListener("submit",async e=>{
   e.preventDefault();
-  if(!$("name").value.trim()&&!$("myrole").value.trim()){$("st").textContent="프로젝트명이나 맡은 일 중 하나는 적어 주세요.";return}
+  const s=state();
+  if(!s.role.trim()||!s.projects.some(p=>p.pname.trim())){$("st").textContent="지원 직무와 프로젝트 1개 이상은 적어 주세요.";return}
   const sample=await sampleP;
   if(!sample){$("na").hidden=false;$("st").textContent="AI 생성 불가";return}
-  busy?.abort();busy=new AbortController();
+  ctl?.abort();ctl=new AbortController();
   $("go").disabled=true;$("st").textContent="작성 중…";
   try{
-    const r=await sample(prompt(),{signal:busy.signal,modelTier:"default",cache:false,onText:({text})=>{md=text;render(md)}});
+    const r=await sample(buildPrompt(),{signal:ctl.signal,modelTier:"default",cache:false,onText:({text})=>{md=text;render(md)}});
     md=r.text;render(md);$("st").textContent="완성 · 노션에 붙여넣으세요";
   }catch(err){
     if(err?.text){md=err.text;render(md)}
     $("st").textContent=err?.code==="rate_limited"?"요청이 많아요. 잠시 후 다시 눌러 주세요.":err?.code==="not_granted"?"AI 사용 권한이 허용되지 않았어요.":"생성에 실패했어요. 다시 눌러 주세요.";
   }finally{$("go").disabled=false}
 });
-
 $("copy").onclick=async()=>{
-  try{await navigator.clipboard.writeText(md);$("st").textContent="복사했어요"}
+  try{await navigator.clipboard.writeText(md);$("st").textContent="복사했어요 · 노션에 붙여넣으면 서식이 적용돼요"}
   catch(e){const r=document.createRange();r.selectNodeContents($("doc"));const s=getSelection();s.removeAllRanges();s.addRange(r);$("st").textContent="선택됨 · Ctrl+C로 복사하세요"}
 };
 </script>
