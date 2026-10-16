@@ -65,6 +65,7 @@ input:focus,textarea:focus,select:focus,button:focus-visible,summary:focus-visib
 .doc details.more summary{cursor:pointer;padding:8px 0;font-size:13px;color:var(--accent);font-weight:700}
 .doc details.more[open]{padding-bottom:8px}
 .doc td:first-child{white-space:nowrap;font-weight:700;width:1%}
+.doc th,.doc td{word-break:keep-all}
 .need{background:var(--chip);color:var(--accent);font-size:12px;padding:1px 6px;border-radius:3px}
 .ready{box-shadow:0 0 0 3px var(--chip);border-color:var(--accent)!important;color:var(--accent)}
 .paste{order:2;display:grid;gap:8px;padding:12px 14px;border-top:1px solid var(--line);background:var(--soft)}
@@ -372,11 +373,15 @@ ${JSON.stringify(s,null,1)}
 +++
 
 ## 🎈 Experiences
-### 이름 (기간)
-- 소개 / 역할과 성과
+| 경험 | 기간 | 역할 | 핵심 성과 |
+|---|---|---|---|
+| 동아리·인턴·회사명 | 2024.03 ~ 12 | 맡은 역할 한 줄 | ==숫자 성과== 위주 한 줄 |
+(경험마다 한 행. 부수 설명이 있으면 표 아래 "+++ 경험 상세 보기" 접기 블록에 경험별로 모두 적는다)
 
 ## 🛫 Education
 | 학교·기관 | 기간 | 전공·과정 |
+|---|---|---|
+(학교·교육마다 한 행, 입력한 것은 모두)
 
 ## 💬 Language
 ## 🎳 Other
@@ -476,7 +481,7 @@ details.more{margin:8px 0 18px;border:1px solid var(--line);border-radius:8px;pa
 details.more summary{cursor:pointer;padding:10px 0;font-size:14px;color:var(--accent);font-weight:700}
 details.more[open]{padding-bottom:10px}
 td:first-child{white-space:nowrap;font-weight:700;width:1%}
-@media (max-width:520px){td:first-child{white-space:normal}}
+@media (max-width:520px){td:first-child{white-space:normal;min-width:4.5em}th,td{word-break:keep-all;overflow-wrap:normal;padding:7px 8px}table{font-size:13px}}
 @media print{details.more{border:0;padding:0}details.more summary{display:none}}
 footer{color:var(--muted);font-size:12px;margin-top:48px;border-top:1px solid var(--line);padding-top:14px}
 @media print{body{background:#fff;color:#000}h2{break-after:avoid}h3{break-after:avoid}}`;
