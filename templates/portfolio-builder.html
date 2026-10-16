@@ -166,7 +166,7 @@ input:focus,textarea:focus,select:focus,button:focus-visible,summary:focus-visib
   <section class="out" aria-live="polite">
     <div class="out-h">
       <span class="status" id="st">미리보기 · 예시</span>
-      <button type="button" class="btn" id="copy">노션용 복사</button>
+      <span class="actions"><button type="button" class="btn" id="copy">노션용 복사</button><button type="button" class="btn primary" id="savehtml">HTML 저장</button></span>
     </div>
     <div class="doc" id="doc"></div>
     <p class="note" id="na" hidden>이메일·연락처는 프롬프트에서 빠져 있어요. 완성본의 [[EMAIL]], [[PHONE]] 자리에 직접 넣어 주세요. 복사된 프롬프트를 <a href="https://claude.ai" target="_blank" rel="noopener">Claude</a> 또는 <a href="https://chatgpt.com" target="_blank" rel="noopener">ChatGPT</a>에 붙여넣으면 노션 양식대로 완성본이 나와요. 결과를 노션에 붙여넣으세요.</p>
@@ -392,6 +392,36 @@ async function viaApi(key){
   }catch(err){$("st").textContent=err.name==="AbortError"?"취소했어요":(err.message||"생성에 실패했어요.")}
   finally{$("go").disabled=false}
 }
+const dlP=window.claude?.use?window.claude.use("downloads"):Promise.resolve(null);
+function htmlDoc(){
+  const title=($("doc").querySelector("h1")?.textContent||(($("role").value||"")+" 포트폴리오")).trim();
+  const css=`:root{--bg:#fff;--fg:#231d2e;--muted:#6b6478;--line:#e2dcec;--accent:#6b3fa0;--soft:#efe8f8;--chip:#e6dbf5}
+@media (prefers-color-scheme:dark){:root{--bg:#16131c;--fg:#ece7f4;--muted:#a69eb5;--line:#352d42;--accent:#b591e6;--soft:#2a2236;--chip:#3a2d4d}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font-family:"Malgun Gothic","맑은 고딕","Apple SD Gothic Neo","Noto Sans KR",sans-serif;font-size:15px;line-height:1.7}
+main{max-width:860px;margin:0 auto;padding:48px max(20px,env(safe-area-inset-left,0px)) 64px}
+header.band{border-top:6px solid var(--accent)}
+h1{font-size:30px;margin:0 0 10px;letter-spacing:-.02em}
+h2{font-size:20px;margin:40px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--chip);color:var(--accent)}
+h3{font-size:17px;margin:22px 0 8px}
+blockquote{margin:12px 0 18px;padding:14px 18px;background:var(--soft);border-left:4px solid var(--accent);border-radius:0 6px 6px 0;font-size:16px}
+ul{padding-left:22px}li{margin:3px 0}
+.tw{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:14px;margin:8px 0}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}th{background:var(--soft)}
+hr{border:0;border-top:1px solid var(--line);margin:28px 0}
+.need{background:var(--chip);color:var(--accent);font-size:12px;padding:1px 6px;border-radius:3px}
+footer{color:var(--muted);font-size:12px;margin-top:48px;border-top:1px solid var(--line);padding-top:14px}
+@media print{body{background:#fff;color:#000}h2{break-after:avoid}h3{break-after:avoid}}`;
+  const e=t=>t.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  return `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${e(title)}</title><style>${css}</style></head><body><header class="band"></header><main>${$("doc").innerHTML}<footer>Made with CareerCatcher Portfolio Builder · purple-career</footer></main></body></html>`;
+}
+$("savehtml").onclick=async()=>{
+  if($("doc").querySelector("pre")||!$("doc").textContent.trim()){$("st").textContent="먼저 포트폴리오를 완성해 주세요.";return}
+  const html=htmlDoc();const fname=(($("name").value||"my")+"_portfolio.html").replace(/[\\/:*?"<>|\s]+/g,"_");
+  const dl=await dlP;
+  if(dl){try{await dl.save({filename:fname,data:html});$("st").textContent="HTML 파일을 저장했어요"}catch(e){$("st").textContent="저장을 취소했어요"}return}
+  try{const u=URL.createObjectURL(new Blob([html],{type:"text/html"}));const a=document.createElement("a");a.href=u;a.download=fname;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);$("st").textContent="HTML 파일을 저장했어요 · 브라우저로 열어 보세요"}
+  catch(e){$("st").textContent="이 환경에서는 저장할 수 없어요"}
+};
 $("copy").onclick=async()=>{
   try{await navigator.clipboard.writeText(md);$("st").textContent="복사했어요 · 노션에 붙여넣으면 서식이 적용돼요"}
   catch(e){const r=document.createRange();r.selectNodeContents($("doc"));const s=getSelection();s.removeAllRanges();s.addRange(r);$("st").textContent="선택됨 · Ctrl+C로 복사하세요"}
