@@ -1,135 +1,78 @@
-<title>에이전트 사무실</title>
+<title>멍멍 에이전트 사무실</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=IBM+Plex+Sans+KR:wght@400;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=IBM+Plex+Sans+KR:wght@400;600&display=swap">
 <style>
-/* Layout: a top-down office floor plan — rooms drawn as ink outlines on drafting paper, people at desks, status shown as desk lamps */
+/* Layout: status ledger — one row per team member, current work then next work as cards, grouped by department */
 :root{
-  --paper:#EDF1EF; --room:#F8FAF9; --ink:#1E2A2D; --muted:#5E6E70; --line:#B9C6C3;
-  --accent:#2F7D6B; --work:#C9851A; --done:#2F7D6B; --idle:#9AA8A8; --bubble:#FFFFFF; --wood:#E3C9A0;
+  --bg:#FBFAF7; --surface:#FFFFFF; --ink:#26221D; --muted:#7A736A; --line:#ECE7DF;
+  --orange-bg:#FBE3BE; --orange-bd:#F0C887; --orange-ink:#8A5413;
+  --green-bg:#E3F3DC; --green-bd:#BCE0AE; --green-ink:#3D6B2E;
+  --gray-bg:#EFEDEA; --gray-bd:#DEDAD4; --gray-ink:#6E6860;
+  --link:#7A4A12;
   --display:"Do Hyeon","IBM Plex Sans KR",system-ui,sans-serif;
   --body:"IBM Plex Sans KR",system-ui,-apple-system,"Malgun Gothic",sans-serif;
-  --mono:"IBM Plex Mono",ui-monospace,monospace;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --paper:#141B1D; --room:#1B2427; --ink:#E3ECEA; --muted:#93A4A5; --line:#33444A;
-  --accent:#5BC2A8; --work:#E7A93B; --done:#5BC2A8; --idle:#56676A; --bubble:#25313A; --wood:#6B5236; color-scheme:dark}}
+  --bg:#191714; --surface:#221F1B; --ink:#EEE9E2; --muted:#A39B90; --line:#34302A;
+  --orange-bg:#4A3418; --orange-bd:#6E4E22; --orange-ink:#F6C987;
+  --green-bg:#24361F; --green-bd:#3A5531; --green-ink:#B5DDA4;
+  --gray-bg:#2B2824; --gray-bd:#3B3731; --gray-ink:#B3ACA2; --link:#F6C987; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --paper:#141B1D; --room:#1B2427; --ink:#E3ECEA; --muted:#93A4A5; --line:#33444A;
-  --accent:#5BC2A8; --work:#E7A93B; --done:#5BC2A8; --idle:#56676A; --bubble:#25313A; --wood:#6B5236; color-scheme:dark}
-body{background:var(--paper);color:var(--ink);font-family:var(--body);line-height:1.55;
-  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
-  background-size:28px 28px;background-position:-1px -1px}
-.wrap{max-width:1180px;margin:0 auto;padding-block:24px 48px;
-  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
-  display:grid;gap:18px}
-header{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:end;justify-content:space-between}
-h1{font-family:var(--display);font-weight:400;font-size:2.4rem;margin:0;line-height:1.1;text-wrap:balance}
-.sub{color:var(--muted);margin:4px 0 0}
-.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-input,select,button{font:inherit;font-size:.9rem;border:1.5px solid var(--ink);background:var(--room);color:var(--ink);padding:6px 10px;border-radius:4px}
-input{width:190px;max-width:100%}
-button{cursor:pointer;font-weight:600}
-button.primary{background:var(--ink);color:var(--paper)}
-:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
-
-.board{background:var(--room);border:2px solid var(--ink);border-radius:4px;padding:14px 16px;display:grid;gap:10px}
-.board .topic{font-family:var(--display);font-size:1.35rem}
-.steps{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
-.step{font-family:var(--mono);font-size:.72rem;letter-spacing:.03em;padding:6px 4px;text-align:center;border:1.5px solid var(--line);border-radius:3px;color:var(--muted)}
-.step.done{border-color:var(--done);color:var(--done)}
-.step.work{border-color:var(--work);color:var(--work);animation:pulse 1.2s ease-in-out infinite}
-
-.main{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px;align-items:start}
-.floor{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0;border:3px solid var(--ink);background:var(--room)}
-.room{border:1.5px solid var(--ink);padding:12px;position:relative;min-height:170px;display:grid;align-content:start;gap:10px}
-.room h2{margin:0;font-family:var(--mono);font-size:.72rem;font-weight:500;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
-.r-boss{grid-column:span 2}.r-res{grid-column:span 2}.r-plan{grid-column:span 2}
-.r-write{grid-column:span 4}.r-design{grid-column:span 2}.r-qa{grid-column:span 6}
-.floor{position:relative}
-.runner{position:absolute;left:0;top:0;width:52px;height:52px;z-index:5;pointer-events:none}
-.runner svg{width:100%;height:100%;overflow:visible;animation:hop .18s ease-in-out infinite alternate}
-.desk.away .person{opacity:.15}
-@keyframes hop{to{transform:translateY(-6px)}}
-.desks{display:flex;flex-wrap:wrap;gap:14px}
-.desk{display:grid;justify-items:center;gap:6px;width:112px;text-align:center;cursor:pointer;background:none;border:none;padding:4px;font-weight:400}
-.person{width:72px;height:72px;display:block;position:relative;transition:transform .3s}
-.person svg{width:100%;height:100%;overflow:visible}
-.tail{transform-origin:52px 50px}
-.desk[data-s="work"] .tail{animation:wag .25s ease-in-out infinite alternate}
-.desk[data-s="done"] .tail{animation:wag .6s ease-in-out 3 alternate}
-.tongue{display:none}
-.desk[data-s="work"] .tongue,.desk[data-s="done"] .tongue{display:inline}
-.desk[data-s="idle"] .eye{transform:scaleY(.25);transform-box:fill-box;transform-origin:center}
-.breed{font-size:.68rem;color:var(--muted)}
-.table{width:96px;height:28px;border:1.5px solid var(--ink);border-radius:6px;background:var(--wood);position:relative;margin-top:-16px;z-index:1}
-.table::before{content:"";position:absolute;left:10px;top:-9px;width:30px;height:12px;border-radius:2px;background:var(--room);border:1.5px solid var(--ink)}
-.desk[data-s="work"] .table::before{background:var(--work)}
-.lamp{position:absolute;right:6px;top:6px;width:10px;height:10px;border-radius:50%;background:var(--idle)}
-.desk[data-s="work"] .lamp{background:var(--work);box-shadow:0 0 10px var(--work)}
-.desk[data-s="done"] .lamp{background:var(--done)}
-.desk[data-s="work"] .person{animation:bob .6s ease-in-out infinite alternate}
-.desk[data-s="idle"] .person{opacity:.55}
-.name{font-size:.82rem;font-weight:600;line-height:1.25}
-.state{font-family:var(--mono);font-size:.68rem;color:var(--muted)}
-.desk[data-s="work"] .state{color:var(--work)}
-.desk[data-s="done"] .state{color:var(--done)}
-.bubble{position:absolute;bottom:100%;left:50%;transform:translate(-50%,-8px);background:var(--bubble);color:var(--ink);border:1.5px solid var(--ink);border-radius:8px;padding:5px 9px;font-size:.75rem;width:max-content;max-width:180px;z-index:2;line-height:1.35}
-.bubble::after{content:"";position:absolute;top:100%;left:50%;margin-left:-5px;border:5px solid transparent;border-top-color:var(--ink)}
-.dots::after{content:"";animation:dots 1.2s steps(4) infinite}
-
-aside{background:var(--room);border:2px solid var(--ink);border-radius:4px;padding:14px;display:grid;gap:10px;min-width:0}
-aside h2{margin:0;font-family:var(--display);font-weight:400;font-size:1.2rem}
-.log{list-style:none;margin:0;padding:0;display:grid;gap:8px;max-height:460px;overflow:auto;font-size:.85rem}
-.log li{display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:baseline}
-.log time{font-family:var(--mono);font-size:.7rem;color:var(--muted);font-variant-numeric:tabular-nums}
-.log b{font-weight:600}
-.files{display:grid;gap:4px;font-family:var(--mono);font-size:.78rem}
-.files a{color:var(--accent)}
-.note{font-size:.78rem;color:var(--muted);margin:0}
-
-@keyframes bob{to{transform:translateY(-4px) rotate(-3deg)}}
-@keyframes wag{from{transform:rotate(-18deg)}to{transform:rotate(22deg)}}
-@keyframes pulse{50%{opacity:.45}}
-@keyframes dots{0%{content:""}25%{content:"."}50%{content:".."}75%{content:"..."}}
-@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-@media (max-width:860px){.main{grid-template-columns:minmax(0,1fr)}}
-@media (max-width:640px){
-  .floor{grid-template-columns:minmax(0,1fr)}
-  .room{grid-column:auto!important}
-  .steps{grid-template-columns:repeat(3,1fr)}
-  h1{font-size:1.9rem}
-}
+  --bg:#191714; --surface:#221F1B; --ink:#EEE9E2; --muted:#A39B90; --line:#34302A;
+  --orange-bg:#4A3418; --orange-bd:#6E4E22; --orange-ink:#F6C987;
+  --green-bg:#24361F; --green-bd:#3A5531; --green-ink:#B5DDA4;
+  --gray-bg:#2B2824; --gray-bd:#3B3731; --gray-ink:#B3ACA2; --link:#F6C987; color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);line-height:1.5}
+.wrap{max-width:1200px;margin:0 auto;padding-block:28px 56px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:14px}
+.top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:6px 16px}
+h1{font-family:var(--display);font-weight:400;font-size:2rem;margin:0}
+.when{color:var(--muted);font-size:.85rem;font-variant-numeric:tabular-nums}
+.lead{margin:0;color:var(--muted);font-size:.92rem;max-width:80ch}
+.legend{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-block;font-size:.78rem;font-weight:600;padding:3px 10px;border-radius:999px;border:1px solid}
+.c-orange{background:var(--orange-bg);border-color:var(--orange-bd);color:var(--orange-ink)}
+.c-green{background:var(--green-bg);border-color:var(--green-bd);color:var(--green-ink)}
+.c-gray{background:var(--gray-bg);border-color:var(--gray-bd);color:var(--gray-ink)}
+.hint{font-size:.8rem;color:var(--muted)}
+.scroller{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:960px}
+th{text-align:left;font-size:.8rem;font-weight:600;color:var(--muted);padding:12px 16px;border-bottom:1px solid var(--line)}
+td{vertical-align:top;padding:16px;border-bottom:1px solid var(--line)}
+tr:last-child td{border-bottom:none}
+td.dept{font-weight:600;width:96px}
+td.who{width:150px}
+.member{display:grid;grid-template-columns:44px 1fr;gap:4px 10px;align-items:center}
+.member svg{width:44px;height:44px;overflow:visible;grid-row:span 2}
+.member b{font-size:.95rem}
+.member .breed{font-size:.72rem;color:var(--muted)}
+.member .chip{grid-column:2;justify-self:start;margin-top:2px}
+.cards{display:flex;flex-wrap:wrap;gap:8px}
+td.now .cards{flex-direction:column;max-width:240px}
+.card{width:220px;border:1px solid;border-radius:8px;padding:10px 12px;display:grid;gap:4px;min-height:84px}
+.card small{font-size:.72rem;opacity:.85}
+.card strong{font-size:.9rem;line-height:1.35;color:var(--ink)}
+.card a{justify-self:end;font-size:.75rem;color:var(--link);text-decoration:underline;text-underline-offset:2px}
+.card.c-gray strong{color:var(--gray-ink)}
+.empty{font-size:.82rem;color:var(--muted);padding-top:6px}
+.note{font-size:.82rem;color:var(--muted);margin:0}
+@media (max-width:640px){h1{font-size:1.6rem}}
 </style>
 
 <div class="wrap">
-  <header>
-    <div>
-      <h1>멍멍 에이전트 사무실</h1>
-      <p class="sub" id="modeLine">데모: 실제 업무가 어떻게 흘러가는지 보여주는 예시예요</p>
-    </div>
-    <div class="controls">
-      <label for="repo" class="note">저장소</label>
-      <input id="repo" value="eunkyoungAn/-" aria-label="GitHub 저장소 (소유자/이름)">
-      <button id="connect">불러오기</button>
-      <select id="project" aria-label="프로젝트 선택" hidden></select>
-      <button id="demo" class="primary">데모 재생</button>
-    </div>
-  </header>
-
-  <section class="board" aria-label="현재 프로젝트">
-    <div class="topic" id="topic">미리 준비하는 경험노트 작성법 가이드</div>
-    <div class="steps" id="steps"></div>
-  </section>
-
-  <div class="main">
-    <section class="floor" id="floor" aria-label="사무실 배치도"></section>
-    <aside>
-      <h2>업무 기록</h2>
-      <ul class="log" id="log"></ul>
-      <div class="files" id="files"></div>
-      <p class="note">실제 진행 상황은 저장소의 <code>office/</code> 폴더에 생긴 파일을 보고 표시해요.</p>
-    </aside>
+  <div class="top"><h1>부서별 현황</h1><span class="when" id="when"></span></div>
+  <p class="lead" id="lead"></p>
+  <div class="legend">
+    <span class="chip c-orange">작업 중 / 할 예정</span>
+    <span class="chip c-green">검토·게시 대기</span>
+    <span class="chip c-gray">완료 · 담당자 대기 중</span>
   </div>
+  <span class="hint">표 전체를 좌우로 넘겨 다음 할 일을 확인해요 →</span>
+  <div class="scroller"><table>
+    <thead><tr><th>부서</th><th>담당</th><th>현재 상태</th><th>다음 할 일</th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table></div>
+  <p class="note">저장소 main과 작업 브랜치의 <code>office/</code> 폴더 파일을 기준으로 정리했어요. "게시 대기"는 결과물이 완성되어 블로그·인스타에 올리기만 하면 되는 상태예요.</p>
 </div>
 
 <script>
@@ -179,154 +122,71 @@ function dog(t){
     ${ACC[t.acc]||""}
   </svg>`;
 }
-const STEPS = [["00_brief","지시서"],["01_research","리서치"],["02_plan","기획"],["03_draft","초안"],["04_review","검수"],["05_final","최종본"]];
-const ROOMS = [["r-boss","팀장실"],["r-res","리서치팀"],["r-plan","기획팀"],["r-write","작성실"],["r-design","디자인실"],["r-qa","검수팀"]];
-const $ = id => document.getElementById(id);
-
-// build floor
-$("floor").innerHTML = ROOMS.map(([cls,label]) =>
-  `<div class="room ${cls}"><h2>${label}</h2><div class="desks">${
-    TEAM.filter(t=>t.room===cls).map(t=>`
-      <button class="desk" id="d-${t.id}" data-s="idle" aria-label="${t.name}">
-        <span class="person">${dog(t)}</span>
-        <span class="table"><span class="lamp"></span></span>
-        <span class="name">${t.name}</span>
-        <span class="breed">${t.breed}</span>
-        <span class="state">대기</span>
-      </button>`).join("")}</div></div>`).join("") +
-  `<div class="runner" id="runner" hidden>${dog({...TEAM.find(t=>t.id==="mgr"), acc:"paper"})}</div>`;
-
-// 과장이 서류를 물고 다음 팀 책상으로 뛰어가는 애니메이션
-function carry(toId){
-  return new Promise(done=>{
-    const from=$("d-mgr"), to=$("d-"+toId), f=$("floor"), r=$("runner");
-    if(!from||!to||toId==="mgr"||!r.animate||matchMedia("(prefers-reduced-motion: reduce)").matches) return done();
-    const fr=f.getBoundingClientRect(), a=from.getBoundingClientRect(), b=to.getBoundingClientRect();
-    const x0=a.left-fr.left+a.width/2-26, y0=a.top-fr.top+12, x1=b.left-fr.left+b.width/2-26, y1=b.top-fr.top+12;
-    const flip = x1<x0 ? -1 : 1, dist=Math.hypot(x1-x0,y1-y0);
-    r.hidden=false; from.classList.add("away");
-    const anim=r.animate([
-      {transform:`translate(${x0}px,${y0}px) scaleX(${flip})`},
-      {transform:`translate(${(x0+x1)/2}px,${Math.min(y0,y1)-28}px) scaleX(${flip})`},
-      {transform:`translate(${x1}px,${y1}px) scaleX(${flip})`}],
-      {duration:Math.max(900,dist*3.2),easing:"ease-in-out"});
-    anim.onfinish=()=>{ r.hidden=true; from.classList.remove("away"); done(); };
-  });
-}
-
-function setDesk(id, s, say){
-  const d = $("d-"+id); if(!d) return;
-  d.dataset.s = s;
-  d.querySelector(".state").textContent = {idle:"대기",work:"작업 중",done:"완료"}[s];
-  d.querySelector(".bubble")?.remove();
-  if(say){ const b=document.createElement("span"); b.className="bubble"+(s==="work"?" dots":""); b.textContent=say; d.querySelector(".person").appendChild(b); }
-}
-function setSteps(doneCount, working){
-  $("steps").innerHTML = STEPS.map(([k,l],i)=>
-    `<div class="step ${i<doneCount?"done":(i===doneCount&&working?"work":"")}">${k.slice(0,2)} ${l}</div>`).join("");
-}
-function log(who,msg){
-  const li=document.createElement("li");
-  const t=new Date().toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
-  li.innerHTML=`<time>${t}</time><span><b>${who}</b> ${msg}</span>`;
-  $("log").prepend(li);
-}
-function resetAll(){ TEAM.forEach(t=>setDesk(t.id,"idle")); $("log").innerHTML=""; $("files").innerHTML=""; }
-
-// ---------- demo ----------
-let timer=null;
-const SCRIPT = [
-  [0,"boss","work","멍! 새 업무 접수","주제를 접수하고 업무지시서를 작성합니다"],
-  [0,"boss","done","리서치팀, 부탁해요","00_brief.md 작성 완료"],
-  [1,"res","work","킁킁… 자료 냄새 맡는 중","자료 조사를 시작합니다"],
-  [1,"res","done","출처 12개 정리 완료","01_research.md 저장"],
-  [2,"plan","work","설계도 그리는 중","리서치를 읽고 구조를 설계합니다"],
-  [2,"plan","done","5단계 구성으로 확정","02_plan.md 저장"],
-  [3,"writer","work","초안 쓰는 중","기획안대로 가이드 초안을 씁니다"],
-  [3,"writer","done","초안 넘겼어요","03_draft.md 저장"],
-  [4,"qa","work","안전 점검 중!","출처와 초안을 대조합니다"],
-  [4,"qa","done","필수 수정 2건","04_review.md: 수정 필요"],
-  [5,"writer","work","검수 반영 중","리뷰를 반영해 최종본을 씁니다"],
-  [5,"writer","done","최종본 완성","05_final.md 저장"],
-  [6,"card","work","카드뉴스 8장 그리는 중","최종본을 카드뉴스로 만듭니다"],
-  [6,"card","done","카드뉴스 완성!","06_cardnews.md 저장"],
-  [6,"boss","done","다들 수고했멍!","사용자에게 결과를 보고했습니다"],
+const CHECKED = "10월 18일 확인";
+const M = "https://github.com/eunkyoungAn/-/tree/main/office/";
+const B = (br,p) => `https://github.com/eunkyoungAn/-/tree/${br}/office/${p}`;
+const P = {
+  ai:"20261015_AI시대_생각하는힘", exp:"20261015_경험노트-작성법-카드뉴스", road:"20261016_익숙한길_다른길_커리어",
+  trl:"20261018_TRL주니어학습", dec:"20261018_쇠퇴인가퇴행인가"
+};
+// c: orange(작업/할 일) green(검토·게시 대기) gray(완료)
+const ROWS = [
+  {dept:"운영", id:"boss", now:[
+      {c:"gray", tag:"보고 완료", title:"쇠퇴인가 퇴행인가 · 블로그+카드뉴스+릴스", url:M+P.dec}],
+    next:[
+      {c:"orange", tag:"결정 필요", title:"경험노트 작성법 가이드 이어서 끝낼지 결정", url:B("claude/gifted-goodall-afewke","20261015_경험노트-작성법-가이드")},
+      {c:"orange", tag:"점검", title:"팀 호출 도구가 없던 세션 원인 확인 (경험노트 건)", url:M+P.exp}]},
+  {dept:"", id:"mgr", now:[], next:[]},
+  {dept:"리서치", id:"res", now:[
+      {c:"gray", tag:"완료", title:"TRL 주니어 학습 리서치", url:M+P.trl},
+      {c:"gray", tag:"완료", title:"쇠퇴·퇴행 개념·재취업 근거 리서치", url:M+P.dec}], next:[]},
+  {dept:"기획", id:"plan", now:[
+      {c:"gray", tag:"완료", title:"TRL 블로그 구성·목차", url:M+P.trl},
+      {c:"gray", tag:"완료", title:"쇠퇴·퇴행 구성·SEO 키워드", url:M+P.dec}], next:[]},
+  {dept:"작성실", id:"blog", now:[
+      {c:"green", tag:"검수 통과 · 게시 대기", title:"TRL 주니어 학습 블로그 원고", url:M+P.trl},
+      {c:"green", tag:"게시 대기", title:"쇠퇴인가 퇴행인가 블로그 (복사용 페이지·이미지 4장)", url:M+P.dec},
+      {c:"green", tag:"게시 대기", title:"익숙한 길, 다른 길 블로그", url:M+P.road},
+      {c:"green", tag:"게시 대기", title:"AI 시대 생각하는 힘 블로그", url:M+P.ai}],
+    next:[
+      {c:"orange", tag:"원고 완료 후", title:"TRL 블로그 이미지·네이버 복사용 페이지 만들기", url:M+P.trl}]},
+  {dept:"", id:"writer", now:[
+      {c:"orange", tag:"중단됨", title:"경험노트 작성법 가이드 · 초안(03)·최종본(05) 없음", url:B("claude/gifted-goodall-afewke","20261015_경험노트-작성법-가이드")}],
+    next:[
+      {c:"orange", tag:"재개 결정 후", title:"가이드 초안 작성 → 검수 요청", url:B("claude/gifted-goodall-afewke","20261015_경험노트-작성법-가이드")}]},
+  {dept:"", id:"lect", now:[], next:[]},
+  {dept:"", id:"cover", now:[], next:[]},
+  {dept:"디자인실", id:"card", now:[
+      {c:"green", tag:"인스타 게시 대기", title:"쇠퇴인가 퇴행인가 카드뉴스·릴스·캡션", url:M+P.dec},
+      {c:"green", tag:"인스타 게시 대기", title:"익숙한 길 카드뉴스 10장·릴스·캡션", url:M+P.road},
+      {c:"green", tag:"인스타 게시 대기", title:"AI 시대 생각하는 힘 카드뉴스·릴스·캡션", url:M+P.ai},
+      {c:"green", tag:"인스타 게시 대기", title:"경험노트 카드뉴스 v2 (PNG 7·MP4 7)", url:M+P.exp},
+      {c:"green", tag:"main 미반영", title:"PPT 모핑·도식 디자인 명세서", url:B("claude/optimistic-ritchie-mhqmkx","design")}],
+    next:[
+      {c:"orange", tag:"블로그 완료 후", title:"TRL 주니어 학습 카드뉴스 제작", url:M+P.trl}]},
+  {dept:"검수", id:"qa", now:[
+      {c:"gray", tag:"통과", title:"TRL 블로그 재검수 (필수 수정 0건)", url:M+P.trl},
+      {c:"gray", tag:"통과", title:"쇠퇴·퇴행 카드뉴스 검수", url:M+P.dec}],
+    next:[
+      {c:"orange", tag:"제작 후", title:"TRL 카드뉴스 검수", url:M+P.trl},
+      {c:"orange", tag:"초안 작성 후", title:"경험노트 가이드 초안 검수", url:B("claude/gifted-goodall-afewke","20261015_경험노트-작성법-가이드")}]},
 ];
-let runToken=0;
-function runDemo(){
-  clearTimeout(timer); resetAll(); setMode("demo");
-  const my=++runToken;
-  $("topic").textContent="미리 준비하는 경험노트 작성법 가이드 (예시)";
-  let i=0;
-  const tick=async()=>{
-    if(my!==runToken || i>=SCRIPT.length) return;
-    const [stage,id,s,say,msg]=SCRIPT[i++];
-    if(s==="work") TEAM.forEach(t=>{ if(t.id!==id && $("d-"+t.id).dataset.s!=="idle") setDesk(t.id,$("d-"+t.id).dataset.s); });
-    if(s==="work" && id!=="boss"){
-      setDesk("mgr","work","서류 배달 갑니다!");
-      log("과장", `${TEAM.find(t=>t.id===id).name}팀에 서류를 물어다 주러 갑니다`);
-      await carry(id);
-      if(my!==runToken) return;
-      setDesk("mgr","done");
-    }
-    setDesk(id,s,say); setSteps(s==="done"?Math.min(stage+1,6):stage, s==="work");
-    log(TEAM.find(t=>t.id===id).name, msg);
-    timer=setTimeout(tick, s==="work"?2200:1100);
-  };
-  setSteps(0,false); tick();
+function status(r){
+  if(r.now.some(x=>x.c==="orange")) return ["작업 중","orange"];
+  if(r.next.some(x=>x.c==="orange")) return ["할 일 있음","orange"];
+  if(r.now.some(x=>x.c==="green")) return ["게시 대기","green"];
+  return ["대기 중","gray"];
 }
-function setMode(m,extra){
-  $("modeLine").textContent = m==="demo" ? "데모: 실제 업무가 어떻게 흘러가는지 보여주는 예시예요" : extra;
-}
-
-// ---------- live from GitHub ----------
-let projects=[], repo="";
-async function gh(path){
-  const r = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`);
-  if(!r.ok) throw new Error(r.status===404?"office 폴더나 저장소를 찾지 못했어요":"GitHub 응답 오류 "+r.status);
-  return r.json();
-}
-async function connect(){
-  repo = $("repo").value.trim();
-  clearTimeout(timer); runToken++;
-  try{
-    const items = await gh("office");
-    projects = items.filter(x=>x.type==="dir").map(x=>x.name).sort().reverse();
-    if(!projects.length){ setMode("live","아직 진행한 프로젝트가 없어요. /office 주제 로 첫 업무를 시작해 보세요"); return; }
-    $("project").innerHTML = projects.map(p=>`<option>${p}</option>`).join("");
-    $("project").hidden=false;
-    showProject(projects[0]);
-  }catch(e){
-    setMode("live", `불러오지 못했어요: ${e.message}. 이 화면이 GitHub에 접속할 수 없는 곳이라면 데모로 봐 주세요`);
-  }
-}
-async function showProject(name){
-  resetAll();
-  const files = await gh("office/"+encodeURIComponent(name));
-  const names = files.map(f=>f.name);
-  const has = k => names.some(n=>n.startsWith(k));
-  $("topic").textContent = name.replace(/^\d{8}_/,"").replace(/[-_]/g," ");
-  setMode("live", `실제 진행 상황 · ${repo} · ${name}`);
-  // which writer team? read the brief
-  let writer="writer";
-  const brief = files.find(f=>f.name.startsWith("00_brief"));
-  if(brief){ try{ const txt = await (await fetch(brief.download_url)).text();
-    const hit = TEAM.find(t=>t.agent && t.agent!=="office-writer" && txt.includes(t.agent)); if(hit) writer=hit.id; }catch(e){} }
-  const order = [["00_brief","boss"],["01_research","res"],["02_plan","plan"],["03_draft",writer],["04_review","qa"],["05_final",writer]];
-  let done=0; while(done<order.length && has(order[done][0])) done++;
-  order.forEach(([k,id],i)=>{ if(i<done) setDesk(id,"done"); });
-  if(done<order.length){ setDesk(order[done][1],"work", order[done][0]+" 작업 중"); log(TEAM.find(t=>t.id===order[done][1]).name, order[done][0]+" 작업 중"); }
-  else { setDesk("boss","done","보고 완료!"); log("팀장","모든 단계 완료"); }
-  setSteps(done, done<order.length);
-  $("files").innerHTML = files.filter(f=>f.type==="file").map(f=>`<a href="${f.html_url}" target="_blank" rel="noopener">${f.name}</a>`).join("");
-}
-$("connect").onclick=connect;
-$("demo").onclick=runDemo;
-$("project").onchange=e=>showProject(e.target.value);
-TEAM.forEach(t=>$("d-"+t.id).addEventListener("click",()=>log(t.name, {idle:"쉬는 중이에요",work:"열심히 작업 중이에요",done:"맡은 일을 끝냈어요"}[$("d-"+t.id).dataset.s])));
-
-// start: try live, otherwise demo
-setSteps(0,false);
-const isArtifact = !/^(file:|https?:\/\/(localhost|127\.|[^/]*github\.io))/.test(location.href);
-if(isArtifact) runDemo(); else connect().then(()=>{ if(!projects.length) runDemo(); });
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const card=x=>`<div class="card c-${x.c}"><small>${esc(x.tag)}</small><strong>${esc(x.title)}</strong>${x.url?`<a href="${x.url}" target="_blank" rel="noopener">상세 보기 →</a>`:""}</div>`;
+document.getElementById("rows").innerHTML = ROWS.map(r=>{
+  const t=TEAM.find(m=>m.id===r.id); const [lab,col]=status(r);
+  return `<tr><td class="dept">${r.dept}</td>
+    <td class="who"><div class="member">${dog(t)}<b>${t.name}</b><span class="chip c-${col}">${lab}</span></div><div class="breed">${t.breed}</div></td>
+    <td class="now">${r.now.length?`<div class="cards">${r.now.map(card).join("")}</div>`:`<div class="empty">진행 중인 업무 없음</div>`}</td>
+    <td>${r.next.length?`<div class="cards">${r.next.map(card).join("")}</div>`:`<div class="empty">—</div>`}</td></tr>`;
+}).join("");
+const busy=ROWS.filter(r=>status(r)[0]==="작업 중").length, todo=ROWS.filter(r=>status(r)[0]==="할 일 있음").length, idle=ROWS.filter(r=>status(r)[0]==="대기 중").length;
+document.getElementById("when").textContent=CHECKED;
+document.getElementById("lead").textContent=`담당 ${ROWS.length}명 · 작업 중 ${busy}명 · 할 일 있음 ${todo}명 · 대기 ${idle}명. 지금 실제로 돌아가는 세션은 없고, 마지막 작업은 10월 18일 13:46 커밋이에요. 완성됐지만 아직 올리지 않은 결과물은 "게시 대기"로 표시해요.`;
 </script>
