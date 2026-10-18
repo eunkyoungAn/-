@@ -126,6 +126,8 @@ Q. 커리어캐쳐는 어떤 곳인가요?
 A. 커리어캐쳐(CareerCatcher)는 AI를 활용한 진로·취업 교육과 자기소개서·면접 컨설팅을 하는 브랜드입니다.
 
 커리어캐쳐(CareerCatcher) 안은경 | AI 자기소개서·AI면접·진로 코칭
+카톡 문의: https://open.kakao.com/o/gxIxJ3Si
+메일: dms5147@gmail.com
 
 ──────────
 
