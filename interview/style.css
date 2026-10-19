@@ -151,3 +151,22 @@ details summary { cursor: pointer; font-weight: 600; }
   background: var(--fg); color: var(--bg); font-size: 15px; opacity: 0; pointer-events: none; transition: .2s; z-index: 10;
 }
 #toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* 저장 */
+.savebtns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0; }
+.savebtns .btn.primary { grid-column: 1 / -1; min-height: 54px; }
+.save .small { margin: 0; }
+.linkbtn { margin-top: 10px; border: 0; background: none; color: var(--accent); font-weight: 600; padding: 8px 0; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.rec h2 { font-size: 20px; line-height: 1.45; margin: 2px 0 12px; }
+.rec .nextfix { margin-bottom: 14px; }
+.rec .fb { margin-top: 14px; }
+.print-only { display: none; }
+@media print {
+  :root { --bg: #fff; --panel: #fff; --fg: #000; --muted: #444; --line: #ccc; --soft: #eef3fa; --focus: #fff7dc; }
+  body { font-size: 12pt; background: #fff; }
+  .no-print, #toast { display: none !important; }
+  .print-only { display: block; }
+  .wrap { max-width: none; padding: 0; }
+  .card, .nextfix { break-inside: avoid; border-color: #ccc; }
+  .bar, .bar i, .nextfix, blockquote { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}

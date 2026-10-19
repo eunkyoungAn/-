@@ -4,6 +4,7 @@
 
 import { QUESTIONS, CATEGORIES, findQuestion } from './questions.js';
 import { RUBRIC, measure, speedLabel, deliveryScore, localEvaluate } from './scoring.js';
+import { buildText, saveImage } from './save.js';
 
 const PREP_SEC = 30;
 const app = document.getElementById('app');
@@ -41,6 +42,8 @@ const state = {
   attempts: [], // {answer, metrics, result}
   draft: null,  // {answer, rawAnswer, durationSec}
   consent: false,
+  log: [],      // 오늘 연습한 질문들 {question, attempts}. 화면을 닫으면 사라진다.
+  saved: false, // 저장(이미지·PDF·복사)을 한 번이라도 했는지
 };
 
 // ---------- 공통 ----------
@@ -61,7 +64,8 @@ function toast(msg) {
   toast.t = setTimeout(() => el.classList.remove('show'), 2600);
 }
 function header(step) {
-  return `<header class="top"><button class="brand" data-act="home" aria-label="처음으로">커리어캐쳐 <b>면접 리허설</b></button>${step ? `<span class="step">${esc(step)}</span>` : ''}</header>`;
+  const showLog = state.log.length && !['ask', 'loading', 'records'].includes(state.screen);
+  return `<header class="top no-print"><button class="brand" data-act="home" aria-label="처음으로">커리어캐쳐 <b>면접 리허설</b></button>${showLog ? `<button class="btn ghost sm" data-act="records">연습 기록 ${state.log.length}</button>` : step ? `<span class="step">${esc(step)}</span>` : ''}</header>`;
 }
 function inAppBrowser() {
   const ua = navigator.userAgent;
@@ -142,7 +146,7 @@ function homeView() {
     <section class="card">
       <h2>시작 전에 확인해 주세요</h2>
       <ul class="plain">
-        <li>음성은 이 기기에서 글자로만 바뀌며, 녹음 파일은 만들거나 보관하지 않습니다.</li>
+        <li>말한 소리는 휴대폰 브라우저의 음성 인식 기능(Chrome은 Google, 아이폰은 Apple)이 글자로 바꿉니다. 이 앱은 녹음 파일을 만들거나 보관하지 않습니다.</li>
         <li>${aiOn ? '피드백을 만들 때 질문과 답변 글만 AI 평가 서버로 보냅니다. 서버는 답변을 저장하지 않습니다.' : '피드백은 이 휴대폰 안에서 만들어지며, 답변은 어디에도 전송하지 않습니다.'}</li>
         <li>회원가입이 없고, 화면을 닫으면 답변은 사라집니다. 실명, 학교, 회사 이름은 말하지 않아도 됩니다.</li>
         <li>점수는 연습용 참고치이며 합격을 예측하지 않습니다. 목소리 톤, 외모, 표정은 평가하지 않습니다.</li>
@@ -334,6 +338,8 @@ async function evaluate() {
   else { const dv = deliveryScore(metrics, settings.limit); result.scores.delivery = dv.score; result.reasons.delivery = dv.reason; }
 
   state.attempts.push({ answer, metrics, result });
+  if (state.attempts.length === 1) state.log.push({ question: state.question, attempts: state.attempts });
+  state.saved = false;
   state.draft = null;
   go(state.attempts.length > 1 ? 'compare' : 'report');
 }
@@ -416,6 +422,7 @@ function reportView() {
     <details class="card"><summary>내 답변 보기</summary><p class="answer">${esc(a.answer)}</p></details>
     <button class="btn primary big" data-act="retry">한 가지 고쳐서 다시 답하기</button>
     <button class="btn ghost wide" data-act="pick">다른 질문 연습하기</button>
+    ${savePanel()}
     ${disclaimer(a)}
   </main>`;
 }
@@ -440,12 +447,83 @@ function compareView() {
     ${feedbackBody(last)}
     <button class="btn primary big" data-act="pick">다른 질문 연습하기</button>
     <button class="btn ghost wide" data-act="retry">같은 질문 한 번 더</button>
+    ${savePanel()}
     ${disclaimer(last)}
   </main>`;
 }
 
+// ---------- 저장 ----------
+function savePanel() {
+  const n = state.log.length;
+  return `<section class="card save no-print">
+    <h3>피드백 저장하기</h3>
+    <p class="muted small">화면을 닫으면 기록이 사라져요. 오늘 연습한 질문 ${n}개의 피드백이 모두 담깁니다.</p>
+    <div class="savebtns">
+      <button class="btn primary" data-act="save-image">이미지로 저장</button>
+      <button class="btn ghost" data-act="save-pdf">PDF로 저장</button>
+      <button class="btn ghost" data-act="save-text">글로 복사</button>
+    </div>
+    <p class="muted small">이미지는 휴대폰 사진첩에 저장하거나 카카오톡 "나에게 보내기"로 보낼 수 있어요. 글로 복사하면 메모장이나 카카오톡에 붙여 넣을 수 있습니다.</p>
+    ${state.screen !== 'records' ? '<button class="linkbtn" data-act="records">오늘 연습 기록 한눈에 보기</button>' : ''}
+  </section>`;
+}
+
+function recordsView() {
+  if (!state.log.length) return `${header('연습 기록')}<main class="wrap"><p class="muted">아직 연습한 질문이 없어요.</p><button class="btn primary big" data-act="pick">질문 고르기</button></main>`;
+  const d = new Date();
+  return `${header('연습 기록')}
+  <main class="wrap records">
+    <section class="hero small">
+      <p class="eyebrow print-only">커리어캐쳐 면접 리허설</p>
+      <h1>면접 연습 기록 <small class="muted">${d.getFullYear()}.${d.getMonth() + 1}.${d.getDate()}</small></h1>
+      <p>오늘 ${state.log.length}개 질문을 연습했어요.</p>
+    </section>
+    ${savePanel()}
+    ${state.log.map((item, i) => {
+      const first = item.attempts[0];
+      const last = item.attempts[item.attempts.length - 1];
+      return `<article class="card rec">
+        <p class="eyebrow">질문 ${i + 1} · 답변 ${item.attempts.length}번</p>
+        <h2>${esc(item.question.text)}</h2>
+        <div class="nextfix"><p class="eyebrow">다음에 고칠 한 가지</p><p class="big">${esc(last.result.next_fix)}</p></div>
+        ${scoreBars(last.result.scores, last.result.reasons, item.attempts.length > 1 ? first.result.scores : null)}
+        <div class="fb">
+          <h3>잘한 점</h3><p>${esc(last.result.strength)}</p>
+          <h3>고칠 점</h3><p>${esc(last.result.improvement)}</p>
+          <h3>이렇게 바꿔 말해 보세요</h3><blockquote>${esc(last.result.rewrite_example)}</blockquote>
+          <h3>마지막 답변</h3><p class="answer">${esc(last.answer)}</p>
+        </div>
+      </article>`;
+    }).join('')}
+    <button class="btn primary big no-print" data-act="pick">다른 질문 연습하기</button>
+    <p class="disclaimer">점수는 연습용 참고치이며 합격을 예측하지 않습니다. [ ] 표시는 본인의 실제 경험으로 채워 주세요. eunkyoungan.github.io/-/interview</p>
+  </main>`;
+}
+
+async function doSave(act) {
+  if (!state.log.length) { toast('먼저 질문 하나를 연습해 주세요.'); return; }
+  if (act === 'save-text') {
+    await copy(buildText(state.log), '피드백을 글로 복사했어요. 메모장이나 카카오톡에 붙여 넣어 주세요.');
+    state.saved = true;
+  } else if (act === 'save-image') {
+    try {
+      const how = await saveImage(state.log);
+      if (how !== 'cancelled') { state.saved = true; toast(how === 'shared' ? '저장할 곳을 골라 주세요.' : '이미지를 내려받았어요.'); }
+    } catch (err) { toast(err.message || '이미지 저장에 실패했어요.'); }
+  } else if (act === 'save-pdf') {
+    if (state.screen !== 'records') go('records');
+    state.saved = true;
+    toast('인쇄 창에서 "PDF로 저장"을 골라 주세요.');
+    setTimeout(() => window.print(), 300);
+  }
+}
+
+window.addEventListener('beforeunload', e => {
+  if (state.log.length && !state.saved) { e.preventDefault(); e.returnValue = ''; }
+});
+
 // ---------- 렌더링 ----------
-const views = { home: homeView, pick: pickView, ask: askView, review: reviewView, report: reportView, compare: compareView };
+const views = { home: homeView, pick: pickView, ask: askView, review: reviewView, report: reportView, compare: compareView, records: recordsView };
 function render() {
   app.innerHTML = views[state.screen]();
   if (state.screen === 'ask') bindAsk();
@@ -476,6 +554,8 @@ app.addEventListener('click', async e => {
   else if (act === 'redo' || act === 'retry') go('ask');
   else if (act === 'evaluate') evaluate();
   else if (act === 'pick') go('pick');
+  else if (act === 'records') go('records');
+  else if (act === 'save-image' || act === 'save-pdf' || act === 'save-text') doSave(act);
   else if (act === 'save-settings' || act === 'share-link') {
     settings.relay = document.getElementById('relay').value.trim();
     settings.code = document.getElementById('code').value.trim();
@@ -499,7 +579,7 @@ app.addEventListener('click', async e => {
 
 async function copy(text, msg) {
   try { await navigator.clipboard.writeText(text); toast(msg); }
-  catch { prompt('아래 주소를 복사해 주세요.', text); }
+  catch { prompt('아래 내용을 길게 눌러 복사해 주세요.', text); }
 }
 
 render();
