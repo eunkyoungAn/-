@@ -26,6 +26,14 @@ const settings = {
 };
 const assigned = (params.get('q') || '').split(',').map(findQuestion).filter(Boolean);
 
+// 카카오톡 인앱 브라우저는 마이크가 막히는 경우가 많아, 처음 한 번은 외부 브라우저로 자동으로 넘긴다.
+const KAKAO_EXTERNAL = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(location.href);
+if (/KAKAOTALK/i.test(navigator.userAgent)) {
+  let tried = false;
+  try { tried = sessionStorage.getItem('cc-kakao-tried') === '1'; sessionStorage.setItem('cc-kakao-tried', '1'); } catch { /* 무시 */ }
+  if (!tried) location.href = KAKAO_EXTERNAL;
+}
+
 // ---------- 상태 ----------
 const state = {
   screen: 'home',
@@ -129,14 +137,14 @@ function homeView() {
       <h1>듣고, 말하고,<br>한 가지만 고쳐서 다시.</h1>
       <p>질문을 듣고 말로 답하면, 커리어캐쳐 기준으로 피드백을 드립니다. 같은 질문에 한 번 더 답해 달라진 점을 확인해 보세요. 카메라는 쓰지 않습니다.</p>
     </section>
-    ${inApp ? `<div class="notice warn"><b>${esc(inApp)} 안에서 열려 있어요.</b> 이 화면에서는 마이크가 막힐 수 있습니다. 오른쪽 위 메뉴에서 <b>다른 브라우저로 열기</b>(Chrome, Safari 등)를 눌러 주세요.<button class="btn ghost sm" data-act="copy-link">주소 복사</button></div>` : ''}
+    ${inApp ? `<div class="notice warn"><b>${esc(inApp)} 안에서 열려 있어요.</b> 이 화면에서는 마이크가 막힐 수 있습니다. ${inApp === '카카오톡' ? `아래 버튼을 눌러 Chrome이나 Safari에서 열어 주세요.<a class="btn primary sm" href="${KAKAO_EXTERNAL}">다른 브라우저로 열기</a>` : '오른쪽 위 메뉴에서 <b>다른 브라우저로 열기</b>(Chrome, Safari 등)를 눌러 주세요.'}<button class="btn ghost sm" data-act="copy-link">주소 복사</button></div>` : ''}
     ${!SR ? `<div class="notice">이 브라우저는 음성 인식을 지원하지 않아 <b>글로 답하기</b>로 진행합니다. 말로 연습하려면 Chrome(안드로이드·PC) 또는 Safari(아이폰)에서 열어 주세요.</div>` : ''}
     <section class="card">
       <h2>시작 전에 확인해 주세요</h2>
       <ul class="plain">
         <li>음성은 이 기기에서 글자로만 바뀌며, 녹음 파일은 만들거나 보관하지 않습니다.</li>
-        <li>${aiOn ? '피드백을 만들 때 질문과 답변 글만 AI 평가 서버로 보냅니다. 서버는 답변을 저장하지 않습니다.' : '지금은 AI 서버가 연결되지 않아, 이 기기 안에서 간이 피드백을 만듭니다. 아무것도 전송하지 않습니다.'}</li>
-        <li>답변에 실명, 학교, 회사 이름 같은 개인정보는 말하지 않아도 됩니다.</li>
+        <li>${aiOn ? '피드백을 만들 때 질문과 답변 글만 AI 평가 서버로 보냅니다. 서버는 답변을 저장하지 않습니다.' : '피드백은 이 휴대폰 안에서 만들어지며, 답변은 어디에도 전송하지 않습니다.'}</li>
+        <li>회원가입이 없고, 화면을 닫으면 답변은 사라집니다. 실명, 학교, 회사 이름은 말하지 않아도 됩니다.</li>
         <li>점수는 연습용 참고치이며 합격을 예측하지 않습니다. 목소리 톤, 외모, 표정은 평가하지 않습니다.</li>
       </ul>
       <label class="check"><input type="checkbox" id="consent" ${state.consent ? 'checked' : ''}> 위 내용을 확인했습니다</label>
@@ -150,7 +158,7 @@ function homeView() {
     </section>
     <button class="btn primary big" data-act="start">${assigned.length ? `강사가 준 질문 ${assigned.length}개로 시작` : '질문 고르기'}</button>
     <details class="card settings">
-      <summary>강사용 설정 ${aiOn ? '<span class="pill ok">AI 연결됨</span>' : '<span class="pill">간이 피드백</span>'}</summary>
+      <summary>강사용 설정 ${aiOn ? '<span class="pill ok">AI 연결됨</span>' : '<span class="pill">자동 피드백</span>'}</summary>
       <p class="muted">AI 평가 서버 주소와 수업 코드를 넣으면 AI 피드백을 받습니다. 배포 링크에 <code>?relay=주소&amp;code=수업코드&amp;q=1,4,7</code>를 붙이면 참여자는 입력 없이 바로 시작합니다.</p>
       <label>AI 평가 서버 주소<input id="relay" type="url" inputmode="url" placeholder="https://....workers.dev" value="${esc(settings.relay)}"></label>
       <label>수업 코드<input id="code" type="text" autocomplete="off" value="${esc(settings.code)}"></label>
@@ -394,7 +402,7 @@ function feedbackBody(a) {
 }
 
 function disclaimer(a) {
-  return `<p class="disclaimer">${a.result.source === 'ai' ? 'AI 피드백' : '간이 피드백(AI 미연결, 낱말 규칙으로 계산)'}입니다. 점수는 연습용 참고치이며 합격을 예측하지 않습니다. 전달 점수는 받아 적은 글과 시간만으로 계산하며 목소리 톤·억양은 보지 않습니다. 음성 인식은 "음, 어" 같은 군말을 빠뜨리기도 합니다.</p>`;
+  return `<p class="disclaimer">${a.result.source === 'ai' ? 'AI 피드백' : '자동 피드백(답변 속 표현을 정해진 규칙으로 살펴본 결과로, 내용의 깊이까지는 판단하지 못할 수 있습니다)'}입니다. 점수는 연습용 참고치이며 합격을 예측하지 않습니다. 전달 점수는 받아 적은 글과 시간만으로 계산하며 목소리 톤·억양은 보지 않습니다. 음성 인식은 "음, 어" 같은 군말을 빠뜨리기도 합니다.</p>`;
 }
 
 function reportView() {
