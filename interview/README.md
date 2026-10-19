@@ -6,6 +6,7 @@
 
 - 주소: `https://eunkyoungan.github.io/-/interview/` (main 브랜치에 합쳐진 뒤 열림)
 - 빌드·설치 없이 GitHub Pages에서 바로 동작합니다.
+- 구직자에게 나눠 줄 안내 문구, QR, 안내 이미지: `SHARE.md`
 
 ## 참여자 흐름
 
