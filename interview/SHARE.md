@@ -28,6 +28,7 @@ https://eunkyoungan.github.io/-/interview/
 - 카메라를 쓰지 않고 목소리만 사용
 - 녹음 파일을 저장하지 않음
 - 연습이 끝나면 피드백을 이미지·PDF로 내 휴대폰에 저장 가능
+- 받을 것 같은 질문을 직접 추가해서 연습 가능
 
 열기: https://eunkyoungan.github.io/-/interview/
 
