@@ -170,3 +170,17 @@ details summary { cursor: pointer; font-weight: 600; }
   .card, .nextfix { break-inside: avoid; border-color: #ccc; }
   .bar, .bar i, .nextfix, blockquote { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
+
+/* 내 질문 추가 */
+.ask-custom textarea { margin-bottom: 10px; }
+.qlist li.mine { display: flex; gap: 8px; }
+.qlist li.mine > button[data-act="choose"] { flex: 1; }
+.qlist li.mine .qn { font-size: 12px; }
+.qlist .del { flex: none; width: auto; padding: 0 12px; border: 1px solid var(--line); border-radius: 12px; background: transparent; color: var(--muted); font-size: 14px; cursor: pointer; }
+
+/* 점수 기준 */
+.guide summary { min-height: 32px; }
+.guide p { margin: 10px 0 0; }
+.rules { margin: 12px 0 0; display: grid; gap: 4px; font-size: 15px; }
+.rules dt { font-weight: 700; margin-top: 8px; }
+.rules dd { margin: 0; color: var(--fg); line-height: 1.6; }

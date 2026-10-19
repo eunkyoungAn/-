@@ -27,6 +27,13 @@ const settings = {
 };
 const assigned = (params.get('q') || '').split(',').map(findQuestion).filter(Boolean);
 
+// 참여자가 직접 추가한 질문. 이 기기의 브라우저에만 저장되고 어디에도 보내지 않는다.
+const CUSTOM_TIP = '첫 문장에 답을 먼저 말하고, 경험 하나를 근거로 들어 보세요.';
+let custom = [];
+try { custom = JSON.parse(store.get('custom') || '[]').filter(q => q && q.id && q.text); } catch { custom = []; }
+const saveCustom = () => store.set('custom', custom.length ? JSON.stringify(custom) : '');
+const getQuestion = id => custom.find(q => q.id === id) || findQuestion(id);
+
 // 카카오톡 인앱 브라우저는 마이크가 막히는 경우가 많아, 처음 한 번은 외부 브라우저로 자동으로 넘긴다.
 const KAKAO_EXTERNAL = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(location.href);
 if (/KAKAOTALK/i.test(navigator.userAgent)) {
@@ -177,6 +184,14 @@ function pickView() {
   const groups = assigned.length ? [['강사가 준 질문', list]] : CATEGORIES.map(c => [c, list.filter(q => q.cat === c)]);
   return `${header('질문 고르기')}
   <main class="wrap">
+    <section class="card ask-custom">
+      <h2>연습하고 싶은 질문이 있나요?</h2>
+      <p class="muted small">지원하는 회사에서 나올 것 같은 질문, 받기 두려운 질문을 직접 넣어 보세요. 이 휴대폰에만 저장됩니다.</p>
+      <textarea id="customText" rows="2" maxlength="150" placeholder="예: 고객 불만을 해결한 경험을 말해 주세요"></textarea>
+      <button class="btn primary wide" data-act="add-custom">내 질문 추가하고 바로 연습</button>
+    </section>
+    ${custom.length ? `<h2 class="group">내가 추가한 질문</h2>
+      <ul class="qlist">${custom.map(q => `<li class="mine"><button data-act="choose" data-id="${q.id}"><span class="qn">내</span>${esc(q.text)}</button><button class="del" data-act="del-custom" data-id="${q.id}" aria-label="이 질문 지우기">지우기</button></li>`).join('')}</ul>` : ''}
     <button class="btn ghost wide" data-act="random">아무 질문이나 골라 주세요</button>
     ${groups.map(([name, qs]) => `
       <h2 class="group">${esc(name)}</h2>
@@ -419,6 +434,7 @@ function reportView() {
     ${feedbackBody(a)}
     <section class="card"><h3>항목별 점수 <small class="muted">각 5점</small></h3>${scoreBars(a.result.scores, a.result.reasons)}</section>
     <section class="card"><h3>말하기 지표</h3>${metricsRow(a.metrics)}</section>
+    ${scoreGuide(a)}
     <details class="card"><summary>내 답변 보기</summary><p class="answer">${esc(a.answer)}</p></details>
     <button class="btn primary big" data-act="retry">한 가지 고쳐서 다시 답하기</button>
     <button class="btn ghost wide" data-act="pick">다른 질문 연습하기</button>
@@ -445,11 +461,30 @@ function compareView() {
       <div class="card"><h3>${state.attempts.length > 2 ? '이번' : '다시 한'} 답변</h3>${metricsRow(last.metrics)}<p class="answer">${esc(last.answer)}</p></div>
     </section>
     ${feedbackBody(last)}
+    ${scoreGuide(last)}
     <button class="btn primary big" data-act="pick">다른 질문 연습하기</button>
     <button class="btn ghost wide" data-act="retry">같은 질문 한 번 더</button>
     ${savePanel()}
     ${disclaimer(last)}
   </main>`;
+}
+
+// 참여자가 점수의 근거를 직접 볼 수 있게 계산 방식을 그대로 보여 준다.
+function scoreGuide(a) {
+  const ai = a.result.source === 'ai';
+  return `<details class="card guide">
+    <summary>점수는 어떻게 매기나요?</summary>
+    <p class="muted small">커리어캐쳐 강의에서 가르치는 다섯 가지 기준으로 봅니다. 각 1~5점입니다.</p>
+    ${ai ? `<p>내용 네 항목(두괄식, 구조, 구체성, 직무 연결)은 AI가 아래 기준표를 보고 매기고, 점수마다 이유를 함께 적습니다. 전달은 아래 규칙으로 계산합니다.</p>` : `<p>내용 네 항목은 답변에 나온 <b>표현</b>을 정해진 규칙으로 세어 계산합니다. 말한 내용이 좋은지 나쁜지를 이해해서 매기는 점수가 아니므로, 방향을 잡는 참고로만 봐 주세요.</p>`}
+    <dl class="rules">
+      <dt>두괄식</dt><dd>${ai ? '첫 문장만 들어도 답을 알 수 있으면 5점.' : '3점에서 시작. 첫 문장이 짧고(60자 이하) "~입니다", "~때문에"처럼 답을 맺으면 올라가고, "음", "그"로 시작하거나 첫 문장이 길면(110자 넘음) 내려갑니다.'}</dd>
+      <dt>구조</dt><dd>${ai ? '상황-맡은 일-행동-결과가 순서대로 드러나면 5점.' : '상황(당시, 근무하며), 맡은 일(맡아, 담당, 목표), 행동(진행, 제안, 개선), 결과(그 결과, 줄었, 받았) 네 가지 신호 표현 중 몇 가지가 나오는지 셉니다. 하나도 없으면 1점, 넷 다 있으면 5점.'}</dd>
+      <dt>구체성</dt><dd>${ai ? '숫자나 결과가 1개 이상 있으면 5점에 가깝습니다.' : '숫자, 기간, 횟수 표현(3년, 200건, 두 번, 50%)을 셉니다. 없으면 2점, 1개 3점, 2~3개 4점, 4개 이상 5점.'}</dd>
+      <dt>직무 연결</dt><dd>${ai ? '경험을 지원 직무의 역량과 잇고, 직무 기여로 마무리하면 5점.' : '직무, 업무, 역량, 기여, 활용 같은 표현이 나올수록(최대 3개) 올라가고, 마지막 문장이 "활용하겠습니다", "기여하고 싶습니다"처럼 끝나면 1점 더합니다.'}</dd>
+      <dt>전달</dt><dd>5점에서 깎습니다. 답변 시간이 제한 시간의 60%보다 짧으면 1~2점, 말 속도가 분당 200음절보다 느리거나 420음절보다 빠르면 1~2점, "음, 어, 그" 같은 군말이 1분에 4번 넘으면 1~2점. 글로 답하면 평가하지 않습니다.</dd>
+    </dl>
+    <p class="muted small">점수는 연습 방향을 잡기 위한 참고치이며 합격 가능성과는 관계가 없습니다. 목소리 톤, 외모, 나이, 경력 공백 여부는 점수에 들어가지 않습니다.</p>
+  </details>`;
 }
 
 // ---------- 저장 ----------
@@ -546,7 +581,7 @@ app.addEventListener('click', async e => {
   }
   else if (act === 'choose' || act === 'random') {
     const pool = assigned.length ? assigned : QUESTIONS;
-    state.question = act === 'random' ? pool[Math.floor(Math.random() * pool.length)] : findQuestion(el.dataset.id);
+    state.question = act === 'random' ? pool[Math.floor(Math.random() * pool.length)] : getQuestion(el.dataset.id);
     state.attempts = [];
     go('ask');
   }
@@ -555,6 +590,23 @@ app.addEventListener('click', async e => {
   else if (act === 'evaluate') evaluate();
   else if (act === 'pick') go('pick');
   else if (act === 'records') go('records');
+  else if (act === 'add-custom') {
+    const box = document.getElementById('customText');
+    const text = box.value.replace(/\s+/g, ' ').trim();
+    if (text.length < 5) { toast('질문을 조금 더 자세히 써 주세요.'); box.focus(); return; }
+    const q = { id: 'c' + Date.now().toString(36), cat: '내 질문', text, tip: CUSTOM_TIP };
+    custom.unshift(q);
+    custom = custom.slice(0, 20);
+    saveCustom();
+    state.question = q;
+    state.attempts = [];
+    go('ask');
+  }
+  else if (act === 'del-custom') {
+    custom = custom.filter(q => q.id !== el.dataset.id);
+    saveCustom();
+    render();
+  }
   else if (act === 'save-image' || act === 'save-pdf' || act === 'save-text') doSave(act);
   else if (act === 'save-settings' || act === 'share-link') {
     settings.relay = document.getElementById('relay').value.trim();
