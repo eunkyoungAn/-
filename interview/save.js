@@ -1,5 +1,6 @@
 // 연습 기록 저장: 이미지(PNG), 글(복사), PDF(인쇄). 모두 이 기기 안에서 만들고 어디에도 보내지 않는다.
 import { RUBRIC } from './scoring.js';
+import { NV_ITEMS } from './video.js';
 
 const SITE = 'eunkyoungan.github.io/-/interview';
 
@@ -17,6 +18,15 @@ function scoreLine(first, last) {
   }).join(' · ');
 }
 
+function nvLine(first, last) {
+  if (!last.nv) return '';
+  return '영상 분석(5점) ' + NV_ITEMS.map(r => {
+    const b = last.nv.scores[r.key];
+    const a = first.nv && first !== last ? first.nv.scores[r.key] : null;
+    return b == null ? `${r.label} -` : a == null ? `${r.label} ${b}` : `${r.label} ${a}→${b}`;
+  }).join(' · ');
+}
+
 // ---------- 글 ----------
 export function buildText(log) {
   const lines = [`[커리어캐쳐 면접 리허설] 연습 기록 ${today()}`, ''];
@@ -26,6 +36,7 @@ export function buildText(log) {
     const r = last.result;
     lines.push(`${i + 1}. ${item.question.text}`);
     lines.push(`답변 ${item.attempts.length}번 · 점수(5점) ${scoreLine(first, last)}`);
+    if (last.nv) lines.push(nvLine(first, last) + ' / ' + NV_ITEMS.map(r => last.nv.reasons[r.key]).join(' / '));
     lines.push(`다음에 고칠 한 가지: ${r.next_fix}`);
     lines.push(`잘한 점: ${r.strength}`);
     lines.push(`고칠 점: ${r.improvement}`);
@@ -96,6 +107,8 @@ function layout(ctx, log, draw) {
       text(`질문 ${i + 1}`, { size: 24, weight: 700, color: C.accent, ...inner });
       text(item.question.text, { size: 34, weight: 700, ...inner });
       text(`답변 ${item.attempts.length}번 · ${scoreLine(first, last)}`, { size: 25, color: C.muted, ...inner });
+      if (last.nv) text(nvLine(first, last), { size: 25, color: C.muted, ...inner });
+      if (last.nv && last.nv.tips.length) text('영상 팁: ' + last.nv.tips.join(' '), { size: 25, color: C.fg, ...inner });
       y += 14;
       text('다음에 고칠 한 가지', { size: 24, weight: 700, color: C.muted, ...inner });
       text(r.next_fix, { size: 32, weight: 700, ...inner });

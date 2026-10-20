@@ -1,10 +1,12 @@
 // 커리어캐쳐 면접 리허설 (MVP)
 // 흐름: 시작 → 질문 고르기 → 질문 듣기 → 준비 30초 → 말로 답하기 → 답변 확인 → 피드백 → 다시 답하기 → 전후 비교
-// 음성은 브라우저 안에서 글자로만 바뀌고, 녹음 파일은 만들지도 보내지도 않는다.
+// 음성 모드: 브라우저 음성 인식으로 글자만 받는다. 녹음 파일은 만들지 않는다.
+// 영상 모드(선택): 카메라로 녹화하고 시선·억양·템포를 휴대폰 안에서만 분석한다. 영상은 참여자가 직접 저장한다.
 
 import { QUESTIONS, CATEGORIES, findQuestion } from './questions.js';
 import { RUBRIC, measure, speedLabel, deliveryScore, localEvaluate } from './scoring.js';
-import { buildText, saveImage } from './save.js';
+import { buildText, saveImage, fileName } from './save.js';
+import { canRecord, openCamera, stopStream, startRecorder, startAudioAnalysis, startGaze, loadGazeModel, scoreNonverbal, NV_ITEMS, saveVideo } from './video.js';
 
 const PREP_SEC = 30;
 const app = document.getElementById('app');
@@ -24,6 +26,7 @@ const settings = {
   code: store.get('code') || '',
   limit: [60, 90].includes(Number(params.get('t'))) ? Number(params.get('t')) : Number(store.get('limit')) || 60,
   textMode: !SR,
+  video: store.get('video') === '1' && canRecord(),
 };
 const assigned = (params.get('q') || '').split(',').map(findQuestion).filter(Boolean);
 
@@ -146,7 +149,7 @@ function homeView() {
   <main class="wrap">
     <section class="hero">
       <h1>듣고, 말하고,<br>한 가지만 고쳐서 다시.</h1>
-      <p>질문을 듣고 말로 답하면, 커리어캐쳐 기준으로 피드백을 드립니다. 같은 질문에 한 번 더 답해 달라진 점을 확인해 보세요. 카메라는 쓰지 않습니다.</p>
+      <p>질문을 듣고 말로 답하면, 커리어캐쳐 기준으로 피드백을 드립니다. 같은 질문에 한 번 더 답해 달라진 점을 확인해 보세요. 카메라는 원할 때만 켭니다.</p>
     </section>
     ${inApp ? `<div class="notice warn"><b>${esc(inApp)} 안에서 열려 있어요.</b> 이 화면에서는 마이크가 막힐 수 있습니다. ${inApp === '카카오톡' ? `아래 버튼을 눌러 Chrome이나 Safari에서 열어 주세요.<a class="btn primary sm" href="${KAKAO_EXTERNAL}">다른 브라우저로 열기</a>` : '오른쪽 위 메뉴에서 <b>다른 브라우저로 열기</b>(Chrome, Safari 등)를 눌러 주세요.'}<button class="btn ghost sm" data-act="copy-link">주소 복사</button></div>` : ''}
     ${!SR ? `<div class="notice">이 브라우저는 음성 인식을 지원하지 않아 <b>글로 답하기</b>로 진행합니다. 말로 연습하려면 Chrome(안드로이드·PC) 또는 Safari(아이폰)에서 열어 주세요.</div>` : ''}
@@ -156,7 +159,8 @@ function homeView() {
         <li>말한 소리는 휴대폰 브라우저의 음성 인식 기능(Chrome은 Google, 아이폰은 Apple)이 글자로 바꿉니다. 이 앱은 녹음 파일을 만들거나 보관하지 않습니다.</li>
         <li>${aiOn ? '피드백을 만들 때 질문과 답변 글만 AI 평가 서버로 보냅니다. 서버는 답변을 저장하지 않습니다.' : '피드백은 이 휴대폰 안에서 만들어지며, 답변은 어디에도 전송하지 않습니다.'}</li>
         <li>회원가입이 없고, 화면을 닫으면 답변은 사라집니다. 실명, 학교, 회사 이름은 말하지 않아도 됩니다.</li>
-        <li>점수는 연습용 참고치이며 합격을 예측하지 않습니다. 목소리 톤, 외모, 표정은 평가하지 않습니다.</li>
+        <li>점수는 연습용 참고치이며 합격을 예측하지 않습니다. 외모, 표정, 목소리 높낮이 자체는 평가하지 않습니다.</li>
+        ${settings.video ? '<li>영상 녹화를 켜면 시선 방향, 억양 변화, 말 빠르기를 이 휴대폰 안에서만 분석합니다. 영상은 어디에도 전송되지 않으며, 저장 버튼을 눌러야 휴대폰에 남습니다.</li>' : ''}
       </ul>
       <label class="check"><input type="checkbox" id="consent" ${state.consent ? 'checked' : ''}> 위 내용을 확인했습니다</label>
     </section>
@@ -167,6 +171,14 @@ function homeView() {
       </div>
       ${SR ? `<label class="check"><input type="checkbox" id="textmode" ${settings.textMode ? 'checked' : ''}> 말하기가 어려우면 글로 답하기</label>` : ''}
     </section>
+    ${canRecord() ? `<section class="card">
+      <h2>답변 방식</h2>
+      <div class="seg" role="radiogroup" aria-label="답변 방식">
+        <button role="radio" aria-checked="${!settings.video}" class="${!settings.video ? 'on' : ''}" data-act="video-mode" data-v="0">목소리만</button>
+        <button role="radio" aria-checked="${settings.video}" class="${settings.video ? 'on' : ''}" data-act="video-mode" data-v="1">영상 녹화</button>
+      </div>
+      <p class="muted small">${settings.video ? '실제 화상 면접처럼 내 모습을 보며 답합니다. 시선, 억양, 템포 분석과 영상 저장이 추가됩니다. 휴대폰을 눈높이에 세워 두면 좋아요.' : '카메라 없이 목소리로만 연습합니다. 부담 없이 시작하기 좋아요.'}</p>
+    </section>` : ''}
     <button class="btn primary big" data-act="start">${assigned.length ? `강사가 준 질문 ${assigned.length}개로 시작` : '질문 고르기'}</button>
     <details class="card settings">
       <summary>강사용 설정 ${aiOn ? '<span class="pill ok">AI 연결됨</span>' : '<span class="pill">자동 피드백</span>'}</summary>
@@ -213,6 +225,7 @@ function askView() {
     </section>
     ${round > 1 ? `<div class="notice focus"><b>이번에 고칠 한 가지</b>${esc(state.attempts[state.attempts.length - 1].result.next_fix)}</div>` : `<p class="tip">${esc(q.tip)}</p>`}
     <section class="stage" id="stage">
+      ${settings.video && !settings.textMode ? '<div class="cam" id="camWrap"><video id="cam" playsinline muted autoplay></video><span class="cam-tip" id="camTip">카메라를 켜는 중...</span></div>' : ''}
       <div class="timer" id="timer" aria-live="polite"><span class="tlabel">준비</span><span class="tnum">${PREP_SEC}</span></div>
       <p class="muted center" id="stageMsg">답할 내용을 머릿속으로 정리해 보세요.</p>
       <div class="live" id="live" hidden></div>
@@ -234,6 +247,32 @@ function bindAsk() {
   let startedAt = 0;
   let rec = null;
   let tick = null;
+  const cam = document.getElementById('cam');
+  let camStream = null;
+  let recorder = null;
+  let audioA = null;
+  let gaze = null;
+  if (cam) {
+    const tip = document.getElementById('camTip');
+    openCamera().then(stream => {
+      if (phase === 'done') { stopStream(stream); return; }
+      camStream = stream;
+      cam.srcObject = stream;
+      tip.textContent = '화면 속 얼굴 말고 카메라 렌즈를 봐 주세요';
+      loadGazeModel().catch(() => {}); // 준비 시간 동안 시선 분석 모델을 미리 불러 둔다
+      if (phase === 'answer') startCapture();
+    }).catch(() => {
+      toast('카메라를 켜지 못해 목소리로만 진행합니다. 브라우저에서 카메라 권한을 확인해 주세요.');
+      document.getElementById('camWrap').hidden = true;
+    });
+  }
+  function startCapture() {
+    if (!camStream || recorder) return;
+    try { recorder = startRecorder(camStream); } catch { toast('이 브라우저에서는 녹화를 시작하지 못했어요.'); }
+    audioA = startAudioAnalysis(camStream);
+    gaze = startGaze(cam);
+    document.getElementById('camTip').innerHTML = '<span class="rec-dot" aria-hidden="true"></span>녹화 중';
+  }
 
   const setTimer = (label, n, warn) => {
     timerEl.innerHTML = `<span class="tlabel">${label}</span><span class="tnum">${n}</span>`;
@@ -267,6 +306,7 @@ function bindAsk() {
       typed.focus();
       return;
     }
+    startCapture();
     msg.innerHTML = '<span class="rec-dot" aria-hidden="true"></span>듣고 있어요. 편하게 말해 주세요.';
     live.hidden = false;
     live.innerHTML = '<span class="muted">말하면 여기에 글자로 나타납니다.</span>';
@@ -290,7 +330,7 @@ function bindAsk() {
     try { rec.start(); } catch { toast('음성 인식을 시작하지 못했어요.'); }
   }
 
-  function finish() {
+  async function finish() {
     if (phase === 'done') return;
     if (phase === 'prep') { beginAnswer(); return; }
     phase = 'done';
@@ -299,6 +339,15 @@ function bindAsk() {
     let text = typed.value.trim();
     if (rec) text = join(rec.stop(), text);
     state.draft = { answer: text, rawAnswer: text, durationSec, typed: settings.textMode || !typed.hidden };
+    if (recorder || audioA || gaze) {
+      btn.disabled = true;
+      btn.textContent = '영상 정리 중...';
+      state.draft.audio = audioA ? audioA.stop() : null;
+      state.draft.gaze = gaze ? gaze.stop() : null;
+      if (recorder) { try { state.draft.video = await recorder.stop(); } catch { state.draft.video = null; } }
+    }
+    stopStream(camStream);
+    camStream = null;
     // 인식 마지막 조각이 늦게 도착하는 경우가 있어 잠깐 기다린다.
     setTimeout(() => { if (rec) state.draft.answer = state.draft.rawAnswer = join(rec.text(), typed.value.trim()); go('review'); }, rec ? 600 : 0);
   }
@@ -308,7 +357,18 @@ function bindAsk() {
     if (btn.dataset.act === 'answer-now') beginAnswer();
     else finish();
   });
-  cleanup.push(() => { clearInterval(tick); if (rec && phase !== 'done') rec.stop(); if ('speechSynthesis' in window) speechSynthesis.cancel(); });
+  cleanup.push(() => {
+    clearInterval(tick);
+    if (phase !== 'done') {
+      if (rec) rec.stop();
+      if (recorder) recorder.stop();
+      if (audioA) audioA.stop();
+      if (gaze) gaze.stop();
+      phase = 'done';
+    }
+    stopStream(camStream);
+    if ('speechSynthesis' in window) speechSynthesis.cancel();
+  });
 }
 
 // ---------- 화면: 답변 확인 ----------
@@ -352,7 +412,12 @@ async function evaluate() {
   if (d.typed) { result.scores.delivery = null; result.reasons.delivery = '글로 답해 전달은 평가하지 않습니다'; }
   else { const dv = deliveryScore(metrics, settings.limit); result.scores.delivery = dv.score; result.reasons.delivery = dv.reason; }
 
-  state.attempts.push({ answer, metrics, result });
+  const attempt = { answer, metrics, result };
+  if (d.video || d.audio || d.gaze) {
+    attempt.nv = scoreNonverbal({ gaze: d.gaze, audio: d.audio, metrics, durationSec: d.durationSec });
+    if (d.video && d.video.blob.size) attempt.video = { ...d.video, url: URL.createObjectURL(d.video.blob) };
+  }
+  state.attempts.push(attempt);
   if (state.attempts.length === 1) state.log.push({ question: state.question, attempts: state.attempts });
   state.saved = false;
   state.draft = null;
@@ -389,8 +454,8 @@ async function remoteEvaluate({ answer, metrics, prev }) {
 }
 
 // ---------- 화면: 피드백 ----------
-function scoreBars(scores, reasons, prevScores) {
-  return `<ul class="scores">${RUBRIC.map(r => {
+function scoreBars(scores, reasons, prevScores, items = RUBRIC) {
+  return `<ul class="scores">${items.map(r => {
     const v = scores[r.key];
     const p = prevScores ? prevScores[r.key] : null;
     const diff = v != null && p != null ? v - p : null;
@@ -423,7 +488,7 @@ function feedbackBody(a) {
 }
 
 function disclaimer(a) {
-  return `<p class="disclaimer">${a.result.source === 'ai' ? 'AI 피드백' : '자동 피드백(답변 속 표현을 정해진 규칙으로 살펴본 결과로, 내용의 깊이까지는 판단하지 못할 수 있습니다)'}입니다. 점수는 연습용 참고치이며 합격을 예측하지 않습니다. 전달 점수는 받아 적은 글과 시간만으로 계산하며 목소리 톤·억양은 보지 않습니다. 음성 인식은 "음, 어" 같은 군말을 빠뜨리기도 합니다.</p>`;
+  return `<p class="disclaimer">${a.result.source === 'ai' ? 'AI 피드백' : '자동 피드백(답변 속 표현을 정해진 규칙으로 살펴본 결과로, 내용의 깊이까지는 판단하지 못할 수 있습니다)'}입니다. 점수는 연습용 참고치이며 합격을 예측하지 않습니다. 전달 점수는 받아 적은 글과 시간으로 계산합니다. 음성 인식은 "음, 어" 같은 군말을 빠뜨리기도 합니다.</p>`;
 }
 
 function reportView() {
@@ -434,6 +499,7 @@ function reportView() {
     ${feedbackBody(a)}
     <section class="card"><h3>항목별 점수 <small class="muted">각 5점</small></h3>${scoreBars(a.result.scores, a.result.reasons)}</section>
     <section class="card"><h3>말하기 지표</h3>${metricsRow(a.metrics)}</section>
+    ${nvSection(a)}
     ${scoreGuide(a)}
     <details class="card"><summary>내 답변 보기</summary><p class="answer">${esc(a.answer)}</p></details>
     <button class="btn primary big" data-act="retry">한 가지 고쳐서 다시 답하기</button>
@@ -461,6 +527,7 @@ function compareView() {
       <div class="card"><h3>${state.attempts.length > 2 ? '이번' : '다시 한'} 답변</h3>${metricsRow(last.metrics)}<p class="answer">${esc(last.answer)}</p></div>
     </section>
     ${feedbackBody(last)}
+    ${nvSection(last, first)}
     ${scoreGuide(last)}
     <button class="btn primary big" data-act="pick">다른 질문 연습하기</button>
     <button class="btn ghost wide" data-act="retry">같은 질문 한 번 더</button>
@@ -483,8 +550,36 @@ function scoreGuide(a) {
       <dt>직무 연결</dt><dd>${ai ? '경험을 지원 직무의 역량과 잇고, 직무 기여로 마무리하면 5점.' : '직무, 업무, 역량, 기여, 활용 같은 표현이 나올수록(최대 3개) 올라가고, 마지막 문장이 "활용하겠습니다", "기여하고 싶습니다"처럼 끝나면 1점 더합니다.'}</dd>
       <dt>전달</dt><dd>5점에서 깎습니다. 답변 시간이 제한 시간의 60%보다 짧으면 1~2점, 말 속도가 분당 200음절보다 느리거나 420음절보다 빠르면 1~2점, "음, 어, 그" 같은 군말이 1분에 4번 넘으면 1~2점. 글로 답하면 평가하지 않습니다.</dd>
     </dl>
-    <p class="muted small">점수는 연습 방향을 잡기 위한 참고치이며 합격 가능성과는 관계가 없습니다. 목소리 톤, 외모, 나이, 경력 공백 여부는 점수에 들어가지 않습니다.</p>
+    ${a.nv ? `<h3 class="guide-h">영상 분석(휴대폰 안에서 측정)</h3>
+    <dl class="rules">
+      <dt>시선</dt><dd>0.2초마다 얼굴 방향과 눈동자 방향을 보고, 카메라 쪽을 향한 시간 비율을 잽니다. 80% 이상 5점, 65% 이상 4점, 50% 이상 3점, 30% 이상 2점. 1초 넘게 벗어난 횟수도 함께 보여 줍니다.</dd>
+      <dt>억양</dt><dd>말하는 동안 목소리 높낮이가 얼마나 오르내리는지를 반음 단위로 잽니다. 변화가 너무 작으면(1.8반음 미만) 단조롭게 들릴 수 있어 점수가 낮고, 2.5~6반음이면 5점입니다. 목소리가 높은지 낮은지는 보지 않습니다.</dd>
+      <dt>템포</dt><dd>5점에서 깎습니다. 말 빠르기가 분당 200음절보다 느리거나 420음절보다 빠르면 1~2점, 2.5초 넘는 멈춤이 1분에 1.5번 넘으면 1점, 3번 넘으면 2점.</dd>
+    </dl>` : ''}
+    <p class="muted small">점수는 연습 방향을 잡기 위한 참고치이며 합격 가능성과는 관계가 없습니다. 외모, 표정, 목소리 높이, 나이, 경력 공백 여부는 점수에 들어가지 않습니다.</p>
   </details>`;
+}
+
+function videoBlock(a, qi, ai) {
+  if (!a.video) return '';
+  return `<div class="vid">
+    <video src="${a.video.url}" controls playsinline preload="metadata"></video>
+    <button class="btn ghost wide no-print" data-act="save-video" data-q="${qi}" data-a="${ai}">이 영상 내 휴대폰에 저장</button>
+  </div>`;
+}
+
+// 영상 모드 분석 결과. prev가 있으면 변화량을 함께 보여 준다.
+function nvSection(a, prev) {
+  if (!a.nv) return '';
+  const qi = state.log.findIndex(x => x.attempts.includes(a));
+  const ai = qi >= 0 ? state.log[qi].attempts.indexOf(a) : -1;
+  return `<section class="card nv">
+    <h3>영상 분석 <small class="muted">시선·억양·템포, 각 5점</small></h3>
+    ${scoreBars(a.nv.scores, a.nv.reasons, prev && prev.nv ? prev.nv.scores : null, NV_ITEMS)}
+    ${a.nv.tips.length ? `<ul class="tips">${a.nv.tips.map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}
+    ${videoBlock(a, qi, ai)}
+    <p class="muted small">영상과 분석은 이 휴대폰 안에서만 처리됐어요. 저장하지 않으면 화면을 닫을 때 사라집니다.</p>
+  </section>`;
 }
 
 // ---------- 저장 ----------
@@ -528,6 +623,8 @@ function recordsView() {
           <h3>이렇게 바꿔 말해 보세요</h3><blockquote>${esc(last.result.rewrite_example)}</blockquote>
           <h3>마지막 답변</h3><p class="answer">${esc(last.answer)}</p>
         </div>
+        ${last.nv ? `<div class="nv-rec"><h3>영상 분석</h3>${scoreBars(last.nv.scores, last.nv.reasons, item.attempts.length > 1 && first.nv ? first.nv.scores : null, NV_ITEMS)}</div>` : ''}
+        ${item.attempts.some(x => x.video) ? `<div class="vids no-print"><h3>녹화한 영상</h3>${item.attempts.map((x, ai) => x.video ? `<p class="muted small">${ai + 1}번째 답변</p>${videoBlock(x, i, ai)}` : '').join('')}</div>` : ''}
       </article>`;
     }).join('')}
     <button class="btn primary big no-print" data-act="pick">다른 질문 연습하기</button>
@@ -590,6 +687,14 @@ app.addEventListener('click', async e => {
   else if (act === 'evaluate') evaluate();
   else if (act === 'pick') go('pick');
   else if (act === 'records') go('records');
+  else if (act === 'video-mode') { settings.video = el.dataset.v === '1'; store.set('video', settings.video ? '1' : ''); render(); }
+  else if (act === 'save-video') {
+    const a = state.log[Number(el.dataset.q)]?.attempts[Number(el.dataset.a)];
+    if (!a || !a.video) return;
+    const how = await saveVideo(a.video, fileName('x').replace(/\.x$/, '') + `-q${Number(el.dataset.q) + 1}-${Number(el.dataset.a) + 1}`);
+    if (how === 'downloaded') toast('영상을 내려받았어요. 다운로드 폴더나 갤러리에서 확인해 주세요.');
+    else if (how === 'shared') toast('"비디오 저장"을 누르면 사진첩에 저장돼요.');
+  }
   else if (act === 'add-custom') {
     const box = document.getElementById('customText');
     const text = box.value.replace(/\s+/g, ' ').trim();
