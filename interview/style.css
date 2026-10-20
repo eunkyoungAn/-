@@ -184,3 +184,15 @@ details summary { cursor: pointer; font-weight: 600; }
 .rules { margin: 12px 0 0; display: grid; gap: 4px; font-size: 15px; }
 .rules dt { font-weight: 700; margin-top: 8px; }
 .rules dd { margin: 0; color: var(--fg); line-height: 1.6; }
+
+/* 영상 모드 */
+.cam { position: relative; border-radius: 14px; overflow: hidden; background: #000; aspect-ratio: 3 / 4; max-height: 52vh; margin: 0 auto; width: 100%; max-width: 380px; }
+.cam video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); display: block; }
+.cam-tip { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); background: rgba(0,0,0,.6); color: #fff; font-size: 14px; padding: 4px 12px; border-radius: 99px; white-space: nowrap; }
+.cam[hidden] { display: none; }
+.nv .tips { margin: 12px 0 0; padding-left: 20px; display: grid; gap: 4px; font-size: 15px; }
+.vid { margin-top: 14px; display: grid; gap: 8px; }
+.vid video { width: 100%; max-height: 60vh; border-radius: 12px; background: #000; }
+.nv-rec, .vids { margin-top: 14px; }
+.nv-rec h3, .vids h3, .guide-h { font-size: 15px; color: var(--muted); margin: 14px 0 8px; }
+.btn:disabled { opacity: .6; }
