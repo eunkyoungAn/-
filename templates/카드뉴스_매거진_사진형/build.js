@@ -35,10 +35,10 @@ const html = data.cards.map((c, i) => {
   const photo = c.photo && fs.existsSync(path.join(dir, c.photo));
   const bg = photo ? `url('${c.photo}') center/cover` : (scenes[c.scene] || scenes.night);
   const dots = Array.from({ length: n }, (_, k) => `<i class="${k === i ? 'on' : ''}"></i>`).join('');
-  return `<div class="c ${c.layout || ''}">
+  return `<div class="c ${data.theme || ''} ${c.layout || ''}">
   <div class="bg" style="background:${bg}"></div>${photo ? '' : `<div class="blur">${props[c.prop || 'none']}</div><div class="grain"></div>`}
   <div class="shade"></div>
-  ${c.kicker ? `<div class="kicker">${fmt(c.kicker)}</div>` : ''}
+  ${c.kicker ? `<div class="kicker">${fmt(c.kicker)}</div>` : ''}${(c.stickers||[]).map((t,k)=>`<div class="stk s${k}">${fmt(t)}</div>`).join('')}
   <div class="txt">
     <h1>${title(c.title)}</h1>
     ${c.sub ? `<p class="sub">${fmt(c.sub)}</p>` : ''}
@@ -78,6 +78,11 @@ h1 em,.sub em,.body em,.stat em{font-style:normal;color:#7FE3C2}
 .dots{position:absolute;left:0;right:0;bottom:30px;display:flex;justify-content:center;gap:14px}
 .dots i{width:16px;height:16px;border-radius:50%;background:rgba(255,255,255,.45)}.dots i.on{background:#fff}
 .top .txt{bottom:auto;top:200px}.top .shade{background:linear-gradient(180deg,rgba(0,0,0,.8) 0%,rgba(0,0,0,.5) 45%,transparent 70%,rgba(0,0,0,.5) 100%)}
+.meme h1 .q{color:#FFE14D;-webkit-text-stroke:4px #111;paint-order:stroke fill;text-shadow:6px 6px 0 #111}
+.meme .kicker{background:#FFE14D;color:#111;border:4px solid #111;border-radius:6px;transform:rotate(-4deg);font-weight:900;box-shadow:6px 6px 0 #111}
+.meme h1 em,.meme .sub em,.meme .body em,.meme .stat em,.meme .stat b{color:#FFE14D}
+.stk{position:absolute;font-weight:900;font-size:44px;color:#111;background:#fff;border:4px solid #111;border-radius:40px;padding:12px 28px;box-shadow:6px 6px 0 #111}
+.stk.s0{right:70px;top:150px;transform:rotate(6deg)}.stk.s1{right:120px;top:300px;transform:rotate(-5deg);background:#FF6FA8}
 .small h1{font-size:84px}.small h1 .q{font-size:100px}`;
 fs.writeFileSync(path.join(dir, 'cards.html'), `<html><head><meta charset="utf-8"><style>${css}</style></head><body>${html}</body></html>`);
 

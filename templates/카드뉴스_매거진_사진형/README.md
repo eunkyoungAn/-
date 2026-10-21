@@ -14,4 +14,5 @@
 1. 작업 폴더에 `cards.json` 작성 (예시: `office/20261021_꼭AI써야해/cards.json`)
 2. 사진은 작업 폴더 `photos/01.jpg` … 에 넣는다. 사진이 없으면 `scene`(night·cafe·window·office·dawn·mint) + `prop`(laptop·cup·phone·chart) 분위기 배경이 대신 들어간다.
 3. `NODE_PATH=$(npm root -g) node templates/카드뉴스_매거진_사진형/build.js <작업폴더 절대경로>` → `cards.html`, `png/card_01.png …`
+- 병맛 버전: cards.json 에 `"theme": "meme"`, 카드별 `"stickers": ["말풍선"]`
 - 사람 얼굴 사진은 본인 동의·저작권 확인 후에만 쓴다. 참고 이미지 원본(타 매체 사진)은 쓰지 않는다.
