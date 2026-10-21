@@ -46,11 +46,11 @@ const cards=[
  </div></div>`,
 `<div class="c green"><div class="card">${balloons}
  <div class="pill g">놓치지 말고 신청하세요!</div>
- <h2>부담 없는 수강료로<br>AI 실무 시작!</h2>
- <div class="fees"><div><small>1회 과정</small><b>20,000<i>원</i></b></div><div><small>2회 과정</small><b>30,000<i>원</i></b></div></div>
- <div class="apply"><div class="row"><span>신청</span>남부여성발전센터 홈페이지</div><div class="row"><span>문의</span>02-802-0922 <em>(교육팀 2번)</em></div></div>
- <p class="slogan">배운 날부터, 나의 일과 생활에 연결되는 AI.</p>
- <p class="note">최신 일정·수강료는 과정별 공식 안내를 확인해 주세요</p>
+ <h2>배운 날부터<br>내 일에 연결되는 AI!</h2>
+ <p class="q3t">수업을 관통하는 세 가지 질문</p>
+ <div class="q3"><div><b>문제정의</b>내가 해결하려는 문제는 무엇인가?</div><div><b>자동화 업무 발굴</b>어떤 반복 업무를 자동화할 것인가?</div><div><b>데이터의 중요성</b>어떤 데이터가 필요하고 믿을 만한가?</div></div>
+ <p class="slogan">생각하는 주체는 나, 실행을 돕는 도구는 AI.</p>
+ <p class="note">최신 일정은 과정별 공식 안내를 확인해 주세요</p>
  <div class="sig">담당강사 안은경 | 커리어캐쳐(CareerCatcher) · @career_catcher_ek</div>
  </div></div>`];
 const css=`@font-face{font-family:P;font-weight:500;src:url(${F}/Pretendard-Medium.woff2)}@font-face{font-family:P;font-weight:700;src:url(${F}/Pretendard-Bold.woff2)}@font-face{font-family:P;font-weight:800;src:url(${F}/Pretendard-ExtraBold.woff2)}@font-face{font-family:P;font-weight:900;src:url(${F}/Pretendard-Black.woff2)}
@@ -84,7 +84,8 @@ td{background:#f3f6fb;padding:11px 16px;font-size:28px;vertical-align:middle}td:
 .bl{position:absolute;width:200px}
 .fees{margin-top:80px;display:flex;gap:30px;justify-content:center}.fees div{flex:1;background:#eaf2ff;border-radius:24px;padding:36px 10px}.fees small{display:block;font-size:32px;font-weight:700;color:#1f5fd6}.fees b{font-size:84px;font-weight:900;color:#111;letter-spacing:-2px}.fees i{font-style:normal;font-size:40px}
 .apply{margin-top:70px;text-align:left}.row{display:flex;align-items:center;gap:24px;font-size:38px;font-weight:800;padding:22px 0;border-bottom:2px dashed #ddd}.row span{background:#18a957;color:#fff;font-size:28px;padding:8px 20px;border-radius:10px}.row em{font-style:normal;color:#666;font-size:30px}
-.slogan{margin-top:80px;font-size:40px;font-weight:900;color:#1f5fd6}
+.q3t{margin-top:50px;font-size:34px;font-weight:800;color:#18a957}.q3{margin-top:26px;display:flex;flex-direction:column;gap:18px}.q3 div{background:#eaf2ff;border-radius:22px;padding:22px 30px;font-size:32px;font-weight:700;line-height:1.4;color:#222;text-align:left}.q3 b{display:block;font-size:28px;color:#1f5fd6;margin-bottom:6px}
+.slogan{margin-top:50px;font-size:40px;font-weight:900;color:#1f5fd6}
 .sig{position:absolute;left:0;right:0;bottom:50px;font-size:26px;color:#666;font-weight:700}`;
 fs.writeFileSync(__dirname+'/cards.html',`<html><head><meta charset="utf-8"><style>${css}</style></head><body>${cards.join('')}</body></html>`);
 (async()=>{const {chromium}=require('playwright');const b=await chromium.launch();const p=await b.newPage({viewport:{width:1120,height:1400}});
