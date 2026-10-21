@@ -268,7 +268,35 @@ let samplerP = null;
 function sampler(){ if(!samplerP) samplerP = (window.claude?.use ? window.claude.use("sample") : Promise.resolve(null)).catch(()=>null); return samplerP; }
 sampler();
 
+// GitHub Pages 등 claude.ai 밖에서는 중계 서버로 채점 (?relay=서버주소&code=수업코드)
+const RELAY = (()=>{ const q=new URLSearchParams(location.search); let r=q.get("relay"), c=q.get("code");
+  try{ if(r){localStorage.setItem("aip-relay",r);localStorage.setItem("aip-code",c||"");} else {r=localStorage.getItem("aip-relay");c=localStorage.getItem("aip-code");} }catch(e){}
+  return r ? {url:r.replace(/\/+$/,""), code:c||""} : null; })();
+
+async function relayGrade(g, text){
+  const ctl = new AbortController(); const to = setTimeout(()=>ctl.abort(), 45000);
+  try{
+    const res = await fetch(RELAY.url+"/grade-prompt",{method:"POST",signal:ctl.signal,
+      headers:{"Content-Type":"application/json","X-Class-Code":RELAY.code},
+      body:JSON.stringify({ask:g.ask,conds:g.conds,checks:g.checks.map(c=>({k:c.k,pt:c.pt,tip:c.tip})),prompt:text})});
+    if(!res.ok) return null; return await res.json();
+  } finally { clearTimeout(to); }
+}
+
 async function aiGrade(g, text){
+  let out = null;
+  if(RELAY){ try{ out = await relayGrade(g, text); }catch(e){} }
+  if(!out) out = await samplerGrade(g, text);
+  if(!out || !Array.isArray(out.checks)) return null;
+  const r = g.checks.map(c=>{
+    const a = out.checks.find(x=>x && x.k===c.k) || {};
+    const got = Math.max(0, Math.min(c.pt, Math.round(Number(a.got)||0)));
+    return {...c, got, tip: (a.comment && String(a.comment).trim()) || c.tip};
+  });
+  return {r, reply: String(out.reply||"").slice(0,600), summary: String(out.summary||"").slice(0,300)};
+}
+
+async function samplerGrade(g, text){
   const sample = await sampler(); if(!sample) return null;
   const rubric = g.checks.map(c=>`- ${c.k} (${c.pt}점): ${c.tip}`).join("\n");
   const prompt = `너는 초심자·중급자 대상 'AI 질문법(컨텍스트 엔지니어링)' 수업의 채점관이다.
@@ -290,14 +318,7 @@ ${rubric}
 {"checks":[{"k":"항목명 그대로","got":0~배점 정수,"comment":"부족하면 무엇을 넣으면 좋은지 한 문장, 충분하면 빈 문자열"}],
  "reply":"이 질문을 그대로 받은 AI가 만들 법한 결과를 4줄 이내로. 빠진 정보는 실제 AI처럼 뭉뚱그리거나 추측한 티가 나게",
  "summary":"참여자에게 주는 격려 + 가장 중요한 개선점 한 가지, 두 문장, 존댓말"}`;
-  const out = await sample.json(prompt, {modelTier:"quick"});
-  if(!out || !Array.isArray(out.checks)) return null;
-  const r = g.checks.map(c=>{
-    const a = out.checks.find(x=>x && x.k===c.k) || {};
-    const got = Math.max(0, Math.min(c.pt, Math.round(Number(a.got)||0)));
-    return {...c, got, tip: (a.comment && String(a.comment).trim()) || c.tip};
-  });
-  return {r, reply: String(out.reply||"").slice(0,600), summary: String(out.summary||"").slice(0,300)};
+  return await sample.json(prompt, {modelTier:"quick"});
 }
 
 const tierOf = s => s>=80?["상","t1"]:s>=50?["중","t2"]:["하","t3"];
