@@ -262,6 +262,42 @@ function grade(g, text){
     const ok=c.re.test(t); return {...c,got:ok?c.pt:0,hit:ok?1:0,of:1};
   });
 }
+let samplerP = null;
+function sampler(){ if(!samplerP) samplerP = (window.claude?.use ? window.claude.use("sample") : Promise.resolve(null)).catch(()=>null); return samplerP; }
+sampler();
+
+async function aiGrade(g, text){
+  const sample = await sampler(); if(!sample) return null;
+  const rubric = g.checks.map(c=>`- ${c.k} (${c.pt}점): ${c.tip}`).join("\n");
+  const prompt = `너는 초심자·중급자 대상 'AI 질문법(컨텍스트 엔지니어링)' 수업의 채점관이다.
+참여자가 동료의 부탁을 보고 AI에게 보낼 질문(프롬프트)을 썼다. 표현이 달라도 의미가 담겼으면 인정하고, 조건에 없는 내용을 지어낸 것은 감점한다.
+
+[동료의 부탁]
+${g.ask}
+
+[주어진 조건]
+${g.conds.map(c=>"- "+c).join("\n")}
+
+[채점 기준: 항목명 (배점): 기준]
+${rubric}
+
+[참여자 질문]
+"""${text}"""
+
+아래 JSON만 출력하라.
+{"checks":[{"k":"항목명 그대로","got":0~배점 정수,"comment":"부족하면 무엇을 넣으면 좋은지 한 문장, 충분하면 빈 문자열"}],
+ "reply":"이 질문을 그대로 받은 AI가 만들 법한 결과를 4줄 이내로. 빠진 정보는 실제 AI처럼 뭉뚱그리거나 추측한 티가 나게",
+ "summary":"참여자에게 주는 격려 + 가장 중요한 개선점 한 가지, 두 문장, 존댓말"}`;
+  const out = await sample.json(prompt, {modelTier:"quick"});
+  if(!out || !Array.isArray(out.checks)) return null;
+  const r = g.checks.map(c=>{
+    const a = out.checks.find(x=>x && x.k===c.k) || {};
+    const got = Math.max(0, Math.min(c.pt, Math.round(Number(a.got)||0)));
+    return {...c, got, tip: (a.comment && String(a.comment).trim()) || c.tip};
+  });
+  return {r, reply: String(out.reply||"").slice(0,600), summary: String(out.summary||"").slice(0,300)};
+}
+
 const tierOf = s => s>=80?["상","t1"]:s>=50?["중","t2"]:["하","t3"];
 
 function game(){
@@ -278,16 +314,23 @@ function game(){
     <textarea id="pr" placeholder="예) 너는 … 야. … 을 위해 … 을 … 형식으로 만들어 줘."></textarea>
     <div class="row"><button class="btn" id="send">AI에게 보내기</button></div>
     <div id="res"></div></div>`;
-  send.onclick = ()=>{
+  send.onclick = async ()=>{
     const text = pr.value.trim();
     if(text.length<5){res.innerHTML=`<p class="small">질문을 한 문장 이상 써 주세요.</p>`;return;}
-    const r = grade(g,text), score = r.reduce((a,c)=>a+c.got,0), [tn,tc]=tierOf(score);
+    pr.disabled=true; send.disabled=true;
+    log.innerHTML = `<div class="msg me"><span class="who">나 → AI</span>${esc(text)}</div><div class="msg ai"><span class="who">AI 채점관</span>채점하고 있어요…</div>`;
+    let r = null, reply = "", summary = "", byAI = false;
+    try { const out = await aiGrade(g, text); if(out){ r = out.r; reply = out.reply; summary = out.summary; byAI = true; } } catch(e){}
+    if(!r) r = grade(g,text);
+    const score = r.reduce((a,c)=>a+c.got,0), [tn,tc]=tierOf(score);
     S.gameScores[S.gi] = {score, miss:r.filter(c=>c.got<c.pt).map(c=>c.k)};
-    log.innerHTML = `<div class="msg me"><span class="who">나 → AI</span>${esc(text)}</div>`;
-    pr.disabled=true; send.hidden=true;
+    log.innerHTML = `<div class="msg me"><span class="who">나 → AI</span>${esc(text)}</div>` +
+      (reply ? `<div class="msg ai"><span class="who">AI가 이 질문으로 만든 결과</span>${esc(reply)}</div>` : "");
+    send.hidden=true;
     const last = S.gi===GAMES.length-1;
     res.innerHTML = `<div class="explain">
-      <div class="score"><b>${score}</b><span>/ 100</span><span class="tier ${tc}">${tn}</span></div>
+      <div class="score"><b>${score}</b><span>/ 100</span><span class="tier ${tc}">${tn}</span><span class="small">${byAI?"AI 채점":"기본 채점(AI 연결 안 됨)"}</span></div>
+      ${summary?`<p>${esc(summary)}</p>`:""}
       <ul class="checks">${r.map(c=>`<li><span class="mark ${c.got===c.pt?"y":"n"}">${c.got===c.pt?"✓":c.got?"△":"✕"}</span><span><b>${c.k}</b>${c.got<c.pt?`<br><span class="small">${c.tip}</span>`:""}</span><span class="pt">${c.got}/${c.pt}</span></li>`).join("")}</ul>
       <details><summary>모범 질문 예시 보기</summary><div class="msg ai" style="max-width:100%;margin-top:8px">${esc(g.sample)}</div></details>
       <div class="row"><button class="btn ghost" id="re">다시 써 보기</button><button class="btn" id="nx">${last?"내 결과 보기":"다음 부탁"}</button></div></div>`;
