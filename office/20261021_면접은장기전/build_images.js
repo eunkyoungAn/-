@@ -7,10 +7,10 @@ const cards=[
 <h1 class="mj">서류는 붙는데<br>면접에서 떨어진다면</h1>
 <img class="cut" src="${P}thumb_cut.png" style="right:10px;top:70px;height:300px;-webkit-mask-image:linear-gradient(#000 82%,transparent)">
 <div class="jobs">${rows([['“열심히 했습니다”','“이 문제를, 이렇게 해결했습니다”'],['내 경험이 학교뿐이라면','맡은 일과 결과 중심으로'],['외우듯 줄줄','핵심만 내 말로'],['“AI 써 봤어요”','“AI로 이것을 완성했어요”']])}</div>
-<div class="box red"><div class="li">서류는 <em>‘정리해서 낸 기록’</em>을 봅니다<br>면접은 <em>‘해 온 일을 말로 설명하는 능력’</em>을 확인합니다<br>경험노트 → 스크립트 → 리허설</div></div>
+<div class="box red"><div class="li">서류는 <em>‘해 온 일을 글로 표현한 것’</em>을 봅니다<br>면접은 <em>‘해 온 일을 말로 설명하는 능력’</em>을 확인합니다<br>경험노트 → 스크립트 → 리허설</div></div>
 <div class="dic"><b>면접스크립트</b> <span>명사</span> 내 일 경험을 질문 의도에 맞춰 말로 꺼낼 수 있게 미리 써 둔 답변 설계도</div>${sig()}</div>`,
 // img0
-`<div class="b sky"><div class="kick">커리어캐쳐 · 면접은 장기전</div><h1 class="mj" style="font-size:66px">서류는 정리해서 낸 기록,<br>면접은 해 온 일을 말로 설명하는 능력</h1>
+`<div class="b sky"><div class="kick">커리어캐쳐 · 면접은 장기전</div><h1 class="mj" style="font-size:66px">서류는 해 온 일을 글로 표현한 것,<br>면접은 해 온 일을 말로 설명하는 능력</h1>
 <img class="cut" src="${P}profile_cut.png" style="right:30px;bottom:0;height:470px"><div class="stat"><b>서류 합격 대비 면접 탈락 100%</b><span>경력 약 2년 코칭 사례</span></div></div>`,
 // img1
 `<div class="b white"><div class="kick">코칭 사례 · 경력 약 2년</div><h1 class="mj" style="font-size:56px">내가 직접 꼽은 면접 탈락 원인</h1>
