@@ -3,12 +3,10 @@
 <style>
 /* Layout: 좌측 입력 시트(섹션 탭 순서 = 노션 양식 순서) / 우측 노션형 미리보기 */
 :root{
-  --bg:#f6f4fa; --panel:#ffffff; --fg:#231d2e; --muted:#6b6478; --line:#e2dcec;
-  --accent:#6b3fa0; --accent-fg:#ffffff; --soft:#efe8f8; --chip:#e6dbf5;
+  --bg:#f0eafb; --panel:#ffffff; --fg:#231d2e; --muted:#6b6478; --line:#e2dcec;
+  --accent:#6b3fa0; --accent-fg:#ffffff; --soft:#e4d9f7; --chip:#d9caf2;
   --font:"Malgun Gothic","맑은 고딕","Apple SD Gothic Neo","Noto Sans KR",sans-serif;
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#16131c;--panel:#1f1a28;--fg:#ece7f4;--muted:#a69eb5;--line:#352d42;--accent:#b591e6;--accent-fg:#1a1422;--soft:#2a2236;--chip:#3a2d4d;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#16131c;--panel:#1f1a28;--fg:#ece7f4;--muted:#a69eb5;--line:#352d42;--accent:#b591e6;--accent-fg:#1a1422;--soft:#2a2236;--chip:#3a2d4d;color-scheme:dark}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:14px;line-height:1.65;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
 .top{border-bottom:3px solid var(--accent);padding-block:22px 16px;margin-bottom:22px}
@@ -473,8 +471,7 @@ async function viaApi(key){
 const dlP=window.claude?.use?window.claude.use("downloads"):Promise.resolve(null);
 function htmlDoc(){
   const title=($("doc").querySelector("h1")?.textContent||(($("role").value||"")+" 포트폴리오")).trim();
-  const css=`:root{--bg:#fff;--fg:#231d2e;--muted:#6b6478;--line:#e2dcec;--accent:#6b3fa0;--soft:#efe8f8;--chip:#e6dbf5}
-@media (prefers-color-scheme:dark){:root{--bg:#16131c;--fg:#ece7f4;--muted:#a69eb5;--line:#352d42;--accent:#b591e6;--soft:#2a2236;--chip:#3a2d4d}}
+  const css=`:root{--bg:#f0eafb;--fg:#231d2e;--muted:#6b6478;--line:#e2dcec;--accent:#6b3fa0;--soft:#e4d9f7;--chip:#d9caf2}
 *{box-sizing:border-box}h1,h2,h3,p,li,td{word-break:keep-all;overflow-wrap:anywhere}body{margin:0;background:var(--bg);color:var(--fg);font-family:"Malgun Gothic","맑은 고딕","Apple SD Gothic Neo","Noto Sans KR",sans-serif;font-size:15px;line-height:1.7}
 main{max-width:860px;margin:0 auto;padding:48px max(20px,env(safe-area-inset-left,0px)) 64px}
 header.band{border-top:6px solid var(--accent)}
