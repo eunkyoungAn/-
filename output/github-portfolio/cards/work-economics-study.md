@@ -1,6 +1,6 @@
 ---
 language: ko
-license: [확인 필요] (원문 저작권: 조우현, 『일의 세계 경제학』 제2판)
+license: All Rights Reserved — 별도 허락 없이 사용 불가 (본인 작성분). 원문 도서의 저작권은 원저자에게 있음
 tags: [careercatcher, 학습자료, 노동경제학, 오픈북]
 service_type: 학습자료 웹사이트 + PDF
 ai_used: [확인 필요 — 재서술 과정의 AI 사용 여부]

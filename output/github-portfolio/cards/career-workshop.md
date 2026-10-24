@@ -1,6 +1,6 @@
 ---
 language: ko
-license: [확인 필요] (포함 라이브러리 PeerJS·qrcode-generator는 MIT)
+license: All Rights Reserved — 별도 허락 없이 사용 불가 (포함된 PeerJS·qrcode-generator는 각 MIT 라이선스)
 tags: [careercatcher, 워크숍, 자기이해, 코칭휠, webrtc]
 service_type: 웹앱 (GitHub Pages, 정적 사이트)
 ai_used: 아니오

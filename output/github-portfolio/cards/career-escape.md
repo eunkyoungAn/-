@@ -1,6 +1,6 @@
 ---
 language: ko
-license: [확인 필요]
+license: All Rights Reserved — 별도 허락 없이 사용 불가
 tags: [careercatcher, 자기소개서, 면접, 경험정리, gemini, opendart]
 service_type: 웹앱 (Google Apps Script)
 ai_used: 예 — Gemini API (참가자 본인 키)

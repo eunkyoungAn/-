@@ -1,7 +1,7 @@
 ---
 # Hugging Face 모델카드 메타데이터 형식을 웹서비스용으로 맞춤
 language: ko
-license: [확인 필요]
+license: [All Rights Reserved 또는 사용 허락 조건]
 tags: [careercatcher, 진로취업교육]
 service_type: [웹앱 | 학습자료 | 데이터분석 | 데스크톱앱]
 ai_used: [예/아니오 — 사용 API]

@@ -1,6 +1,6 @@
 ---
 language: ko
-license: [확인 필요]
+license: All Rights Reserved — 별도 허락 없이 사용 불가
 tags: [careercatcher, 면접연습, 음성인식, 피드백, claude, mediapipe]
 service_type: 웹앱 (GitHub Pages) + 선택형 AI 중계 서버 (Cloudflare Workers)
 ai_used: 선택 — 기본은 이 기기 안의 규칙 기반 간이 피드백, 설정 시 Claude 피드백
