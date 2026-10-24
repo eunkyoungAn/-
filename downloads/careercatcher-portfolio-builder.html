@@ -106,6 +106,7 @@ input:focus,textarea:focus,select:focus,button:focus-visible,summary:focus-visib
       <summary><span class="kc-t">⚡ AI 자동 완성 켜기 <em class="kc-badge" id="kcstate">무료 · 1분 설정</em></span><small>키를 넣으면 버튼 한 번에 완성본이 나와요</small></summary>
       <div class="body">
         <label>AI 선택<select id="provider"><option value="gemini">Google Gemini (무료)</option><option value="claude">Claude (유료)</option></select></label>
+        <label>Gemini 모델 <small>(무료 한도가 모델마다 따로 있어요)</small><select id="gemmodel"><option value="lite">Flash-Lite · 더 많이 생성 (기본)</option><option value="flash">Flash · 품질 우선 (한도 적음)</option></select></label>
         <label>API 키<input id="apikey" type="password" autocomplete="off" spellcheck="false" placeholder="AIza... 또는 sk-ant-..."></label>
         <p class="hint">📘 처음이라면 <a href="https://eunkyoungan.github.io/-/portfolio/guide/" target="_blank" rel="noopener noreferrer"><b>그림으로 보는 키 발급·사용 매뉴얼</b></a></p>
         <p class="hint"><b>무료 키 받기</b>: <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">aistudio.google.com/apikey</a> 접속 → 구글 로그인 → "API 키 만들기" → 복사해서 붙여넣기 (카드 등록 없음, 하루 사용량 제한 있음)</p>
@@ -460,12 +461,12 @@ $("f").addEventListener("submit",async e=>{
     $("st").textContent=err?.code==="rate_limited"?"요청이 많아요. 잠시 후 다시 눌러 주세요.":err?.code==="not_granted"?"AI 사용 권한이 허용되지 않았어요.":"생성에 실패했어요. 다시 눌러 주세요.";
   }finally{$("go").disabled=false}
 });
-let gemModel=null;
-async function gemPick(key){
+let gemModel={};
+async function gemPick(key,lite){
   const res=await fetch("https://generativelanguage.googleapis.com/v1beta/models?pageSize=200",{headers:{"x-goog-api-key":key},referrerPolicy:"no-referrer",signal:ctl.signal});
   if(!res.ok)return null;
   const ms=((await res.json()).models||[]).filter(m=>(m.supportedGenerationMethods||[]).includes("generateContent")).map(m=>m.name.replace(/^models\//,""));
-  const score=n=>(/flash/.test(n)?100:/pro/.test(n)?40:0)-(/lite/.test(n)?30:0)-(/preview|exp|tts|image|audio|live|embed|thinking/.test(n)?60:0)+(/latest/.test(n)?5:0)+(parseFloat((n.match(/(\d+(\.\d+)?)/)||[0,0])[1])||0);
+  const score=n=>(/flash/.test(n)?100:/pro/.test(n)?40:0)+(/lite/.test(n)?(lite?60:-30):(lite?-30:0))-(/preview|exp|tts|image|audio|live|embed|thinking/.test(n)?60:0)+(/latest/.test(n)?5:0)+(parseFloat((n.match(/(\d+(\.\d+)?)/)||[0,0])[1])||0);
   return ms.filter(n=>/^gemini/.test(n)).sort((a,b)=>score(b)-score(a))[0]||null;
 }
 let usedModel="";
@@ -475,15 +476,21 @@ async function gemCall(key,m,think){
     body:JSON.stringify({contents:[{role:"user",parts:[{text:buildPrompt()}]}],generationConfig:Object.assign({maxOutputTokens:16384},think?{thinkingConfig:{thinkingBudget:0}}:{})})});
 }
 async function errDetail(res){try{return (await res.clone().json()).error?.message||""}catch(e){return ""}}
+const GEM={lite:"gemini-2.5-flash-lite",flash:"gemini-2.5-flash"};
 async function gemFetch(key){
-  let m=gemModel||"gemini-2.5-flash",think=true,res,d="";
-  for(let n=0;n<4;n++){
-    res=await gemCall(key,m,think);
-    if(res.ok){gemModel=m;usedModel=m;return res}
-    d=await errDetail(res);
-    if(res.status===400&&think&&/thinking/i.test(d)){think=false;continue}
-    if(res.status===404||(res.status===400&&/not supported|not found|deprecated|no longer/i.test(d))){const pk=await gemPick(key);if(pk&&pk!==m){m=pk;continue}}
-    break}
+  const want=$("gemmodel").value==="flash"?"flash":"lite",order=[want,want==="lite"?"flash":"lite"];
+  let res,d="";
+  for(const kind of order){
+    let m=gemModel[kind]||GEM[kind],think=true;
+    for(let n=0;n<4;n++){
+      res=await gemCall(key,m,think);
+      if(res.ok){gemModel[kind]=m;usedModel=m;return res}
+      d=await errDetail(res);
+      if(res.status===400&&think&&/thinking/i.test(d)){think=false;continue}
+      if(res.status===404||(res.status===400&&/not supported|not found|deprecated|no longer/i.test(d))){const pk=await gemPick(key,kind==="lite");if(pk&&pk!==m){m=pk;continue}}
+      break}
+    if(res.status!==429&&res.status!==404&&res.status!==503)break;   // 한도·모델 문제일 때만 다른 모델로 넘어가요
+    $("st").textContent=`${m} 한도·응답 문제(${res.status}) · 다른 Gemini 모델로 다시 시도해요…`}
   res.detail=d;return res;
 }
 async function viaApi(key){
