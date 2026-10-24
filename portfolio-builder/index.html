@@ -544,18 +544,22 @@ details.more[open]{padding-bottom:10px}
 td:first-child{white-space:nowrap;font-weight:700;width:1%}
 @media (max-width:520px){td:first-child{white-space:normal;min-width:4.5em}th,td{word-break:keep-all;overflow-wrap:normal;padding:7px 8px}table{font-size:13px}}
 @media print{details.more{border:0;padding:0}details.more summary{display:none}}
-footer{color:var(--muted);font-size:12px;margin-top:48px;border-top:1px solid var(--line);padding-top:14px}
 @media print{body{background:#fff;color:#000}h2{break-after:avoid}h3{break-after:avoid}}`;
   const e=t=>t.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-  return `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${e(title)}</title><style>${css}</style></head><body><header class="band"></header><main>${$("doc").innerHTML}<footer>Made with CareerCatcher Portfolio Builder · purple-career</footer></main></body></html>`;
+  return `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${e(title)}</title><style>${css}</style></head><body><header class="band"></header><main>${$("doc").innerHTML}</main></body></html>`;
 }
 function markReady(){["savehtml","savehtml2"].forEach(i=>$(i).classList.add("ready"))}
 new MutationObserver(()=>{const ok=$("doc").textContent.trim()&&!$("doc").querySelector("pre")&&!$("go").disabled&&md!==SAMPLE;["savehtml","savehtml2"].forEach(i=>$(i).classList.toggle("ready",!!ok))}).observe($("st"),{childList:true,characterData:true,subtree:true});
 $("stopgen").onclick=()=>ctl?.abort();
 $("savehtml2").onclick=()=>$("savehtml").click();
+function fileName(){
+  const clean=t=>(t||"").replace(/\s*[\(\[（][^\)\]）]*[\)\]）]/g,"").replace(/[\\/:*?"<>|]/g,"").replace(/\s+/g,"").trim();
+  let role=clean($("role").value),nm=clean($("name").value);
+  if(!role||!nm){const h=($("doc").querySelector("h1")?.textContent||"").replace(/포트폴리오\s*$/,"");const [a,b]=h.split("|").map(x=>clean(x));role=role||a;nm=nm||b}
+  return ([role,nm].filter(Boolean).join("_")||"포트폴리오")+".html"}
 $("savehtml").onclick=async()=>{
   if($("doc").querySelector("pre")||!$("doc").textContent.trim()){$("st").textContent="먼저 포트폴리오를 완성해 주세요.";return}
-  const html=htmlDoc();const fname=(($("name").value||"my")+"_portfolio.html").replace(/[\\/:*?"<>|\s]+/g,"_");
+  const html=htmlDoc();const fname=fileName();
   const dl=await dlP;
   if(dl){try{await dl.save({filename:fname,data:html});$("st").textContent="HTML 파일을 저장했어요"}catch(e){$("st").textContent="저장을 취소했어요"}return}
   try{const u=URL.createObjectURL(new Blob([html],{type:"text/html"}));const a=document.createElement("a");a.href=u;a.download=fname;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);$("st").textContent="HTML 파일을 저장했어요 · 브라우저로 열어 보세요"}
