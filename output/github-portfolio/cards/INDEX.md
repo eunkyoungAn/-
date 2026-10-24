@@ -19,6 +19,10 @@
 | [career-workshop](career-workshop.md) | GitHub Pages 웹 | 없음 | ★ |
 | [work-economics-study](work-economics-study.md) | 학습 웹 + PDF | 확인 필요 | |
 | [talent-economics-study](talent-economics-study.md) | 학습 웹 + PDF | 확인 필요 | |
+| [내일동행 (aftercare)](../suite/aftercare.md) | 담당자용 암호화 웹앱 | 없음 | |
+| [면접 리허설 (interview)](../suite/interview-rehearsal.md) | 음성·영상 면접 연습 웹앱 | 선택(Claude) | |
+
+서비스 3종 카드는 [suite](../suite/README.md)에 있습니다.
 
 제외: `career-portfolio`(소개 페이지라 카드 대신 프로필 허브로 사용), `test`(연습용).
 `[확인 필요]` 항목은 원작자가 채워야 합니다.
