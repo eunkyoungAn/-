@@ -1,0 +1,581 @@
+<title>커리어캐쳐 포트폴리오 빌더</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: 좌측 입력 시트(섹션 탭 순서 = 노션 양식 순서) / 우측 노션형 미리보기 */
+:root{
+  --bg:#f0eafb; --panel:#ffffff; --fg:#231d2e; --muted:#6b6478; --line:#e2dcec;
+  --accent:#6b3fa0; --accent-fg:#ffffff; --soft:#e4d9f7; --chip:#d9caf2;
+  --font:"Malgun Gothic","맑은 고딕","Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:14px;line-height:1.65;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+.top{border-bottom:3px solid var(--accent);padding-block:22px 16px;margin-bottom:22px}
+.top-in,.grid{max-width:1200px;margin:0 auto}
+.top-in{display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap}
+.top h1{margin:0;font-size:22px;font-weight:700;letter-spacing:-.02em}
+.top h1 b{color:var(--accent)}
+.top p{margin:4px 0 0;color:var(--muted);font-size:13px}
+.safe{font-size:12px!important;color:var(--accent)!important}
+.by{font-size:12px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:22px;align-items:start}
+@media (max-width:940px){.grid{grid-template-columns:1fr}.out{position:static;max-height:none}}
+@media (max-width:940px),(pointer:coarse){input,textarea,select{font-size:16px!important}.btn,.add,.x,summary{min-height:44px}.x{padding:0 10px}.actions .btn{flex:1 1 140px}}
+form{display:grid;gap:14px;min-width:0}
+details{background:var(--panel);border:1px solid var(--line);border-radius:6px}
+summary{cursor:pointer;padding:12px 14px;font-weight:700;display:flex;justify-content:space-between;gap:8px;list-style:none}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"＋";color:var(--accent)}
+details[open] summary::after{content:"－"}
+summary small{font-weight:400;color:var(--muted);margin-left:6px;margin-right:auto}
+.body{padding:0 14px 14px;display:grid;gap:10px}
+label{display:grid;gap:3px;font-size:12px;color:var(--muted)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:480px){.row{grid-template-columns:1fr}}
+input,textarea,select{font:inherit;font-size:14px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:7px 9px;width:100%}
+textarea{min-height:64px;resize:vertical}
+input:focus,textarea:focus,select:focus,button:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.item{border:1px solid var(--line);border-left:3px solid var(--chip);border-radius:4px;padding:10px;display:grid;gap:8px}
+.item-h{display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:700;color:var(--accent)}
+.x{border:0;background:none;color:var(--muted);cursor:pointer;font:inherit;font-size:12px;padding:2px 4px}
+.add{justify-self:start;border:1px dashed var(--accent);background:none;color:var(--accent);border-radius:4px;padding:6px 12px;font:inherit;font-size:13px;cursor:pointer}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{white-space:nowrap;font:inherit;font-weight:700;border-radius:4px;padding:10px 16px;cursor:pointer;border:1px solid var(--line);background:var(--panel);color:var(--fg)}
+.btn.primary{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.btn:disabled{opacity:.55;cursor:wait}
+.out{position:sticky;top:12px;background:var(--panel);border:1px solid var(--line);border-radius:6px;min-width:0;max-height:calc(100vh - 24px);display:flex;flex-direction:column}
+.out-h{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--soft);border-radius:6px 6px 0 0}
+.status{font-size:12px;color:var(--muted)}
+.doc{padding:22px 26px 30px;overflow:auto}
+.doc h1{font-size:24px;margin:0 0 6px;letter-spacing:-.02em;text-wrap:balance}
+.doc h2{font-size:18px;margin:26px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--chip);color:var(--accent)}
+.doc h3{font-size:15px;margin:16px 0 6px}
+.doc p{margin:4px 0}
+.doc ul{padding-left:20px;margin:4px 0}
+.doc li{margin:2px 0}
+.doc blockquote{margin:8px 0;padding:8px 12px;background:var(--soft);border-left:3px solid var(--accent);border-radius:0 4px 4px 0}
+.doc .tw{overflow-x:auto}
+.doc table{border-collapse:collapse;width:100%;font-size:13px;margin:6px 0}
+.doc th,.doc td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+.doc th{background:var(--soft)}
+.doc hr{border:0;border-top:1px solid var(--line);margin:18px 0}
+.doc mark{background:var(--chip);color:var(--accent);font-weight:700;padding:0 3px;border-radius:3px}
+.doc details.more{margin:6px 0 14px;border:1px solid var(--line);border-radius:6px;padding:0 12px}
+.doc details.more summary{cursor:pointer;padding:8px 0;font-size:13px;color:var(--accent);font-weight:700}
+.doc details.more[open]{padding-bottom:8px}
+.doc td:first-child{white-space:nowrap;font-weight:700;width:1%}
+.doc th,.doc td{word-break:keep-all}
+.need{background:var(--chip);color:var(--accent);font-size:12px;padding:1px 6px;border-radius:3px}
+.ready{box-shadow:0 0 0 3px var(--chip);border-color:var(--accent)!important;color:var(--accent)}
+.paste{order:2;display:grid;gap:8px;padding:12px 14px;border-top:1px solid var(--line);background:var(--soft)}
+.steps{margin:0;padding-left:20px;font-size:13px;display:grid;gap:2px}
+.paste label{font-size:13px;color:var(--fg)}
+.paste textarea{min-height:110px}
+[hidden]{display:none!important}
+.keycard summary::after{display:none}
+.keycard{border:2px solid var(--accent)!important;background:var(--soft)!important}
+.keycard summary{flex-wrap:wrap;align-items:center}
+.kc-t{font-size:16px;color:var(--accent);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.kc-badge{font-style:normal;font-size:11px;background:var(--accent);color:var(--accent-fg);padding:2px 8px;border-radius:999px}
+.kc-badge.on{background:#2e8b57;color:#fff}
+.keycard summary small{flex-basis:100%;margin-left:0}
+.fbbox{order:3;border-top:2px dashed var(--accent);background:var(--soft)}
+.fb-h{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;padding:10px 14px;color:var(--accent)}
+.fb-h span{font-size:12px;color:var(--muted);flex:1 1 200px}
+.fb-doc{padding:0 18px 14px!important;background:transparent;max-height:200px}
+.hint{margin:0;font-size:12px;color:var(--muted)}
+.note{font-size:12px;color:var(--muted);padding:0 14px 12px;margin:0}
+</style>
+
+<div class="top"><div class="top-in">
+  <div>
+    <h1><b>Purple Career</b> 포트폴리오 빌더</h1>
+    <p>노션 포트폴리오 양식 순서대로 입력하면, 직무 역량이 드러나는 완성본으로 정리해 드려요.</p>
+    <p class="safe">🔒 입력 내용은 서버에 저장하지 않고 이 브라우저에만 임시 저장돼요. 이메일·연락처는 AI에 보내지 않아요. 공용 PC에서는 사용 후 <b>모두 지우기</b>를 눌러 주세요.</p>
+  </div>
+  <span class="by">© career catcher</span>
+</div></div>
+
+<div class="grid">
+  <form id="f">
+    <details id="keybox" class="keycard" open>
+      <summary><span class="kc-t">⚡ AI 자동 완성 켜기 <em class="kc-badge" id="kcstate">무료 · 1분 설정</em></span><small>키를 넣으면 버튼 한 번에 완성본이 나와요</small></summary>
+      <div class="body">
+        <label>AI 선택<select id="provider"><option value="gemini">Google Gemini (무료)</option><option value="claude">Claude (유료)</option></select></label>
+        <label>Gemini 모델 <small>(무료 한도가 모델마다 따로 있어요)</small><select id="gemmodel"><option value="lite">Flash-Lite · 더 많이 생성 (기본)</option><option value="flash">Flash · 품질 우선 (한도 적음)</option></select></label>
+        <label>API 키<input id="apikey" type="password" autocomplete="off" spellcheck="false" placeholder="AIza... 또는 sk-ant-..."></label>
+        <p class="hint">📘 처음이라면 <a href="https://eunkyoungan.github.io/-/portfolio/guide/" target="_blank" rel="noopener noreferrer"><b>그림으로 보는 키 발급·사용 매뉴얼</b></a></p>
+        <p class="hint"><b>무료 키 받기</b>: <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">aistudio.google.com/apikey</a> 접속 → 구글 로그인 → "API 키 만들기" → 복사해서 붙여넣기 (카드 등록 없음, 하루 사용량 제한 있음)</p>
+        <p class="hint">🔒 키는 저장하지 않고 탭을 닫으면 사라져요. 무료 Gemini는 입력 내용이 구글 서비스 개선에 쓰일 수 있어서, 이메일·연락처는 보내지 않아요. 키가 없으면 프롬프트를 복사해 무료 ChatGPT·Claude 웹에 붙여넣는 방식으로 진행돼요.</p>
+      </div>
+    </details>
+    <details open>
+      <summary>Contact · 기본 정보</summary>
+      <div class="body">
+        <div class="row">
+          <label>이름<input id="name" placeholder="홍길동"></label>
+          <label>지원 직무<input id="role" placeholder="데이터 분석가"></label>
+        </div>
+        <div class="row">
+          <label>이메일<input id="email"></label>
+          <label>연락처<input id="phone" placeholder="010-0000-0000"></label>
+        </div>
+        <label>링크 (블로그·깃허브·링크드인·인스타)<input id="links"></label>
+        <label>M365 신입 공고 불러오기 <small>(M365 수료자용 · 지원 직무와 공고 요약이 채워져요)</small><select id="jdsel"><option value="">선택 안 함</option><option value="j1">씨앤토트 · Microsoft 365 엔지니어 (신입)</option><option value="j2">소프트피플코리아 · M365·AD·Exchange 기술지원</option><option value="j3">에이피드 · Microsoft 365 / EMS 엔지니어</option><option value="j4">에이스엔지니어링 · 사내 IT 운영담당자</option></select></label>
+        <label>채용공고 핵심 내용 <small>(선택, 키워드 매칭용)</small><textarea id="jd"></textarea></label>
+      </div>
+    </details>
+
+    <details open>
+      <summary>About me<small>강점과 성장 방향</small></summary>
+      <div class="body">
+        <label>나의 강점·관심사를 편하게 적어 주세요<textarea id="about" placeholder="통계 전공, 공모전 3회, Python·SQL 분석이 강점, 비즈니스를 이해하는 분석가가 되고 싶음"></textarea></label>
+      </div>
+    </details>
+
+    <details>
+      <summary>Skills<small>협업 툴 / 기술 스택</small></summary>
+      <div class="body">
+        <label>협업 툴<input id="tools" placeholder="Slack, Notion, Git, Figma"></label>
+        <label>기술 스택과 활용 수준<textarea id="skills" placeholder="Python - 프로젝트 3건, pandas 전처리&#10;SQL - 공모전 데이터 추출"></textarea></label>
+      </div>
+    </details>
+
+    <details open>
+      <summary>AI Competency<small>활용 → 검증 → 성과</small></summary>
+      <div class="body">
+        <label>사용하는 AI 도구와 숙련도<textarea id="aitools" placeholder="ChatGPT·Claude - 매일 사용, 프롬프트 템플릿 직접 설계&#10;GitHub Copilot - 코드 작성 보조&#10;Cursor / n8n / Gemini 등"></textarea></label>
+        <label>AI로 일하는 방식이 바뀐 사례 (전/후)<textarea id="aiuse" placeholder="EDA 보고서 작성 4시간 → 1시간 (AI 초안 + 수치 직접 검증)&#10;반복 업무를 Apps Script + AI로 자동화"></textarea></label>
+        <label>검증·윤리 원칙 <small>(결과를 어떻게 확인하나, 개인정보 처리 등)</small><textarea id="aiethics" placeholder="AI가 쓴 코드는 테스트로 확인 후 반영, 원본 데이터는 업로드하지 않음"></textarea></label>
+        <label>AI 관련 학습·자격·프로젝트 <small>(선택)</small><input id="ailearn" placeholder="LLM API로 챗봇 제작, AI 활용 교육 수료"></label>
+      </div>
+    </details>
+
+    <details open>
+      <summary>Projects<small>성과 좋은 순서로</small></summary>
+      <div class="body"><div id="projects" style="display:grid;gap:10px"></div>
+        <button type="button" class="add" data-add="projects">프로젝트 추가</button></div>
+    </details>
+
+    <details>
+      <summary>Experiences<small>동아리·인턴·경력 3~4개</small></summary>
+      <div class="body"><div id="experiences" style="display:grid;gap:10px"></div>
+        <button type="button" class="add" data-add="experiences">경험 추가</button></div>
+    </details>
+
+    <details>
+      <summary>Education<small>학교·교육 이수</small></summary>
+      <div class="body"><div id="education" style="display:grid;gap:10px"></div>
+        <button type="button" class="add" data-add="education">학력·교육 추가</button></div>
+    </details>
+
+    <details>
+      <summary>Language · Other</summary>
+      <div class="body">
+        <label>어학<input id="lang" placeholder="OPIc IH (2022.06)"></label>
+        <label>기타 (자격증·수상·봉사 등)<textarea id="other"></textarea></label>
+      </div>
+    </details>
+
+
+    <div class="actions">
+      <button type="submit" class="btn primary" id="go">포트폴리오 완성하기</button>
+      <button type="button" class="btn" id="stopgen" hidden>중단</button>
+      <button type="button" class="btn" id="savehtml2">HTML 저장</button>
+      <select id="exsel" aria-label="예시 직군" class="btn">
+        <option value="data">예시: 데이터 분석</option><option value="be">예시: 백엔드 개발</option><option value="fe">예시: 프론트엔드</option><option value="ux">예시: UX/UI 디자인</option><option value="pm">예시: 서비스 기획·PM</option><option value="mkt">예시: 디지털 마케팅</option><option value="sales">예시: B2B 영업</option><option value="hr">예시: 인사(HR)</option><option value="m365">예시: M365 엔지니어</option>
+      </select>
+      <button type="button" class="btn" id="ex">예시로 채우기</button>
+      <button type="button" class="btn" id="clr">모두 지우기</button>
+    </div>
+  </form>
+
+  <section class="out" aria-live="polite">
+    <div class="out-h">
+      <span class="status" id="st">미리보기 · 예시</span>
+      <span class="actions"><button type="button" class="btn" id="copy">노션용 복사</button><button type="button" class="btn primary" id="savehtml">HTML 저장</button></span>
+    </div>
+    <div class="doc" id="doc"></div>
+    <section class="fbbox" id="fbbox" hidden>
+      <div class="fb-h"><b>🔍 컨설턴트 피드백</b><span>별도 제공 · 저장하는 HTML 파일에는 포함되지 않아요</span><button type="button" class="btn" id="copyfb">피드백 복사</button></div>
+      <div class="doc fb-doc" id="fbdoc"></div>
+    </section>
+    <div class="paste" id="pastebox" hidden>
+      <ol class="steps"><li>위 프롬프트는 <b>이미 복사됐어요</b> (아래 칸에 넣지 마세요)</li><li><a href="https://chatgpt.com" target="_blank" rel="noopener noreferrer">ChatGPT</a> 또는 <a href="https://claude.ai" target="_blank" rel="noopener noreferrer">Claude</a>에 붙여넣고 보내기</li><li>AI가 <b>답한 글</b>("# 직무 | 이름 포트폴리오"로 시작)을 복사해 아래에 붙여넣기</li></ol>
+      <label for="pasted"><b>AI가 답한 결과</b></label>
+      <textarea id="pasted" placeholder="# 직무 | 이름 포트폴리오&#10;..."></textarea>
+      <button type="button" class="btn primary" id="applypaste">결과 적용하기 → HTML 저장 가능</button>
+    </div>
+    <p class="note" id="na" hidden>이메일·연락처는 프롬프트에서 빠져 있어요. 완성본의 [[EMAIL]], [[PHONE]] 자리에 직접 넣어 주세요. <b>① 프롬프트 복사 완료</b> → 복사된 프롬프트를 <a href="https://claude.ai" target="_blank" rel="noopener">Claude</a> 또는 <a href="https://chatgpt.com" target="_blank" rel="noopener">ChatGPT</a>에 붙여넣으면 노션 양식대로 완성본이 나와요. 결과를 아래 ② 칸에 붙여넣으면 HTML로 저장할 수 있어요.</p>
+  </section>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const SIMPLE=["name","role","email","phone","links","jd","about","tools","skills","aitools","aiuse","aiethics","ailearn","lang","other"];
+const LISTS={
+  projects:{title:"프로젝트",fields:[["pname","프로젝트명","input"],["pperiod","작업기간","input","2025.04 ~ 2025.07"],["psum","요약 (무엇을, 왜)","textarea"],["pteam","전체 인원 / 나의 역할·기여도","input","4명 / 데이터 수집·분석 담당 (60%)"],["pimpl","구현·분석 내용과 사용 기술","textarea"],["presult","성과 (숫자로)","textarea","정확도 72% → 85%, 수상 등"],["ptrouble","문제해결 과정과 배운 점","textarea","문제 → 원인 → 시도한 방법 → 결과"],["pai","AI 활용과 검증 (선택)","textarea","어디에 AI를 썼고, 결과를 어떻게 확인·수정했나"]]},
+  experiences:{title:"경험",fields:[["ename","이름 (동아리·회사)","input"],["eperiod","진행기간","input"],["edesc","소개와 맡은 일·성과","textarea"]]},
+  education:{title:"학력·교육",fields:[["sname","학교·기관명","input"],["speriod","기간","input","2020.03 - 2025.02"],["smajor","전공·과정명","input"]]}
+};
+const listEl=k=>$(k);
+function addItem(k,v={}){
+  const box=document.createElement("div");box.className="item";
+  const n=listEl(k).children.length+1;
+  box.innerHTML=`<div class="item-h"><span>${LISTS[k].title} ${n}</span><button type="button" class="x">삭제</button></div>`+
+    LISTS[k].fields.map(([f,l,t,ph])=>`<label>${l}${t==="input"?`<input data-f="${f}" placeholder="${ph||""}">`:`<textarea data-f="${f}" placeholder="${ph||""}"></textarea>`}</label>`).join("");
+  box.querySelectorAll("[data-f]").forEach(el=>el.value=v[el.dataset.f]||"");
+  box.querySelector(".x").onclick=()=>{box.remove();renum(k);save()};
+  listEl(k).appendChild(box);
+}
+function renum(k){[...listEl(k).children].forEach((c,i)=>c.querySelector(".item-h span").textContent=`${LISTS[k].title} ${i+1}`)}
+document.querySelectorAll("[data-add]").forEach(b=>b.onclick=()=>{addItem(b.dataset.add);save()});
+function state(){const s={};SIMPLE.forEach(k=>s[k]=$(k).value);for(const k in LISTS)s[k]=[...listEl(k).children].map(c=>Object.fromEntries([...c.querySelectorAll("[data-f]")].map(e=>[e.dataset.f,e.value])));return s}
+function load(s){SIMPLE.forEach(k=>$(k).value=s[k]||"");for(const k in LISTS){listEl(k).innerHTML="";(s[k]&&s[k].length?s[k]:[{}]).forEach(v=>addItem(k,v))}save()}
+function save(){try{localStorage.setItem("pc-pf2",JSON.stringify(state()))}catch(e){}}
+$("f").addEventListener("input",save);
+function kcUpdate(){const on=$("apikey").value.trim().length>10;$("kcstate").textContent=on?"✓ 연결됨":"무료 · 1분 설정";$("kcstate").classList.toggle("on",on)}
+$("apikey").addEventListener("input",kcUpdate);
+
+const EX={name:"김보라",role:"데이터 분석가",email:"bora@example.com",phone:"010-0000-0000",links:"github.com/example · blog.example.com",jd:"SQL·Python 활용 데이터 추출/분석, 대시보드 구축 경험 우대, 이해관계자 커뮤니케이션",
+about:"통계학 전공. 공모전 3회 참가(1회 수상). Python·SQL 분석과 시각화가 강점. 현장을 이해하고 의사결정에 쓰이는 분석을 하고 싶음",tools:"Slack, Notion, Git/GitHub, Jira",skills:"Python - pandas 전처리·시각화, 프로젝트 3건\nSQL - MySQL로 공모전 데이터 추출\nTableau - 대시보드 2개 제작",
+aitools:"ChatGPT·Claude - 분석 계획·코드 초안, 프롬프트 템플릿 5종 직접 설계\nGitHub Copilot - pandas 전처리 코드 보조",aiuse:"주간 분석 리포트 작성 4시간 → 1시간 (AI 초안 + 수치는 SQL로 재확인)",aiethics:"AI가 만든 코드·수치는 원본 데이터로 교차검증 후 사용, 고객 개인정보는 AI에 입력하지 않음",ailearn:"LLM API로 리뷰 감성분석 미니 프로젝트",
+projects:[{pname:"카페 매출 예측 대시보드",pperiod:"2025.04 ~ 2025.07",psum:"동네 카페 3곳의 판매 데이터로 요일·날씨별 수요를 예측해 발주 낭비를 줄이는 프로젝트",pteam:"4명 / 데이터 전처리·모델링 담당 (50%)",pimpl:"POS 데이터 2년치 정제(Python), 날씨 API 결합, XGBoost 예측 모델, Tableau 대시보드",presult:"예측 오차(MAPE) 24% → 11%, 점주 테스트 후 폐기량 약 20% 감소 보고",ptrouble:"공휴일 매출 튐으로 오차가 큼 → 잔차 분석으로 원인 확인 → 공휴일·이벤트 변수 추가 → 오차 절반 감소. 변수 설계는 현장 인터뷰에서 시작해야 함을 배움",pai:"Claude로 피처 아이디어 20개 도출 → 데이터로 검증해 4개 채택. AI 제안 중 데이터 누수 위험 변수는 제외"}],
+experiences:[{ename:"데이터 분석 연합 동아리 'D.Lab'",eperiod:"2024.03 ~ 2024.12",edesc:"스터디 운영진. 월 1회 케이스 스터디 발표, Kaggle 대회 팀 동메달"}],
+education:[{sname:"한국대학교",speriod:"2020.03 - 2025.02",smajor:"통계학 전공"},{sname:"K-Digital Training",speriod:"2025.03 - 2025.07",smajor:"데이터 분석 실무 과정 수료"}],
+lang:"OPIc IH (2024.06)",other:"ADsP 자격증 (2024.11)"};
+try{const s=JSON.parse(localStorage.getItem("pc-pf2")||"null");load(s||{})}catch(e){load({})}
+const EXS={data:EX,
+be:{name:"이준호",role:"백엔드 개발자 (신입)",email:"junho@example.com",phone:"010-0000-0000",links:"github.com/example",jd:"Java/Spring 기반 API 개발, RDBMS 설계, 성능 개선 경험 우대, 코드 리뷰 문화",
+about:"컴퓨터공학 전공. 트래픽 문제를 직접 측정하고 개선하는 과정에 흥미. 테스트와 문서화를 습관처럼 함",tools:"Git/GitHub, Slack, Notion, Jira",skills:"Java·Spring Boot - 프로젝트 3건, REST API 설계\nMySQL·Redis - 인덱스 튜닝, 캐시 적용\nAWS EC2·GitHub Actions - 배포 자동화",
+aitools:"GitHub Copilot - 반복 코드 작성\nClaude - 에러 로그 분석, 테스트 케이스 초안",aiuse:"단위 테스트 작성 시간 약 40% 단축 (AI 초안 + 경계값 케이스 직접 추가)",aiethics:"AI가 만든 코드는 테스트 통과 후 리뷰를 거쳐 반영, 사내 코드·키는 입력하지 않음",ailearn:"",
+projects:[{pname:"동네마켓 - 중고거래 웹서비스",pperiod:"2025.03 ~ 2025.06",psum:"동네 단위 중고거래에서 검색이 느리고 약속이 자주 깨지는 문제 해결",pteam:"4명 (BE 2, FE 1, 디자인 1) / 검색·채팅 API 담당 (60%)",pimpl:"MySQL 인덱스 + Redis 캐시 검색 API, WebSocket(STOMP) 실시간 채팅, GitHub Actions CI/CD",presult:"검색 응답 3.2초 → 0.8초 (JMeter 동시 100명), 베타 사용자 120명, 캡스톤 우수상",ptrouble:"상품 1만 건 이후 검색 지연 → 슬로우쿼리 로그로 LIKE 전체 스캔 확인 → 풀텍스트 인덱스와 Elasticsearch 비교, 기간 내 가능한 인덱스+캐시 선택 → 75% 단축",pai:"Copilot으로 DTO·테스트 초안 생성, N+1 쿼리 제안은 직접 확인해 fetch join으로 수정"}],
+experiences:[{ename:"IT 연합 동아리 백엔드 파트",eperiod:"2024.03 ~ 2024.12",edesc:"백엔드 파트장. 코드 리뷰 규칙(24시간 내, 2인 승인) 도입으로 머지 대기 2일 → 0.5일"}],
+education:[{sname:"한국대학교",speriod:"2020.03 - 2026.02",smajor:"컴퓨터공학 전공"}],lang:"TOEIC 850 (2025.05)",other:"정보처리기사 (2025.06)"},
+fe:{name:"박서연",role:"프론트엔드 개발자",email:"seoyeon@example.com",phone:"010-0000-0000",links:"github.com/example · portfolio.example.com",jd:"React·TypeScript, 웹 성능 최적화, 디자이너 협업, 접근성 이해",
+about:"사용자가 기다리지 않는 화면을 만드는 것에 관심. 디자이너와 같은 언어로 이야기하는 개발자를 목표로 함",tools:"Figma, Git/GitHub, Notion, Slack",skills:"React·TypeScript - 프로젝트 4건, 컴포넌트 설계\nNext.js - SSR·이미지 최적화\nStorybook - 디자인 시스템 문서화",
+aitools:"Cursor - 컴포넌트 리팩터링\nChatGPT - 접근성 체크리스트 점검",aiuse:"디자인 시스템 컴포넌트 20개 문서화 2주 → 4일",aiethics:"AI 코드는 Lighthouse·스크린리더로 검증 후 반영",ailearn:"",
+projects:[{pname:"전시 예약 웹앱 리뉴얼",pperiod:"2025.01 ~ 2025.04",psum:"모바일 이탈률이 높던 전시 예약 페이지를 다시 설계",pteam:"5명 / 프론트엔드 리드 (50%)",pimpl:"Next.js 이미지 최적화·코드 스플리팅, 예약 단계 5 → 3단계로 축소, 공통 컴포넌트 30개",presult:"LCP 4.1초 → 1.6초, 모바일 예약 전환율 2.1% → 3.4%",ptrouble:"첫 화면 로딩이 느림 → 번들 분석으로 차트 라이브러리 확인 → 동적 import와 경량 라이브러리 비교 → 번들 38% 감소",pai:"Cursor로 클래스형 컴포넌트를 훅으로 변환, 스냅샷 테스트로 동작 동일성 확인"}],
+experiences:[{ename:"웹 개발 부트캠프 팀 프로젝트",eperiod:"2024.07 ~ 2024.12",edesc:"팀장. 디자이너와 주 1회 디자인 QA 정례화"}],
+education:[{sname:"한국대학교",speriod:"2019.03 - 2024.02",smajor:"시각디자인 전공"},{sname:"웹 개발 부트캠프",speriod:"2024.07 - 2024.12",smajor:"프론트엔드 과정 수료"}],lang:"",other:"웹 접근성 교육 수료 (2025.02)"},
+ux:{name:"최하은",role:"UX/UI 디자이너",email:"haeun@example.com",phone:"010-0000-0000",links:"behance.net/example",jd:"사용자 리서치, Figma 프로토타이핑, 데이터 기반 개선, 개발자 협업",
+about:"인터뷰와 데이터로 문제를 정의하고, 화면으로 검증하는 디자이너. 개발 가능한 디자인을 중요하게 생각함",tools:"Figma, FigJam, Notion, Jira, Maze",skills:"사용자 인터뷰·사용성 테스트 - 프로젝트 5건\nFigma - 오토레이아웃·컴포넌트·프로토타입\nGA4 - 퍼널 분석 기초",
+aitools:"ChatGPT - 인터뷰 질문 초안·녹취 요약\nMidjourney - 무드보드 시안",aiuse:"인터뷰 10건 요약·분류 2일 → 반나절 (원문 대조로 검증)",aiethics:"인터뷰 녹취는 익명 처리 후 사용, AI 이미지는 저작권 확인 후 시안 단계에서만 사용",ailearn:"",
+projects:[{pname:"대학 축제 길찾기·부스 안내 앱",pperiod:"2025.04 ~ 2025.05",psum:"축제 방문객이 부스 위치를 못 찾아 헤매는 문제 해결",pteam:"4명 / UX 리서치·UI 디자인 단독 (100%)",pimpl:"방문객 인터뷰 12명, 여정 지도, 지도형/리스트형 A/B 프로토타입, 디자인 시스템",presult:"사용성 테스트 과업 성공률 58% → 91%, 축제 당일 이용자 2,300명",ptrouble:"지도형 화면에서 길을 더 헤맴 → 테스트 녹화 분석으로 랜드마크 부재 확인 → 랜드마크 아이콘·리스트 병행 → 성공률 상승",pai:"ChatGPT로 인터뷰 녹취 요약, 핵심 인용은 원문과 대조해 오류 3건 수정"}],
+experiences:[{ename:"디자인 동아리",eperiod:"2023.03 ~ 2024.02",edesc:"외부 공모전 2회 참가, 장려상 1회"}],
+education:[{sname:"한국대학교",speriod:"2021.03 - 2025.02",smajor:"산업디자인 전공"}],lang:"",other:"GTQ 1급"},
+pm:{name:"정민수",role:"서비스 기획자 (PM)",email:"minsu@example.com",phone:"010-0000-0000",links:"brunch.co.kr/@example",jd:"서비스 기획·요구사항 정의, 지표 설계, SQL 기초, 개발·디자인 협업",
+about:"문제를 숫자로 정의하고, 작게 실험해서 확인하는 기획자. 개발자와 디자이너가 일하기 편한 문서를 만드는 것을 중요하게 생각함",tools:"Notion, Jira, Figma, Slack, Amplitude",skills:"요구사항 정의서·화면 설계서 - 프로젝트 3건\nSQL - 지표 추출\nGA4·Amplitude - 퍼널 분석",
+aitools:"Claude - PRD 초안·경쟁사 비교표\nChatGPT - 사용자 설문 문항 검토",aiuse:"PRD 초안 작성 1일 → 2시간 (AI 초안 + 팀 리뷰)",aiethics:"내부 지표·고객 데이터는 AI에 입력하지 않고, 공개 정보만 사용",ailearn:"",
+projects:[{pname:"빈 강의실 찾기 서비스 기획",pperiod:"2024.09 ~ 2024.12",psum:"공부할 빈 강의실을 찾느라 시간을 쓰는 학생 문제를 해결하는 웹서비스",pteam:"5명 / 기획·PM (기여도 40%)",pimpl:"학생 설문 210명, 요구사항 정의서, MVP 범위 결정, 주간 스프린트 운영",presult:"출시 4주 만에 가입자 640명, 주간 재방문율 38%",ptrouble:"초기 기능이 많아 일정 지연 → 설문 데이터로 핵심 기능 3개만 남김 → 2주 앞당겨 출시",pai:"Claude로 경쟁 서비스 비교표 초안 작성, 출처를 직접 확인해 틀린 정보 2건 수정"}],
+experiences:[{ename:"스타트업 기획 인턴",eperiod:"2025.01 ~ 2025.06",edesc:"온보딩 화면 개선 기획, 가입 완료율 12%p 상승"}],
+education:[{sname:"한국대학교",speriod:"2019.03 - 2025.02",smajor:"경영학 전공"}],lang:"OPIc IM2",other:""},
+mkt:{name:"한지우",role:"디지털 마케터",email:"jiwoo@example.com",phone:"010-0000-0000",links:"instagram.com/example",jd:"퍼포먼스 광고 운영, 콘텐츠 기획, 데이터 분석, A/B 테스트",
+about:"콘텐츠를 만들고 숫자로 확인하는 마케터. 작은 예산으로 실험하고 성과를 키우는 것을 좋아함",tools:"Notion, Slack, Canva, Google Sheets",skills:"메타·구글 광고 운영 - 월 300만 원 예산\nGA4 - 전환 추적 설정\n콘텐츠 기획 - 인스타그램 릴스",
+aitools:"ChatGPT - 광고 문구 변형안\nCanva AI - 소재 이미지 시안",aiuse:"광고 소재 제작 주 2개 → 주 8개, A/B 테스트 횟수 4배",aiethics:"AI 문구는 과장·허위 표현 체크리스트로 검수 후 사용",ailearn:"",
+projects:[{pname:"지역 베이커리 인스타그램 성장 캠페인",pperiod:"2025.03 ~ 2025.06",psum:"오프라인 단골 위주인 베이커리의 신규 고객 확보",pteam:"2명 / 콘텐츠 기획·광고 운영 (70%)",pimpl:"릴스 주 3회, 메타 광고 A/B 테스트 12회, 방문 쿠폰 전환 추적",presult:"팔로워 800 → 4,200명, 광고 클릭당 비용 41% 절감, 쿠폰 사용 310건",ptrouble:"초기 광고 반응이 낮음 → 소재별 성과 분석으로 제품 클로즈업 영상이 효과적임을 확인 → 소재 방향 전환",pai:"ChatGPT로 광고 문구 20개 변형, 성과 상위 3개만 남기고 과장 표현 수정"}],
+experiences:[{ename:"마케팅 학회",eperiod:"2024.03 ~ 2024.12",edesc:"기업 연계 프로젝트 2건, 최우수 발표"}],
+education:[{sname:"한국대학교",speriod:"2020.03 - 2025.02",smajor:"광고홍보학 전공"}],lang:"",other:"구글 애널리틱스 자격증 (2024.10)"},
+sales:{name:"오태윤",role:"B2B 영업 (기술영업)",email:"taeyun@example.com",phone:"010-0000-0000",links:"linkedin.com/in/example",jd:"신규 고객 발굴, 제안서 작성, CRM 관리, 목표 매출 달성, 고객 커뮤니케이션",
+about:"고객의 문제를 먼저 듣고 숫자로 제안하는 영업인. 거절을 데이터로 바꿔 다음 제안을 개선하는 것을 좋아함",tools:"Salesforce, HubSpot, Notion, Excel, Slack",skills:"CRM 파이프라인 관리 - 리드 150건 관리\n제안서·견적서 작성 - 20건 이상\nExcel - 매출 분석·피벗",
+aitools:"ChatGPT - 고객사 업계 리서치·콜드메일 초안\nClaude - 제안서 구조 잡기",aiuse:"고객사 사전 조사 1시간 → 20분, 콜드메일 회신율 4% → 11%",aiethics:"고객 정보·견적 금액은 AI에 입력하지 않고, AI 리서치는 공식 자료로 사실 확인",ailearn:"",
+projects:[{pname:"중소 제조사 대상 SaaS 신규 영업",pperiod:"2025.01 ~ 2025.06 (인턴)",psum:"재고관리 SaaS를 중소 제조사에 처음 도입시키는 신규 영업",pteam:"영업팀 5명 / 리드 발굴·데모 담당 (기여도 30%)",pimpl:"타깃 리스트 300곳 선정, 콜드메일·전화, 데모 시연 24회, CRM 단계별 관리",presult:"신규 계약 6건, 분기 목표 대비 120%, 데모 → 계약 전환율 25%",ptrouble:"데모 후 계약이 지연됨 → 실패 사유 인터뷰로 '도입 비용 부담' 확인 → 3개월 무료 파일럿 제안 → 계약 3건 추가",pai:"ChatGPT로 업종별 콜드메일 3종 초안, A/B 발송으로 회신율 높은 문구만 유지"}],
+experiences:[{ename:"IT 기업 영업지원 인턴",eperiod:"2025.01 ~ 2025.06",edesc:"CRM 데이터 정리, 영업 리포트 주간 자동화"},{ename:"교내 창업 동아리",eperiod:"2023.03 ~ 2024.02",edesc:"플리마켓 판매 총괄, 매출 340만 원"}],
+education:[{sname:"한국대학교",speriod:"2019.03 - 2025.02",smajor:"경영학 전공"}],lang:"TOEIC Speaking IH",other:"운전면허 1종 보통"},
+hr:{name:"윤소희",role:"인사(HR) 담당자 - 채용·조직문화",email:"sohee@example.com",phone:"010-0000-0000",links:"brunch.co.kr/@example",jd:"채용 운영, 온보딩, 조직문화 프로그램, HR 데이터 관리, 노동법 기초",
+about:"구성원의 경험을 데이터로 이해하고 제도로 개선하는 HR 담당자. 채용부터 온보딩까지 지원자가 기억하는 회사를 만들고 싶음",tools:"Notion, Slack, Google Workspace, 그리팅(ATS), Excel",skills:"채용 운영 - 공고 작성·서류 스크리닝·면접 일정 관리\nExcel·구글 시트 - HR 데이터 정리·대시보드\n설문 설계 - 구성원 만족도 조사",
+aitools:"ChatGPT - 채용 공고 초안, 면접 질문 구조화\nGemini - 설문 서술형 응답 분류",aiuse:"설문 서술형 응답 300건 분류 3일 → 반나절 (표본 50건 직접 대조 검증)",aiethics:"지원자·구성원 개인정보는 익명 처리 후 사용, AI로 합격·불합격을 판단하지 않음",ailearn:"HR AI 활용 교육 수료",
+projects:[{pname:"신입 온보딩 프로그램 개선",pperiod:"2025.02 ~ 2025.07 (인턴)",psum:"입사 3개월 내 퇴사가 많던 신입 온보딩 개선",pteam:"HR팀 3명 / 온보딩 설계·운영 담당 (기여도 50%)",pimpl:"퇴사자·재직자 인터뷰 15명, 30·60·90일 체크인 제도, 버디 매칭, 온보딩 노션 가이드",presult:"3개월 내 조기 퇴사율 18% → 7%, 온보딩 만족도 3.2 → 4.4점(5점)",ptrouble:"버디 제도 참여율이 낮음 → 설문으로 '업무 부담' 확인 → 버디 활동을 업무 시간으로 인정하도록 팀장 설득 → 참여율 40% → 85%",pai:"Gemini로 인터뷰 응답 주제 분류, 핵심 인용은 원문과 대조해 오분류 4건 수정"}],
+experiences:[{ename:"스타트업 HR 인턴",eperiod:"2025.02 ~ 2025.07",edesc:"채용 공고 12건 운영, 면접 일정 조율 80건"},{ename:"교내 학생회 총무부",eperiod:"2023.03 ~ 2023.12",edesc:"행사 인력 50명 배치·관리"}],
+education:[{sname:"한국대학교",speriod:"2020.03 - 2025.02",smajor:"심리학 전공 (경영학 복수전공)"}],lang:"",other:"공인노무사 1차 준비 중, 컴퓨터활용능력 1급"},
+m365:{name:"박지후",role:"Microsoft 365 엔지니어 (신입)",email:"jihoo@example.com",phone:"010-0000-0000",links:"github.com/example (구성도·테스트표·사용자 안내)",
+jd:"씨앤토트 Microsoft 365 엔지니어 신입 모집. 정규직, 초대졸 이상, 서울 서초. 잡코리아 공고 기준 마감 표기 2026-10-31, 채용 시 마감. 상세 업무·우대사항은 지원 전 원문에서 확인할 것.",
+about:"M365 엔지니어 교육을 수료하며 서비스·라이선스, 관리센터, 보안·ID 관리 기초를 학습했습니다. 도입·구축 교육 프로젝트에서 계정·공유 권한 설정과 테스트표·사용자 안내 작성을 맡아, 허용·차단 시나리오로 결과를 확인했습니다. 온프레미스 AD와 PowerShell은 아직 실습하지 못해 주 2회 학습 계획으로 보완하고 있습니다.",
+tools:"Notion·구글 문서 - 권한표 공동 검토, 회의록으로 변경 합의 기록, Teams - 팀 회의",
+skills:"Microsoft 365 관리센터 - 사용자·그룹 생성, 라이선스 할당·회수 (테스트 환경 실습)\nExchange Online - 공유 사서함 설정, 메일 수신 문제 점검 (테스트 환경 실습)\nSharePoint Online - 사이트 권한 그룹 설계, 공유 링크 접근 확인 (테스트 환경 실습)\nMicrosoft Entra ID - 사용자·역할 관리 (테스트 환경 실습), 조건부 접근은 설계만 수행\n미실습: 온프레미스 AD, PowerShell, Intune",
+aitools:"ChatGPT - 테스트 시나리오 초안, 사용자 안내문 문장 다듬기",aiuse:"테스트 시나리오 12개 초안을 만든 뒤 권한표와 대조해 3개 수정 (시간은 측정하지 않음)",aiethics:"가상 계정·가상 데이터만 입력. AI가 제안한 설정은 공식 문서와 테스트 환경에서 확인한 뒤 반영",ailearn:"",
+projects:[{pname:"M365 도입 및 구축 교육 프로젝트 (가상 고객사 40명)",pperiod:"2026.08 ~ 2026.09 (교육 프로젝트)",psum:"가상 중소기업 40명을 가정해 메일·협업·접근 권한을 구성하고 검증한 교육 프로젝트",pteam:"4명 / 계정·공유 권한 설정, 테스트표·사용자 안내 작성 담당 (기여율은 산정하지 않음)",pimpl:"요구사항 정리 → 라이선스 선택 이유 정리 → 사용자·그룹 구성 → 공유 사서함·사이트 권한 설정 → 허용/차단 시나리오 테스트 → 사용자 안내 작성. 모두 교육용 테스트 환경에서 수행",presult:"허용·차단 시나리오 12건 중 11건이 기대 결과와 일치, 불일치 1건은 그룹 상속 설정을 수정한 뒤 재검증 통과 (테스트표 기준)",ptrouble:"공유 사서함에서 메일이 보이지 않음 → 라이선스는 정상이어서 배제하고 권한 대상을 확인 → 개인이 아닌 그룹으로 지정된 점 발견 → 대상을 사용자 그룹으로 수정 → 같은 계정으로 재확인해 정상 수신. 설정 후 계정별 재검증 절차를 점검표에 추가",pai:"ChatGPT로 테스트 시나리오 초안 12개 작성 → 실제 권한표와 대조해 3개 수정"}],
+experiences:[{ename:"IT 학습 스터디",eperiod:"2026.03 ~ 2026.06",edesc:"M365 서비스 개념 정리 발표 4회, 서비스·용어 비교표 작성"}],
+education:[{sname:"한국대학교",speriod:"2019.03 - 2026.02",smajor:"경영정보학 전공"},{sname:"M365 엔지니어 과정",speriod:"2026.08 - 2026.10",smajor:"M365 직종 이해·서비스·라이선스·관리센터·보안·ID 관리·도입 구축 프로젝트 / 수료"}],lang:"",other:"수료증(M365 엔지니어 과정). 자격 취득 없음 (MS-900은 2026-03-31 종료되어 학습 이력으로만 기재)"}};
+const JDS={
+j1:{role:"Microsoft 365 엔지니어",jd:"씨앤토트 Microsoft 365 엔지니어 신입 모집. 정규직, 초대졸 이상, 서울 서초. 잡코리아 공고 기준 마감 표기 2026-10-31, 채용 시 마감. 상세 업무·우대사항은 지원 전 원문에서 확인할 것."},
+j2:{role:"M365·AD·Exchange 기술지원 엔지니어",jd:"소프트피플코리아 M365·AD·Exchange 기술지원 직무. 신입·경력, 정규직, 성남. IT 교육원 수료자·관련 자격 보유자 등 우대. 접수기간은 상시채용 표기이며 실제 모집 상태 재확인."},
+j3:{role:"Microsoft 365·EMS 엔지니어",jd:"에이피드 AP-001, 신입·경력. M365 구축과 Exchange·Teams·SharePoint 설정, EMS·Microsoft Entra ID 연동, 고객 기술지원. 관련 기술과 고객 소통에 대한 관심을 제시. 우대 경험과 개인의 실제 수행 범위를 구분."},
+j4:{role:"사내 IT 운영담당자",jd:"에이스엔지니어링 사내 IT 운영 직무. 신입/경력, 관련 경력 3년 이하, 학사, 정규직. M365·IT 인프라, 계정·권한, 라이선스·자산, 사용자 장애 대응과 보안 지원. 시설·물리보안 업무도 포함."}};
+$("jdsel").onchange=()=>{const j=JDS[$("jdsel").value];if(!j)return;$("role").value=j.role;$("jd").value=j.jd;save();$("st").textContent="공고 정보를 채웠어요 · 실제 지원 전 원문에서 모집 상태를 확인하세요"};
+$("ex").onclick=()=>{load(EXS[$("exsel").value]||EX);$("st").textContent="예시를 채웠어요 · 내 내용으로 바꿔 주세요"};
+$("clr").onclick=()=>{load({});try{localStorage.removeItem("pc-pf2")}catch(e){}$("st").textContent="입력과 이 기기 저장 내용을 지웠어요"};
+function missing(){const s=state(),t=md.replace(/\s+/g,"");const names=[...s.projects.map(x=>x.pname),...s.experiences.map(x=>x.ename),...s.education.map(x=>x.sname)].map(x=>(x||"").trim()).filter(Boolean);
+  return names.filter(n=>!t.includes(n.replace(/\s+/g,"").slice(0,8)))}
+function usageMsg(gem,u){if(!u||u.i==null)return "";const tot=(u.i||0)+(u.o||0)+(u.t||0);
+  return gem?` · 토큰 ${tot.toLocaleString()}개 사용 (입력 ${(u.i||0).toLocaleString()} / 출력 ${((u.o||0)+(u.t||0)).toLocaleString()}) · 무료 한도 내 0원`
+    :` · 토큰 ${tot.toLocaleString()}개 (입력 ${(u.i||0).toLocaleString()} / 출력 ${(u.o||0).toLocaleString()}) · 약 $${(((u.i||0)*4+(u.o||0)*20)/1e6).toFixed(3)}`}
+function doneMsg(stop){const m=missing();return stop==="max_tokens"?"분량이 길어 중간에 끊겼어요 · 다시 눌러 주세요":m.length?"⚠ 빠진 항목: "+m.join(", ")+" · 다시 생성해 보세요":"완성 · 입력 항목이 모두 들어갔어요"}
+function pii(t){const e=$("email").value.trim(),p=$("phone").value.trim();return t.replace(/\[\[EMAIL\]\]/g,e||"[보완 필요: 이메일]").replace(/\[\[PHONE\]\]/g,p||"[보완 필요: 연락처]")}
+function limit(root){root.querySelectorAll("input,textarea").forEach(el=>{if(!el.maxLength||el.maxLength<0)el.maxLength=el.tagName==="TEXTAREA"?2000:200})}
+limit(document);new MutationObserver(()=>limit($("f"))).observe($("f"),{childList:true,subtree:true});
+
+const SAMPLE=`# 데이터 분석가 | 김보라 포트폴리오
+> 안녕하세요. 현장의 데이터로 **매출과 낭비를 함께 줄이는** 데이터 분석가 김보라입니다.
+
+## 💫 About me
+통계학 전공자로서 **Python·SQL 분석과 시각화**에 강점이 있습니다. 공모전 3회와 실매장 데이터 프로젝트로 **분석 결과가 실제 의사결정에 쓰이는 과정**을 경험했습니다.
+
+## 💻 Projects
+### 카페 매출 예측 대시보드
+- **요약**: 요일·날씨별 수요 예측으로 발주 낭비 감소
+- **작업기간**: 2025.04 ~ 2025.07
+- **역할**: 4명 중 전처리·모델링 담당 (기여도 50%)
+- **성과**: 예측 오차 24% → 11%
+- **회고/느낀점**: 공휴일 변수 추가로 오차를 절반으로 줄이며, 변수 설계는 현장 인터뷰에서 시작해야 함을 배움
+
+(왼쪽을 채우고 '포트폴리오 완성하기'를 누르면 전체 문서가 만들어져요)`;
+let md=SAMPLE;
+function esc(s){return s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]))}
+function inl(s){return esc(s).replace(/==(.+?)==/g,"<mark>$1</mark>").replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/\[보완 필요[^\]]*\]/g,m=>`<span class="need">${m}</span>`)}
+function render(t,target){const L=t.split("\n");let h="",i=0,open=0;
+  while(i<L.length){const l=L[i];
+    if(l.startsWith("|")){const r=[];while(i<L.length&&L[i].startsWith("|"))r.push(L[i++]);const c=x=>x.replace(/^\||\|$/g,"").split("|").map(s=>s.trim());
+      h+='<div class="tw"><table>'+r.filter((x,k)=>!(k===1&&/^[\s|:-]+$/.test(x))).map((x,k)=>"<tr>"+c(x).map(s=>k?`<td>${inl(s)}</td>`:`<th>${inl(s)}</th>`).join("")+"</tr>").join("")+"</table></div>";continue}
+    if(/^\s*[-*] /.test(l)){h+="<ul>";while(i<L.length&&/^\s*[-*] /.test(L[i]))h+="<li>"+inl(L[i++].replace(/^\s*[-*] /,""))+"</li>";h+="</ul>";continue}
+    if(/^\+\+\+\s*\S/.test(l)){h+="<details class=\"more\"><summary>"+inl(l.replace(/^\+\+\+\s*/,""))+"</summary>";open++;i++;continue}
+    if(/^\+\+\+\s*$/.test(l)){if(open>0){h+="</details>";open--}i++;continue}
+    if(l.startsWith("> "))h+="<blockquote>"+inl(l.slice(2))+"</blockquote>";
+    else if(l.startsWith("### "))h+="<h3>"+inl(l.slice(4))+"</h3>";
+    else if(l.startsWith("## "))h+="<h2>"+inl(l.slice(3))+"</h2>";
+    else if(l.startsWith("# "))h+="<h1>"+inl(l.slice(2))+"</h1>";
+    else if(/^---+$/.test(l.trim()))h+="<hr>";
+    else if(l.trim())h+="<p>"+inl(l)+"</p>";
+    i++}
+  h+="</details>".repeat(open);(target||$("doc")).innerHTML=h}
+render(md);
+let fb="";
+function splitFb(t){const m=t.match(/\n[ \t]*={3}\s*FEEDBACK\s*={3}[ \t]*\n?|\n-{3,}[ \t]*\n(?=##\s*🔍\s*컨설턴트 피드백)|\n(?=##\s*🔍\s*컨설턴트 피드백)/);
+  if(!m)return [t,""];return [t.slice(0,m.index).replace(/\s+$/,""),t.slice(m.index+m[0].length).trim()]}
+function setMd(t){const [a,b]=splitFb(t);md=pii(a);fb=pii(b);render(md);showFb()}
+function showFb(){const box=$("fbbox");if(!fb){box.hidden=true;return}box.hidden=false;render(fb.replace(/^##\s*🔍[^\n]*\n?/,""),$("fbdoc"))}
+
+function buildPrompt(){
+  const s=state();delete s.email;delete s.phone;
+  return `너는 퍼플커리어(커리어캐쳐)의 포트폴리오 컨설턴트다. 아래 구직자 입력(JSON)으로 노션 포트폴리오 완성본을 한국어 마크다운으로 작성하라.
+
+[구직자 입력]
+${JSON.stringify(s,null,1)}
+
+[규칙]
+- 입력에 없는 사실·수치·학교·회사는 절대 만들지 않는다. 비었거나 부족하면 "[보완 필요: 무엇을 적으면 좋은지]"로 표시한다.
+- 교육·학습 프로젝트를 근무 경력으로, 수료를 자격 취득으로 바꾸지 않는다. 입력에 없는 기술·자격·고객사·기여율(%)을 만들지 않고, 기술마다 입력된 수준(학습/설계/테스트 환경/실제 운영)을 그대로 표시한다. 성과에 숫자가 없으면 검증 결과·산출물로 쓴다.
+- [가장 중요] 입력한 내용을 요약하거나 빼지 않는다. 모든 프로젝트·경험·학력·기술·자격·어학과 그 안의 수치, 고유명사, 과정, 결과를 빠짐없이 옮기고, 문장만 더 전문적으로 다듬는다. 완성본은 입력보다 짧아지면 안 된다.
+- 입력이 한 줄이면 직무 관점에서 의미를 덧붙여 1~2줄로 풀어 쓰되, 입력에 없는 사실은 추가하지 않는다.
+- 지원 직무 관점에서 강점이 드러나게 다듬되, 태도는 형용사 대신 행동 장면으로 쓴다.
+- 채용공고가 있으면 그 키워드가 About me·Skills·프로젝트 성과에 자연스럽게 드러나게 한다.
+- 성과·수치·핵심 결과는 ==하이라이트==, 중요한 키워드는 **굵게** 처리한다. 사용 가능한 문법: #, ##, ###, >, -, 표(|), **굵게**, ==하이라이트==, 접기 블록(+++ 제목 ~ +++), ---. 코드블록·HTML 금지.
+- 핵심은 표에, 부수적인 설명은 접기 블록(+++)에 넣어 첫 화면이 간결하게 보이게 한다. 접기 블록 안에서도 입력 내용은 빠짐없이 쓴다.
+- AI 역량은 최근 채용 평가 관점(① 업무에 맞는 도구 선택 ② 프롬프트·워크플로 설계 ③ 결과 검증과 책임 ④ 생산성 성과 ⑤ 윤리·보안)으로 정리한다. "AI를 쓸 줄 안다"가 아니라 "AI로 무엇을 얼마나 바꿨고 어떻게 검증했는지"가 보이게 쓴다. AI 입력이 전혀 없으면 섹션 대신 "[보완 필요: AI 활용 사례 1개와 검증 방법]"만 남긴다.
+- 프로젝트는 성과가 좋은 순으로 정렬한다. 경험은 직무 연관성이 높은 순으로 정렬하되 입력한 경험은 모두 포함한다.
+
+[출력 양식 — 이 순서와 제목을 그대로 지킨다]
+# (지원 직무) | (이름) 포트폴리오
+> 안녕하세요. (직무 정체성을 담은 한 문장 자기소개) (이름)입니다.
+- ✉️ E-Mail: [[EMAIL]] / 📞 [[PHONE]] / 🔗 링크 (이메일·연락처 자리는 [[EMAIL]], [[PHONE]] 표기를 그대로 둔다)
+
+## 💫 About me
+(전문성과 강점, 성장 의지를 담은 3~4문장. 핵심은 굵게)
+
+## ⚒️ Skills
+### Collaboration & Tools
+- 툴 목록
+### Tech Stack
+- 기술 – 활용 경험·수준
+
+## 🤖 AI Competency
+| 역량 | 내용 |
+|---|---|
+| 활용 도구·숙련도 | |
+| 워크플로 설계 | (프롬프트·자동화 방식) |
+| 성과 (전/후) | |
+| 검증·책임 | |
+| 윤리·보안 | |
+
+## 💻 Projects
+(프로젝트마다 아래 표 1개 + 접기 블록 1개. 표 안은 한 칸에 1~2줄 핵심만, 성과 숫자는 ==숫자== 로 하이라이트)
+### 프로젝트명
+| 항목 | 내용 |
+|---|---|
+| 한 줄 요약 | 무엇을, 누구를 위해 |
+| 기간 · 역할 | 2025.03 ~ 06 · 전체 N명 중 담당 역할 (**기여도 N%**) |
+| 핵심 성과 | ==800 → 4,200명==, ==CPC 41% 절감== 처럼 숫자 위주 |
+| 트러블슈팅 | **문제** → **원인** → **해결** → ==결과 숫자== (한 줄) |
+| 사용 기술 | 핵심 기술·도구 나열 |
++++ 상세 내용 보기
+- **구현 내용**: 핵심 작업을 입력 그대로 모두
+- **트러블슈팅 상세**: 문제 / 원인 분석 / 검토한 대안 / 해결 / 결과
+- **AI 활용**: 어디에 썼고 어떻게 검증했는지 (입력 없으면 이 줄 생략)
+- **회고/느낀점**: 인사이트 1~2개
++++
+
+## 🎈 Experiences
+| 경험 | 기간 | 역할 | 핵심 성과 |
+|---|---|---|---|
+| 동아리·인턴·회사명 | 2024.03 ~ 12 | 맡은 역할 한 줄 | ==숫자 성과== 위주 한 줄 |
+(경험마다 한 행. 부수 설명이 있으면 표 아래 "+++ 경험 상세 보기" 접기 블록에 경험별로 모두 적는다)
+
+## 🛫 Education
+| 학교·기관 | 기간 | 전공·과정 |
+|---|---|---|
+(학교·교육마다 한 행, 입력한 것은 모두)
+
+## 💬 Language
+## 🎳 Other
+
+[포트폴리오 본문은 여기서 끝낸다. 컨설턴트 피드백은 본문에 넣지 말고, 아래 구분선 한 줄 뒤에 따로 쓴다]
+===FEEDBACK===
+## 🔍 컨설턴트 피드백
+- 보완하면 더 강해지는 점 3가지 (본문에는 절대 넣지 않는다)`;
+}
+
+const sampleP=window.claude?.use?window.claude.use("sample"):Promise.resolve(null);
+let ctl=null;
+$("f").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const s=state();
+  if(!s.role.trim()||!s.projects.some(p=>p.pname.trim())){$("st").textContent="지원 직무와 프로젝트 1개 이상은 적어 주세요.";return}
+  const sample=await sampleP;
+  const key=$("apikey").value.trim();
+  if(!sample&&key){await viaApi(key);return}
+  if(!sample){
+    const p=buildPrompt();md=p;fb="";showFb();
+    try{await navigator.clipboard.writeText(p);$("st").textContent="AI 프롬프트를 복사했어요"}catch(err){$("st").textContent="아래 프롬프트를 선택해 복사하세요"}
+    $("na").hidden=false;$("pastebox").hidden=false;if(innerWidth<=940)document.querySelector(".out").scrollIntoView({behavior:"smooth"});$("doc").innerHTML="";const pre=document.createElement("pre");pre.textContent=p;pre.style.cssText="white-space:pre-wrap;font:inherit;font-size:12px";$("doc").appendChild(pre);return}
+  ctl?.abort();ctl=new AbortController();
+  $("go").disabled=true;$("st").textContent="작성 중…";if(innerWidth<=940)document.querySelector(".out").scrollIntoView({behavior:"smooth"});
+  try{
+    const r=await sample(buildPrompt(),{signal:ctl.signal,modelTier:"default",cache:false,onText:({text})=>{setMd(text)}});
+    setMd(r.text);$("st").textContent=doneMsg("");
+  }catch(err){
+    if(err?.text){setMd(err.text)}
+    $("st").textContent=err?.code==="rate_limited"?"요청이 많아요. 잠시 후 다시 눌러 주세요.":err?.code==="not_granted"?"AI 사용 권한이 허용되지 않았어요.":"생성에 실패했어요. 다시 눌러 주세요.";
+  }finally{$("go").disabled=false}
+});
+let gemModel={};
+async function gemPick(key,lite){
+  const res=await fetch("https://generativelanguage.googleapis.com/v1beta/models?pageSize=200",{headers:{"x-goog-api-key":key},referrerPolicy:"no-referrer",signal:ctl.signal});
+  if(!res.ok)return null;
+  const ms=((await res.json()).models||[]).filter(m=>(m.supportedGenerationMethods||[]).includes("generateContent")).map(m=>m.name.replace(/^models\//,""));
+  const score=n=>(/flash/.test(n)?100:/pro/.test(n)?40:0)+(/lite/.test(n)?(lite?60:-30):(lite?-30:0))-(/preview|exp|tts|image|audio|live|embed|thinking/.test(n)?60:0)+(/latest/.test(n)?5:0)+(parseFloat((n.match(/(\d+(\.\d+)?)/)||[0,0])[1])||0);
+  return ms.filter(n=>/^gemini/.test(n)).sort((a,b)=>score(b)-score(a))[0]||null;
+}
+let usedModel="";
+async function gemCall(key,m,think){
+  return fetch("https://generativelanguage.googleapis.com/v1beta/models/"+encodeURIComponent(m)+":streamGenerateContent?alt=sse",{method:"POST",signal:ctl.signal,referrerPolicy:"no-referrer",
+    headers:{"content-type":"application/json","x-goog-api-key":key},
+    body:JSON.stringify({contents:[{role:"user",parts:[{text:buildPrompt()}]}],generationConfig:Object.assign({maxOutputTokens:16384},think?{thinkingConfig:{thinkingBudget:0}}:{})})});
+}
+async function errDetail(res){try{return (await res.clone().json()).error?.message||""}catch(e){return ""}}
+const GEM={lite:"gemini-2.5-flash-lite",flash:"gemini-2.5-flash"};
+async function gemFetch(key){
+  const want=$("gemmodel").value==="flash"?"flash":"lite",order=[want,want==="lite"?"flash":"lite"];
+  let res,d="";
+  for(const kind of order){
+    let m=gemModel[kind]||GEM[kind],think=true;
+    for(let n=0;n<4;n++){
+      res=await gemCall(key,m,think);
+      if(res.ok){gemModel[kind]=m;usedModel=m;return res}
+      d=await errDetail(res);
+      if(res.status===400&&think&&/thinking/i.test(d)){think=false;continue}
+      if(res.status===404||(res.status===400&&/not supported|not found|deprecated|no longer/i.test(d))){const pk=await gemPick(key,kind==="lite");if(pk&&pk!==m){m=pk;continue}}
+      break}
+    if(res.status!==429&&res.status!==404&&res.status!==503)break;   // 한도·모델 문제일 때만 다른 모델로 넘어가요
+    $("st").textContent=`${m} 한도·응답 문제(${res.status}) · 다른 Gemini 모델로 다시 시도해요…`}
+  res.detail=d;return res;
+}
+async function viaApi(key){
+  ctl?.abort();ctl=new AbortController();
+  $("go").disabled=true;$("na").hidden=true;$("stopgen").hidden=false;
+  if(innerWidth<=940)document.querySelector(".out").scrollIntoView({behavior:"smooth"});
+  let text="",use={},t0=Date.now(),timedOut=false;usedModel="";
+  const tick=()=>{const sec=Math.round((Date.now()-t0)/1000);$("st").textContent=text.length?`✍️ 작성 중… ${sec}초 · ${text.length.toLocaleString()}자`+(usedModel?` · ${usedModel}`:""):`⏳ AI 응답 대기 중… ${sec}초`+(sec>25?" · 무료 서버가 혼잡하면 1분 넘게 걸려요. 계속 기다리거나 [중단] 후 다시 눌러 주세요":"")};
+  tick();const timer=setInterval(tick,1000),limit=setTimeout(()=>{timedOut=true;ctl.abort()},180000);
+  try{
+    const gem=$("provider").value==="gemini";
+    const res=gem
+      ?await gemFetch(key)
+      :await fetch("https://api.anthropic.com/v1/messages",{method:"POST",signal:ctl.signal,referrerPolicy:"no-referrer",
+        headers:{"content-type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01","anthropic-beta":"server-side-fallback-2026-07-01","anthropic-dangerous-direct-browser-access":"true"},
+        body:JSON.stringify({model:"claude-opus-5-5",max_tokens:16000,stream:true,output_config:{effort:"medium"},fallbacks:"default",messages:[{role:"user",content:buildPrompt()}]})});
+    if(!res.ok){const code=res.status,d=((res.detail??await errDetail(res))||"").replace(/\s+/g," ").slice(0,160);
+      const keyBad=code===401||code===403||/api key|permission|credential/i.test(d);
+      throw new Error(keyBad?"API 키가 올바르지 않거나 권한이 없어요. 키를 다시 복사해 주세요."+(d?` (${d})`:""):code===429?(gem?"무료 사용량·속도 한도에 걸렸어요. 1분 뒤 다시 누르거나 내일 시도해 주세요.":"요청이 많아요. 잠시 후 다시 눌러 주세요.")+(d?` (${d})`:""):code===404?"사용할 수 있는 Gemini 모델을 찾지 못했어요. 키를 새로 발급해 보세요."+(d?` (${d})`:""):`AI 서버가 요청을 거절했어요 (${code}) ${d}`)}
+    const rd=res.body.getReader(),dec=new TextDecoder();let buf="",stop="";
+    for(;;){const {done,value}=await rd.read();if(done)break;buf+=dec.decode(value,{stream:true});
+      let i;while((i=buf.indexOf("\n"))>=0){const line=buf.slice(0,i).trim();buf=buf.slice(i+1);
+        if(!line.startsWith("data:"))continue;let ev;try{ev=JSON.parse(line.slice(5))}catch(e){continue}
+        if(gem&&ev.usageMetadata)use={i:ev.usageMetadata.promptTokenCount,o:ev.usageMetadata.candidatesTokenCount,t:ev.usageMetadata.thoughtsTokenCount||0};
+        if(!gem&&ev.type==="message_start")use.i=ev.message?.usage?.input_tokens;
+        if(!gem&&ev.type==="message_delta"&&ev.usage)use.o=ev.usage.output_tokens;
+        if(gem){const c=ev.candidates?.[0];const t=(c?.content?.parts||[]).map(x=>x.text||"").join("");if(t){text+=t;setMd(text)}
+          if(c?.finishReason==="MAX_TOKENS")stop="max_tokens";else if(c?.finishReason==="SAFETY")stop="refusal";if(ev.error)throw new Error("생성 중 오류가 났어요. 다시 시도해 주세요.");continue}
+        if(ev.type==="content_block_delta"&&ev.delta?.type==="text_delta"){text+=ev.delta.text;setMd(text)}
+        else if(ev.type==="message_delta"&&ev.delta?.stop_reason)stop=ev.delta.stop_reason;
+        else if(ev.type==="error")throw new Error("생성 중 오류가 났어요. 다시 시도해 주세요.")}}
+    if(stop==="refusal")throw new Error("AI가 이 요청을 처리하지 않았어요. 입력 내용을 확인해 주세요.");
+    if(!text.trim())throw new Error("AI가 빈 응답을 보냈어요. 잠시 후 다시 눌러 주세요. 계속되면 입력을 줄이거나 키를 새로 발급해 보세요.");
+    $("st").textContent=doneMsg(stop)+usageMsg(gem,use);
+  }catch(err){$("st").textContent=err.name==="AbortError"?(timedOut?"3분이 지나도 응답이 없어 중단했어요. 다시 눌러 주세요.":"중단했어요"+(text.length?" · 지금까지 쓰인 내용은 오른쪽에 남아 있어요":"")):(err.message||"생성에 실패했어요.")}
+  finally{clearInterval(timer);clearTimeout(limit);$("go").disabled=false;$("stopgen").hidden=true}
+}
+const dlP=window.claude?.use?window.claude.use("downloads"):Promise.resolve(null);
+function htmlDoc(){
+  const title=($("doc").querySelector("h1")?.textContent||(($("role").value||"")+" 포트폴리오")).trim();
+  const css=`:root{--bg:#f0eafb;--fg:#231d2e;--muted:#6b6478;--line:#e2dcec;--accent:#6b3fa0;--soft:#e4d9f7;--chip:#d9caf2}
+*{box-sizing:border-box}h1,h2,h3,p,li,td{word-break:keep-all;overflow-wrap:anywhere}body{margin:0;background:var(--bg);color:var(--fg);font-family:"Malgun Gothic","맑은 고딕","Apple SD Gothic Neo","Noto Sans KR",sans-serif;font-size:15px;line-height:1.7}
+main{max-width:860px;margin:0 auto;padding:48px max(20px,env(safe-area-inset-left,0px)) 64px}
+header.band{border-top:6px solid var(--accent)}
+h1{font-size:30px;margin:0 0 10px;letter-spacing:-.02em}
+h2{font-size:20px;margin:40px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--chip);color:var(--accent)}
+h3{font-size:17px;margin:22px 0 8px}
+blockquote{margin:12px 0 18px;padding:14px 18px;background:var(--soft);border-left:4px solid var(--accent);border-radius:0 6px 6px 0;font-size:16px}
+ul{padding-left:22px}li{margin:3px 0}
+.tw{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:14px;margin:8px 0}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}th{background:var(--soft)}
+hr{border:0;border-top:1px solid var(--line);margin:28px 0}
+.need{background:var(--chip);color:var(--accent);font-size:12px;padding:1px 6px;border-radius:3px}
+mark{background:var(--chip);color:var(--accent);font-weight:700;padding:0 3px;border-radius:3px}
+details.more{margin:8px 0 18px;border:1px solid var(--line);border-radius:8px;padding:0 14px}
+details.more summary{cursor:pointer;padding:10px 0;font-size:14px;color:var(--accent);font-weight:700}
+details.more[open]{padding-bottom:10px}
+td:first-child{white-space:nowrap;font-weight:700;width:1%}
+@media (max-width:520px){td:first-child{white-space:normal;min-width:4.5em}th,td{word-break:keep-all;overflow-wrap:normal;padding:7px 8px}table{font-size:13px}}
+@media print{details.more{border:0;padding:0}details.more summary{display:none}}
+@media print{body{background:#fff;color:#000}h2{break-after:avoid}h3{break-after:avoid}}`;
+  const e=t=>t.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  return `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${e(title)}</title><style>${css}</style></head><body><header class="band"></header><main>${$("doc").innerHTML}</main></body></html>`;
+}
+function markReady(){["savehtml","savehtml2"].forEach(i=>$(i).classList.add("ready"))}
+new MutationObserver(()=>{const ok=$("doc").textContent.trim()&&!$("doc").querySelector("pre")&&!$("go").disabled&&md!==SAMPLE;["savehtml","savehtml2"].forEach(i=>$(i).classList.toggle("ready",!!ok))}).observe($("st"),{childList:true,characterData:true,subtree:true});
+$("stopgen").onclick=()=>ctl?.abort();
+$("savehtml2").onclick=()=>$("savehtml").click();
+function fileName(){
+  const clean=t=>(t||"").replace(/\s*[\(\[（][^\)\]）]*[\)\]）]/g,"").replace(/[\\/:*?"<>|]/g,"").replace(/\s+/g,"").trim();
+  let role=clean($("role").value),nm=clean($("name").value);
+  if(!role||!nm){const h=($("doc").querySelector("h1")?.textContent||"").replace(/포트폴리오\s*$/,"");const [a,b]=h.split("|").map(x=>clean(x));role=role||a;nm=nm||b}
+  return ([role,nm].filter(Boolean).join("_")||"포트폴리오")+".html"}
+$("savehtml").onclick=async()=>{
+  if($("doc").querySelector("pre")||!$("doc").textContent.trim()){$("st").textContent="먼저 포트폴리오를 완성해 주세요.";return}
+  const html=htmlDoc();const fname=fileName();
+  const dl=await dlP;
+  if(dl){try{await dl.save({filename:fname,data:html});$("st").textContent="HTML 파일을 저장했어요"}catch(e){$("st").textContent="저장을 취소했어요"}return}
+  try{const u=URL.createObjectURL(new Blob([html],{type:"text/html"}));const a=document.createElement("a");a.href=u;a.download=fname;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);$("st").textContent="HTML 파일을 저장했어요 · 브라우저로 열어 보세요"}
+  catch(e){$("st").textContent="이 환경에서는 저장할 수 없어요"}
+};
+$("applypaste").onclick=()=>{
+  const t=$("pasted").value.trim();if(!t){$("st").textContent="먼저 AI 결과를 붙여넣어 주세요.";return}
+  if(/\[구직자 입력\]|포트폴리오 컨설턴트다|"projects"\s*:/.test(t)){$("st").textContent="⚠ 붙여넣은 건 프롬프트예요. ChatGPT·Claude에 프롬프트를 보낸 뒤, AI가 답한 글을 복사해서 넣어 주세요.";$("pasted").focus();return}
+  setMd(t.replace(/^```[a-z]*\n?|```$/g,""));$("pastebox").hidden=true;$("na").hidden=true;$("pasted").value="";
+  $("st").textContent=doneMsg("")+" · HTML 저장을 눌러 주세요";$("savehtml").scrollIntoView({behavior:"smooth",block:"center"});
+};
+$("copyfb").onclick=async()=>{try{await navigator.clipboard.writeText(fb);$("st").textContent="피드백을 복사했어요"}catch(e){const r=document.createRange();r.selectNodeContents($("fbdoc"));const s=getSelection();s.removeAllRanges();s.addRange(r);$("st").textContent="선택됨 · Ctrl+C로 복사하세요"}};
+$("copy").onclick=async()=>{
+  try{await navigator.clipboard.writeText(md.replace(/^\+\+\+\s*(\S.*)$/gm,"**▶ $1**").replace(/^\+\+\+\s*$/gm,"").replace(/==(.+?)==/g,"**$1**"));$("st").textContent="복사했어요 · 노션에 붙여넣으면 서식이 적용돼요"}
+  catch(e){const r=document.createRange();r.selectNodeContents($("doc"));const s=getSelection();s.removeAllRanges();s.addRange(r);$("st").textContent="선택됨 · Ctrl+C로 복사하세요"}
+};
+</script>

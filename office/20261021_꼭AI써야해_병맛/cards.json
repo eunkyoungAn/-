@@ -1,0 +1,32 @@
+{
+  "brand": "CareerCatcher Magazine",
+  "theme": "meme",
+  "cards": [
+    {"scene": "night", "prop": "laptop", "photo": "photos/01.jpg", "stickers": ["AI? 그게 뭔데 ㅇㅅㅇ"],
+     "title": "난 AI 안 쓰는데\n“일은 잘해”",
+     "sub": "꼭 AI 써야 해? 앤트로픽이 400만 건 까봄"},
+    {"scene": "office", "prop": "laptop", "photo": "photos/02.jpg", "kicker": "팩트 1", "stickers": ["AI도 아직 반쯤 잠"],
+     "title": "AI 만능설?\n“아직 일부만 씀”",
+     "body": "AI가 이론상 할 수 있는 일 중\n실제로 쓰이는 건 *일부*에 불과해요.",
+     "source": "출처: Anthropic, Labor market impacts of AI (2026.3)"},
+    {"scene": "cafe", "prop": "cup", "photo": "photos/03.jpg", "kicker": "팩트 2", "stickers": ["ㅋㅋ 소수정예"],
+     "title": "일 전부 AI로 하는 직업\n“고작 4%”",
+     "body": "업무 75% 이상에 AI 쓰는 직업은 약 4%.\n대신 *36%*는 업무 4분의 1 이상에 써요.",
+     "source": "출처: Anthropic, Claude 대화 400만 건 분석 (Handa 외, 2025)"},
+    {"scene": "mint", "prop": "phone", "photo": "photos/04.jpg", "kicker": "팩트 3", "stickers": ["하이파이브 ✋"],
+     "title": "AI한테 다 맡김?\n“아니, 같이 함”",
+     "stat": ["57%", "배우고·고치고·다듬는 협업형"],
+     "body": "통째로 맡기는 자동화형은 43%.",
+     "source": "출처: Anthropic, Claude 대화 400만 건 분석 (Handa 외, 2025)"},
+    {"scene": "window", "prop": "laptop", "photo": "photos/05.jpg", "kicker": "팩트 4", "layout": "small", "stickers": ["쫄림 주의 😰"],
+     "title": "일자리는 아직 괜찮은데\n“신입은 좀 쫄림”",
+     "body": "실업률이 뚜렷하게 늘진 않았지만,\nAI 노출 직군에서 *22~25세*가 새로 취업하는\n비율은 2022년보다 약 *14%* 낮아진 신호.",
+     "source": "출처: Anthropic, Labor market impacts of AI (2026.3) · 초기 신호로 해석 주의"},
+    {"scene": "dawn", "prop": "cup", "photo": "photos/06.jpg", "kicker": "그래서 결론", "layout": "small", "stickers": ["게으른 사람 환영"],
+     "title": "전부 말고\n“4분의 1만 써”",
+     "body": "① 귀찮은 반복 업무 하나 고르기\n② AI한테 초안 시키고 → 내가 검증\n③ ‘어떻게 썼는지’ 경험으로 적어두기"},
+    {"scene": "night", "prop": "phone", "photo": "photos/07.jpg", "kicker": "커리어캐쳐",
+     "title": "게을러도 괜찮아\n“같이 일하면 됨”",
+     "body": "📌 저장  💬 내 직무 댓글  ➕ 팔로우\n@career_catcher_ek · AI 자기소개서·면접·진로 코칭"}
+  ]
+}
