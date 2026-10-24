@@ -78,6 +78,10 @@ input:focus,textarea:focus,select:focus,button:focus-visible,summary:focus-visib
 .kc-badge{font-style:normal;font-size:11px;background:var(--accent);color:var(--accent-fg);padding:2px 8px;border-radius:999px}
 .kc-badge.on{background:#2e8b57;color:#fff}
 .keycard summary small{flex-basis:100%;margin-left:0}
+.fbbox{order:3;border-top:2px dashed var(--accent);background:var(--soft)}
+.fb-h{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;padding:10px 14px;color:var(--accent)}
+.fb-h span{font-size:12px;color:var(--muted);flex:1 1 200px}
+.fb-doc{padding:0 18px 14px!important;background:transparent;max-height:200px}
 .hint{margin:0;font-size:12px;color:var(--muted)}
 .note{font-size:12px;color:var(--muted);padding:0 14px 12px;margin:0}
 </style>
@@ -188,6 +192,10 @@ input:focus,textarea:focus,select:focus,button:focus-visible,summary:focus-visib
       <span class="actions"><button type="button" class="btn" id="copy">노션용 복사</button><button type="button" class="btn primary" id="savehtml">HTML 저장</button></span>
     </div>
     <div class="doc" id="doc"></div>
+    <section class="fbbox" id="fbbox" hidden>
+      <div class="fb-h"><b>🔍 컨설턴트 피드백</b><span>별도 제공 · 저장하는 HTML 파일에는 포함되지 않아요</span><button type="button" class="btn" id="copyfb">피드백 복사</button></div>
+      <div class="doc fb-doc" id="fbdoc"></div>
+    </section>
     <div class="paste" id="pastebox" hidden>
       <ol class="steps"><li>위 프롬프트는 <b>이미 복사됐어요</b> (아래 칸에 넣지 마세요)</li><li><a href="https://chatgpt.com" target="_blank" rel="noopener noreferrer">ChatGPT</a> 또는 <a href="https://claude.ai" target="_blank" rel="noopener noreferrer">Claude</a>에 붙여넣고 보내기</li><li>AI가 <b>답한 글</b>("# 직무 | 이름 포트폴리오"로 시작)을 복사해 아래에 붙여넣기</li></ol>
       <label for="pasted"><b>AI가 답한 결과</b></label>
@@ -306,7 +314,7 @@ const SAMPLE=`# 데이터 분석가 | 김보라 포트폴리오
 let md=SAMPLE;
 function esc(s){return s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]))}
 function inl(s){return esc(s).replace(/==(.+?)==/g,"<mark>$1</mark>").replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/\[보완 필요[^\]]*\]/g,m=>`<span class="need">${m}</span>`)}
-function render(t){const L=t.split("\n");let h="",i=0,open=0;
+function render(t,target){const L=t.split("\n");let h="",i=0,open=0;
   while(i<L.length){const l=L[i];
     if(l.startsWith("|")){const r=[];while(i<L.length&&L[i].startsWith("|"))r.push(L[i++]);const c=x=>x.replace(/^\||\|$/g,"").split("|").map(s=>s.trim());
       h+='<div class="tw"><table>'+r.filter((x,k)=>!(k===1&&/^[\s|:-]+$/.test(x))).map((x,k)=>"<tr>"+c(x).map(s=>k?`<td>${inl(s)}</td>`:`<th>${inl(s)}</th>`).join("")+"</tr>").join("")+"</table></div>";continue}
@@ -320,8 +328,13 @@ function render(t){const L=t.split("\n");let h="",i=0,open=0;
     else if(/^---+$/.test(l.trim()))h+="<hr>";
     else if(l.trim())h+="<p>"+inl(l)+"</p>";
     i++}
-  $("doc").innerHTML=h}
+  h+="</details>".repeat(open);(target||$("doc")).innerHTML=h}
 render(md);
+let fb="";
+function splitFb(t){const m=t.match(/\n[ \t]*={3}\s*FEEDBACK\s*={3}[ \t]*\n?|\n-{3,}[ \t]*\n(?=##\s*🔍\s*컨설턴트 피드백)|\n(?=##\s*🔍\s*컨설턴트 피드백)/);
+  if(!m)return [t,""];return [t.slice(0,m.index).replace(/\s+$/,""),t.slice(m.index+m[0].length).trim()]}
+function setMd(t){const [a,b]=splitFb(t);md=pii(a);fb=pii(b);render(md);showFb()}
+function showFb(){const box=$("fbbox");if(!fb){box.hidden=true;return}box.hidden=false;render(fb.replace(/^##\s*🔍[^\n]*\n?/,""),$("fbdoc"))}
 
 function buildPrompt(){
   const s=state();delete s.email;delete s.phone;
@@ -394,9 +407,11 @@ ${JSON.stringify(s,null,1)}
 
 ## 💬 Language
 ## 🎳 Other
----
+
+[포트폴리오 본문은 여기서 끝낸다. 컨설턴트 피드백은 본문에 넣지 말고, 아래 구분선 한 줄 뒤에 따로 쓴다]
+===FEEDBACK===
 ## 🔍 컨설턴트 피드백
-- 보완하면 더 강해지는 점 3가지`;
+- 보완하면 더 강해지는 점 3가지 (본문에는 절대 넣지 않는다)`;
 }
 
 const sampleP=window.claude?.use?window.claude.use("sample"):Promise.resolve(null);
@@ -409,16 +424,16 @@ $("f").addEventListener("submit",async e=>{
   const key=$("apikey").value.trim();
   if(!sample&&key){await viaApi(key);return}
   if(!sample){
-    const p=buildPrompt();md=p;
+    const p=buildPrompt();md=p;fb="";showFb();
     try{await navigator.clipboard.writeText(p);$("st").textContent="AI 프롬프트를 복사했어요"}catch(err){$("st").textContent="아래 프롬프트를 선택해 복사하세요"}
     $("na").hidden=false;$("pastebox").hidden=false;if(innerWidth<=940)document.querySelector(".out").scrollIntoView({behavior:"smooth"});$("doc").innerHTML="";const pre=document.createElement("pre");pre.textContent=p;pre.style.cssText="white-space:pre-wrap;font:inherit;font-size:12px";$("doc").appendChild(pre);return}
   ctl?.abort();ctl=new AbortController();
   $("go").disabled=true;$("st").textContent="작성 중…";if(innerWidth<=940)document.querySelector(".out").scrollIntoView({behavior:"smooth"});
   try{
-    const r=await sample(buildPrompt(),{signal:ctl.signal,modelTier:"default",cache:false,onText:({text})=>{md=pii(text);render(md)}});
-    md=pii(r.text);render(md);$("st").textContent=doneMsg("");
+    const r=await sample(buildPrompt(),{signal:ctl.signal,modelTier:"default",cache:false,onText:({text})=>{setMd(text)}});
+    setMd(r.text);$("st").textContent=doneMsg("");
   }catch(err){
-    if(err?.text){md=err.text;render(md)}
+    if(err?.text){setMd(err.text)}
     $("st").textContent=err?.code==="rate_limited"?"요청이 많아요. 잠시 후 다시 눌러 주세요.":err?.code==="not_granted"?"AI 사용 권한이 허용되지 않았어요.":"생성에 실패했어요. 다시 눌러 주세요.";
   }finally{$("go").disabled=false}
 });
@@ -458,9 +473,9 @@ async function viaApi(key){
         if(gem&&ev.usageMetadata)use={i:ev.usageMetadata.promptTokenCount,o:ev.usageMetadata.candidatesTokenCount,t:ev.usageMetadata.thoughtsTokenCount||0};
         if(!gem&&ev.type==="message_start")use.i=ev.message?.usage?.input_tokens;
         if(!gem&&ev.type==="message_delta"&&ev.usage)use.o=ev.usage.output_tokens;
-        if(gem){const c=ev.candidates?.[0];const t=(c?.content?.parts||[]).map(x=>x.text||"").join("");if(t){text+=t;md=pii(text);render(md)}
+        if(gem){const c=ev.candidates?.[0];const t=(c?.content?.parts||[]).map(x=>x.text||"").join("");if(t){text+=t;setMd(text)}
           if(c?.finishReason==="MAX_TOKENS")stop="max_tokens";else if(c?.finishReason==="SAFETY")stop="refusal";if(ev.error)throw new Error("생성 중 오류가 났어요. 다시 시도해 주세요.");continue}
-        if(ev.type==="content_block_delta"&&ev.delta?.type==="text_delta"){text+=ev.delta.text;md=pii(text);render(md)}
+        if(ev.type==="content_block_delta"&&ev.delta?.type==="text_delta"){text+=ev.delta.text;setMd(text)}
         else if(ev.type==="message_delta"&&ev.delta?.stop_reason)stop=ev.delta.stop_reason;
         else if(ev.type==="error")throw new Error("생성 중 오류가 났어요. 다시 시도해 주세요.")}}
     if(stop==="refusal")throw new Error("AI가 이 요청을 처리하지 않았어요. 입력 내용을 확인해 주세요.");
@@ -510,9 +525,10 @@ $("savehtml").onclick=async()=>{
 $("applypaste").onclick=()=>{
   const t=$("pasted").value.trim();if(!t){$("st").textContent="먼저 AI 결과를 붙여넣어 주세요.";return}
   if(/\[구직자 입력\]|포트폴리오 컨설턴트다|"projects"\s*:/.test(t)){$("st").textContent="⚠ 붙여넣은 건 프롬프트예요. ChatGPT·Claude에 프롬프트를 보낸 뒤, AI가 답한 글을 복사해서 넣어 주세요.";$("pasted").focus();return}
-  md=pii(t.replace(/^```[a-z]*\n?|```$/g,""));render(md);$("pastebox").hidden=true;$("na").hidden=true;$("pasted").value="";
+  setMd(t.replace(/^```[a-z]*\n?|```$/g,""));$("pastebox").hidden=true;$("na").hidden=true;$("pasted").value="";
   $("st").textContent=doneMsg("")+" · HTML 저장을 눌러 주세요";$("savehtml").scrollIntoView({behavior:"smooth",block:"center"});
 };
+$("copyfb").onclick=async()=>{try{await navigator.clipboard.writeText(fb);$("st").textContent="피드백을 복사했어요"}catch(e){const r=document.createRange();r.selectNodeContents($("fbdoc"));const s=getSelection();s.removeAllRanges();s.addRange(r);$("st").textContent="선택됨 · Ctrl+C로 복사하세요"}};
 $("copy").onclick=async()=>{
   try{await navigator.clipboard.writeText(md.replace(/^\+\+\+\s*(\S.*)$/gm,"**▶ $1**").replace(/^\+\+\+\s*$/gm,"").replace(/==(.+?)==/g,"**$1**"));$("st").textContent="복사했어요 · 노션에 붙여넣으면 서식이 적용돼요"}
   catch(e){const r=document.createRange();r.selectNodeContents($("doc"));const s=getSelection();s.removeAllRanges();s.addRange(r);$("st").textContent="선택됨 · Ctrl+C로 복사하세요"}
