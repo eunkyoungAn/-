@@ -1,6 +1,6 @@
 ---
 language: ko
-license: [확인 필요]
+license: All Rights Reserved — 별도 허락 없이 사용 불가
 tags: [careercatcher, 포트폴리오, 노션, gemini]
 service_type: 웹앱 (GitHub Pages 정적 사이트)
 ai_used: 예 — Gemini API (선택, 키 없이 프롬프트 복사도 가능)

@@ -1,6 +1,6 @@
 ---
 language: ko
-license: [확인 필요]
+license: All Rights Reserved — 별도 허락 없이 사용 불가
 tags: [careercatcher, 고용서비스, 사후관리, 취업지원, 개인정보보호, 암호화]
 service_type: 웹앱 (GitHub Pages 정적 사이트, 담당자 개인 브라우저에서 실행)
 ai_used: 아니오

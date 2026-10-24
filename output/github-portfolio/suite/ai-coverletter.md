@@ -1,6 +1,6 @@
 ---
 language: ko
-license: [확인 필요]
+license: All Rights Reserved — 별도 허락 없이 사용 불가
 tags: [careercatcher, 자기소개서, 기업분석, gemini]
 service_type: 웹앱 (정적 사이트, React/TypeScript 소스)
 ai_used: 예 — Gemini API (사용자 본인 키)
