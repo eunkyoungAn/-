@@ -1,0 +1,32 @@
+{
+  "brand": "CareerCatcher Magazine",
+  "cards": [
+    {"scene": "night", "prop": "laptop", "photo": "photos/01.jpg",
+     "title": "난 AI 안 쓰는데\n“일은 잘해”",
+     "sub": "꼭 AI 써야 해? 앤트로픽 연구로 본 답"},
+    {"scene": "office", "prop": "chart", "photo": "photos/02.jpg", "kicker": "FACT 1",
+     "title": "AI, 생각보다\n*덜* 쓰이고 있다",
+     "body": "AI가 이론상 할 수 있는 일과\n실제로 쓰이는 일 사이엔 큰 차이가 있어요.\n실제 활용은 가능 범위의 ‘일부’에 그칩니다.",
+     "source": "출처: Anthropic, Labor market impacts of AI (2026.3)"},
+    {"scene": "cafe", "prop": "cup", "photo": "photos/03.jpg", "kicker": "FACT 2",
+     "title": "업무 전부를\nAI로 하는 직업은",
+     "stat": ["4%", "업무의 75% 이상에\nAI를 쓰는 직업 비율"],
+     "body": "대신 *36%*의 직업은 업무 4분의 1 이상에 AI를 씁니다.",
+     "source": "출처: Anthropic, Claude 대화 400만 건 분석 (Handa 외, 2025)"},
+    {"scene": "mint", "prop": "phone", "photo": "photos/04.jpg", "kicker": "FACT 3",
+     "title": "AI에게 맡기기보다\n*같이* 한다",
+     "stat": ["57%", "배우고, 고치고, 다듬는\n‘협업형’ 사용"],
+     "body": "통째로 맡기는 ‘자동화형’은 43%였어요.",
+     "source": "출처: Anthropic, Claude 대화 400만 건 분석 (Handa 외, 2025)"},
+    {"scene": "window", "prop": "laptop", "photo": "photos/05.jpg", "kicker": "FACT 4", "layout": "small",
+     "title": "일자리는 아직 괜찮다\n“그런데 신입은?”",
+     "body": "AI 노출이 큰 직군에서 실업률이 뚜렷하게\n늘진 않았어요. 다만 *22~25세*가 새로 취업하는 비율은\n2022년보다 약 *14%* 낮아진 신호가 보여요.",
+     "source": "출처: Anthropic, Labor market impacts of AI (2026.3) · 초기 신호로 해석 주의"},
+    {"scene": "dawn", "prop": "cup", "photo": "photos/06.jpg", "kicker": "그래서, 꼭 써야 해?", "layout": "small",
+     "title": "전부는 아니어도\n“4분의 1부터”",
+     "body": "① 내 업무 중 반복되는 일 하나 고르기\n② AI와 같이 초안 → 내가 검증·수정\n③ ‘어떻게 썼는지’를 경험으로 기록하기"},
+    {"scene": "night", "prop": "phone", "photo": "photos/07.jpg", "kicker": "커리어캐쳐",
+     "title": "AI는 대신이 아니라\n“같이 일하는 법”",
+     "body": "📌 저장해 두고  💬 내 직무 댓글 남기기\n@career_catcher_ek · AI 자기소개서·면접·진로 코칭"}
+  ]
+}
