@@ -183,6 +183,7 @@ input:focus,textarea:focus,select:focus,button:focus-visible,summary:focus-visib
 
     <div class="actions">
       <button type="submit" class="btn primary" id="go">포트폴리오 완성하기</button>
+      <button type="button" class="btn" id="stopgen" hidden>중단</button>
       <button type="button" class="btn" id="savehtml2">HTML 저장</button>
       <select id="exsel" aria-label="예시 직군" class="btn">
         <option value="data">예시: 데이터 분석</option><option value="be">예시: 백엔드 개발</option><option value="fe">예시: 프론트엔드</option><option value="ux">예시: UX/UI 디자인</option><option value="pm">예시: 서비스 기획·PM</option><option value="mkt">예시: 디지털 마케팅</option><option value="sales">예시: B2B 영업</option><option value="hr">예시: 인사(HR)</option><option value="m365">예시: M365 엔지니어</option>
@@ -467,19 +468,31 @@ async function gemPick(key){
   const score=n=>(/flash/.test(n)?100:/pro/.test(n)?40:0)-(/lite/.test(n)?30:0)-(/preview|exp|tts|image|audio|live|embed|thinking/.test(n)?60:0)+(/latest/.test(n)?5:0)+(parseFloat((n.match(/(\d+(\.\d+)?)/)||[0,0])[1])||0);
   return ms.filter(n=>/^gemini/.test(n)).sort((a,b)=>score(b)-score(a))[0]||null;
 }
-async function gemFetch(key){
-  const call=m=>fetch("https://generativelanguage.googleapis.com/v1beta/models/"+encodeURIComponent(m)+":streamGenerateContent?alt=sse",{method:"POST",signal:ctl.signal,referrerPolicy:"no-referrer",
+let usedModel="";
+async function gemCall(key,m,think){
+  return fetch("https://generativelanguage.googleapis.com/v1beta/models/"+encodeURIComponent(m)+":streamGenerateContent?alt=sse",{method:"POST",signal:ctl.signal,referrerPolicy:"no-referrer",
     headers:{"content-type":"application/json","x-goog-api-key":key},
-    body:JSON.stringify({contents:[{role:"user",parts:[{text:buildPrompt()}]}],generationConfig:{maxOutputTokens:32768}})});
-  let res=await call(gemModel||"gemini-2.5-flash");
-  if(res.status===404){const m=await gemPick(key);if(m){gemModel=m;res=await call(m)}}
-  return res;
+    body:JSON.stringify({contents:[{role:"user",parts:[{text:buildPrompt()}]}],generationConfig:Object.assign({maxOutputTokens:16384},think?{thinkingConfig:{thinkingBudget:0}}:{})})});
+}
+async function errDetail(res){try{return (await res.clone().json()).error?.message||""}catch(e){return ""}}
+async function gemFetch(key){
+  let m=gemModel||"gemini-2.5-flash",think=true,res,d="";
+  for(let n=0;n<4;n++){
+    res=await gemCall(key,m,think);
+    if(res.ok){gemModel=m;usedModel=m;return res}
+    d=await errDetail(res);
+    if(res.status===400&&think&&/thinking/i.test(d)){think=false;continue}
+    if(res.status===404||(res.status===400&&/not supported|not found|deprecated|no longer/i.test(d))){const pk=await gemPick(key);if(pk&&pk!==m){m=pk;continue}}
+    break}
+  res.detail=d;return res;
 }
 async function viaApi(key){
   ctl?.abort();ctl=new AbortController();
-  $("go").disabled=true;$("na").hidden=true;$("st").textContent="AI가 작성 중…";
+  $("go").disabled=true;$("na").hidden=true;$("stopgen").hidden=false;
   if(innerWidth<=940)document.querySelector(".out").scrollIntoView({behavior:"smooth"});
-  let text="",use={};
+  let text="",use={},t0=Date.now(),timedOut=false;usedModel="";
+  const tick=()=>{const sec=Math.round((Date.now()-t0)/1000);$("st").textContent=text.length?`✍️ 작성 중… ${sec}초 · ${text.length.toLocaleString()}자`+(usedModel?` · ${usedModel}`:""):`⏳ AI 응답 대기 중… ${sec}초`+(sec>25?" · 무료 서버가 혼잡하면 1분 넘게 걸려요. 계속 기다리거나 [중단] 후 다시 눌러 주세요":"")};
+  tick();const timer=setInterval(tick,1000),limit=setTimeout(()=>{timedOut=true;ctl.abort()},180000);
   try{
     const gem=$("provider").value==="gemini";
     const res=gem
@@ -487,7 +500,9 @@ async function viaApi(key){
       :await fetch("https://api.anthropic.com/v1/messages",{method:"POST",signal:ctl.signal,referrerPolicy:"no-referrer",
         headers:{"content-type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01","anthropic-beta":"server-side-fallback-2026-07-01","anthropic-dangerous-direct-browser-access":"true"},
         body:JSON.stringify({model:"claude-opus-5-5",max_tokens:16000,stream:true,output_config:{effort:"medium"},fallbacks:"default",messages:[{role:"user",content:buildPrompt()}]})});
-    if(!res.ok){const code=res.status;throw new Error(code===401||code===403||(gem&&code===400)?"API 키가 올바르지 않아요. 다시 확인해 주세요.":code===429?(gem?"무료 사용량을 다 썼어요. 잠시 후(또는 내일) 다시 시도해 주세요.":"요청이 많아요. 잠시 후 다시 눌러 주세요."):code===404?"사용할 수 있는 Gemini 모델을 찾지 못했어요. 키를 새로 발급해 보세요.":code===400?"요청을 처리하지 못했어요. 입력을 줄이거나 다시 시도해 주세요.":"AI 서버 오류("+code+")예요. 잠시 후 다시 시도해 주세요.")}
+    if(!res.ok){const code=res.status,d=((res.detail??await errDetail(res))||"").replace(/\s+/g," ").slice(0,160);
+      const keyBad=code===401||code===403||/api key|permission|credential/i.test(d);
+      throw new Error(keyBad?"API 키가 올바르지 않거나 권한이 없어요. 키를 다시 복사해 주세요."+(d?` (${d})`:""):code===429?(gem?"무료 사용량·속도 한도에 걸렸어요. 1분 뒤 다시 누르거나 내일 시도해 주세요.":"요청이 많아요. 잠시 후 다시 눌러 주세요.")+(d?` (${d})`:""):code===404?"사용할 수 있는 Gemini 모델을 찾지 못했어요. 키를 새로 발급해 보세요."+(d?` (${d})`:""):`AI 서버가 요청을 거절했어요 (${code}) ${d}`)}
     const rd=res.body.getReader(),dec=new TextDecoder();let buf="",stop="";
     for(;;){const {done,value}=await rd.read();if(done)break;buf+=dec.decode(value,{stream:true});
       let i;while((i=buf.indexOf("\n"))>=0){const line=buf.slice(0,i).trim();buf=buf.slice(i+1);
@@ -501,9 +516,10 @@ async function viaApi(key){
         else if(ev.type==="message_delta"&&ev.delta?.stop_reason)stop=ev.delta.stop_reason;
         else if(ev.type==="error")throw new Error("생성 중 오류가 났어요. 다시 시도해 주세요.")}}
     if(stop==="refusal")throw new Error("AI가 이 요청을 처리하지 않았어요. 입력 내용을 확인해 주세요.");
+    if(!text.trim())throw new Error("AI가 빈 응답을 보냈어요. 잠시 후 다시 눌러 주세요. 계속되면 입력을 줄이거나 키를 새로 발급해 보세요.");
     $("st").textContent=doneMsg(stop)+usageMsg(gem,use);
-  }catch(err){$("st").textContent=err.name==="AbortError"?"취소했어요":(err.message||"생성에 실패했어요.")}
-  finally{$("go").disabled=false}
+  }catch(err){$("st").textContent=err.name==="AbortError"?(timedOut?"3분이 지나도 응답이 없어 중단했어요. 다시 눌러 주세요.":"중단했어요"+(text.length?" · 지금까지 쓰인 내용은 오른쪽에 남아 있어요":"")):(err.message||"생성에 실패했어요.")}
+  finally{clearInterval(timer);clearTimeout(limit);$("go").disabled=false;$("stopgen").hidden=true}
 }
 const dlP=window.claude?.use?window.claude.use("downloads"):Promise.resolve(null);
 function htmlDoc(){
@@ -535,6 +551,7 @@ footer{color:var(--muted);font-size:12px;margin-top:48px;border-top:1px solid va
 }
 function markReady(){["savehtml","savehtml2"].forEach(i=>$(i).classList.add("ready"))}
 new MutationObserver(()=>{const ok=$("doc").textContent.trim()&&!$("doc").querySelector("pre")&&!$("go").disabled&&md!==SAMPLE;["savehtml","savehtml2"].forEach(i=>$(i).classList.toggle("ready",!!ok))}).observe($("st"),{childList:true,characterData:true,subtree:true});
+$("stopgen").onclick=()=>ctl?.abort();
 $("savehtml2").onclick=()=>$("savehtml").click();
 $("savehtml").onclick=async()=>{
   if($("doc").querySelector("pre")||!$("doc").textContent.trim()){$("st").textContent="먼저 포트폴리오를 완성해 주세요.";return}
