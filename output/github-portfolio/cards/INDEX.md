@@ -19,7 +19,6 @@
 | [career-workshop](career-workshop.md) | GitHub Pages 웹 | 없음 | ★ |
 | [work-economics-study](work-economics-study.md) | 학습 웹 + PDF | 확인 필요 | |
 | [talent-economics-study](talent-economics-study.md) | 학습 웹 + PDF | 확인 필요 | |
-| [career-todo (node-test)](career-todo.md) | Python 앱 | 없음 | |
 | [public-data-analysis](public-data-analysis.md) | Colab 분석 | 없음 | |
 
 제외: `career-portfolio`(소개 페이지라 카드 대신 프로필 허브로 사용), `test`(연습용).

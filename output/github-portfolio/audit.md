@@ -10,7 +10,6 @@
 | work-economics-study | 『일의 세계 경제학』 오픈북 학습실 | ❌ | ✅ | ❌ | ❌ | ✅ | △ | ❌ | 유지 + 배포 링크·목적 추가 |
 | talent-economics-study | 『인재주의 경제학』 학습노트 | ❌ | ✅ | ❌ | ❌ | △ | △ | ✅ | 유지 + Problem·Tech 보완 |
 | career-portfolio | 컨설턴트 소개 페이지 | – | – | – | – | – | – | – | 자리표시자 `[성과1]` 등 남아 있음, 깨진 링크 4개. **프로필 허브**로 개편 |
-| node-test | Career Todo (Python/Flask) | △ | ✅ | ✅ | ❌ | ❌ | △ | ❌ | 저장소 이름 변경 권장(`career-todo`) |
 | public-data-analysis | 공공데이터 매출 분석 (Colab) | ✅ | △ | ✅ | ✅ | ❌ | ✅ | ❌ | 노트북 파일 없음(README만). 코드·데이터 출처 추가 필요 |
 | test | 비개발자 GitHub 활용법 | ❌ | – | – | – | – | – | – | README에 HTML이 그대로 들어감. 보관(Archive) 또는 정리 |
 
@@ -25,4 +24,3 @@
 1. career-escape, career-workshop README를 7단 구조로 교체 (초안: `drafts/`)
 2. career-portfolio를 GitHub 프로필 허브로 개편 → 대표 프로젝트 2~3개 연결
 3. 학습자료 2종은 상단에 Problem·Demo만 추가
-4. node-test 이름 변경, test 보관
