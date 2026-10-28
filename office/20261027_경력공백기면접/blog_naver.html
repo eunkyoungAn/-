@@ -1,0 +1,74 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>경력공백기 면접 블로그</title><style>
+:root{--red:#F0564A;--ink:#16171B;--muted:#6B6B6B;--page:#EDEDF0;--panel:#FFFFFF;--bar:#FFFFFFEE;--line:#DDDDE2}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#EDEDF0;--muted:#A0A0A8;--page:#18181B;--panel:#26262B;--bar:#202024EE;--line:#3A3A40}}
+:root[data-theme="dark"]{--ink:#EDEDF0;--muted:#A0A0A8;--page:#18181B;--panel:#26262B;--bar:#202024EE;--line:#3A3A40}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--page);color:var(--ink);font-family:Pretendard,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;overflow-x:hidden}
+.bar{position:sticky;top:0;z-index:2;background:var(--bar);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:12px 16px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center}
+button{font:inherit;font-weight:700;font-size:15px;border-radius:10px;padding:10px 16px;cursor:pointer;border:2px solid var(--red);background:transparent;color:var(--red)}
+button.main{background:var(--red);color:#fff}
+#msg{width:100%;text-align:center;font-size:13px;color:var(--muted);min-height:18px}
+.info{max-width:693px;margin:18px auto 8px;padding:0 16px;font-size:13px;color:var(--muted)}
+.info b{color:var(--ink)}
+.wrap{max-width:693px;margin:0 auto 60px;padding:0 16px}
+.ttl{background:var(--panel);border:1px solid var(--line);border-radius:12px 12px 0 0;padding:20px;font-size:22px;font-weight:800;line-height:1.45;color:var(--ink)}
+#post{background:#fff;color:#222;border:1px solid var(--line);border-top:0;border-radius:0 0 12px 12px;padding:28px 22px;word-break:keep-all;overflow-wrap:anywhere}
+.tags{margin-top:14px;font-size:13px;color:var(--muted);line-height:1.7}
+@media (max-width:480px){#post{padding:20px 14px}.ttl{font-size:19px}button{flex:1 1 100%}}
+</style></head><body>
+<div class="bar"><button class="main" id="bHtml">본문 서식 포함 복사</button><button id="bTitle">제목 복사</button><button id="bTags">태그 복사</button><div id="msg" role="status"></div></div>
+<div class="info">네이버 본문폭(약 693px) 미리보기 · 📷 박스 자리에 <b>blog_images/img1~6.png</b>를 넣으세요.</div>
+<div class="wrap"><div class="ttl" id="title">경력 단절 면접, 공백기 설명은 이렇게 정리해 보세요 | 커리어캐쳐</div>
+<div id="post"><p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px">경력 단절 면접에서 공백기 질문이 나오면 "죄송합니다"부터 나오는 분이 많습니다.<br>공백기 설명을 짧고 사실대로 정리하는 순서를 소개합니다.</p>
+<p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px">[이 글에서 알 수 있는 것]<br>1) 면접관이 공백기 질문으로 보는 것<br>2) 공백기 설명을 정리하는 4단계 (한 예)<br>3) 불편한 질문을 받았을 때의 선택지</p>
+<p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px">커리어캐쳐(CareerCatcher)는 AI를 활용한 진로·취업 교육과 자기소개서·면접 컨설팅을 하는 브랜드입니다.</p>
+<p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px">커리어캐쳐 안은경이 정리한 일반 정보이며, 합격을 보장하는 방법은 아닙니다.</p>
+<div class="ph" style="border:2px dashed #F0564A;border-radius:12px;background:#FDECEA;padding:18px 20px;margin:8px 0 26px;text-align:center;color:#222;font-size:15px;line-height:1.6"><b style="color:#F0564A;font-size:17px">📷 img1.png</b><br>면접 장면 일러스트와 문구 "공백기 질문, 이렇게 정리해요"<br><span style="color:#6B6B6B">경력 단절 면접 공백기 설명 대표 이미지</span></div>
+<h3 style="font-size:20px;font-weight:800;color:#111;margin:36px 0 14px;padding-left:12px;border-left:5px solid #F0564A">공백기를 겪는 분은 생각보다 많습니다</h3>
+<p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px">두 조사를 각각 살펴보겠습니다.</p>
+<p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px">1) 성평등가족부 「2025년 여성의 경제활동 및 경력단절 실태조사」(2026년 7월 발표, 만 19~54세 여성 대상, 언론 보도 기준): 살면서 한 번이라도 경력이 끊긴 적이 있는 비율은 56.7%입니다. 결혼·임신·출산 등으로 단절된 경우 재취업까지 평균 7.5년이 걸렸습니다.<br>2) 통계청 「2024년 상반기 지역별고용조사」(기혼여성 대상, 2024년 11월 언론 보도 기준): 기혼여성 중 경력단절 비중은 15.9%, 사유 1위는 육아(41.1%)였습니다.</p>
+<p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px">조사 대상과 기준이 달라 두 수치를 서로 비교하지는 않습니다.<br>그만큼 공백기 질문을 받는 분도 적지 않을 겁니다.</p>
+<div class="ph" style="border:2px dashed #F0564A;border-radius:12px;background:#FDECEA;padding:18px 20px;margin:8px 0 26px;text-align:center;color:#222;font-size:15px;line-height:1.6"><b style="color:#F0564A;font-size:17px">📷 img2.png</b><br>두 조사 숫자 카드 2장, 출처·연도 표기<br><span style="color:#6B6B6B">조사별 숫자 카드, 서로 비교하지 않음</span></div>
+<h3 style="font-size:20px;font-weight:800;color:#111;margin:36px 0 14px;padding-left:12px;border-left:5px solid #F0564A">면접관은 공백기 질문으로 무엇을 볼까요?</h3>
+<p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px">해외 커리어 사이트들이 일반적으로 설명하는 내용이며, 국내 공식 자료는 아닙니다.<br>공백 자체보다 아래 세 가지를 확인하려는 것으로 알려져 있습니다.</p>
+<p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px">1) 공백의 사유를 이해할 수 있는지<br>2) 지금 일할 준비가 되어 있는지<br>3) 설명하는 태도가 솔직하고 차분한지</p>
+<h3 style="font-size:20px;font-weight:800;color:#111;margin:36px 0 14px;padding-left:12px;border-left:5px solid #F0564A">공백기 설명, 이렇게 정리해 보세요 (한 예)</h3>
+<p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px">공식 자료로 정해진 틀은 아니고, 정리하는 방법의 한 예입니다.</p>
+<p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px">1) 사유: 한두 문장, 사실만 말합니다.<br>2) 배운 점·유지한 역량: 지원 직무와 연결합니다.<br>3) 복귀 준비: 돌봄 상황이 정리됐는지, 교육·자격을 준비했는지 말합니다.<br>4) 지금 가능한 것: 근무 가능 시간과 시작 시점을 말합니다.</p>
+<p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px">해외 커리어 사이트에서 일반적으로 권하는 방식입니다. 사과하는 말투는 피하고, 없는 경력이나 직책은 만들지 않는 것이 좋다고 합니다.</p>
+<div class="ph" style="border:2px dashed #F0564A;border-radius:12px;background:#FDECEA;padding:18px 20px;margin:8px 0 26px;text-align:center;color:#222;font-size:15px;line-height:1.6"><b style="color:#F0564A;font-size:17px">📷 img3.png</b><br>사유, 배운 점, 복귀 준비, 지금 가능한 것 4단계 흐름도<br><span style="color:#6B6B6B">공백기 설명 4단계</span></div>
+<h3 style="font-size:20px;font-weight:800;color:#111;margin:36px 0 14px;padding-left:12px;border-left:5px solid #F0564A">공백기 면접 답변 예시 두 가지 (가상 상황 예시)</h3>
+<p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px">아래는 실제 사례가 아닌 가상 상황 예시입니다. 내 말로 바꿔 쓰세요.</p>
+<p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px">예시 A) 육아로 약 3년 쉰 뒤 사무·행정 지원<br>"육아로 3년간 쉬었습니다. 그동안 문서 작성 자격 과정을 마쳤습니다. 지금은 돌봄 환경이 정리되어 평일 근무가 가능합니다. 다음 달부터 출근할 수 있습니다."</p>
+<p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px">예시 B) 가족 돌봄으로 쉰 뒤 데이터·사무 직무 지원<br>"가족 돌봄으로 쉬었고, 지금은 정리되어 근무에 지장이 없습니다. 쉬는 동안 엑셀 활용 교육을 들었고, 데이터 정리 업무에 바로 쓸 수 있습니다. 협의되는 날부터 출근할 수 있습니다."</p>
+<p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px">사유를 어디까지 말할지는 본인이 정합니다. B처럼 필요한 만큼만 말해도 됩니다.</p>
+<div class="ph" style="border:2px dashed #F0564A;border-radius:12px;background:#FDECEA;padding:18px 20px;margin:8px 0 26px;text-align:center;color:#222;font-size:15px;line-height:1.6"><b style="color:#F0564A;font-size:17px">📷 img4.png</b><br>가상 상황 예시 답변 말풍선 카드, "가상 상황 예시" 라벨<br><span style="color:#6B6B6B">예시 A와 B, 실제 사례 아님</span></div>
+<h3 style="font-size:20px;font-weight:800;color:#111;margin:36px 0 14px;padding-left:12px;border-left:5px solid #F0564A">불편한 질문을 받았을 때는?</h3>
+<p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px">서류에 혼인 여부 등을 요구하는 것은 채용절차법 제4조의3이 제한하는 사항으로 알려져 있습니다. 면접에서 구두로 묻는 경우는 상황에 따라 해석이 다를 수 있습니다.</p>
+<p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px">선택지는 이렇습니다.</p>
+<p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px">1) 짧게 답하고 업무 이야기로 돌리기<br>2) 개인 계획은 어디까지 말할지 내가 정하기<br>3) 계속 불편하면 가까운 고용노동청·지청(지방고용노동관서)에 문의하기</p>
+<div class="ph" style="border:2px dashed #F0564A;border-radius:12px;background:#FDECEA;padding:18px 20px;margin:8px 0 26px;text-align:center;color:#222;font-size:15px;line-height:1.6"><b style="color:#F0564A;font-size:17px">📷 img5.png</b><br>불편한 질문 대처 선택지 3가지 인포그래픽<br><span style="color:#6B6B6B">짧게 답하기 / 범위 정하기 / 문의하기</span></div>
+<h3 style="font-size:20px;font-weight:800;color:#111;margin:36px 0 14px;padding-left:12px;border-left:5px solid #F0564A">면접 전에 준비할 것</h3>
+<p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px">공백기에 한 일(교육·자격·봉사·돌봄 중 익힌 것)을 적고, 지원 직무가 요구하는 역량과 연결해 보세요.<br>여성새로일하기센터는 취업상담·교육훈련·모의면접 등을 운영해 온 것으로 알려져 있습니다. 이용 전 최신 운영 내용을 확인하세요.</p>
+<p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px">답변을 함께 정리하고 싶다면 커리어캐쳐에 문의해 주세요.</p>
+<div class="ph" style="border:2px dashed #F0564A;border-radius:12px;background:#FDECEA;padding:18px 20px;margin:8px 0 26px;text-align:center;color:#222;font-size:15px;line-height:1.6"><b style="color:#F0564A;font-size:17px">📷 img6.png</b><br>공백기 활동과 직무 역량 연결 체크리스트, 코칭 문의 안내<br><span style="color:#6B6B6B">활동 목록 / 직무 연결 / 카톡·메일 문의</span></div>
+<h3 style="font-size:20px;font-weight:800;color:#111;margin:36px 0 14px;padding-left:12px;border-left:5px solid #F0564A">경력 단절 면접 자주 묻는 질문(FAQ)</h3>
+<p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px"><b>Q. 공백기가 길면 무조건 불리한가요?</b><br>A. 단정하기 어렵습니다. 해외 커리어 사이트에서는 공백의 길이보다 사유와 복귀 준비, 설명하는 태도를 함께 본다고 설명합니다.</p>
+<p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px"><b>Q. 공백기에 아무것도 못 했는데 뭐라고 말하죠?</b><br>A. 돌봄 자체를 사실대로 말하고, 그 안에서 유지한 역량을 찾아보세요. 없는 경력은 만들지 마세요.</p>
+<p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px"><b>Q. 커리어캐쳐는 어떤 곳인가요?</b><br>A. 커리어캐쳐(CareerCatcher)는 AI를 활용한 진로·취업 교육과 자기소개서·면접 컨설팅을 하는 브랜드입니다. 안은경이 진행하며, 공백기 답변 정리가 필요하면 카톡이나 메일로 문의할 수 있습니다.</p>
+<p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px">통계는 언론 보도, 법령은 검색 요약 기준이며 원문(통계청·성평등가족부 자료, 법제처 조문)은 직접 확인하지 못했습니다. 실제 적용 전 원문 확인을 권합니다.</p>
+<p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px">―――――</p>
+<div style="margin:30px 0;padding:22px;border-top:2px solid #F0564A;border-bottom:2px solid #F0564A;text-align:center;font-size:15px;line-height:1.8;color:#444"><b style="font-size:18px;color:#F0564A">커리어캐쳐(CareerCatcher) 안은경</b><br>AI 자기소개서 · AI면접 · 진로 코칭<br>카톡 문의: https://open.kakao.com/o/gxIxJ3Si<br>메일: dms5147@gmail.com</div></div>
+<div class="tags">태그: <span id="tags">#커리어캐쳐 #CareerCatcher #커리어캐쳐경력단절면접 #커리어캐쳐코칭 #경력단절면접 #공백기설명 #경력단절면접질문 #공백기면접답변 #경력단절여성재취업 #재취업준비 #경력단절여성면접 #면접답변준비 #공백기면접 #육아공백기 #경력단절극복 #재취업면접 #면접질문대처 #여성재취업 #면접코칭</span></div></div>
+<script>
+const msg=t=>{document.getElementById('msg').textContent=t};
+function fallback(node,text){const s=getSelection();s.removeAllRanges();let ok=false;
+ if(node){const r=document.createRange();r.selectNodeContents(node);s.addRange(r);try{ok=document.execCommand('copy')}catch(e){}s.removeAllRanges();return ok}
+ const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();try{ok=document.execCommand('copy')}catch(e){}ta.remove();return ok}
+async function copyHtml(){const n=document.getElementById('post'),h=n.innerHTML,t=n.innerText;
+ try{await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([h],{type:'text/html'}),'text/plain':new Blob([t],{type:'text/plain'})})]);msg('본문을 서식과 함께 복사했습니다. 네이버 편집기에 붙여넣으세요.')}
+ catch(e){msg(fallback(n)?'본문을 복사했습니다.':'복사에 실패했습니다. 본문을 직접 선택해 복사해 주세요.')}}
+async function copyText(id,label){const t=document.getElementById(id).textContent;
+ try{await navigator.clipboard.writeText(t);msg(label+'을(를) 복사했습니다.')}catch(e){msg(fallback(null,t)?label+'을(를) 복사했습니다.':'복사에 실패했습니다.')}}
+bHtml.onclick=copyHtml;bTitle.onclick=()=>copyText('title','제목');bTags.onclick=()=>copyText('tags','태그');
+</script></body></html>
