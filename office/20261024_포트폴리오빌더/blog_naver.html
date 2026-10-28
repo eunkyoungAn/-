@@ -1,0 +1,74 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>포트폴리오 빌더 블로그</title><style>
+:root{--red:#F0564A;--ink:#16171B;--muted:#6B6B6B;--page:#EDEDF0;--panel:#FFFFFF;--bar:#FFFFFFEE;--line:#DDDDE2}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#EDEDF0;--muted:#A0A0A8;--page:#18181B;--panel:#26262B;--bar:#202024EE;--line:#3A3A40}}
+:root[data-theme="dark"]{--ink:#EDEDF0;--muted:#A0A0A8;--page:#18181B;--panel:#26262B;--bar:#202024EE;--line:#3A3A40}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--page);color:var(--ink);font-family:Pretendard,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;overflow-x:hidden}
+.bar{position:sticky;top:0;z-index:2;background:var(--bar);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:12px 16px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center}
+button{font:inherit;font-weight:700;font-size:15px;border-radius:10px;padding:10px 16px;cursor:pointer;border:2px solid var(--red);background:transparent;color:var(--red)}
+button.main{background:var(--red);color:#fff}
+#msg{width:100%;text-align:center;font-size:13px;color:var(--muted);min-height:18px}
+.info{max-width:693px;margin:18px auto 8px;padding:0 16px;font-size:13px;color:var(--muted)}
+.info b{color:var(--ink)}
+.wrap{max-width:693px;margin:0 auto 60px;padding:0 16px}
+.ttl{background:var(--panel);border:1px solid var(--line);border-radius:12px 12px 0 0;padding:20px;font-size:22px;font-weight:800;line-height:1.45;color:var(--ink)}
+#post{background:#fff;color:#222;border:1px solid var(--line);border-top:0;border-radius:0 0 12px 12px;padding:28px 22px;word-break:keep-all;overflow-wrap:anywhere}
+.tags{margin-top:14px;font-size:13px;color:var(--muted);line-height:1.7}
+@media (max-width:480px){#post{padding:20px 14px}.ttl{font-size:19px}button{flex:1 1 100%}}
+</style></head><body>
+<div class="bar"><button class="main" id="bHtml">본문 서식 포함 복사</button><button id="bTitle">제목 복사</button><button id="bTags">태그 복사</button><div id="msg" role="status"></div></div>
+<div class="info">네이버 본문폭(약 693px) 미리보기 · 📷 박스 자리에 <b>blog_images/img1~6.png</b>를 넣으세요.</div>
+<div class="wrap"><div class="ttl" id="title">노션 AI 포트폴리오, 신입 포트폴리오 작성법 순서 | 커리어캐쳐</div>
+<div id="post"><p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px">신입 포트폴리오 작성법이 막막해서 노션 포트폴리오를 AI로 정리할 방법을 찾는 분이 많습니다.<br>노션 양식 순서대로 입력하면 AI 포트폴리오가 완성되는 빌더와, 쓰는 순서를 소개합니다.</p>
+<div style="margin:6px 0 26px;padding:18px 20px;border:2px solid #F0564A;border-radius:12px;background:#FFF5F3;font-size:15px;line-height:1.8;color:#222"><b style="color:#F0564A">이 글에서 알 수 있는 것</b><br>1) 신입 포트폴리오 조언 3가지<br>2) 노션 양식 기반 AI 포트폴리오 입력 순서<br>3) 사용 전에 꼭 확인할 점</div>
+<p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px">커리어캐쳐(CareerCatcher)는 AI를 활용한 진로·취업 교육과 자기소개서·면접 컨설팅을 하는 브랜드입니다.</p>
+<p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px">커리어캐쳐 안은경이 만든 AI 포트폴리오 빌더는 퍼플커리어 노션 포트폴리오 양식에 맞춰 입력 내용을 정리해 주고, [노션용 복사]도 지원합니다.</p>
+<div class="ph" style="border:2px dashed #F0564A;border-radius:12px;background:#FDECEA;padding:18px 20px;margin:8px 0 26px;text-align:center;color:#222;font-size:15px;line-height:1.6"><b style="color:#F0564A;font-size:17px">📷 사진1 · img1.png</b><br>노션 양식 순서로 입력하면 AI가 정리해 주는 AI 포트폴리오 빌더 화면<br><span style="color:#6B6B6B">커리어캐쳐 노션 AI 포트폴리오 빌더 대표 이미지</span></div>
+<h3 style="font-size:20px;font-weight:800;color:#111;margin:36px 0 14px;padding-left:12px;border-left:5px solid #F0564A">신입 포트폴리오, 왜 쓰기 막막할까요?</h3>
+<p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px">무엇을 넣고 어떤 순서로 쓸지, 직무마다 달라 샘플을 봐도 내 것으로 옮기기 어렵습니다.</p>
+<h3 style="font-size:20px;font-weight:800;color:#111;margin:36px 0 14px;padding-left:12px;border-left:5px solid #F0564A">신입 포트폴리오 작성법, 자주 나오는 조언 3가지</h3>
+<p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px">취업 커뮤니티와 현직자 답변에서 반복되는 개인·업체 의견이며, 검색 요약으로만 확인했고 원문은 다 읽지 못했어요.</p>
+<p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px">1) 나열보다 "왜 했고, 무엇을 알게 됐는지"<br>브런치와 코멘토 같은 취업 글은 한 일만 늘어놓은 정리를 흔한 실수로 꼽습니다.</p>
+<p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px">2) 결과의 크기보다 과정과 내 역할<br>코멘토 마케팅 직무 답변은 문제, 전략, 실행 순으로 정리하라고 하고, GPTers의 서비스 기획 평가 글은 팀 안에서의 내 역할이 분명한지를 봅니다.</p>
+<p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px">3) 링크가 열리는지, 구성이 정리돼 있는지<br>비공개·깨진 링크는 신뢰를 떨어뜨린다는 지적이 있습니다. 미국 광고·마케팅·디자인 분야 임원 설문을 소개한 대학 커리어센터 글(2023)은 정리되지 않은 구성을 흔한 실수로 꼽았습니다. 다른 직무엔 맞지 않을 수 있어요.</p>
+<div class="ph" style="border:2px dashed #F0564A;border-radius:12px;background:#FDECEA;padding:18px 20px;margin:8px 0 26px;text-align:center;color:#222;font-size:15px;line-height:1.6"><b style="color:#F0564A;font-size:17px">📷 사진2 · img2.png</b><br>신입 포트폴리오 체크 3가지 카드 도식<br><span style="color:#6B6B6B">왜 했나 / 내 역할 / 열리는 링크</span></div>
+<h3 style="font-size:20px;font-weight:800;color:#111;margin:36px 0 14px;padding-left:12px;border-left:5px solid #F0564A">노션 포트폴리오 양식으로 AI 포트폴리오 만들기</h3>
+<p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px">노션 포트폴리오 양식 순서는 아래와 같습니다.</p>
+<p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px">Contact → About me → Skills → AI 역량(AI Competency) → Projects → Experiences → Education → Language·Other</p>
+<p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px">지원 직무와 프로젝트 1개 이상은 꼭 적어야 완성할 수 있어요. 세 칸에는 위 조언을 담아 보세요.</p>
+<p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px">1) 성과 칸: "전 → 후" 숫자로 적기<br>2) 문제해결 칸: "문제 → 원인 → 시도 → 결과" 순서로 적기<br>3) 역할 칸: 팀 프로젝트라면 내가 맡은 일과 기여도 적기</p>
+<p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px">감이 안 잡히면 [예시로 채우기] 버튼을 눌러 보세요. 예시 속 이름, 학교, 숫자는 모두 가상입니다.</p>
+<div class="ph" style="border:2px dashed #F0564A;border-radius:12px;background:#FDECEA;padding:18px 20px;margin:8px 0 26px;text-align:center;color:#222;font-size:15px;line-height:1.6"><b style="color:#F0564A;font-size:17px">📷 사진3 · img3.png</b><br>Contact부터 Language·Other까지 노션 포트폴리오 양식 입력 순서도 (예시 화면)<br><span style="color:#6B6B6B">입력 순서 한눈에 보기</span></div>
+<h3 style="font-size:20px;font-weight:800;color:#111;margin:36px 0 14px;padding-left:12px;border-left:5px solid #F0564A">AI 포트폴리오 완성은 두 가지 방법 중 편한 쪽으로</h3>
+<p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px">방법 A) API 키(열쇠 같은 번호)를 붙여넣고 버튼 한 번<br>Gemini 또는 Claude 키를 쓸 수 있습니다. 무료 키도 있지만 사용 한도가 있을 수 있어요.</p>
+<p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px">방법 B) 키 없이 프롬프트 복사<br>프롬프트를 복사해 ChatGPT나 Claude 웹에 붙여넣고, 받은 답을 다시 빌더에 붙여넣습니다.</p>
+<p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px">완성하면 노션형 미리보기에서 [HTML 저장]을 쓰거나, 노션에 옮길 때는 [노션용 복사]를 쓰세요. PDF는 브라우저 인쇄로 만듭니다. 컨설턴트 피드백(보완점 3가지)은 화면에만 보이고 저장한 HTML에는 없습니다.</p>
+<div class="ph" style="border:2px dashed #F0564A;border-radius:12px;background:#FDECEA;padding:18px 20px;margin:8px 0 26px;text-align:center;color:#222;font-size:15px;line-height:1.6"><b style="color:#F0564A;font-size:17px">📷 사진4 · img4.png</b><br>키 방식과 프롬프트 복사 방식 비교표<br><span style="color:#6B6B6B">방법 A와 방법 B 차이</span></div>
+<div class="ph" style="border:2px dashed #F0564A;border-radius:12px;background:#FDECEA;padding:18px 20px;margin:8px 0 26px;text-align:center;color:#222;font-size:15px;line-height:1.6"><b style="color:#F0564A;font-size:17px">📷 사진5 · img5.png</b><br>가상 인물 '디지털 마케터 | 김공순' 포트폴리오 완성 예시<br><span style="color:#6B6B6B">가상 인물의 예시이며 실제 인물이 아닙니다</span></div>
+<h3 style="font-size:20px;font-weight:800;color:#111;margin:36px 0 14px;padding-left:12px;border-left:5px solid #F0564A">개인정보는 어떻게 다뤄지나요?</h3>
+<p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px">1) 입력 내용은 서버에 저장하지 않고 이 브라우저에만 임시 저장됩니다.<br>2) API 키는 저장하지 않고, 이메일과 연락처는 AI에 보내지 않습니다.</p>
+<p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px">나머지 입력은 AI가 읽습니다. 실명 대신 이니셜을 써도 되고, 무료 AI는 입력이 서비스 개선에 쓰일 수 있으니 민감한 내용은 빼 주세요. 공용 PC라면 [모두 지우기]를 눌러 주세요.</p>
+<h3 style="font-size:20px;font-weight:800;color:#111;margin:36px 0 14px;padding-left:12px;border-left:5px solid #F0564A">쓰기 전에 알아둘 점, 그리고 막힐 때는</h3>
+<p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px">1) 경험과 숫자는 내가 채워야 하고, 빌더는 정리를 돕는 도구입니다.<br>2) AI 결과는 사실과 맞는지 내가 직접 확인해야 합니다.<br>3) 결과는 HTML 파일 하나입니다. PDF만 받는 사이트라면 변환이 필요하고, 링크 공유는 직접 올린 뒤 로그아웃 상태에서 열리는지 확인하세요.<br>4) 이미지 업로드는 없어서, 디자인 직무는 이미지 포트폴리오를 따로 준비하세요.</p>
+<div class="ph" style="border:2px dashed #F0564A;border-radius:12px;background:#FDECEA;padding:18px 20px;margin:8px 0 26px;text-align:center;color:#222;font-size:15px;line-height:1.6"><b style="color:#F0564A;font-size:17px">📷 사진6 · img6.png</b><br>사용 전 확인 4가지 체크리스트 카드<br><span style="color:#6B6B6B">경험·숫자 / 사실 확인 / 파일 형식 / 이미지 포트폴리오</span></div>
+<p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px">AI 포트폴리오 만들기가 처음이라면 [예시로 채우기]부터 눌러 보세요.<br>빌더: https://eunkyoungan.github.io/-/portfolio-builder/</p>
+<p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px">신입 포트폴리오 작성법이 막막하면 지원 직무와 프로젝트 한두 개를 메모해서 보내 주세요. 함께 정리해 드릴게요.</p>
+<h3 style="font-size:20px;font-weight:800;color:#111;margin:36px 0 14px;padding-left:12px;border-left:5px solid #F0564A">노션 AI 포트폴리오 자주 묻는 질문(FAQ)</h3>
+<p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px"><b>Q. 커리어캐쳐는 어떤 곳인가요?</b><br>A. 커리어캐쳐는 AI를 활용한 진로·취업 교육과 자기소개서·면접 컨설팅을 하는 브랜드입니다.</p>
+<p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px"><b>Q. 노션 포트폴리오 양식은 어떻게 쓰나요?</b><br>A. 입력 칸이 Contact부터 Language·Other까지 노션 양식 순서라 위에서부터 채우면 돼요.</p>
+<p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px"><b>Q. AI로 포트폴리오 만들어도 되나요?</b><br>A. 도구로 쓰되 사실을 확인하고 내 말로 다듬어 주세요.</p>
+<p style="margin:0 0 4px;font-size:16px;line-height:1.8;color:#222;margin-bottom:22px"><b>Q. 신입 포트폴리오 작성법, 뭐부터 하나요?</b><br>A. 지원 직무와 프로젝트 한두 개를 먼저 적어 보세요.</p>
+<div style="margin:30px 0;padding:22px;border-top:2px solid #F0564A;border-bottom:2px solid #F0564A;text-align:center;font-size:15px;line-height:1.8;color:#444"><b style="font-size:18px;color:#F0564A">커리어캐쳐(CareerCatcher) 안은경</b><br>AI 자기소개서 · AI면접 · 진로 코칭<br>카톡 문의: https://open.kakao.com/o/gxIxJ3Si<br>메일: dms5147@gmail.com</div></div>
+<div class="tags">태그: <span id="tags">#커리어캐쳐 #CareerCatcher #커리어캐쳐포트폴리오 #커리어캐쳐코칭 #노션포트폴리오 #AI포트폴리오 #노션AI포트폴리오 #노션포트폴리오양식 #AI로포트폴리오만들기 #신입포트폴리오 #포트폴리오작성법 #신입포트폴리오작성법 #포트폴리오빌더 #포트폴리오양식 #직무별포트폴리오 #프로젝트정리 #취준생 #신입취업 #포트폴리오코칭</span></div></div>
+<script>
+const msg=t=>{document.getElementById('msg').textContent=t};
+function fallback(node,text){const s=getSelection();s.removeAllRanges();let ok=false;
+ if(node){const r=document.createRange();r.selectNodeContents(node);s.addRange(r);try{ok=document.execCommand('copy')}catch(e){}s.removeAllRanges();return ok}
+ const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();try{ok=document.execCommand('copy')}catch(e){}ta.remove();return ok}
+async function copyHtml(){const n=document.getElementById('post'),h=n.innerHTML,t=n.innerText;
+ try{await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([h],{type:'text/html'}),'text/plain':new Blob([t],{type:'text/plain'})})]);msg('본문을 서식과 함께 복사했습니다. 네이버 편집기에 붙여넣으세요.')}
+ catch(e){msg(fallback(n)?'본문을 복사했습니다.':'복사에 실패했습니다. 본문을 직접 선택해 복사해 주세요.')}}
+async function copyText(id,label){const t=document.getElementById(id).textContent;
+ try{await navigator.clipboard.writeText(t);msg(label+'을(를) 복사했습니다.')}catch(e){msg(fallback(null,t)?label+'을(를) 복사했습니다.':'복사에 실패했습니다.')}}
+bHtml.onclick=copyHtml;bTitle.onclick=()=>copyText('title','제목');bTags.onclick=()=>copyText('tags','태그');
+</script></body></html>
