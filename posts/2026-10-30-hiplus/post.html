@@ -1,0 +1,91 @@
+<title>하이플러스 원고</title>
+<style>
+/* 레이아웃: 위쪽 복사 버튼 바 + 네이버 본문폭(약 680px) 원고 미리보기 */
+:root{--bg:#f6f7f5;--paper:#ffffff;--fg:#1f2421;--muted:#5f6b64;--accent:#03a94f;--line:#dfe4e0;
+--body:"Noto Sans KR",system-ui,sans-serif;--display:"Gowun Batang","Noto Serif KR",serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#151816;--paper:#1d211f;--fg:#e8ece9;--muted:#a3ada7;--accent:#35c977;--line:#323833;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#151816;--paper:#1d211f;--fg:#e8ece9;--muted:#a3ada7;--accent:#35c977;--line:#323833;color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);padding:16px;line-height:1.7}
+.wrap{max-width:720px;margin:0 auto;display:grid;gap:16px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.bar p{flex-basis:100%;margin:0;color:var(--muted);font-size:13px}
+button{font:inherit;font-size:14px;padding:10px 14px;border-radius:8px;border:1px solid var(--line);background:var(--paper);color:var(--fg);cursor:pointer}
+button.main{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.toast{color:var(--accent);font-size:13px;font-weight:700}
+.meta{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;gap:6px;font-size:14px}
+.meta b{color:var(--muted);font-weight:500;margin-right:6px}
+article{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:24px 20px;min-width:0}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@700&family=Noto+Sans+KR:wght@400;700&display=swap">
+<div class="wrap">
+  <div class="bar">
+    <button class="main" id="copyBody">본문 서식 포함 복사</button>
+    <button id="copyTitle">제목 복사</button>
+    <button id="copyTags">태그 복사</button>
+    <span class="toast" id="toast" aria-live="polite"></span>
+    <p>네이버 글쓰기에서 본문 칸에 붙여넣으면 굵게·글자 크기·색이 함께 들어갑니다. 붙여넣은 뒤 [임시저장]을 눌러 주세요.</p>
+  </div>
+  <div class="meta">
+    <div><b>제목</b><span id="title">직업계고 하이플러스 진로·취업 수업 후기 | 커리어캐쳐</span></div>
+    <div><b>태그</b><span id="tags">#커리어캐쳐 #CareerCatcher #커리어캐쳐직업계고 #커리어캐쳐코칭 #하이플러스 #직업계고 #직업계고취업 #직업계고진로교육 #진로수업 #취업준비 #서울디지텍고 #한국미래문화고 #게임형수업 #진로코칭 #특성화고취업 #고등학생진로 #취업준비방법</span></div>
+  </div>
+<article id="post">
+<p style="font-size:16px;line-height:1.8;">&quot;진로는 아직 모르겠고, 취업 준비는 어디서부터 해야 할지 막막해요.&quot;</p>
+<p style="font-size:16px;line-height:1.8;">직업계고 학생들과 이 고민을 게임으로 풀어 본 시간을 정리했습니다.</p>
+<p style="font-size:16px;line-height:1.8;background-color:#f1faf4;padding:12px;"><b>✅ 이 글에서 알 수 있는 것</b><br>1) 하이플러스 모듈에서 어떤 이야기를 나눴는지<br>2) 서울디지텍고, 한국미래문화고에서의 진행 모습<br>3) 직업계고 학생이 취업 준비를 시작할 때 참고할 곳</p>
+<p style="font-size:16px;line-height:1.8;background-color:#f1faf4;padding:12px;"><b>커리어캐쳐(CareerCatcher)는 AI를 활용한 진로·취업 교육과 자기소개서·면접 컨설팅을 하는 브랜드입니다.</b></p>
+<p style="font-size:16px;line-height:1.8;">이 글은 커리어캐쳐 안은경이 서울디지텍고등학교와 한국미래문화고등학교에서 직업계고 학생들과 진행한 하이플러스 모듈 수업을 소개한 후기입니다. 학생 보호를 위해 사진은 모두 만화 스타일로 바꿨어요.</p>
+<p style="text-align:center;background-color:#eeeeee;color:#666666;font-size:14px;padding:28px 12px;">📷 [사진1: 서울디지텍고 교육 현장을 만화 스타일로 바꾼 대표 이미지 — images/01_digitech_class.png]<br>(직업계고 하이플러스 진로·취업 수업 현장)</p>
+<p style="font-size:22px;font-weight:bold;color:#03a94f;margin-top:28px;">■ 하이플러스 모듈, 어떤 시간이었나요?</p>
+<p style="font-size:16px;line-height:1.8;">하이플러스 모듈은 직업계고 학생들이 진로에 대한 고민을 꺼내고, 취업 준비 방법을 함께 이야기하는 시간입니다.</p>
+<p style="font-size:16px;line-height:1.8;">딱딱한 강의 대신 게임 형식으로 진행했어요.</p>
+<p style="font-size:16px;line-height:1.8;">교재와 활동지를 책상에 두고, 화면으로 영상을 함께 보면서 이야기를 이어 갔습니다.</p>
+<p style="font-size:16px;line-height:1.8;">1) 진로에 대한 고민 나누기</p>
+<p style="font-size:16px;line-height:1.8;">2) 취업 준비 방법 이야기하기</p>
+<p style="font-size:16px;line-height:1.8;">3) 게임 형식으로 직접 참여하기</p>
+<p style="font-size:16px;line-height:1.8;">이번에는 월요일, 화요일, 목요일, 금요일에 활동을 진행했습니다.</p>
+<p style="font-size:22px;font-weight:bold;color:#03a94f;margin-top:28px;">■ 서울디지텍고등학교에서는 어땠을까요?</p>
+<p style="font-size:16px;line-height:1.8;">서울디지텍고등학교에서는 모둠 책상에 둘러앉아 활동을 했습니다.</p>
+<p style="font-size:16px;line-height:1.8;">화면으로 영상을 함께 본 뒤, 활동지에 생각을 적고 이야기를 나눴어요.</p>
+<p style="font-size:16px;line-height:1.8;">교실 한쪽에는 Hi 로고가 있는 교재와 필기구를 미리 준비해 두었습니다.</p>
+<p style="text-align:center;background-color:#eeeeee;color:#666666;font-size:14px;padding:28px 12px;">📷 [사진2: 활동 교재와 필기구를 준비해 둔 교실을 만화 스타일로 바꾼 이미지 — images/02_digitech_room.png]<br>(수업 전 책상 준비 모습)</p>
+<p style="text-align:center;background-color:#eeeeee;color:#666666;font-size:14px;padding:28px 12px;">📷 [사진3: 교실 창밖 풍경을 만화 스타일로 바꾼 이미지 — images/03_digitech_view.png]<br>(수업 중 창밖 풍경)</p>
+<p style="font-size:22px;font-weight:bold;color:#03a94f;margin-top:28px;">■ 한국미래문화고등학교에서는요?</p>
+<p style="font-size:16px;line-height:1.8;">한국미래문화고등학교에서는 교실에서 모둠별로 자리를 잡고 활동을 진행했습니다.</p>
+<p style="font-size:16px;line-height:1.8;">영상을 함께 보고, 모둠 안에서 서로의 이야기를 나눴어요.</p>
+<p style="text-align:center;background-color:#eeeeee;color:#666666;font-size:14px;padding:28px 12px;">📷 [사진4: 한국미래문화고 교실 활동을 만화 스타일로 바꾼 이미지 — images/04_miraeculture_class.png]<br>(모둠별로 이야기를 나누는 모습)</p>
+<p style="font-size:22px;font-weight:bold;color:#03a94f;margin-top:28px;">■ 직업계고 학생, 취업 준비는 어디서부터 시작하나요?</p>
+<p style="font-size:16px;line-height:1.8;">수업에서 나온 이야기와 별개로, 직업계고 학생이 참고할 수 있는 공식 안내도 있습니다.</p>
+<p style="font-size:16px;line-height:1.8;">아래 제도는 검색 요약으로 확인한 내용이라 신청 전에 학교 선생님이나 공식 사이트에서 최신 내용을 꼭 확인하세요.</p>
+<p style="font-size:16px;line-height:1.8;">1) 하이파이브 포털: 특성화고·마이스터고 대상 진로탐색, 직업정보, 취업정보 제공</p>
+<p style="font-size:16px;line-height:1.8;">2) 선취업 후학습: 특성화고·마이스터고 졸업생이 이용할 수 있는 제도</p>
+<p style="font-size:16px;line-height:1.8;">3) 직업계고 채용연계형 직무교육: 3학년과 미취업 졸업생 대상 약 3개월 직무교육 안내</p>
+<p style="text-align:center;background-color:#eeeeee;color:#666666;font-size:14px;padding:28px 12px;">📷 [사진5: 취업 준비 시작 체크리스트 카드 — images/05.png]<br>(진로 고민 → 정보 찾기 → 준비하기)</p>
+<p style="font-size:22px;font-weight:bold;color:#03a94f;margin-top:28px;">■ 학교·기관에서 이런 수업을 하고 싶다면?</p>
+<p style="font-size:16px;line-height:1.8;">진로·취업 수업을 게임 형식으로 진행하고 싶은 학교나 기관은 카카오톡이나 메일로 문의해 주세요.</p>
+<p style="font-size:16px;line-height:1.8;">대상과 시간에 맞춰 함께 구성해 드릴게요.</p>
+<p style="font-size:22px;font-weight:bold;color:#03a94f;margin-top:28px;">■ 자주 묻는 질문(FAQ)</p>
+<p style="font-size:16px;line-height:1.8;"><b>Q. 커리어캐쳐는 어떤 곳인가요?</b></p>
+<p style="font-size:16px;line-height:1.8;">A. 커리어캐쳐는 AI를 활용한 진로·취업 교육과 자기소개서·면접 컨설팅을 하는 브랜드입니다.</p>
+<p style="font-size:16px;line-height:1.8;"><b>Q. 하이플러스 모듈은 어떤 수업인가요?</b></p>
+<p style="font-size:16px;line-height:1.8;">A. 직업계고 학생들이 진로 고민과 취업 준비 방법을 게임 형식으로 이야기하는 수업입니다.</p>
+<p style="font-size:16px;line-height:1.8;"><b>Q. 어느 학교에서 진행했나요?</b></p>
+<p style="font-size:16px;line-height:1.8;">A. 서울디지텍고등학교와 한국미래문화고등학교에서 진행했습니다.</p>
+<p style="text-align:center;font-size:14px;color:#666666;">─────────────<br><b>커리어캐쳐(CareerCatcher) 안은경 | AI 자기소개서·AI면접·진로 코칭</b><br>카톡 문의: <a href="https://open.kakao.com/o/gxIxJ3Si">https://open.kakao.com/o/gxIxJ3Si</a><br>메일: dms5147@gmail.com</p>
+</article>
+</div>
+<script>
+const toast=document.getElementById('toast');
+function say(t){toast.textContent=t;setTimeout(()=>toast.textContent='',2500)}
+function selectCopy(el){const r=document.createRange();r.selectNodeContents(el);const s=getSelection();s.removeAllRanges();s.addRange(r);let ok=false;try{ok=document.execCommand('copy')}catch(e){}return ok}
+async function copyRich(el){
+  try{const html=el.innerHTML,text=el.innerText;
+    await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([html],{type:'text/html'}),'text/plain':new Blob([text],{type:'text/plain'})})]);return true}
+  catch(e){return selectCopy(el)}
+}
+async function copyText(el){try{await navigator.clipboard.writeText(el.innerText);return true}catch(e){return selectCopy(el)}}
+document.getElementById('copyBody').onclick=async()=>say(await copyRich(document.getElementById('post'))?'본문 복사됨':'본문이 선택됐어요. 길게 눌러 복사해 주세요')
+document.getElementById('copyTitle').onclick=async()=>say(await copyText(document.getElementById('title'))?'제목 복사됨':'제목이 선택됐어요. 복사해 주세요')
+document.getElementById('copyTags').onclick=async()=>say(await copyText(document.getElementById('tags'))?'태그 복사됨':'태그가 선택됐어요. 복사해 주세요')
+</script>
