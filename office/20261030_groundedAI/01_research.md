@@ -1,78 +1,124 @@
-# Grounded AI(그라운딩, 근거 기반 AI) 리서치
+# Grounded AI(그라운딩, 근거 기반 AI) 리서치 (RAG·파인튜닝 비교 확장판)
 
-- 작성일: 2026-10-30 / 용도: 커리어캐쳐 블로그(취준생·직장인, 자소서·면접 준비에 AI 활용)
+- 작성일: 2026-10-30 / 용도: 커리어캐쳐 블로그(취준생·직장인, 자소서·면접 준비에 AI 활용). 글 중심: Grounded AI·RAG·파인튜닝 비교 + '일하는 방식' 연결
 - 확인 수준 표기: **원문 확인** = 해당 페이지를 직접 열어 확인 / **검색요약** = 검색 결과 요약만 확인(페이지 직접 열람 못 함)
-- 환경 제약: aws.amazon.com, arxiv.org, blog.google, support.google.com, docs.cloud.google.com, docs.anthropic.com 직접 열람 불가(네트워크 허용 목록 밖). 해당 출처는 검색요약으로만 표기.
-- 통계·수치: 이 문서에는 블로그에 쓸 통계가 없음(출처 확인된 수치 없음). 글에 수치를 넣지 않는 것을 권장.
+- 환경 제약: aws.amazon.com, docs.aws.amazon.com, arxiv.org, blog.google, support.google.com, docs.cloud.google.com, docs.anthropic.com, developers.openai.com, platform.openai.com, learn.microsoft.com 직접 열람 불가(네트워크 허용 목록 밖). 이 출처들은 검색요약으로만 표기. 직접 열람한 것은 platform.claude.com 2개 페이지뿐.
+- 통계·수치: 출처 확인된 수치 없음. 글에 수치를 넣지 않는 것을 권장.
 
 ## ① 핵심 요약
-1. Grounding은 LLM이 학습 기억만으로 답하지 않고, 검증 가능한 외부 자료(문서·검색 결과)에 근거해 답하게 만드는 방식이다.
-2. 목적은 환각(hallucination) 감소와 출처 확인 가능성이다. 다만 환각을 완전히 없애지는 못한다(Anthropic 공식 문서가 명시).
-3. 구현 예: RAG, 웹 검색 연동(Google Search 그라운딩), 파일 검색(OpenAI File Search), 인용 기능(Claude Citations), 문서 첨부형(NotebookLM).
-4. 한계: 근거 자료가 틀리거나 부족하면 답도 틀리고, 출처가 붙어도 사람이 원문을 확인해야 한다.
-5. 취업 준비 팁: 내 경험 자료를 주고 "자료 안의 내용만 사용 / 근거 문장 표시 / 없으면 모른다고" 요청하면 자소서·면접 답변의 지어내기를 줄일 수 있다.
+1. Grounding은 '답을 근거 자료에 묶는다'는 목적, RAG는 그 대표 구현 방식, 파인튜닝은 모델 자체의 행동(말투·형식·작업 방식)을 바꾸는 방식으로 층위가 다르다(Google·Microsoft·AWS 문서 설명, 검색요약).
+2. 공식 문서들의 공통 구도: 지식 문제(최신·사내 자료) = RAG/그라운딩, 행동 문제(톤·형식·일관성) = 파인튜닝.
+3. 환각은 줄일 수 있어도 없앨 수 없다(Anthropic 원문 확인). 출처가 있어도 사람이 검증해야 한다.
+4. "프롬프트 → RAG → 파인튜닝" 순서: AWS는 프롬프트 먼저·파인튜닝은 비용 고려를 권고(검색요약). OpenAI는 이 순서를 '선형이 아니다'라고 단서를 단다(검색요약). 개인 업무엔 대부분 프롬프트+자료 첨부 단계로 충분하다는 해석은 추정.
+5. 취업 준비 팁: 경험 자료 제공 + "자료 안의 내용만 / 근거 문장 표시 / 모르면 모른다고".
 
 ## ② 주요 발견
 
 ### 1) 정의
-- Grounding = 모델 출력을 외부의 검증 가능한 자료에 연결하는 것. 업체 문서들이 "실시간 웹 콘텐츠/자체 데이터에 모델을 연결해 사실성을 높이고 인용을 제공"하는 의미로 사용.
-  - Google "Grounding with Google Search": 모델이 검색이 도움 될지 판단 → 검색어 생성·실행 → 결과로 답변 작성, 출처 URL 인용 정보를 반환. 확인 수준: 검색요약. https://ai.google.dev/gemini-api/docs/google-search
-  - Google 엔터프라이즈 문서: 자체 검색 API의 스니펫을 "source of truth"로 삼아 근거 있는 답변 생성. 검색요약. https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/grounding/grounding-with-your-search-api
-- RAG(검색 증강 생성): LLM이 답하기 전에 학습 데이터 밖의 신뢰할 만한 지식 베이스를 참조하게 하는 기법. 검색기가 관련 자료를 찾아 질문과 함께 생성 모델에 전달. 학습 데이터는 시점이 고정돼 최신 정보 반영이 어렵다는 점이 배경. 재학습 없이 지식 추가 가능. 검색요약(AWS·IBM 문서). https://aws.amazon.com/what-is/retrieval-augmented-generation/ , https://www.ibm.com/think/topics/retrieval-augmented-generation
-- RAG 원 논문: Lewis et al., 2020, "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks" (arXiv 2005.11401). 서지정보만 검색요약으로 확인, 초록 원문은 미확인. https://arxiv.org/abs/2005.11401
-- 용어 주의: "grounding"은 업체마다 범위가 달라(웹 검색형/자체 문서형) 단일 표준 정의는 미확인. 글에서는 "근거 자료에 연결해 답하게 하는 방식"으로 풀어 쓰는 것을 권장(추정).
+- Grounding = 모델 출력을 외부의 검증 가능한 자료에 연결하는 것.
+  - Google "Grounding with Google Search": 모델이 검색 필요성 판단 → 검색어 생성·실행 → 결과로 답변, 출처 URL 인용 정보 반환. 검색요약. https://ai.google.dev/gemini-api/docs/google-search
+  - Google 엔터프라이즈: 자체 검색 API 스니펫을 "source of truth"로 사용. 검색요약. https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/grounding/grounding-with-your-search-api
+- RAG: 답변 전에 학습 데이터 밖의 신뢰할 만한 지식 베이스를 검색해 질문과 함께 모델에 전달. 학습 데이터는 시점 고정이라 최신성 확보가 어렵다는 배경. 재학습 없이 지식 추가. 검색요약. https://aws.amazon.com/what-is/retrieval-augmented-generation/ , https://www.ibm.com/think/topics/retrieval-augmented-generation
+- RAG 원 논문: Lewis et al. 2020 (arXiv 2005.11401). 서지만 검색요약, 초록 원문 미확인. https://arxiv.org/abs/2005.11401
+- 용어 주의: "grounding"은 업체마다 범위가 달라 단일 표준 정의는 미확인. 글에서는 "근거 자료에 연결해 답하게 하는 원칙"으로 풀어 쓰기 권장(추정).
 
 ### 2) 환각과의 관계
-- 환각 = 사실과 다르거나 주어진 맥락과 일치하지 않는 텍스트를 생성하는 현상. Anthropic은 "가장 진보한 모델도 때때로 생성할 수 있다"고 명시. **원문 확인.** https://platform.claude.com/docs/en/test-and-evaluate/strengthen-guardrails/reduce-hallucinations
-- Grounding/RAG는 환각을 줄이는 수단으로 제시됨(AWS·IBM·Google 문서, 2025 arXiv 리뷰). 검색요약.
-- 그러나 "줄이는 것이지 없애는 것이 아님": Anthropic 원문 - "these techniques significantly reduce hallucinations, they don't eliminate them entirely. Always validate critical information." **원문 확인.**
-- Google Live API 문서가 "환각 방지"라고 표현한 것은 업체 주장이며 오류 0을 보장한다는 근거는 아님. 검색요약.
+- 환각 = 사실과 다르거나 주어진 맥락과 불일치하는 텍스트 생성. Anthropic: 가장 진보한 모델도 때때로 생성. **원문 확인.** https://platform.claude.com/docs/en/test-and-evaluate/strengthen-guardrails/reduce-hallucinations
+- Grounding/RAG는 환각 감소 수단으로 제시됨(AWS·IBM·Google). 검색요약.
+- "줄이는 것이지 없애는 것이 아님": Anthropic 원문 - "significantly reduce hallucinations, they don't eliminate them entirely. Always validate critical information." **원문 확인.**
+- Google Live API의 "환각 방지" 표현은 업체 주장이며 오류 0 보장 근거 아님. 검색요약.
 
 ### 3) 구현 방식 (제품명은 공식 문서 확인 건만)
-- **웹 검색 연동**: Google Gemini API "Grounding with Google Search" - 응답 텍스트 구간과 출처 URL을 연결하는 인용 정보 반환. 검색요약. https://ai.google.dev/gemini-api/docs/google-search
-- **파일 검색/RAG**: OpenAI File Search - 업로드한 파일을 벡터 저장소에 청킹·임베딩·인덱싱하고 시맨틱+키워드 검색으로 모델이 참조. `include`로 검색된 결과 확인 가능. 검색요약(공식 문서 검색결과). https://developers.openai.com/api/docs/guides/tools-file-search
-- **출처 인용**: Anthropic Claude Citations - 문서에 citations 활성화 시 답변의 근거가 된 정확한 구절(cited_text, 페이지/문자 범위)을 반환. 텍스트·PDF 지원, 이미지 인용 불가. 검색요약(공식 문서 검색결과). https://platform.claude.com/docs/en/build-with-claude/citations
-- **문서 첨부형 서비스**: Google NotebookLM - 사용자가 올린 소스에만 근거해 답하고 인라인 인용으로 원문 구절 연결. 2023 출시 글이 "원문 인용을 응답 옆에 표시"를 설명했다는 내용은 검색요약. 구글 공식 도움말·블로그 원문은 열람 못 함(미확인). https://blog.google/technology/ai/notebooklm-google-ai/ (대학 도서관 가이드 등 2차 자료가 동일 설명)
-- 일반 사용자용 챗봇의 파일 첨부·웹검색 기능 세부 동작(제품별)은 이번에 확인 못 함. 미확인.
+- 웹 검색 연동: Gemini API Grounding with Google Search. 검색요약. https://ai.google.dev/gemini-api/docs/google-search
+- 파일 검색/RAG: OpenAI File Search - 업로드 파일을 벡터 저장소에 청킹·임베딩·인덱싱, 시맨틱+키워드 검색. 검색요약. https://developers.openai.com/api/docs/guides/tools-file-search
+- 출처 인용: Claude Citations - 근거 구절(cited_text, 페이지/문자 범위) 반환, 텍스트·PDF 지원. 검색요약. https://platform.claude.com/docs/en/build-with-claude/citations
+- 문서 첨부형: Google NotebookLM - 올린 소스에만 근거, 인라인 인용. 구글 공식 원문 미열람(미확인), 2차 가이드·검색요약. https://blog.google/technology/ai/notebooklm-google-ai/
+- Google Vertex AI RAG Engine(관리형 RAG 런타임)과 grounding check API(RAG 출력을 검색된 사실과 비교) 존재: 검색요약. https://docs.cloud.google.com/vertex-ai/generative-ai/docs/grounding/ground-responses-using-rag
+- 일반 챗봇 앱의 파일 첨부·웹검색 세부 동작은 제품별 미확인.
 
 ### 4) 한계
-- 근거 자료가 틀리거나 부족하면 답도 틀림 / 자료에 없는 정보는 채워주지 못함(NotebookLM 2차 가이드 설명, 검색요약). "Garbage in, garbage out" 성격은 일반 원리이며 공식 문서 직접 인용은 미확인(추정).
-- 출처가 붙어도 사람이 확인 필요: Anthropic "Always validate critical information, especially for high-stakes decisions." **원문 확인.** 인용 클릭 후 원문 대조 권장은 2차 가이드(검색요약).
-- 검색 결과 수 제한 등 설정이 답변 품질에 영향: OpenAI `max_num_results`는 토큰·지연을 줄이나 품질을 희생할 수 있음. 검색요약.
-- 검색 연동형은 웹 출처의 품질에 의존(일반 원리, 공식 문구 미확인, 추정).
+- 근거 자료가 틀리거나 부족하면 답도 틀림 / 자료에 없는 정보는 채우지 못함(NotebookLM 2차 설명, 검색요약). 공식 문서 직접 인용은 미확인(추정: 일반 원리).
+- 출처가 붙어도 검증 필요: Anthropic "Always validate critical information, especially for high-stakes decisions." **원문 확인.**
+- 검색 결과 수 제한(`max_num_results`)은 토큰·지연을 줄이나 품질 희생 가능(OpenAI, 검색요약).
+- RAG 자체의 약점: AWS 비교 문서는 '문서 전체를 요약하는 작업'을 RAG의 약점으로 언급(검색요약).
 
-### 5) 취업 준비에서 쓰는 법 (일반적 사용 팁)
-Anthropic 공식 가이드(원문 확인)의 기법을 자소서·면접에 적용한 것. 적용 예시는 팀 작성 제안(추정)이며 공식 문구가 아님.
-- **자료 안의 내용만 사용**: 공식 기법 "External knowledge restriction - 제공 문서의 정보만 쓰고 일반 지식은 쓰지 말 것". → 예: "아래 경험노트 안의 내용만 사용해 자소서 초안을 써줘."
-- **근거 문장 표시**: 공식 기법 "Use direct quotes / Verify with citations - 먼저 정확한 인용문을 추출하고, 주장마다 근거 인용을 달고, 근거를 못 찾으면 해당 주장을 삭제". → 예: "문장마다 경험노트의 근거 문장을 []로 붙이고, 근거가 없으면 그 문장을 빼줘."
-- **모르면 모른다고**: 공식 기법 "Allow Claude to say 'I don't know'". → 예: "자료에 없는 내용은 추측하지 말고 '자료에 없음'이라고 써줘. 필요한 정보는 질문으로 되물어줘."
-- 면접: 경험 자료를 주고 예상 질문별 답변을 만들게 한 뒤, 답변의 수치·역할·기간이 자료와 일치하는지 본인이 대조. 자료에 없는 성과·숫자가 들어갔다면 환각 신호(일반 권고, 추정).
-- 주의: 개인정보(실명·학교·연락처 등)는 외부 AI 서비스에 올릴 때 직접 가리거나 서비스의 데이터 사용 정책을 확인(일반 권고. 각 서비스 정책은 이번에 미확인).
-- 참고: 공식 문서는 "문서 길이가 길 때(>20k 토큰) 인용 추출 기법이 유효"라고 설명(원문). 짧은 경험노트에서는 효과 차이가 다를 수 있음(추정).
+### 5) 취업 준비 팁 (일반적 사용법)
+Anthropic 공식 기법(원문 확인)을 자소서·면접에 적용. 예시 문구는 팀 작성(추정), 공식 문구 아님.
+- 자료 안의 내용만 사용: 공식 기법 "External knowledge restriction". → "아래 경험노트 안의 내용만 사용해 초안을 써줘."
+- 근거 문장 표시: 공식 기법 "direct quotes / verify with citations; 근거를 못 찾으면 주장 삭제". → "문장마다 근거 문장을 []로 붙이고, 근거 없으면 그 문장을 빼줘."
+- 모르면 모른다고: 공식 기법 "Allow Claude to say 'I don't know'". → "자료에 없는 내용은 '자료에 없음'이라고 쓰고, 필요한 정보는 되물어줘."
+- 면접: 답변의 수치·역할·기간을 본인이 자료와 대조. 자료에 없는 성과·숫자는 환각 신호(일반 권고, 추정).
+- 개인정보(실명·학교·연락처)는 외부 AI에 올리기 전 가리거나 서비스 데이터 정책 확인(일반 권고, 서비스별 정책 미확인).
+- 인용 추출 기법은 공식 문서에서 긴 문서(>20k 토큰) 대상으로 설명(원문). 짧은 경험노트에서의 효과는 다를 수 있음(추정).
+
+### 6) [신규] 세 개념의 관계 (Grounding / RAG / 파인튜닝)
+제안 구분: 그라운딩 = 목적·원칙, RAG = 그 대표 구현, 파인튜닝 = 가중치 추가 학습으로 행동 변경. 문서별 뒷받침 정도는 아래와 같다.
+- Google Cloud: RAG를 grounding의 권장 방법으로 설명("recommended best practice is to use RAG"). 튜닝은 기본 동작을 바꿔 복잡한 프롬프트 없이도 원하는 결과를 일관되게 내게 하고, 프롬프트 단순화로 비용·지연을 줄이는 수단. → 그라운딩=RAG 중심 / 튜닝=행동 커스터마이징 구도 일치. 검색요약. https://docs.cloud.google.com/vertex-ai/generative-ai/docs/grounding/ground-responses-using-rag , https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/beginners-guide
+- Microsoft(Foundry/Learn): "RAG = 비공개·자주 바뀌는 데이터에 근거한 답변, 파인튜닝 = 모델 행동·스타일·작업 성능(새 지식 아님)". 검색요약. https://learn.microsoft.com/en-us/azure/foundry/concepts/retrieval-augmented-generation , https://learn.microsoft.com/th-th/azure/developer/ai/augment-llm-rag-fine-tuning
+- AWS Prescriptive Guidance: RAG 대 파인튜닝 비교 문서 존재, 둘을 한 모델에서 결합 가능. 검색요약. https://docs.aws.amazon.com/prescriptive-guidance/latest/retrieval-augmented-generation-options/rag-vs-fine-tuning.html
+- OpenAI: 'Optimizing LLM Accuracy'에서 프롬프트 엔지니어링·RAG·파인튜닝을 정확도 최적화 수단으로 다루고, 격차를 context(모델이 모르는 정보)와 output/model(행동) 문제로 구분(Humanloop 요약 경유, 가이드 자체는 미열람). 검색요약. https://developers.openai.com/api/docs/guides/optimizing-llm-accuracy
+- Anthropic: 프롬프트 가이드에서 성공 기준·평가를 먼저 세우라고 안내(원문 확인). RAG vs 파인튜닝 비교 문서는 이번에 미확인. https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/overview
+- "파인튜닝 = 가중치 추가 학습" 정의 문구 자체를 공식 문서 원문으로 확인하지 못함(미확인). Google 문서가 '기본 동작 변경'으로 설명한 것은 검색요약.
+- 파인튜닝은 인용 제공 안 함, 새 지식 주입 용도가 아님이 AWS·Microsoft에서 공통(검색요약).
+
+### 7) [신규] 비교표 재료 (출처 있는 설명만)
+| 항목 | 그라운딩/RAG | 파인튜닝 | 출처·확인 수준 |
+|---|---|---|---|
+| 목적 | 비공개·최신 자료에 근거한 답변 | 행동·스타일·작업 성능 변경(새 지식 주입용 아님) | Microsoft 문서, 검색요약 |
+| 지식 최신성 | 최신 문서를 몇 분 내 반영 가능(AWS). 재학습 없이 프롬프트로 새 데이터 제공(Azure ML) | 재학습 필요. 소요 수 시간~수 일, 모델 크기에 따라(AWS). 업데이트가 잦은 작업엔 부적합(Microsoft) | AWS·Microsoft 문서, 검색요약 |
+| 비용·준비 난이도 | 검색 호출로 왕복·연산·지연 추가(Microsoft). 색인·자료 준비 필요 | 시간·비용 부담 크다(AWS 라이프사이클 가이드). 지속적 도메인 적응은 비용 높음(Azure ML). 많은 조직은 불필요(AWS 데이터 가이드) | AWS·Microsoft 문서, 검색요약 |
+| 출처 인용 | 가능(AWS: 정보 출처 참조 제공). Google 블로그: 항상 자사 데이터를 인용해야 하면 RAG | 불가(AWS: 응답에 출처 참조 없음) | AWS·Google 문서, 검색요약 |
+| 환각 감소 | 근거 자료 제공으로 감소, 완전 제거 아님(Anthropic 원문 확인) | 환각 감소 효과에 대한 공식 근거 미확인 | Anthropic 원문 / 파인튜닝은 미확인 |
+| 접근 통제 | RAG는 호출자별 접근 가능한 그라운딩 데이터 통제 가능(Google 블로그) | 해당 설명 미확인 | Google 블로그, 검색요약 |
+| 적합 상황 | 최신·사내 문서 질의, 출처 필요 | 톤·형식·분류·요약 같은 반복 작업(AWS는 요약류, Google은 브랜드 보이스 예) | AWS·Google·Microsoft, 검색요약 |
+| 주의 | 문서 전체 요약엔 약함(AWS) | 일반 언어 과제 성능이 떨어질 수 있음(Microsoft) | 검색요약 |
+- 둘은 배타적이지 않고 결합 가능: 튜닝으로 브랜드 톤, RAG로 자사 데이터 기반 답변(Google 블로그). Microsoft Tech Community도 결합 제안. 검색요약. https://cloud.google.com/blog/products/ai-machine-learning/to-tune-or-not-to-tune-a-guide-to-leveraging-your-data-with-llms
+- 주의: Google 블로그는 약 900~1,000일 전 글(구형 모델 언급), AWS 문서도 오래된 것이 있음. 현행 기능은 재확인 필요.
+- 수치 비교(비용 금액, 정확도 %)는 확인하지 못해 포함하지 않음.
+
+### 8) [신규] 일하는 방식 연결
+- 권장 순서 문서 근거:
+  - AWS Generative AI Lifecycle 가이드: 모델 기존 능력으로 되는 작업은 프롬프트 엔지니어링부터, 지식 주입은 RAG가 보통의 선택, 파인튜닝은 시간·비용 고려. 검색요약. https://docs.aws.amazon.com/pdfs/prescriptive-guidance/latest/gen-ai-lifecycle-operational-excellence/gen-ai-lifecycle-operational-excellence.pdf
+  - OpenAI: 많은 가이드가 '프롬프트 → RAG → 파인튜닝' 선형 흐름을 제시하나 실제로는 선형이 아니며, 프롬프트로 기준선을 만든 뒤 실패 원인(context vs 행동)에 따라 다음 수단 선택. 요약·번역·코드 생성은 프롬프트만으로 충분한 경우 많음. 대형 고객 배포 다수가 프롬프트+RAG만 사용. 검색요약(가이드 본문 미열람). https://developers.openai.com/api/docs/guides/optimizing-llm-accuracy
+  - Anthropic: 먼저 성공 기준·평가 마련, 그 다음 프롬프트 개선(원문 확인).
+  - 결론: "순서 자체"는 AWS가 가장 가깝게 뒷받침, OpenAI는 '고정 순서 아님'이라 단서. 글에서는 "대체로 이 순서를 권한다, 실패 원인에 따라 다르다"로 표현 권장.
+- 개인·소규모 업무 해석(모두 추정, 팀 제안):
+  - 자기소개서: 경험노트 첨부 + "자료 안 내용만" 프롬프트 = 단순한 그라운딩 단계. 파일이 많아지면 문서 첨부형 서비스/RAG.
+  - 면접 준비: 이력서·직무기술서·내 경험을 근거 자료로 주고 예상 질문 답변을 만들게 한 뒤 근거 문장 대조 = 프롬프트+자료 첨부.
+  - 교육자료 작성: 사내 규정·교안 원본을 자료로 첨부해 인용 요청 = 그라운딩/RAG. 같은 형식·톤을 매번 반복해야 하면 먼저 예시와 템플릿을 프롬프트에 넣고, 그래도 일관성이 안 나오는 대규모 반복에서만 파인튜닝 검토.
+  - 개인이 파인튜닝까지 가야 하는 경우는 드물다는 판단: AWS가 "대부분 조직은 불필요"라 한 것에 근거한 추정이며 개인 사용자 대상 공식 언급은 미확인.
 
 ## ③ 통계·사례
-- 출처 확인된 통계·수치: 없음. 환각률 등 수치는 이번 조사에서 확인하지 않았으므로 글에 쓰지 말 것.
-- 사례(구조 설명용): 문서 첨부형 서비스에서 "답변 옆 원문 구절 확인" 흐름은 NotebookLM·Claude Citations 문서에서 공통 확인(검색요약).
-- Anthropic 공식 예시: 보도자료 초안 작성 후 주장마다 근거 인용을 찾고, 없으면 삭제 표시(원문 확인). → 자소서 문장 검증 흐름에 그대로 응용 가능.
+- 출처 확인된 통계·수치: 없음. 환각률, 비용 금액, 정확도 수치는 쓰지 말 것.
+- 사례(구조 설명용): Anthropic 공식 예시 - 보도자료 초안 작성 후 주장마다 근거 인용을 찾고 없으면 삭제 표시(원문 확인). 자소서 문장 검증 흐름에 응용 가능.
+- OpenAI "대형 고객 배포 다수가 프롬프트+RAG만 사용"은 가이드 요약(검색요약), 구체 사례명·수치 미확인.
 
 ## ④ 확인되지 않은 부분 (미확인)
-- Google 공식 Vertex AI Grounding 개요 페이지 원문(도메인 접근 불가) - 미확인
-- AWS RAG 페이지, IBM RAG 페이지 원문 - 검색요약만
-- RAG 원 논문 초록 원문 - 미확인
-- NotebookLM 공식 도움말·출시 글 원문 - 미확인
-- OpenAI File Search, Claude Citations, Gemini Google Search 그라운딩 페이지 원문 직접 열람 - 미확인(검색요약)
-- ChatGPT·Claude·Gemini 일반 앱의 파일 첨부/검색 기능이 어느 수준으로 "그라운딩"되는지 - 미확인
-- 그라운딩의 환각 감소 정량 효과 - 미확인(수치 사용 금지)
-- 위 열람 불가 도메인을 허용하면 원문 재확인 가능.
+- 열람 불가 도메인(AWS, OpenAI, Microsoft Learn, Google Cloud, arXiv, blog.google, support.google.com) 원문 전반. 허용 시 재확인 가능.
+- 파인튜닝 정의("가중치 추가 학습")의 공식 문서 원문, 파인튜닝의 환각 감소 효과
+- Anthropic의 RAG vs 파인튜닝 비교 문서
+- OpenAI 가이드 본문(Humanloop 등 2차 요약 경유)
+- NotebookLM 공식 도움말, 일반 챗봇 앱의 파일 첨부·검색 기능 세부 동작
+- 정량 비교(비용·정확도·환각률)
+- 개인 사용자 대상 파인튜닝 권장 여부
 
 ## ⑤ 출처 목록
 1. Anthropic, Reduce hallucinations (원문 확인) - https://platform.claude.com/docs/en/test-and-evaluate/strengthen-guardrails/reduce-hallucinations
-2. Anthropic, Citations (검색요약) - https://platform.claude.com/docs/en/build-with-claude/citations
-3. Google, Grounding with Google Search, Gemini API (검색요약) - https://ai.google.dev/gemini-api/docs/google-search
-4. Google Cloud, Grounding with your search API (검색요약) - https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/grounding/grounding-with-your-search-api
-5. Google Cloud, Grounding overview (검색 결과에 노출, 미열람) - https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/grounding/overview
-6. OpenAI, File search (검색요약) - https://developers.openai.com/api/docs/guides/tools-file-search
-7. AWS, What is RAG? (검색요약) - https://aws.amazon.com/what-is/retrieval-augmented-generation/
-8. IBM, What is RAG? (검색요약) - https://www.ibm.com/think/topics/retrieval-augmented-generation
-9. Lewis et al. 2020, RAG (서지만 검색요약) - https://arxiv.org/abs/2005.11401
-10. Google, Introducing NotebookLM (검색요약) - https://blog.google/technology/ai/notebooklm-google-ai/
+2. Anthropic, Prompt engineering overview (원문 확인) - https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/overview
+3. Anthropic, Citations (검색요약) - https://platform.claude.com/docs/en/build-with-claude/citations
+4. Google, Grounding with Google Search (검색요약) - https://ai.google.dev/gemini-api/docs/google-search
+5. Google Cloud, Grounding with your search API (검색요약) - https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/grounding/grounding-with-your-search-api
+6. Google Cloud, Ground responses using RAG (검색요약) - https://docs.cloud.google.com/vertex-ai/generative-ai/docs/grounding/ground-responses-using-rag
+7. Google Cloud, Generative AI beginner's guide (검색요약) - https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/beginners-guide
+8. Google Cloud blog, To tune or not to tune (검색요약, 오래된 글) - https://cloud.google.com/blog/products/ai-machine-learning/to-tune-or-not-to-tune-a-guide-to-leveraging-your-data-with-llms
+9. OpenAI, File search (검색요약) - https://developers.openai.com/api/docs/guides/tools-file-search
+10. OpenAI, Optimizing LLM Accuracy (검색요약) - https://developers.openai.com/api/docs/guides/optimizing-llm-accuracy
+11. Microsoft Learn, RAG in Microsoft Foundry (검색요약) - https://learn.microsoft.com/en-us/azure/foundry/concepts/retrieval-augmented-generation
+12. Microsoft Learn, Augment LLMs with RAGs or fine-tuning (검색요약) - https://learn.microsoft.com/th-th/azure/developer/ai/augment-llm-rag-fine-tuning
+13. Microsoft Tech Community, RAG vs fine-tuning in Foundry (검색요약, 공식 문서보다 2차) - https://techcommunity.microsoft.com/discussions/azure-ai-foundry-discussions/when-should-you-use-rag-vs-fine-tuning-in-microsoft-foundry/4510099
+14. AWS Prescriptive Guidance, Comparing RAG and fine-tuning (검색요약) - https://docs.aws.amazon.com/prescriptive-guidance/latest/retrieval-augmented-generation-options/rag-vs-fine-tuning.html
+15. AWS Prescriptive Guidance, Gen AI Lifecycle Operational Excellence (검색요약) - https://docs.aws.amazon.com/pdfs/prescriptive-guidance/latest/gen-ai-lifecycle-operational-excellence/gen-ai-lifecycle-operational-excellence.pdf
+16. AWS, What is RAG? (검색요약) - https://aws.amazon.com/what-is/retrieval-augmented-generation/
+17. IBM, What is RAG? (검색요약) - https://www.ibm.com/think/topics/retrieval-augmented-generation
+18. Lewis et al. 2020 (서지만 검색요약) - https://arxiv.org/abs/2005.11401
+19. Google, Introducing NotebookLM (검색요약) - https://blog.google/technology/ai/notebooklm-google-ai/

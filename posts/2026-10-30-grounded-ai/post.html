@@ -1,0 +1,105 @@
+<title>Grounded AI 원고</title>
+<style>
+/* 레이아웃: 위쪽 복사 버튼 바 + 네이버 본문폭(약 680px) 원고 미리보기 */
+:root{--bg:#f6f7f5;--paper:#ffffff;--fg:#1f2421;--muted:#5f6b64;--accent:#03a94f;--line:#dfe4e0;
+--body:"Noto Sans KR",system-ui,sans-serif;--display:"Gowun Batang","Noto Serif KR",serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#151816;--paper:#1d211f;--fg:#e8ece9;--muted:#a3ada7;--accent:#35c977;--line:#323833;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#151816;--paper:#1d211f;--fg:#e8ece9;--muted:#a3ada7;--accent:#35c977;--line:#323833;color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);padding:16px;line-height:1.7}
+.wrap{max-width:720px;margin:0 auto;display:grid;gap:16px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.bar p{flex-basis:100%;margin:0;color:var(--muted);font-size:13px}
+button{font:inherit;font-size:14px;padding:10px 14px;border-radius:8px;border:1px solid var(--line);background:var(--paper);color:var(--fg);cursor:pointer}
+button.main{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.toast{color:var(--accent);font-size:13px;font-weight:700}
+.meta{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;gap:6px;font-size:14px}
+.meta b{color:var(--muted);font-weight:500;margin-right:6px}
+article{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:24px 20px;min-width:0}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@700&family=Noto+Sans+KR:wght@400;700&display=swap">
+<div class="wrap">
+  <div class="bar">
+    <button class="main" id="copyBody">본문 서식 포함 복사</button>
+    <button id="copyTitle">제목 복사</button>
+    <button id="copyTags">태그 복사</button>
+    <span class="toast" id="toast" aria-live="polite"></span>
+    <p>네이버 글쓰기에서 본문 칸에 붙여넣으면 굵게·글자 크기·색이 함께 들어갑니다. 붙여넣은 뒤 [임시저장]을 눌러 주세요.</p>
+  </div>
+  <div class="meta">
+    <div><b>제목</b><span id="title">Grounded AI, RAG, 파인튜닝 차이와 일하는 방식 | 커리어캐쳐</span></div>
+    <div><b>태그</b><span id="tags">#커리어캐쳐 #CareerCatcher #커리어캐쳐AI활용 #커리어캐쳐코칭 #GroundedAI #그라운딩AI #RAG #RAG뜻 #파인튜닝 #RAG파인튜닝차이 #AI환각 #환각줄이는법 #AI업무활용 #생성형AI활용 #AI자소서 #AI면접준비 #프롬프트엔지니어링 #AI일하는방식</span></div>
+  </div>
+<article id="post">
+<p style="font-size:16px;line-height:1.8;">&quot;AI가 그럴듯하게 말하는데, 이게 진짜 맞는 말인지 모르겠어요.&quot;</p>
+<p style="font-size:16px;line-height:1.8;">AI를 업무에 쓰는 분들이 가장 많이 하는 고민입니다.</p>
+<p style="font-size:16px;line-height:1.8;background-color:#f1faf4;padding:12px;"><b>✅ 이 글에서 알 수 있는 것</b><br>1) Grounded AI, RAG, 파인튜닝의 차이<br>2) 상황별로 무엇을 먼저 쓰면 좋은지<br>3) 자소서·면접 준비에 바로 쓰는 요청 문구</p>
+<p style="font-size:16px;line-height:1.8;background-color:#f1faf4;padding:12px;"><b>커리어캐쳐(CareerCatcher)는 AI를 활용한 진로·취업 교육과 자기소개서·면접 컨설팅을 하는 브랜드입니다.</b></p>
+<p style="font-size:16px;line-height:1.8;">이 글은 커리어캐쳐 안은경이 AI를 일에 쓰는 방식을 Grounded AI, RAG, 파인튜닝 세 가지로 나눠 정리한 글입니다. 제품별 공식 문서 설명을 검색으로 확인했고, 원문을 다 읽지 못한 부분은 &quot;확인 필요&quot;로 표시했어요.</p>
+<p style="text-align:center;background-color:#eeeeee;color:#666666;font-size:14px;padding:28px 12px;">📷 [사진1: Grounded AI, RAG, 파인튜닝 관계 도식 — images/01.png]<br>(목적과 방법과 행동 변경, 세 층위 한눈에 보기)</p>
+<p style="font-size:22px;font-weight:bold;color:#03a94f;margin-top:28px;">■ Grounded AI란 무엇인가요?</p>
+<p style="font-size:16px;line-height:1.8;">Grounded AI는 AI가 기억에만 의존하지 않고, 확인할 수 있는 자료에 근거해 답하게 하는 방식입니다.</p>
+<p style="font-size:16px;line-height:1.8;">이 근거는 내가 올린 문서일 수도 있고, 검색 결과일 수도 있어요.</p>
+<p style="font-size:16px;line-height:1.8;">정리하면 &quot;답을 근거 자료에 묶어 두는 원칙&quot;입니다.</p>
+<p style="font-size:16px;line-height:1.8;">근거를 붙이면 환각(AI가 그럴듯하게 지어내는 답)이 줄어듭니다.</p>
+<p style="font-size:16px;line-height:1.8;">다만 완전히 없어지지는 않습니다. Anthropic 공식 문서도 중요한 정보는 항상 검증하라고 안내합니다.</p>
+<p style="font-size:22px;font-weight:bold;color:#03a94f;margin-top:28px;">■ RAG와 파인튜닝은 뭐가 다를까요?</p>
+<p style="font-size:16px;line-height:1.8;">세 개념은 같은 층위가 아닙니다.</p>
+<p style="font-size:16px;line-height:1.8;">1) Grounded AI: 근거에 묶는다는 목적과 원칙</p>
+<p style="font-size:16px;line-height:1.8;">2) RAG: 답하기 전에 외부 문서를 검색해 AI에게 함께 주는 방법. 그라운딩을 구현하는 대표 방식</p>
+<p style="font-size:16px;line-height:1.8;">3) 파인튜닝: 모델을 추가로 학습시켜 말투, 형식, 작업 방식을 바꾸는 방법</p>
+<p style="font-size:16px;line-height:1.8;">Microsoft와 AWS 문서는 파인튜닝을 새 지식을 넣는 용도가 아니라 행동과 스타일을 바꾸는 용도로 설명합니다.</p>
+<p style="font-size:16px;line-height:1.8;">그래서 &quot;최신 자료로 답하게 하고 싶다&quot;면 RAG, &quot;항상 이 톤과 형식으로 쓰게 하고 싶다&quot;면 파인튜닝 쪽입니다.</p>
+<p style="text-align:center;background-color:#eeeeee;color:#666666;font-size:14px;padding:28px 12px;">📷 [사진2: 지식 문제는 RAG, 행동 문제는 파인튜닝 구분 카드 — images/02.png]<br>(문제의 종류로 고르기)</p>
+<p style="font-size:22px;font-weight:bold;color:#03a94f;margin-top:28px;">■ 한눈에 비교하면?</p>
+<p style="font-size:16px;line-height:1.8;">1) 최신성: RAG는 자료를 바꾸면 곧바로 반영됩니다. 파인튜닝은 다시 학습해야 해서 시간이 걸려요.</p>
+<p style="font-size:16px;line-height:1.8;">2) 출처 인용: RAG는 어떤 자료에서 나온 답인지 보여 줄 수 있습니다. 파인튜닝은 응답에 출처가 붙지 않습니다.</p>
+<p style="font-size:16px;line-height:1.8;">3) 준비 부담: RAG는 자료 정리와 검색 환경이 필요하고, 파인튜닝은 학습 데이터와 시간, 비용이 더 듭니다.</p>
+<p style="font-size:16px;line-height:1.8;">4) 잘 맞는 일: RAG는 최신 문서와 사내 자료 질문, 파인튜닝은 톤, 형식, 분류처럼 반복되는 작업입니다.</p>
+<p style="font-size:16px;line-height:1.8;">둘은 함께 쓸 수도 있어요. 다만 이 비교는 공식 문서 설명을 검색으로 확인한 것이고, 비용이나 정확도 같은 수치 비교는 확인하지 못해 넣지 않았습니다.</p>
+<p style="text-align:center;background-color:#eeeeee;color:#666666;font-size:14px;padding:28px 12px;">📷 [사진3: RAG와 파인튜닝 4가지 비교 카드 — images/03.png]<br>(최신성, 출처, 준비 부담, 잘 맞는 일)</p>
+<p style="font-size:22px;font-weight:bold;color:#03a94f;margin-top:28px;">■ 일하는 방식에 연결하면 어떻게 될까요?</p>
+<p style="font-size:16px;line-height:1.8;">대체로 아래 순서를 권합니다. 실패하는 이유에 따라 달라질 수 있어요.</p>
+<p style="font-size:16px;line-height:1.8;">1) 프롬프트와 자료 첨부: 내 자료를 붙여 넣고 &quot;이 자료 안에서만 답해줘&quot;라고 요청</p>
+<p style="font-size:16px;line-height:1.8;">2) RAG: 자료가 많아지면 문서 첨부형 서비스나 검색 연동 도구 사용</p>
+<p style="font-size:16px;line-height:1.8;">3) 파인튜닝: 같은 형식을 대량으로 반복하는데 1, 2번으로 일관성이 안 나올 때 검토</p>
+<p style="font-size:16px;line-height:1.8;">개인이 파인튜닝까지 갈 일은 드물다는 것이 제 판단입니다. AWS도 많은 조직에 필요하지 않다고 설명하지만, 개인 사용자를 직접 다룬 문서는 확인하지 못했어요.</p>
+<p style="text-align:center;background-color:#eeeeee;color:#666666;font-size:14px;padding:28px 12px;">📷 [사진4: 프롬프트, RAG, 파인튜닝 선택 순서 도식 — images/04.png]<br>(작게 시작해서 필요할 때 키우기)</p>
+<p style="font-size:22px;font-weight:bold;color:#03a94f;margin-top:28px;">■ 자소서·면접 준비에는 이렇게 쓰세요</p>
+<p style="font-size:16px;line-height:1.8;">내 경험노트를 근거 자료로 올리고, 아래 문구로 요청해 보세요.</p>
+<p style="font-size:16px;line-height:1.8;">1) 자료 안의 내용만 쓰기: &quot;아래 경험노트 안의 내용만 사용해 초안을 써줘.&quot;</p>
+<p style="font-size:16px;line-height:1.8;">2) 근거 표시하기: &quot;문장마다 근거 문장을 붙이고, 근거가 없으면 그 문장을 빼줘.&quot;</p>
+<p style="font-size:16px;line-height:1.8;">3) 모르면 모른다고 하기: &quot;자료에 없는 내용은 자료에 없음이라고 쓰고, 필요한 정보는 되물어줘.&quot;</p>
+<p style="font-size:16px;line-height:1.8;">이 요청 방식은 Anthropic 공식 가이드의 기법을 자소서와 면접에 맞게 옮긴 것입니다. 문구 자체는 제가 만든 예시예요.</p>
+<p style="font-size:16px;line-height:1.8;">면접 답변은 숫자, 역할, 기간을 내 자료와 직접 대조해 보세요. 자료에 없는 성과가 나오면 환각 신호입니다.</p>
+<p style="text-align:center;background-color:#eeeeee;color:#666666;font-size:14px;padding:28px 12px;">📷 [사진5: 자소서·면접용 요청 문구 3가지 카드 — images/05.png]<br>(자료 안에서만, 근거 표시, 모르면 되묻기)</p>
+<p style="font-size:22px;font-weight:bold;color:#03a94f;margin-top:28px;">■ 그래도 확인은 내가 합니다</p>
+<p style="font-size:16px;line-height:1.8;">1) 근거 자료가 틀리거나 부족하면 답도 틀립니다.</p>
+<p style="font-size:16px;line-height:1.8;">2) 출처가 붙어 있어도 원문과 맞는지 직접 확인해야 합니다.</p>
+<p style="font-size:16px;line-height:1.8;">3) 이름, 학교, 연락처 같은 개인정보는 가려서 올리고, 서비스의 데이터 정책을 확인하세요.</p>
+<p style="text-align:center;background-color:#eeeeee;color:#666666;font-size:14px;padding:28px 12px;">📷 [사진6: 사용 전 확인 3가지 체크리스트 — images/06.png]<br>(자료 점검, 출처 대조, 개인정보)</p>
+<p style="font-size:16px;line-height:1.8;">AI를 내 일에 맞게 쓰는 방법이 막막하다면 하는 일과 쓰고 싶은 자료를 메모해서 보내 주세요. 함께 정리해 드릴게요.</p>
+<p style="font-size:22px;font-weight:bold;color:#03a94f;margin-top:28px;">■ 자주 묻는 질문(FAQ)</p>
+<p style="font-size:16px;line-height:1.8;"><b>Q. 커리어캐쳐는 어떤 곳인가요?</b></p>
+<p style="font-size:16px;line-height:1.8;">A. 커리어캐쳐는 AI를 활용한 진로·취업 교육과 자기소개서·면접 컨설팅을 하는 브랜드입니다.</p>
+<p style="font-size:16px;line-height:1.8;"><b>Q. Grounded AI와 RAG는 같은 말인가요?</b></p>
+<p style="font-size:16px;line-height:1.8;">A. 같지 않습니다. 그라운딩은 근거에 묶는다는 원칙이고, RAG는 그 원칙을 구현하는 대표 방법입니다. 업체마다 용어 범위가 조금씩 달라요.</p>
+<p style="font-size:16px;line-height:1.8;"><b>Q. 파인튜닝하면 환각이 없어지나요?</b></p>
+<p style="font-size:16px;line-height:1.8;">A. 파인튜닝의 환각 감소 효과는 공식 근거를 확인하지 못했습니다. 파인튜닝은 새 지식 주입보다 행동과 스타일 조정에 쓰는 방법으로 설명됩니다.</p>
+<p style="text-align:center;font-size:14px;color:#666666;">─────────────<br><b>커리어캐쳐(CareerCatcher) 안은경 | AI 자기소개서·AI면접·진로 코칭</b><br>카톡 문의: <a href="https://open.kakao.com/o/gxIxJ3Si">https://open.kakao.com/o/gxIxJ3Si</a><br>메일: dms5147@gmail.com</p>
+</article>
+</div>
+<script>
+const toast=document.getElementById('toast');
+function say(t){toast.textContent=t;setTimeout(()=>toast.textContent='',2500)}
+function selectCopy(el){const r=document.createRange();r.selectNodeContents(el);const s=getSelection();s.removeAllRanges();s.addRange(r);let ok=false;try{ok=document.execCommand('copy')}catch(e){}return ok}
+async function copyRich(el){
+  try{const html=el.innerHTML,text=el.innerText;
+    await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([html],{type:'text/html'}),'text/plain':new Blob([text],{type:'text/plain'})})]);return true}
+  catch(e){return selectCopy(el)}
+}
+async function copyText(el){try{await navigator.clipboard.writeText(el.innerText);return true}catch(e){return selectCopy(el)}}
+document.getElementById('copyBody').onclick=async()=>say(await copyRich(document.getElementById('post'))?'본문 복사됨':'본문이 선택됐어요. 길게 눌러 복사해 주세요')
+document.getElementById('copyTitle').onclick=async()=>say(await copyText(document.getElementById('title'))?'제목 복사됨':'제목이 선택됐어요. 복사해 주세요')
+document.getElementById('copyTags').onclick=async()=>say(await copyText(document.getElementById('tags'))?'태그 복사됨':'태그가 선택됐어요. 복사해 주세요')
+</script>
