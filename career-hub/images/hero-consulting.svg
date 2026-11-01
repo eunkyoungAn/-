@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 460" role="img" aria-label="커리어 컨설턴트와 학생이 함께 커리어 로드맵을 그리는 일러스트">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7c3aed"/><stop offset="1" stop-color="#3b0a7a"/></linearGradient>
+<linearGradient id="glow" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e9d5ff"/><stop offset="1" stop-color="#c084fc"/></linearGradient>
+<radialGradient id="halo" cx=".7" cy=".25" r=".6"><stop offset="0" stop-color="#f0abfc" stop-opacity=".55"/><stop offset="1" stop-color="#f0abfc" stop-opacity="0"/></radialGradient>
+</defs>
+<rect x="10" y="10" width="540" height="440" rx="36" fill="url(#bg)"/>
+<rect x="10" y="10" width="540" height="440" rx="36" fill="url(#halo)"/>
+<g stroke="#a78bfa" stroke-opacity=".25"><path d="M10 120h540M10 230h540M10 340h540M150 10v440M290 10v440M430 10v440"/></g>
+<!-- roadmap -->
+<path d="M70 380 C150 360 160 290 240 280 S360 230 400 160 S470 90 500 70" fill="none" stroke="url(#glow)" stroke-width="5" stroke-dasharray="2 12" stroke-linecap="round"/>
+<g fill="#fff"><circle cx="70" cy="380" r="9"/><circle cx="240" cy="280" r="9"/><circle cx="400" cy="160" r="9"/></g>
+<g font-family="sans-serif" font-size="12" font-weight="700" fill="#f5f3ff"><text x="52" y="408">관심</text><text x="222" y="308">경험</text><text x="380" y="190">강점</text></g>
+<g transform="translate(486 30)"><path d="M14 0v58" stroke="#fff" stroke-width="3"/><path d="M14 2h34l-8 10 8 10H14z" fill="#f0abfc"/></g>
+<!-- desk -->
+<rect x="120" y="330" width="320" height="14" rx="7" fill="#ddd6fe"/>
+<!-- laptop -->
+<rect x="230" y="276" width="100" height="56" rx="6" fill="#1e1b4b"/><rect x="238" y="283" width="84" height="42" rx="3" fill="#a78bfa"/>
+<path d="M248 312l14-12 12 8 18-18" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/>
+<!-- consultant (left) -->
+<g><circle cx="175" cy="214" r="24" fill="#fcd5c0"/><path d="M151 210c0-22 14-32 26-32s24 10 24 28c-10-8-28-6-50 4z" fill="#2e1065"/>
+<path d="M135 330c0-50 18-82 40-82s40 32 40 82z" fill="#f5f3ff"/><path d="M165 250l10 22 10-22" fill="#7c3aed"/></g>
+<!-- student (right) -->
+<g><circle cx="385" cy="222" r="22" fill="#f6c9a8"/><path d="M362 220c-2-20 12-30 24-30s24 8 22 28c-8-10-30-12-46 2z" fill="#4c1d95"/>
+<path d="M348 330c0-46 16-76 37-76s37 30 37 76z" fill="#f0abfc"/></g>
+<!-- speech bubbles -->
+<g font-family="sans-serif" font-weight="700">
+<rect x="60" y="110" width="150" height="54" rx="16" fill="#fff"/><path d="M150 162l14 18 2-18z" fill="#fff"/>
+<text x="76" y="134" font-size="13" fill="#5b21b6">어떤 경험이</text><text x="76" y="152" font-size="13" fill="#5b21b6">가장 즐거웠나요?</text>
+<rect x="326" y="104" width="172" height="54" rx="16" fill="#facc15"/><path d="M380 156l-6 20 18-20z" fill="#facc15"/>
+<text x="340" y="128" font-size="13" fill="#3b0764">동아리에서 웹사이트를</text><text x="340" y="146" font-size="13" fill="#3b0764">만들었어요!</text>
+</g>
+<g fill="#fde68a"><path d="M300 70l5 13 13 5-13 5-5 13-5-13-13-5 13-5z"/><path d="M90 60l3 8 8 3-8 3-3 8-3-8-8-3 8-3z" opacity=".8"/></g>
+<text x="40" y="54" font-family="sans-serif" font-size="11" letter-spacing="3" fill="#ddd6fe" font-weight="700">1:1 CAREER CONSULTING</text>
+</svg>
