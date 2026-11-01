@@ -21,6 +21,7 @@
 |---|---|---|
 | `[보고서]` | 보고서, 가이드, 양식, 사업 정보, 논문·연구 | 한 장 → `one-page-report-docx`/`-hwpx`, 두 장 → `two-page-report-docx`, hwpx 양식 채우기 → `hwpx-autofill-conversion`, 그 외 문서 → `docs` |
 | `[블로그]` | 블로그 글, 원고, 카드뉴스, SNS | 블로그 → `blog-post`(+`office-blogger`), 카드뉴스 → `office-cardnews-designer`, 마지막에 `office-reviewer` 검수 |
+| `[리뷰]` | 쿠팡 상품 리뷰 | `coupang-review` (메모 기반, 경험 지어내기 금지, 등록은 직접) |
 | `[PPT]` | 강의안, 교안, 발표자료, 커리큘럼 | 설계 → `office-lecture-designer`(+`edu-project-os`), 파일 → `pptx` |
 | `[설정]` | 작업 환경, 자동화, 배포 | 별도 스킬 없음 |
 
