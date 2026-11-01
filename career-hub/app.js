@@ -89,7 +89,8 @@ function showJob(key) {
   const b2 = block('2', '현직자가 말하는 일하는 환경', '현직자 인터뷰에서 자주 언급되는 근무 환경이에요. 회사마다 다르니 인터뷰로 직접 확인해 보세요.');
   j.env.items.forEach(([t, d]) => { const c = el('div', 'dr-row'); c.append(el('b', '', t), el('p', '', d)); b2.append(c); });
   const askBox = el('div', 'dr-card dr-ask'); askBox.append(el('b', '', '현직자 인터뷰에서 물어볼 질문'), list(j.env.ask)); b2.append(askBox);
-  const l2 = el('div', 'dr-links'); l2.append(link('https://www.career.go.kr/cnet/front/base/job/jobList.do', '커리어넷 직업정보·직업인 인터뷰'), link('https://www.work24.go.kr/', '고용24 직업정보')); b2.append(l2);
+  b2.append(el('p', 'dr-mini', '관련 직업 정보 더 보기'));
+  const l2 = el('div', 'dr-links'); l2.append(link('https://www.saramin.co.kr/zf_user/search?searchword=' + q(j.kw), '사람인'), link('https://www.jobkorea.co.kr/Search/?stext=' + q(j.kw), '잡코리아'), link('https://kr.indeed.com/jobs?q=' + q(j.kw), '인디드'), link('https://www.career.go.kr/cnet/front/base/job/jobList.do', '커리어넷 직업인 인터뷰'), link('https://www.work24.go.kr/', '고용24 직업정보')); b2.append(l2);
   const b3 = block('3', '공고 기반 추천 프로젝트', '공고의 요건과 우대 사항을 직접 증명할 수 있는 프로젝트예요.');
   j.projects.forEach(([t, why, how]) => { const c = el('div', 'dr-card dr-project'); c.append(el('span', 'dr-tag', why), el('b', '', t), el('p', '', how)); b3.append(c); });
   const b4 = block('4', '실패한 프로젝트 되살리기', '끝까지 못 한 프로젝트도 원인과 개선 과정을 보여주면 강력한 근거가 돼요.');
