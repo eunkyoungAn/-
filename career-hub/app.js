@@ -93,6 +93,8 @@ function showJob(key) {
   const l2 = el('div', 'dr-links'); l2.append(link('https://www.saramin.co.kr/zf_user/search?searchword=' + q(j.kw), '사람인'), link('https://www.jobkorea.co.kr/Search/?stext=' + q(j.kw), '잡코리아'), link('https://kr.indeed.com/jobs?q=' + q(j.kw), '인디드'), link('https://www.career.go.kr/cnet/front/base/job/jobList.do', '커리어넷 직업인 인터뷰'), link('https://www.work24.go.kr/', '고용24 직업정보')); b2.append(l2);
   const b3 = block('3', '공고 기반 추천 프로젝트', '공고의 요건과 우대 사항을 직접 증명할 수 있는 프로젝트예요.');
   j.projects.forEach(([t, why, how]) => { const c = el('div', 'dr-card dr-project'); c.append(el('span', 'dr-tag', why), el('b', '', t), el('p', '', how)); b3.append(c); });
+  b3.append(el('p', 'dr-mini', '이 프로젝트가 요구되는 실제 공고 찾아보기'));
+  const l3 = el('div', 'dr-links'); l3.append(link('https://www.saramin.co.kr/zf_user/search?searchword=' + q(j.kw), '사람인'), link('https://www.jobkorea.co.kr/Search/?stext=' + q(j.kw), '잡코리아'), link('https://kr.indeed.com/jobs?q=' + q(j.kw), '인디드')); b3.append(l3);
   const b4 = block('4', '실패한 프로젝트 되살리기', '끝까지 못 한 프로젝트도 원인과 개선 과정을 보여주면 강력한 근거가 돼요.');
   const steps = el('ol', 'dr-steps'); [['흔한 실패', j.revive[0]], ['원인 찾기', j.revive[1]], ['되살리기', j.revive[2]]].forEach(([t, d]) => { const li = el('li'); li.append(el('b', '', t), el('p', '', d)); steps.append(li); });
   b4.append(steps, el('p', 'dr-mini', '💡 포트폴리오에는 “실패 → 원인 → 개선 → 결과” 순서로 쓰고, 아래 Career Studio에서 AI 요청문으로 정리해 보세요.'));
