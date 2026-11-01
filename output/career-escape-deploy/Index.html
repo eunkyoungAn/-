@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Career Escape</title>
+  <style>
+    :root{
+      --night:#171029;--deep:#0f0a1e;--panel:#251a43;--field:#130e25;
+      --line:#6755a0;--cream:#fff8e7;--muted:#c9c0e3;--gold:#ffd166;
+      --mint:#67e8d1;--pink:#ff6f91;--ok:#79e18e;--danger:#ff8098;
+      --shadow:6px 6px 0 #090612;
+    }
+    *{box-sizing:border-box}html{background:var(--night)}body{margin:0;color:var(--cream);background:
+      radial-gradient(circle at 12% 10%,#37245d 0,transparent 28%),
+      radial-gradient(circle at 90% 0,#25265c 0,transparent 25%),var(--night);
+      font-family:Pretendard,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;line-height:1.6;min-height:100vh}
+    button,input,textarea{font:inherit}button{cursor:pointer}a{color:var(--gold)}
+    .app{max-width:760px;margin:0 auto;padding:22px 14px 70px}.brand{text-align:center;margin:6px 0 20px}
+    .eyebrow{color:var(--gold);font-weight:900;font-size:12px;letter-spacing:.14em}.brand h1{font-size:clamp(30px,8vw,48px);line-height:1.1;margin:8px 0;text-shadow:4px 4px 0 #090612}.brand p{color:var(--muted);margin:0;font-size:14px}
+    .map{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:18px 0}.map-step{border:2px solid var(--line);background:var(--deep);padding:9px 4px;text-align:center;color:#9488bd;font-size:11px;font-weight:800}.map-step.active{border-color:var(--gold);color:var(--gold)}.map-step.done{border-color:var(--mint);color:var(--mint)}
+    .panel{background:var(--panel);border:3px solid var(--line);box-shadow:var(--shadow);padding:clamp(18px,5vw,34px);border-radius:4px}.panel h2{font-size:24px;line-height:1.3;margin:0 0 8px}.lead{color:var(--muted);margin:0 0 24px}.room{font-size:12px;color:var(--gold);font-weight:900;letter-spacing:.08em;margin-bottom:8px}
+    .field{margin:0 0 18px}.field label{display:block;margin:0 0 7px;color:var(--cream);font-size:14px;font-weight:800}.required{color:var(--pink)}.hint{font-size:12px;color:#a99dcc;margin-top:6px}
+    input,textarea{width:100%;border:2px solid var(--line);background:var(--field);color:var(--cream);border-radius:4px;padding:13px 14px;outline:none}input:focus,textarea:focus{border-color:var(--gold)}textarea{min-height:120px;resize:vertical}#answer{min-height:180px}
+    .consent{display:flex;gap:10px;align-items:flex-start;background:var(--field);border:2px solid #4b3b7b;padding:12px}.consent input{width:20px;height:20px;flex:0 0 auto;margin-top:2px}.consent span{font-size:12px;color:var(--muted)}
+    .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:24px;flex-wrap:wrap}.btn{border:3px solid #080510;background:var(--gold);color:#171029;font-weight:900;padding:12px 20px;min-height:48px;box-shadow:4px 4px 0 #080510}.btn:active{transform:translate(3px,3px);box-shadow:1px 1px 0 #080510}.btn.secondary{background:#44336e;color:var(--cream)}.btn.ghost{background:transparent;color:var(--muted);border-color:var(--line);box-shadow:none}.btn:disabled{opacity:.45;cursor:not-allowed}
+    .status{display:none;margin:0 0 16px;padding:11px 13px;border:2px solid var(--line);background:var(--deep);font-size:13px}.status.show{display:block}.status.error{border-color:var(--danger);color:#ffd6df}.status.ok{border-color:var(--ok);color:#d5ffdd}
+    .progress-wrap{margin:18px 0}.progress-meta{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:7px}.progress{height:12px;background:var(--deep);border:2px solid var(--line)}.progress span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--mint),var(--gold));transition:width .35s}
+    .badges{display:flex;gap:7px;flex-wrap:wrap;margin:14px 0}.badge{font-size:12px;color:var(--mint);border:1px solid #378f84;background:#10352f;padding:5px 9px;border-radius:999px}.clue{color:var(--mint);font-size:13px;margin:0 0 8px}.question{font-size:clamp(20px,5vw,28px);line-height:1.45;margin:0 0 18px}
+    .loading{text-align:center;padding:40px 12px}.orb{width:52px;height:52px;border:5px solid #54447e;border-top-color:var(--gold);border-radius:50%;margin:0 auto 18px;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+    .result-block{background:var(--field);border:2px solid #4f3f7d;padding:16px;margin:14px 0}.result-block h3{color:var(--gold);margin:0 0 10px;font-size:17px}.result-block p{white-space:pre-wrap;margin:7px 0}.result-block ul,.result-block ol{padding-left:22px;margin:8px 0}.result-block li{margin-bottom:7px}.cover{background:#20183b;padding:15px;border-left:4px solid var(--mint)}
+    .notice{font-size:12px;color:var(--muted);padding:12px;background:#2d2444;border-left:4px solid var(--gold);margin:16px 0}.hidden{display:none!important}
+    .resume{display:none;margin:0 0 14px;padding:12px;border:2px dashed var(--gold);background:#30234c}.resume.show{display:flex;gap:10px;align-items:center;justify-content:space-between}.resume span{font-size:13px}
+    .company{background:var(--field);border:2px solid #4f3f7d;border-left:4px solid var(--gold);padding:14px 16px;margin:14px 0}.company h3{margin:0 0 4px;font-size:16px;color:var(--gold)}.company .meta{font-size:12px;color:#a99dcc;margin:0 0 10px}.company .meta a{color:var(--mint)}
+    .company .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin:10px 0}.kpi{background:#1c1533;border:1px solid #3d3066;padding:9px 10px}.kpi b{display:block;font-size:17px;color:var(--cream);line-height:1.2}.kpi span{font-size:11px;color:#a99dcc}.kpi small{display:block;font-size:11px;color:var(--mint);margin-top:2px}
+    .company table{width:100%;border-collapse:collapse;font-size:12.5px;margin:8px 0}.company th{text-align:left;color:#a99dcc;font-weight:700;padding:5px 6px;border-bottom:1px solid #3d3066}.company td{padding:6px;border-bottom:1px solid #2c2349}.company td.num,.company th.num{text-align:right;white-space:nowrap}
+    .company .tag{display:inline-block;font-size:11px;font-weight:800;padding:2px 7px;border-radius:999px;margin-right:6px}.tag.fact{background:#10352f;color:var(--mint);border:1px solid #378f84}.tag.interp{background:#3a2a10;color:var(--gold);border:1px solid #8a6a1e}
+    .company .interp{margin-top:12px;padding-top:10px;border-top:1px dashed #4f3f7d}.company .interp p{margin:6px 0;font-size:13px}.company ul{padding-left:18px;margin:6px 0}.company li{margin-bottom:5px;font-size:13px}.company .limit{font-size:11.5px;color:#a99dcc;margin-top:8px}
+    .up{color:var(--ok)}.down{color:var(--danger)}
+    .keybox{background:var(--deep);border:2px solid var(--gold);padding:14px 16px;margin:0 0 22px}.keybox h3{margin:0 0 4px;font-size:15px;color:var(--gold)}.keybox .why{font-size:12px;color:var(--muted);margin:0 0 12px}
+    .keyrow{display:flex;gap:8px;flex-wrap:wrap}.keyrow input{flex:1;min-width:180px}.keyrow .btn{padding:10px 16px;min-height:46px;white-space:nowrap}
+    .keystate{font-size:12.5px;margin-top:9px;display:none}.keystate.show{display:block}.keystate.ok{color:var(--ok)}.keystate.bad{color:var(--danger)}.keystate.wait{color:var(--muted)}
+    .keyhelp{margin-top:11px;font-size:12.5px;color:var(--muted)}.keyhelp summary{cursor:pointer;color:var(--gold);font-weight:800}.keyhelp ol{padding-left:20px;margin:9px 0 0}.keyhelp li{margin-bottom:6px}
+    .keynote{font-size:11.5px;color:#a99dcc;margin-top:10px;padding-top:9px;border-top:1px dashed #4b3b7b}
+    @media(max-width:520px){.app{padding-top:12px}.panel{box-shadow:4px 4px 0 #090612}.map-step{font-size:9px;padding:8px 2px}.actions .btn{width:100%;justify-content:center}.resume.show{display:block}.resume .btn{width:100%;margin-top:8px}.brand h1{font-size:36px}}
+    @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="brand">
+      <div class="eyebrow">CAREERCATCHER PRESENTS</div>
+      <h1>CAREER ESCAPE</h1>
+      <p>경험 속 단서를 찾아 직무에 맞는 답변으로 탈출하세요.</p>
+    </header>
+
+    <nav class="map" aria-label="진행 단계">
+      <div class="map-step active" data-map="1">1. 목표 정하기</div>
+      <div class="map-step" data-map="2">2. 경험 찾아보기</div>
+      <div class="map-step" data-map="3">3. 경험 정리하기</div>
+      <div class="map-step" data-map="4">4. 커리어 완성</div>
+    </nav>
+
+    <div id="globalStatus" class="status" role="alert"></div>
+    <div id="resumeBox" class="resume"><span>이 기기에서 진행하던 기록이 있습니다.</span><button class="btn secondary" id="resumeBtn">이어서 하기</button></div>
+
+    <section class="panel" id="startView">
+      <div class="room">ROOM 1 · 목표 정하기</div>
+      <h2>탈출 목표를 입력하세요</h2>
+      <p class="lead">준비물(내 Gemini 키)과 필수 정보 3개만 입력하면 직무 맞춤 질문이 시작됩니다.</p>
+      <form id="startForm">
+        <div class="keybox">
+          <h3>준비물 · 나의 Gemini API 키 <span class="required">*</span></h3>
+          <p class="why">이 게임의 질문과 자기소개서는 구글 Gemini AI가 만듭니다. 각자 본인 키로 작동하므로 <b>무료</b>로 쓸 수 있습니다. 입력한 내용은 이 앱의 서버(Google Apps Script)를 거쳐 Gemini로 전달되고, 이름·이메일·답변과 결과는 결과 메일 발송과 이어하기를 위해 운영자의 Google 시트에 저장됩니다.</p>
+          <div class="keyrow">
+            <input id="geminiKey" type="password" autocomplete="off" spellcheck="false" placeholder="Google AI Studio에서 발급한 Gemini API 키를 붙여넣으세요" aria-required="true">
+            <button class="btn secondary" id="keyCheckBtn" type="button">키 확인</button>
+          </div>
+          <div id="keyState" class="keystate"></div>
+          <details class="keyhelp">
+            <summary>키 발급받는 방법 (1분, 무료)</summary>
+            <ol>
+              <li><a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a> 접속 후 구글 계정으로 로그인합니다.</li>
+              <li><b>API 키 만들기(Create API key)</b> 버튼을 누릅니다.</li>
+              <li>발급된 키가 나오면 복사 버튼을 눌러 키 전체를 복사합니다.</li>
+              <li>위 칸에 붙여넣고 <b>키 확인</b>을 누르세요.</li>
+            </ol>
+          </details>
+          <p class="keynote">키는 이 브라우저에만 저장되어 다음 접속 때 다시 입력하지 않아도 됩니다. 요청을 처리할 때만 서버를 거치며, 운영자의 시트에는 저장되지 않습니다. 공용 PC에서는 사용 후 아래 <b>키 지우기</b>를 눌러주세요. <button type="button" id="keyClearBtn" class="btn ghost small" style="padding:4px 10px;min-height:auto;font-size:11.5px;margin-left:4px">키 지우기</button></p>
+        </div>
+        <div class="field"><label for="name">이름 <span class="required">*</span></label><input id="name" name="name" maxlength="80" autocomplete="name" required></div>
+        <div class="field"><label for="email">결과 받을 이메일 <span class="required">*</span></label><input id="email" name="email" type="email" maxlength="160" autocomplete="email" required></div>
+        <div class="field"><label for="role">희망직무 <span class="required">*</span></label><input id="role" name="role" maxlength="120" placeholder="예: 콘텐츠 마케터, 안전관리자, 데이터 분석가" required></div>
+        <div class="field"><label for="company">희망기업 <span class="hint">선택</span></label><input id="company" name="company" maxlength="120" placeholder="예: 삼성전자 (정확한 법인명)"><div class="hint">상장사·공시 대상 기업은 DART 공시(직원 수·평균 연봉·매출 등)를 함께 분석합니다. 이 경우 첫 질문까지 1~2분 걸릴 수 있어요.</div></div>
+        <div class="field"><label for="postingUrl">채용공고 URL <span class="hint">선택</span></label><input id="postingUrl" name="postingUrl" type="url" maxlength="500" placeholder="https://..."></div>
+        <div class="field"><label for="postingText">채용공고 내용 <span class="hint">선택 · 붙여넣기 권장</span></label><textarea id="postingText" name="postingText" maxlength="6000" placeholder="주요업무, 자격요건, 우대사항을 붙여넣으면 분석이 더 정확해집니다."></textarea></div>
+        <label class="consent"><input id="consent" type="checkbox" required><span>입력한 직무·경험 정보가 AI 분석을 위해 <b>본인이 발급한 Gemini API 키</b>로 Google Gemini에 전송되고, 결과 발송 및 운영 기록을 위해 Google Sheets에 저장되는 것에 동의합니다. API 키 자체는 저장되지 않습니다. 주민번호·건강정보 등 민감정보는 입력하지 마세요.</span></label>
+        <div class="actions"><button class="btn" id="startBtn" type="submit">탈출 시작</button></div>
+      </form>
+    </section>
+
+    <section class="panel hidden" id="questionView">
+      <div class="room">ROOM 2 · 경험 찾아보기</div>
+      <div class="progress-wrap"><div class="progress-meta"><span id="progressLabel">질문 1</span><span>약 15분</span></div><div class="progress"><span id="progressBar"></span></div></div>
+      <div id="requirements" class="badges"></div>
+      <div id="companyCard"></div>
+      <div id="clue" class="clue">첫 번째 단서를 찾습니다.</div>
+      <h2 id="question" class="question"></h2>
+      <div class="field"><label for="answer">나의 답변</label><textarea id="answer" maxlength="6000" placeholder="사실대로 구체적으로 작성해 주세요."></textarea><div class="hint">입력하지 않은 경험이나 성과는 결과에 사용하지 않습니다.</div></div>
+      <div class="actions"><button class="btn ghost hidden" id="finishBtn">현재 답변으로 결과 만들기</button><button class="btn" id="answerBtn">단서 제출</button></div>
+    </section>
+
+    <section class="panel hidden" id="loadingView">
+      <div class="loading"><div class="orb"></div><h2 id="loadingTitle">단서를 분석하고 있습니다</h2><p class="lead" id="loadingText">창을 닫지 말고 잠시 기다려 주세요.</p></div>
+    </section>
+
+    <section class="panel hidden" id="resultView">
+      <div class="room">ROOM 4 · 커리어 완성</div>
+      <h2>탈출 성공!</h2>
+      <p class="lead" id="emailMessage"></p>
+      <div id="resultContent"></div>
+      <div class="actions"><button class="btn secondary hidden" id="resendBtn">이메일 재발송</button><button class="btn" id="restartBtn">새로 시작</button></div>
+    </section>
+  </main>
+
+  <script>
+    const STORAGE_KEY='career_escape_mvp_session';
+    const KEY_STORAGE='career_escape_gemini_key';
+    let state={sessionId:'',questionNumber:1,totalQuestions:5};
+    const $=id=>document.getElementById(id);
+    const views=['startView','questionView','loadingView','resultView'];
+
+    document.addEventListener('DOMContentLoaded',()=>{
+      bind();
+      google.script.run.withSuccessHandler(config=>{
+        if(!config.ready) showStatus(config.message,'error');
+      }).withFailureHandler(handleError).getPublicConfig();
+      restoreKey();
+      if(localStorage.getItem(STORAGE_KEY)) $('resumeBox').classList.add('show');
+    });
+
+    function bind(){
+      $('startForm').addEventListener('submit',start);
+      $('answerBtn').addEventListener('click',submitAnswer);
+      $('finishBtn').addEventListener('click',finishNow);
+      $('resumeBtn').addEventListener('click',resume);
+      $('restartBtn').addEventListener('click',restart);
+      $('resendBtn').addEventListener('click',resend);
+      $('keyCheckBtn').addEventListener('click',()=>checkKey(true));
+      $('keyClearBtn').addEventListener('click',clearKey);
+      $('geminiKey').addEventListener('input',()=>{state.keyVerified=false;setKeyState('','')});
+    }
+
+    /* ---- Gemini 키: 이 브라우저에만 보관하고 서버에는 저장하지 않는다 ---- */
+    function getKey(){return $('geminiKey').value.trim()}
+    function saveKey(){try{localStorage.setItem(KEY_STORAGE,getKey())}catch(e){}}
+    function restoreKey(){
+      let saved='';try{saved=localStorage.getItem(KEY_STORAGE)||''}catch(e){}
+      if(saved){$('geminiKey').value=saved;setKeyState('저장된 키를 불러왔습니다. 바로 시작할 수 있어요.','ok')}
+    }
+    function clearKey(){
+      try{localStorage.removeItem(KEY_STORAGE)}catch(e){}
+      $('geminiKey').value='';state.keyVerified=false;setKeyState('이 브라우저에서 키를 지웠습니다.','wait');
+    }
+    function setKeyState(message,type){
+      const el=$('keyState');el.textContent=message||'';
+      el.className='keystate'+(message?' show '+(type||''):'');
+    }
+    function checkKey(manual){
+      const key=getKey();
+      if(!key){setKeyState('키를 먼저 붙여넣어 주세요.','bad');return}
+      $('keyCheckBtn').disabled=true;setKeyState('키를 확인하는 중입니다...','wait');
+      google.script.run.withSuccessHandler(result=>{
+        $('keyCheckBtn').disabled=false;
+        state.keyVerified=result.ok;
+        if(result.ok){saveKey();setKeyState('사용 가능한 키입니다. 이 브라우저에 저장했어요.','ok')}
+        else setKeyState(result.message,'bad');
+      }).withFailureHandler(error=>{
+        $('keyCheckBtn').disabled=false;state.keyVerified=false;
+        setKeyState(error&&error.message?error.message:'키 확인 중 오류가 발생했습니다.','bad');
+      }).checkGeminiKey(key);
+    }
+
+    function start(event){
+      event.preventDefault(); clearStatus();
+      if(!getKey()){setKeyState('Gemini API 키를 입력해 주세요. 위 "키 발급받는 방법"을 펼치면 1분 만에 받을 수 있어요.','bad');$('geminiKey').focus();return}
+      if(!$('startForm').reportValidity()) return;
+      saveKey();
+      showView('loadingView'); setMap(1); $('loadingTitle').textContent='목표를 분석하고 있습니다';
+      $('loadingText').textContent=$('company').value.trim()
+        ?'DART에서 희망기업의 공시(직원 현황·재무)를 조회하고 있어요. 첫 질문까지 1~2분 정도 걸릴 수 있으니 창을 닫지 말고 기다려 주세요.'
+        :'창을 닫지 말고 잠시 기다려 주세요.';
+      const payload={name:$('name').value,email:$('email').value,role:$('role').value,company:$('company').value,postingUrl:$('postingUrl').value,postingText:$('postingText').value,consent:$('consent').checked,geminiKey:getKey()};
+      google.script.run.withSuccessHandler(data=>{state={...state,...data};localStorage.setItem(STORAGE_KEY,data.sessionId);showQuestion(data);}).withFailureHandler(handleError).startSession(payload);
+    }
+
+    function submitAnswer(){
+      const answer=$('answer').value.trim();
+      if(answer.length<10){showStatus('경험을 구체적으로 10자 이상 적어주세요.','error');return}
+      if(!getKey()){showStatus('Gemini API 키가 없습니다. 처음 화면에서 키를 다시 입력해 주세요.','error');return}
+      clearStatus();showView('loadingView');setMap(2);$('loadingTitle').textContent='다음 단서를 찾고 있습니다';$('loadingText').textContent='이전 답변과 겹치지 않는 질문을 고르고 있습니다.';
+      google.script.run.withSuccessHandler(handleProgress).withFailureHandler(handleError).submitAnswer(state.sessionId,answer,getKey());
+    }
+
+    function finishNow(){
+      if(!getKey()){showStatus('Gemini API 키가 없습니다. 처음 화면에서 키를 다시 입력해 주세요.','error');return}
+      clearStatus();showView('loadingView');setMap(3);$('loadingTitle').textContent='경험 증거를 조합하고 있습니다';$('loadingText').textContent='자기소개서와 면접 질문을 만드는 중입니다.';
+      google.script.run.withSuccessHandler(handleProgress).withFailureHandler(handleError).finishSession(state.sessionId,getKey());
+    }
+
+    function handleProgress(data){
+      if(data.complete){showResult(data);return}
+      state={...state,...data};showQuestion(data);
+    }
+
+    function showQuestion(data){
+      showView('questionView');setMap(2);$('question').textContent=data.question;$('answer').value='';$('answer').focus();
+      $('clue').textContent=data.clue||'답변에서 다음 단서를 찾았습니다.';
+      $('progressLabel').textContent=`질문 ${data.questionNumber} / ${data.totalQuestions}`;
+      $('progressBar').style.width=`${Math.min(100,(data.questionNumber/data.totalQuestions)*100)}%`;
+      if(data.questionNumber>=4)$('finishBtn').classList.remove('hidden');else $('finishBtn').classList.add('hidden');
+      if(data.requirements) renderRequirements(data.requirements,data.requirementsBasis);
+      if(data.company!==undefined){state.company=data.company;$('companyCard').innerHTML=companyCardHtml(data.company);}
+      $('resumeBox').classList.remove('show');
+    }
+
+    function companyCardHtml(c){
+      if(!c) return '';
+      if(!c.matched){
+        const tips=(c.suggestions&&c.suggestions.length)?`<div class="limit">비슷한 이름: ${escapeHtml(c.suggestions.join(', '))} — 정확한 법인명으로 다시 시작하면 공시 정보를 볼 수 있어요.</div>`:'';
+        const reason=(c.limitations&&c.limitations.length)?`<div class="limit">사유: ${escapeHtml(c.limitations.join(' / '))}</div>`:'';
+        return `<div class="company"><h3>희망기업 · ${escapeHtml(c.name)}</h3><p class="meta">DART 공시 정보를 불러오지 못해 채용공고 중심으로 분석합니다. (비상장·소규모 기업은 공시 대상이 아닙니다)</p>${reason}${tips}</div>`;
+      }
+      const e=c.employees,f=c.financials,i=c.interpretation;
+      let kpis='';
+      if(e){
+        kpis+=`<div class="kpi"><span>직원 수</span><b>${fmtCount(e.total)}명</b></div>`;
+        if(e.avg_tenure_years)kpis+=`<div class="kpi"><span>평균 근속</span><b>${e.avg_tenure_years}년</b></div>`;
+        if(e.avg_salary_krw)kpis+=`<div class="kpi"><span>1인 평균 급여</span><b>${fmtKrw(e.avg_salary_krw)}</b>${e.salary_unit_uncertain?'<small>공시 단위 확인 필요</small>':''}</div>`;
+      }
+      if(f)f.items.forEach(item=>{
+        const ch=item.change_pct===null?'':`<small class="${item.change_pct>=0?'up':'down'}">전년 대비 ${item.change_pct>=0?'+':''}${item.change_pct}%</small>`;
+        kpis+=`<div class="kpi"><span>${escapeHtml(f.basis)} ${escapeHtml(item.name)}</span><b>${fmtKrw(item.current)}</b>${ch}</div>`;
+      });
+      let units='';
+      if(e&&e.units.length>1){
+        units=`<table><tr><th>사업부문</th><th class="num">직원 수</th><th class="num">평균 근속</th><th class="num">1인 평균 급여</th></tr>`+
+          e.units.slice(0,6).map(u=>`<tr><td>${escapeHtml(u.name)}</td><td class="num">${fmtCount(u.count)}명</td><td class="num">${u.avg_tenure_years?u.avg_tenure_years+'년':'-'}</td><td class="num">${u.avg_salary_krw?fmtKrw(u.avg_salary_krw):'-'}</td></tr>`).join('')+`</table>`;
+      }
+      let interp='';
+      if(i){
+        interp=`<div class="interp"><span class="tag interp">해석</span><span class="meta">AI 추정이며 공식 정보가 아닙니다.</span>`;
+        if(i.related_units.length)interp+=`<p><b>희망직무와 연관성이 높은 부문</b></p><ul>${i.related_units.map(u=>`<li><b>${escapeHtml(u.unit)}</b> — ${escapeHtml(u.reason)}</li>`).join('')}</ul>`;
+        if(i.characteristics)interp+=`<p><b>조직 특징</b><br>${escapeHtml(i.characteristics)}</p>`;
+        if(i.how_to_use.length)interp+=`<p><b>자소서·면접에 이렇게 쓰세요</b></p><ul>${i.how_to_use.map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ul>`;
+        interp+=`</div>`;
+      }
+      const limits=(c.limitations&&c.limitations.length)?`<div class="limit">${escapeHtml(c.limitations.join(' / '))}</div>`:'';
+      return `<div class="company"><h3>희망기업 한눈에 · ${escapeHtml(c.name)}</h3><p class="meta"><span class="tag fact">공식 사실</span>${escapeHtml(c.as_of)} · <a href="${escapeHtml(c.source_url)}" target="_blank" rel="noopener">DART 사업보고서 보기</a></p><div class="kpis">${kpis}</div>${units}${interp}${limits}</div>`;
+    }
+    function fmtCount(n){return Math.round(Number(n)||0).toLocaleString('ko-KR')}
+    function fmtKrw(n){const v=Number(n)||0,a=Math.abs(v),s=v<0?'-':'';if(a>=1e12)return s+(Math.round(a/1e11)/10).toLocaleString('ko-KR')+'조 원';if(a>=1e10)return s+Math.round(a/1e8).toLocaleString('ko-KR')+'억 원';if(a>=1e8)return s+(Math.round(a/1e7)/10).toLocaleString('ko-KR')+'억 원';if(a>=1e4)return s+Math.round(a/1e4).toLocaleString('ko-KR')+'만 원';return s+Math.round(a).toLocaleString('ko-KR')+'원'}
+
+    function renderRequirements(items,basis){
+      const label=basis==='source_backed'?'공고 근거':'잠정 분석';
+      $('requirements').innerHTML=(items||[]).slice(0,7).map(x=>`<span class="badge">${escapeHtml(x)}</span>`).join('')+(items&&items.length?`<span class="badge">${label}</span>`:'');
+    }
+
+    function showResult(data){
+      state={...state,...data};showView('resultView');setMap(4);localStorage.removeItem(STORAGE_KEY);
+      $('emailMessage').textContent=data.emailMessage||(data.emailSent?'입력한 이메일로 결과를 발송했습니다.':'결과가 저장되었습니다.');
+      $('resendBtn').classList.toggle('hidden',Boolean(data.emailSent));
+      const r=data.result,c=r.experience_card;
+      $('resultContent').innerHTML=`
+        <div class="result-block"><h3>직무 경험카드</h3><p><b>${escapeHtml(c.title)}</b></p><p><b>상황</b><br>${escapeHtml(c.context)}</p><p><b>역할</b><br>${escapeHtml(c.role)}</p><p><b>문제</b><br>${escapeHtml(c.problem)}</p><p><b>행동</b></p>${list(c.actions)}<p><b>성과·학습</b></p>${list(c.results)}<p><b>연결 역량</b></p>${list(c.competencies)}</div>
+        <div class="result-block"><h3>자기소개서 초안</h3><p class="cover">${escapeHtml(r.cover_letter.draft)}</p><p><b>수정 포인트</b></p>${list(r.cover_letter.revision_points)}</div>
+        <div class="result-block"><h3>면접 예상질문</h3><ol>${r.interview.questions.map(q=>`<li>${escapeHtml(q.question)}</li>`).join('')}</ol></div>
+        ${r.company_analysis&&r.company_analysis.matched?`<div class="result-block"><h3>희망기업 분석</h3>${companyCardHtml(r.company_analysis)}</div>`:''}
+        <div class="notice"><b>확인 필요</b>${list(r.warnings)}</div>`;
+    }
+
+    function resume(){
+      const id=localStorage.getItem(STORAGE_KEY);if(!id)return;
+      if(!getKey()){showStatus('이어서 하려면 Gemini API 키가 필요합니다. 아래 준비물 칸에 키를 입력한 뒤 다시 눌러주세요.','error');$('geminiKey').focus();return}
+      showView('loadingView');$('loadingTitle').textContent='진행 기록을 불러오고 있습니다';$('loadingText').textContent='창을 닫지 말고 잠시 기다려 주세요.';
+      google.script.run.withSuccessHandler(data=>{if(!data.found){restart();showStatus('진행 기록을 찾지 못했습니다.','error');return}state={...state,...data};data.complete?showResult(data):showQuestion(data)}).withFailureHandler(handleError).resumeSession(id);
+    }
+
+    function resend(){
+      $('resendBtn').disabled=true;
+      google.script.run.withSuccessHandler(()=>{$('resendBtn').classList.add('hidden');$('emailMessage').textContent='이메일을 다시 발송했습니다.'}).withFailureHandler(error=>{$('resendBtn').disabled=false;handleError(error)}).resendResultEmail(state.sessionId);
+    }
+
+    function restart(){localStorage.removeItem(STORAGE_KEY);state={sessionId:'',questionNumber:1,totalQuestions:5};$('startForm').reset();setKeyState('','');restoreKey();$('resultContent').innerHTML='';$('companyCard').innerHTML='';$('requirements').innerHTML='';$('resumeBox').classList.remove('show');showView('startView');setMap(1);clearStatus()}
+    function showView(id){views.forEach(view=>$(view).classList.toggle('hidden',view!==id));window.scrollTo({top:0,behavior:'smooth'})}
+    function setMap(step){document.querySelectorAll('.map-step').forEach((el,i)=>{el.classList.toggle('active',i+1===step);el.classList.toggle('done',i+1<step)})}
+    function handleError(error){showView(state.sessionId?'questionView':'startView');showStatus(error&&error.message?error.message:'처리 중 오류가 발생했습니다.','error')}
+    function showStatus(message,type){const el=$('globalStatus');el.textContent=message;el.className='status show '+(type||'')}
+    function clearStatus(){$('globalStatus').className='status';$('globalStatus').textContent=''}
+    function list(items){return `<ul>${(items||[]).map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ul>`}
+    function escapeHtml(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+  </script>
+</body>
+</html>
+
