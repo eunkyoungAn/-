@@ -396,6 +396,7 @@ function resumeSession(sessionId) {
         complete: true,
         sessionId: id,
         result: JSON.parse(output['결과 JSON']),
+        qaLog: toQaLog_(getAnswers_(id)),
         emailSent: session['이메일상태'] === '발송완료'
       };
     }
@@ -502,6 +503,7 @@ function completeSession_(session, answers) {
     found: true,
     sessionId: sessionId,
     result: result,
+    qaLog: toQaLog_(answers),
     emailSent: emailSent,
     emailMessage: emailMessage
   };
@@ -1287,8 +1289,9 @@ function formatKrw_(n) {
 function sendResultEmail_(session, result) {
   if (MailApp.getRemainingDailyQuota() < 1) throw new Error('오늘의 이메일 발송 한도를 초과했습니다.');
   const subject = ('[Career Escape] ' + session['희망직무'] + ' 경험 분석 결과').replace(/[\r\n]+/g, ' ');
-  const html = buildResultEmailHtml_(session, result);
-  const plain = buildResultPlainText_(session, result);
+  const qaLog = toQaLog_(getAnswers_(session['세션ID']));
+  const html = buildResultEmailHtml_(session, result, qaLog);
+  const plain = buildResultPlainText_(session, result, qaLog);
   MailApp.sendEmail({
     to: session['이메일'],
     subject: subject,
@@ -1298,7 +1301,7 @@ function sendResultEmail_(session, result) {
   });
 }
 
-function buildResultEmailHtml_(session, result) {
+function buildResultEmailHtml_(session, result, qaLog) {
   const card = result.experience_card;
   const questions = result.interview.questions.map(function (item, index) {
     return '<li style="margin:0 0 10px"><b>' + (index + 1) + '.</b> ' + html_(item.question) + '</li>';
@@ -1327,13 +1330,14 @@ function buildResultEmailHtml_(session, result) {
     '<h2 style="font-size:19px;color:#5b35b5;margin-top:28px">3. 면접 예상질문</h2>',
     '<ol style="padding-left:20px">' + questions + '</ol>',
     buildCompanyEmailHtml_(result.company_analysis, list),
+    buildQaEmailHtml_(qaLog),
     '<div style="margin-top:24px;padding:14px;background:#fff7dc;border-radius:10px;font-size:13px"><b>확인 안내</b>' + list(result.warnings) + '</div>',
     '<p style="font-size:12px;color:#6f7480;margin-top:24px">이 결과는 사용자가 입력한 내용을 AI가 정리한 초안입니다. 제출 전 사실관계와 표현을 직접 확인해 주세요.</p>',
     '</div></div>'
   ].join('');
 }
 
-function buildResultPlainText_(session, result) {
+function buildResultPlainText_(session, result, qaLog) {
   return [
     '[Career Escape] ' + session['희망직무'] + ' 경험 분석 결과',
     '',
@@ -1351,8 +1355,36 @@ function buildResultPlainText_(session, result) {
     result.interview.questions.map(function (item, index) { return (index + 1) + '. ' + item.question; }).join('\n'),
     '',
     buildCompanyPlainText_(result.company_analysis),
+    buildQaPlainText_(qaLog),
     '제출 전 사실관계와 표현을 직접 확인해 주세요.'
   ].join('\n');
+}
+
+/** 사용자가 받은 질문과 직접 쓴 답변 원문 (결과 화면·메일 공용). */
+function toQaLog_(answers) {
+  return (Array.isArray(answers) ? answers : []).map(function (item, index) {
+    return {number: index + 1, question: String(item.question || ''), answer: String(item.answer || '')};
+  }).filter(function (item) { return item.question || item.answer; });
+}
+
+function buildQaEmailHtml_(qaLog) {
+  if (!qaLog || !qaLog.length) return '';
+  return [
+    '<h2 style="font-size:19px;color:#5b35b5;margin-top:28px">나의 질문·답변 기록</h2>',
+    '<p style="font-size:12px;color:#6f7480;margin:0 0 10px">진행 중 받은 질문과 직접 작성한 답변 원문입니다. 결과물을 고칠 때 근거로 활용하세요.</p>',
+    qaLog.map(function (item) {
+      return '<div style="margin:0 0 12px;padding:12px 14px;background:#f7f4ff;border-radius:10px">'
+        + '<p style="margin:0 0 6px"><b>Q' + item.number + '.</b> ' + html_(item.question) + '</p>'
+        + '<p style="margin:0;white-space:pre-wrap"><b>A.</b> ' + html_(item.answer) + '</p></div>';
+    }).join('')
+  ].join('');
+}
+
+function buildQaPlainText_(qaLog) {
+  if (!qaLog || !qaLog.length) return '';
+  return ['[나의 질문·답변 기록]'].concat(qaLog.map(function (item) {
+    return 'Q' + item.number + '. ' + item.question + '\nA. ' + item.answer;
+  })).join('\n\n') + '\n';
 }
 
 function buildCompanyEmailHtml_(company, list) {
