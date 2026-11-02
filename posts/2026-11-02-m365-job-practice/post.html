@@ -1,0 +1,94 @@
+<title>M365 실전취업 원고</title>
+<style>
+/* 레이아웃: 위쪽 복사 버튼 바 + 네이버 본문폭(약 680px) 원고 미리보기 */
+:root{--bg:#f6f7f5;--paper:#ffffff;--fg:#1f2421;--muted:#5f6b64;--accent:#03a94f;--line:#dfe4e0;
+--body:"Noto Sans KR",system-ui,sans-serif;--display:"Gowun Batang","Noto Serif KR",serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#151816;--paper:#1d211f;--fg:#e8ece9;--muted:#a3ada7;--accent:#35c977;--line:#323833;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#151816;--paper:#1d211f;--fg:#e8ece9;--muted:#a3ada7;--accent:#35c977;--line:#323833;color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);padding:16px;line-height:1.7}
+.wrap{max-width:720px;margin:0 auto;display:grid;gap:16px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.bar p{flex-basis:100%;margin:0;color:var(--muted);font-size:13px}
+button{font:inherit;font-size:14px;padding:10px 14px;border-radius:8px;border:1px solid var(--line);background:var(--paper);color:var(--fg);cursor:pointer}
+button.main{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.toast{color:var(--accent);font-size:13px;font-weight:700}
+.meta{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;gap:6px;font-size:14px}
+.meta b{color:var(--muted);font-weight:500;margin-right:6px}
+article{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:24px 20px;min-width:0}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@700&family=Noto+Sans+KR:wght@400;700&display=swap">
+<div class="wrap">
+  <div class="bar">
+    <button class="main" id="copyBody">본문 서식 포함 복사</button>
+    <button id="copyTitle">제목 복사</button>
+    <button id="copyTags">태그 복사</button>
+    <span class="toast" id="toast" aria-live="polite"></span>
+    <p>네이버 글쓰기에서 본문 칸에 붙여넣으면 굵게·글자 크기·색이 함께 들어갑니다. 붙여넣은 뒤 [임시저장]을 눌러 주세요.</p>
+  </div>
+  <div class="meta">
+    <div><b>제목</b><span id="title">M365 관리자 과정 실전취업 수업 | 이력서·자소서·포트폴리오 | 커리어캐쳐</span></div>
+    <div><b>태그</b><span id="tags">#커리어캐쳐 #CareerCatcher #커리어캐쳐실전취업 #커리어캐쳐코칭 #M365시스템운영관리자 #서울시여성미래일자리 #남부여성발전센터 #실전취업 #자기소개서작성 #경험노트 #AI포트폴리오 #포트폴리오작성 #이력서작성 #취업준비 #AI자소서 #직업훈련후기 #여성일자리</span></div>
+  </div>
+<article id="post">
+<p style="font-size:16px;line-height:1.8;">&quot;프로젝트 준비하기도 바쁜데, 취업 준비는 언제 하죠?&quot;</p>
+<p style="font-size:16px;line-height:1.8;">다음 주 프로젝트를 앞두고, 오늘은 취업 준비의 기본부터 짚어 보았습니다.</p>
+<p style="font-size:16px;line-height:1.8;background-color:#f1faf4;padding:12px;"><b>✅ 이 글에서 알 수 있는 것</b><br>1) M365 시스템 운영 관리자 과정 실전취업 수업 내용<br>2) 자기소개서 준비와 경험노트 작성이 중요한 이유<br>3) 포트폴리오를 만드는 AI 도구 쓰는 순서</p>
+<p style="font-size:16px;line-height:1.8;background-color:#f1faf4;padding:12px;"><b>커리어캐쳐(CareerCatcher)는 AI를 활용한 진로·취업 교육과 자기소개서·면접 컨설팅을 하는 브랜드입니다.</b></p>
+<p style="font-size:16px;line-height:1.8;">이 글은 커리어캐쳐 안은경이 11월 2일에 진행한 실전취업 수업 후기입니다. 서울특별시남부여성발전센터에서 운영하는 2026년 서울시 여성미래일자리 공모사업 &quot;M365 시스템 운영 관리자&quot; 과정 교육생분들과 이력서, 자기소개서, 포트폴리오 작성을 함께 했어요.</p>
+<p style="text-align:center;background-color:#eeeeee;color:#666666;font-size:14px;padding:28px 12px;">📷 [사진1: M365 시스템 운영 관리자 과정 실전취업 수업 현장 — images/01_classroom.jpg]<br>(노트북으로 실습하는 교육생분들, 교실 전경)</p>
+<p style="font-size:22px;font-weight:bold;color:#03a94f;margin-top:28px;">■ 오늘 실전취업 수업은 어떤 시간이었나요?</p>
+<p style="font-size:16px;line-height:1.8;">M365 시스템 운영 관리자 과정은 9월 10일부터 11월 13일까지, 월요일부터 금요일 9시 30분~13시 30분에 진행됩니다.</p>
+<p style="font-size:16px;line-height:1.8;">오늘 수업은 그중 &quot;실전취업&quot; 시간이었어요. 이력서, 자기소개서, 포트폴리오를 직접 써 보는 실습 중심으로 진행했습니다.</p>
+<p style="font-size:16px;line-height:1.8;">1) 자기소개서 준비</p>
+<p style="font-size:16px;line-height:1.8;">2) 경험노트 작성</p>
+<p style="font-size:16px;line-height:1.8;">3) 포트폴리오를 위한 AI 도구 활용</p>
+<p style="font-size:16px;line-height:1.8;">다음 주 프로젝트와 연결해서, 기본적인 취업 준비를 먼저 점검하는 데 초점을 두었습니다.</p>
+<p style="font-size:22px;font-weight:bold;color:#03a94f;margin-top:28px;">■ 자기소개서 준비, 왜 경험노트부터 시작할까요?</p>
+<p style="font-size:16px;line-height:1.8;">자기소개서를 쓰려고 앉으면 &quot;쓸 경험이 없다&quot;는 생각부터 드는 분이 많습니다.</p>
+<p style="font-size:16px;line-height:1.8;">이때 필요한 것은 문장력보다 경험을 한곳에 모아 두는 일입니다.</p>
+<p style="font-size:16px;line-height:1.8;">경험노트에 프로젝트와 활동, 맡은 역할, 해본 일을 적어 두면 자기소개서와 면접, 포트폴리오에 반복해서 꺼내 쓸 수 있어요.</p>
+<p style="font-size:16px;line-height:1.8;">이번 수업에서도 문장을 다듬기 전에 경험노트 작성의 중요성을 함께 짚었습니다.</p>
+<p style="text-align:center;background-color:#eeeeee;color:#666666;font-size:14px;padding:28px 12px;">📷 [사진2: 경험노트 작성 예시 화면 — 직접 캡처해서 넣어 주세요]<br>(경험을 한곳에 모아 두는 경험노트)</p>
+<p style="font-size:22px;font-weight:bold;color:#03a94f;margin-top:28px;">■ 포트폴리오는 AI 도구로 어떻게 만들었나요?</p>
+<p style="font-size:16px;line-height:1.8;">수업은 커리어캐쳐 취업 준비 허브의 AI 서비스 3종으로 진행했습니다.</p>
+<p style="font-size:16px;line-height:1.8;">1) 기업·경험 찾기: 질문에 답하며 숨은 경험을 꺼내고, 희망기업이 공시 대상이면 공시를 참고해 분석합니다. 경험이 막막할 때 여기서 시작해요.</p>
+<p style="font-size:16px;line-height:1.8;">2) AI 자기소개서 작성: 정리한 기업과 경험을 바탕으로 자기소개서 초안을 만듭니다.</p>
+<p style="font-size:16px;line-height:1.8;">3) AI 포트폴리오 작성: 입력한 내용으로 직무 역량이 드러나는 포트폴리오를 만듭니다.</p>
+<p style="font-size:16px;line-height:1.8;">경험이 이미 정리돼 있다면 2번부터 시작하시면 됩니다.</p>
+<p style="text-align:center;background-color:#eeeeee;color:#666666;font-size:14px;padding:28px 12px;">📷 [사진3: 취업 준비 허브 AI 서비스 3종 화면 — 직접 캡처해서 넣어 주세요]<br>(기업·경험 찾기, AI 자기소개서, AI 포트폴리오)</p>
+<p style="font-size:22px;font-weight:bold;color:#03a94f;margin-top:28px;">■ AI 도구를 쓸 때 꼭 지켜야 할 점은 무엇인가요?</p>
+<p style="font-size:16px;line-height:1.8;">1) AI 결과는 초안입니다. 없는 경험을 지어내지 않았는지 직접 읽고 확인하세요.</p>
+<p style="font-size:16px;line-height:1.8;">2) 서비스 이용은 회원가입 없이 무료지만, AI 사용 한도와 요금은 선택한 AI에 따라 달라요.</p>
+<p style="font-size:16px;line-height:1.8;">3) 서비스를 쓰려면 본인의 AI 키가 필요하고, 키는 서버에 저장하지 않습니다.</p>
+<p style="font-size:16px;line-height:1.8;">4) 기업·경험 찾기는 입력한 이름, 이메일, 답변이 운영자의 구글 시트에 저장됩니다. 민감한 개인정보는 빼고 입력해 주세요.</p>
+<p style="text-align:center;background-color:#eeeeee;color:#666666;font-size:14px;padding:28px 12px;">📷 [사진4: 포트폴리오 완성 화면 — 직접 캡처해서 넣어 주세요]<br>(입력한 내용으로 만들어진 포트폴리오 미리보기)</p>
+<p style="font-size:22px;font-weight:bold;color:#03a94f;margin-top:28px;">■ 포트폴리오, 어디까지 준비하면 될까요?</p>
+<p style="font-size:16px;line-height:1.8;">처음부터 완벽한 포트폴리오를 만들 필요는 없습니다.</p>
+<p style="font-size:16px;line-height:1.8;">지원할 직무와 프로젝트 하나만 있어도 시작할 수 있어요. 다음 주 프로젝트가 끝나면 그 경험을 경험노트에 추가하고, 포트폴리오에 한 칸씩 채워 나가면 됩니다.</p>
+<p style="text-align:center;background-color:#eeeeee;color:#666666;font-size:14px;padding:28px 12px;">📷 [사진5: 취업 준비 3단계 체크리스트 카드 — 이미지 제작 예정]<br>(경험노트, 자기소개서, 포트폴리오 순서)</p>
+<p style="font-size:16px;line-height:1.8;">수업이나 컨설팅이 궁금하시면 카톡이나 메일로 문의해 주세요.</p>
+<p style="font-size:22px;font-weight:bold;color:#03a94f;margin-top:28px;">■ 자주 묻는 질문(FAQ)</p>
+<p style="font-size:16px;line-height:1.8;"><b>Q. 커리어캐쳐는 어떤 곳인가요?</b></p>
+<p style="font-size:16px;line-height:1.8;">A. 커리어캐쳐는 AI를 활용한 진로·취업 교육과 자기소개서·면접 컨설팅을 하는 브랜드입니다.</p>
+<p style="font-size:16px;line-height:1.8;"><b>Q. 경험노트는 왜 먼저 쓰나요?</b></p>
+<p style="font-size:16px;line-height:1.8;">A. 자기소개서, 면접, 포트폴리오에 쓸 경험을 한곳에 모아 두면 매번 처음부터 떠올리지 않아도 되기 때문입니다.</p>
+<p style="font-size:16px;line-height:1.8;"><b>Q. AI로 쓴 자기소개서를 그대로 내도 되나요?</b></p>
+<p style="font-size:16px;line-height:1.8;">A. 그대로 내기보다 사실과 맞는지 확인하고 내 말로 다듬어 주세요.</p>
+<p style="text-align:center;font-size:14px;color:#666666;">─────────────<br><b>커리어캐쳐(CareerCatcher) 안은경 | AI 자기소개서·AI면접·진로 코칭</b><br>카톡 문의: <a href="https://open.kakao.com/o/gxIxJ3Si">https://open.kakao.com/o/gxIxJ3Si</a><br>메일: dms5147@gmail.com</p>
+</article>
+</div>
+<script>
+const toast=document.getElementById('toast');
+function say(t){toast.textContent=t;setTimeout(()=>toast.textContent='',2500)}
+function selectCopy(el){const r=document.createRange();r.selectNodeContents(el);const s=getSelection();s.removeAllRanges();s.addRange(r);let ok=false;try{ok=document.execCommand('copy')}catch(e){}return ok}
+async function copyRich(el){
+  try{const html=el.innerHTML,text=el.innerText;
+    await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([html],{type:'text/html'}),'text/plain':new Blob([text],{type:'text/plain'})})]);return true}
+  catch(e){return selectCopy(el)}
+}
+async function copyText(el){try{await navigator.clipboard.writeText(el.innerText);return true}catch(e){return selectCopy(el)}}
+document.getElementById('copyBody').onclick=async()=>say(await copyRich(document.getElementById('post'))?'본문 복사됨':'본문이 선택됐어요. 길게 눌러 복사해 주세요')
+document.getElementById('copyTitle').onclick=async()=>say(await copyText(document.getElementById('title'))?'제목 복사됨':'제목이 선택됐어요. 복사해 주세요')
+document.getElementById('copyTags').onclick=async()=>say(await copyText(document.getElementById('tags'))?'태그 복사됨':'태그가 선택됐어요. 복사해 주세요')
+</script>
