@@ -1,0 +1,47 @@
+<!doctype html>
+<!-- AI 유튜브 이슈 포스터 (일간 1080x1350). 복사 후 {{...}} 를 채운다. 카드 5개 고정, 없으면 해당 카드 삭제.
+     폰트 경로는 ai-report/daily/YYYY-MM-DD/ 기준. 썸네일은 넣지 않는다. -->
+<html lang="ko"><head><meta charset="utf-8"><title>AI 유튜브 이슈 {{YYYY-MM-DD}}</title>
+<style>
+@font-face{font-family:P;font-weight:500;src:url(../../../templates/카드뉴스_매거진_사진형/fonts/Pretendard-Medium.woff2)}
+@font-face{font-family:P;font-weight:700;src:url(../../../templates/카드뉴스_매거진_사진형/fonts/Pretendard-Bold.woff2)}
+@font-face{font-family:P;font-weight:900;src:url(../../../templates/카드뉴스_매거진_사진형/fonts/Pretendard-Black.woff2)}
+:root{--ink:#14171F;--sub:#5B6270;--bg:#F6F4EE;--card:#fff;
+ --claude:#D9622B;--rival:#2F6FED;--tool:#14A37F}
+*{margin:0;box-sizing:border-box;word-break:keep-all}
+body{font-family:P,sans-serif;background:#888}
+.poster{width:1080px;height:1350px;background:var(--bg);padding:64px 60px 48px;position:relative;overflow:hidden;color:var(--ink)}
+.top{display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:26px;color:var(--sub)}
+.top b{background:var(--ink);color:#fff;padding:8px 18px;border-radius:999px;font-size:24px}
+h1{font-weight:900;font-size:60px;line-height:1.18;margin:26px 0 30px;letter-spacing:-1px}
+.card{background:var(--card);border-radius:22px;padding:22px 26px;margin-bottom:16px;display:flex;gap:22px;align-items:flex-start;border-left:12px solid var(--c)}
+.card .n{font-weight:900;font-size:54px;line-height:1;color:var(--c);width:46px;flex:none}
+.card .chip{display:inline-block;background:var(--c);color:#fff;font-weight:700;font-size:20px;padding:3px 12px;border-radius:999px;margin-bottom:8px}
+.card h2{font-weight:900;font-size:33px;line-height:1.25;margin-bottom:6px}
+.card p{font-weight:500;font-size:25px;line-height:1.4;color:#2b303b}
+.card .meta{margin-top:8px;font-size:21px;color:var(--sub);font-weight:500}
+.card .meta i{font-style:normal;border:1.5px solid var(--sub);border-radius:6px;padding:0 8px;margin-left:8px;font-size:19px}
+.cl{--c:var(--claude)}.rv{--c:var(--rival)}.tl{--c:var(--tool)}
+.insight{background:var(--ink);color:#fff;border-radius:22px;padding:24px 30px;margin-top:6px}
+.insight small{font-weight:700;font-size:21px;color:#FFD66B}
+.insight p{font-weight:700;font-size:29px;line-height:1.4;margin-top:6px}
+.foot{position:absolute;left:60px;right:60px;bottom:30px;font-size:20px;color:var(--sub);font-weight:500;display:flex;justify-content:space-between}
+</style></head><body>
+<div class="poster">
+  <div class="top"><span>AI YOUTUBE DAILY</span><b>{{M월 D일 요일}}</b></div>
+  <h1>{{오늘의 한 줄 헤드라인}}</h1>
+
+  <!-- 카드 반복: 클래스 cl(Claude) / rv(경쟁 모델) / tl(도구·팁) -->
+  <div class="card cl"><div class="n">1</div><div>
+    <span class="chip">Claude</span>
+    <h2>{{한 줄 요지(40자 내외)}}</h2>
+    <p>{{보충 1~2줄}}</p>
+    <div class="meta">{{채널명}} · {{게시일}}<i>{{공식 확인|자막 확인|제목·설명 기준|검색요약}}</i></div>
+  </div></div>
+  <!-- 2~5번 카드도 동일 구조 -->
+
+  <div class="insight"><small>오늘의 한 줄 인사이트</small><p>{{커리어·AI 활용 관점 시사점}}</p></div>
+
+  <div class="foot"><span>링크는 슬랙 스레드 · 요약은 제목·설명·자막 기준</span><span>커리어캐쳐 | CareerCatcher</span></div>
+</div>
+</body></html>
