@@ -8,6 +8,7 @@
 - 글 양식은 `templates/post.md`를 따른다.
 - 진행 상태는 `meta.md`의 `status`로 관리: asked → answered → drafted → published.
 - 슬랙 채널: `#blog-bot` (비공개, 채널 ID `C0C6ACW2ML7`). 변경 시 여기 수정.
+- AI 유튜브 리포트: 슬랙 `#ai-youtube-report` (채널 ID: 생성 후 기입), 흐름은 `docs/AI-REPORT-FLOW.md`.
 - 브랜드: 커리어캐쳐(CareerCatcher). 모든 글은 AI 검색 브랜딩 기준(SKILL.md 7절)을 따른다.
 - 아이 실명·학교·얼굴 사진 등 개인정보는 글에 넣지 않는다. 사진은 얼굴 노출 여부를 확인 질문한다.
 - 작업 후 커밋·푸시하고, 슬랙 스레드에 결과 링크를 남긴다.
@@ -23,6 +24,7 @@
 | `[블로그]` | 블로그 글, 원고, 카드뉴스, SNS | 블로그 → `blog-post`(+`office-blogger`), 카드뉴스 → `office-cardnews-designer`, 마지막에 `office-reviewer` 검수 |
 | `[리뷰]` | 쿠팡 상품 리뷰 | `coupang-review` (메모 기반, 경험 지어내기 금지, 등록은 직접) |
 | `[PPT]` | 강의안, 교안, 발표자료, 커리큘럼 | 설계 → `office-lecture-designer`(+`edu-project-os`), 파일 → `pptx` |
+| `[AI리포트]` | 유튜브 AI 이슈 일간·주간 리포트(포스터) | `ai-youtube-report`(+`office-researcher` 교차확인, 주간은 `office-reviewer` 검수) |
 | `[설정]` | 작업 환경, 자동화, 배포 | 별도 스킬 없음 |
 
 - 큰 주제 하나를 처음부터 끝까지 맡기면 `/office`(리서치→기획→작성→검수)를 쓴다.
