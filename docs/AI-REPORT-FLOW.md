@@ -17,13 +17,13 @@
 | 단계 | 내용 | 상태 |
 |---|---|---|
 | 0 준비 | 슬랙 채널 생성(C0CFT3QPYM7), 환경 허용 호스트(www.youtube.com), 채널 ID 검증(8곳) | 완료 |
-| 1 MVP | 일간 수동 1회 드라이런, 포스터 검수, 슬랙 시험 게시 | 대기 |
-| 2 일간 루틴 | 루틴 등록, 며칠 운영하며 키워드·채널 튜닝 | 대기 |
+| 1 MVP | 일간 수동 1회 드라이런, 포스터 검수, 슬랙 시험 게시 (2026-11-07) | 완료 |
+| 2 일간 루틴 | 평일 09:17 KST 자동 발송 등록, 며칠 운영하며 키워드·채널 튜닝 | 진행 중 |
 | 3 주간 | 주간 포스터 + 블로그 후보 연결, 루틴 등록 | 대기 |
 | 4 API 확장 | YouTube Data API(조회수·검색·쇼츠 제외). 키는 `request_credential`로만 등록(파일·env에 저장 금지) | 대기 |
 
 ## 알려진 제약
-- 기본 환경은 `youtube.com` 을 차단(403)한다. 환경 `eunkyoungan-blog-ai-report` 에 `www.youtube.com` 을 허용해 두었다. **루틴도 이 환경에서 돌려야 한다.**
+- 기본 환경은 `youtube.com` 을 차단(403)한다. 환경 `eunkyoungan-blog-ai-report` 에 `www.youtube.com`, `files.slack.com`(포스터 업로드) 을 허용해 두었다. **루틴도 이 환경에서 돌려야 한다.**
 - 이 환경(데이터센터 IP)에서 YouTube는 RSS(`/feeds/videos.xml`)에 404를 주고, 영상 페이지(`/watch`)는 구글 봇 확인 페이지로 보낸다(2026-11-07 확인). 봇 확인은 우회하지 않는다.
 - 그래서 1단계는 채널 `/videos` 페이지만 읽는다(`ai-report/tools/fetch_channel.py`). 제목·조회수·상대시간만 얻을 수 있다. 정확한 게시일·설명은 Phase 4(YouTube Data API)에서 보강한다.
 - 수집기가 실패하면 WebSearch 로 폴백한다(라벨 `검색요약`).

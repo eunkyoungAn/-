@@ -18,7 +18,7 @@ description: 지정 유튜브 채널의 AI(Claude, ChatGPT 등) 최신 영상 �
 - `ai-report/sources.md` 의 채널마다 `python3 -I ai-report/tools/fetch_channel.py <핸들> 10` 을 실행한다.
   - 이 환경에서는 RSS가 404, 영상 페이지(/watch)는 구글 봇 확인으로 막힌다. **봇 확인을 우회하지 않는다.**
   - 그래서 얻는 정보는 제목·조회수·상대시간(`age`: "5시간 전", "1일 전")뿐이다. 설명·자막은 없다.
-- `age` 가 "분 전/시간 전/1일 전"인 영상만 최근 24시간으로 본다(월요일은 "3일 전"까지).
+- `age_hours` ≤ 24 인 영상만 최근 24시간으로 본다(월요일은 ≤ 72). 문자열 부분 일치로 거르지 않는다("11일 전"이 "1일 전"에 걸림).
 - 영상 내용 보충은 WebSearch(영상 제목·관련 공식 발표)로 한다. 라벨은 `제목 기준` 또는 `검색요약`.
 - `state/youtube_seen.json` 의 `seen` 에 있는 videoId 는 제외한다.
 - `ai-report/keywords.md` 로 분류(Claude / 경쟁 모델 / 도구·팁)하고 제외 규칙을 적용한다.
@@ -32,8 +32,11 @@ description: 지정 유튜브 채널의 AI(Claude, ChatGPT 등) 최신 영상 �
 
 ## 3. 포스터
 - 양식: `templates/ai-report-poster.html` 를 복사해 `ai-report/daily/YYYY-MM-DD/poster.html` 로 저장하고 내용을 채운다.
-- 1080×1350, Pretendard, 분류별 색 고정, 카드당 3줄 이내.
-- Playwright(사전 설치, `require('playwright')`) 로 `poster.png` 캡처(deviceScaleFactor 2). 캡처 후 이미지를 열어 글자 잘림·가독성을 확인한다.
+  예시(첫 실행본): `ai-report/daily/2026-11-07/poster.html`
+- 1080×1350, Pretendard, 분류별 색 고정, 카드당 h2 1줄 + 설명 1줄.
+- 렌더: `node ai-report/tools/render_poster.js <poster.html 절대경로> <poster.png 절대경로> 2`
+  - 출력 JSON의 `overflow` 가 true 이거나 `insightBottom` > `footTop` 이면 글을 줄이거나 간격을 줄여 다시 렌더한다.
+  - 렌더 후 PNG를 열어 글자 잘림·겹침을 눈으로 확인한다.
 
 ## 4. 저장
 - 폴더: `ai-report/daily/YYYY-MM-DD/` (`report.md`, `poster.html`, `poster.png`, `meta.md`)
@@ -50,9 +53,13 @@ notes: <수집 실패·미확인 사항>
 - 보낸 videoId 를 `state/youtube_seen.json` 에 추가한다.
 
 ## 5. 전달
-- 슬랙 `#ai-youtube-report`: `slack_get_file_upload_url` → 업로드 → `slack_complete_file_upload` 로 poster.png 게시, 같은 스레드에 report.md 텍스트(링크 포함).
-- 채널에 처음 게시하기 전에 채널 설명을 확인한다.
-- 커밋·푸시 후 PR 생성·main 병합(저장소 CLAUDE.md 규칙).
+- 슬랙 `#ai-youtube-report`(C0CFT3QPYM7, 공개):
+  1) `slack_get_file_upload_url`(filename, content_length=파일 바이트 수, alt_txt)
+  2) `curl -X POST "$URL" -H "Content-Type: image/png" --data-binary @poster.png` (URL은 셸 변수로 그대로 사용, `files.slack.com` 허용 필요)
+  3) `slack_complete_file_upload`(channel_id, initial_comment: 날짜·헤드라인·"링크는 스레드에")
+  4) `slack_read_channel`(limit 1, detailed)로 방금 글의 `Message TS` 확인 → `slack_send_message`(thread_ts)로 TOP 5 링크·라벨·확인 출처
+- meta.md `status: sent`, `slack_thread` 기록 → 커밋·푸시 → PR 생성·main 병합(저장소 CLAUDE.md 규칙).
+- 업로드가 막히면(403) 이미지 없이 텍스트만 채널에 보내고 notes 에 사유를 적는다.
 
 ## 6. 주간 심층 리포트 (금요일)
 - 입력: 그 주 `ai-report/daily/*/report.md` + 신규 수집.
