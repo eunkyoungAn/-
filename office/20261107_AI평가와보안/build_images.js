@@ -45,7 +45,7 @@ h1{line-height:1.18;margin-top:22px;letter-spacing:-1px;position:relative;z-inde
 .four i{display:inline-block;width:36px;height:36px;line-height:36px;text-align:center;font-style:normal;background:#F0564A;color:#fff;font-weight:900;border-radius:50%;font-size:20px}
 .four b{display:block;font-size:30px;font-weight:900;margin:8px 0}.four small{display:block;font-size:20px;line-height:1.5;color:#444;font-weight:500}
 .sent{margin-top:22px;width:830px;background:#fff;border:4px solid #F0564A;padding:16px 24px;font-size:23px;font-weight:700;line-height:1.55}
-.ck{list-style:none;margin-top:26px;width:830px}.ck li{font-size:26px;font-weight:700;background:#fff;border:3px solid #111;padding:13px 22px;margin-bottom:12px}.ck i{color:#F0564A;font-style:normal;margin-right:14px;font-weight:900}
+.ck{list-style:none;padding:0;margin-top:26px;width:830px}.ck li{font-size:26px;font-weight:700;background:#fff;border:3px solid #111;padding:13px 22px;margin-bottom:12px}.ck i{color:#F0564A;font-style:normal;margin-right:14px;font-weight:900}
 .box{margin-top:16px;width:830px;background:#fff;border:4px solid #F0564A;padding:14px 24px;font-size:23px;font-weight:700;line-height:1.5}.box b{color:#F0564A}`;
 const link=['noto-sans-kr/500','noto-sans-kr/700','noto-sans-kr/900','nanum-myeongjo/800'].map(n=>{const[a,w]=n.split('/');return `<link rel="stylesheet" href="file://${F}${a}/${w}.css">`}).join('');
 fs.writeFileSync(TMP,`<html><head><meta charset="utf-8">${link}<style>${css}</style></head><body>${Object.values(cards).join('')}</body></html>`);
@@ -55,7 +55,7 @@ const els=await pg.$$('.b');const names=Object.keys(cards);
 for(let i=0;i<els.length;i++)await els[i].screenshot({path:OUT+names[i]+'.png'});
 // img1: 원본 데일리 카드를 PNG로 변환만 (가로 1080, 비율 유지)
 if(fs.existsSync(SRC1)){const p2=await br.newPage({viewport:{width:1080,height:1350}});
- await p2.setContent(`<body style="margin:0"><img id=i src="file://${SRC1}" style="width:1080px;display:block">`);
+ fs.writeFileSync(TMP+'.1.html',`<body style="margin:0"><img id=i src="file://${SRC1}" style="width:1080px;display:block">`);await p2.goto('file://'+TMP+'.1.html');
  await p2.waitForFunction(()=>document.getElementById('i').complete);
  const i=await p2.$('#i');const bb=await i.boundingBox();console.log('img1 box',bb.width,bb.height);
  await p2.setViewportSize({width:1080,height:Math.ceil(bb.height)});await i.screenshot({path:OUT+'img1.png'})}else console.log('NO img1 source');
