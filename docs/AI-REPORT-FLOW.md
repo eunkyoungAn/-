@@ -5,7 +5,7 @@
 
 ```
 [일간 루틴] 평일 아침 (KST 7시대, 분은 지터)
-  RSS(+WebSearch) 수집 → 중복 제거(state/youtube_seen.json) → 분류·TOP5 → 요약·교차확인
+  채널 /videos 페이지(+WebSearch) 수집 → 중복 제거(state/youtube_seen.json) → 분류·TOP5 → 요약·교차확인
   → poster.html → Playwright → poster.png → 슬랙 업로드 + 텍스트 → 커밋·PR·병합
 [주간 루틴] 금요일 오후
   일간 리포트 7일치 종합 → 포스터 2~3장 → 슬랙 + 블로그 주제 후보 3개(blog-ideas.md)
@@ -16,15 +16,17 @@
 ## 단계 (Phase)
 | 단계 | 내용 | 상태 |
 |---|---|---|
-| 0 준비 | 슬랙 채널 생성, 환경 허용 호스트(www.youtube.com), 채널 ID 검증 | 대기 |
+| 0 준비 | 슬랙 채널 생성(C0CFT3QPYM7), 환경 허용 호스트(www.youtube.com), 채널 ID 검증(8곳) | 완료 |
 | 1 MVP | 일간 수동 1회 드라이런, 포스터 검수, 슬랙 시험 게시 | 대기 |
 | 2 일간 루틴 | 루틴 등록, 며칠 운영하며 키워드·채널 튜닝 | 대기 |
 | 3 주간 | 주간 포스터 + 블로그 후보 연결, 루틴 등록 | 대기 |
 | 4 API 확장 | YouTube Data API(조회수·검색·쇼츠 제외). 키는 `request_credential`로만 등록(파일·env에 저장 금지) | 대기 |
 
 ## 알려진 제약
-- 클라우드 환경 프록시가 기본으로 `youtube.com`·`googleapis.com` 을 차단(403)한다. 환경 허용 호스트에 추가해야 RSS 수집이 된다. 루틴이 도는 환경에도 같이 적용.
-- 허용 전·실패 시 폴백은 WebSearch(제목·설명 수준, 라벨 `검색요약`).
+- 기본 환경은 `youtube.com` 을 차단(403)한다. 환경 `eunkyoungan-blog-ai-report` 에 `www.youtube.com` 을 허용해 두었다. **루틴도 이 환경에서 돌려야 한다.**
+- 이 환경(데이터센터 IP)에서 YouTube는 RSS(`/feeds/videos.xml`)에 404를 주고, 영상 페이지(`/watch`)는 구글 봇 확인 페이지로 보낸다(2026-11-07 확인). 봇 확인은 우회하지 않는다.
+- 그래서 1단계는 채널 `/videos` 페이지만 읽는다(`ai-report/tools/fetch_channel.py`). 제목·조회수·상대시간만 얻을 수 있다. 정확한 게시일·설명은 Phase 4(YouTube Data API)에서 보강한다.
+- 수집기가 실패하면 WebSearch 로 폴백한다(라벨 `검색요약`).
 - 썸네일은 저작권상 포스터에 넣지 않는다.
 
 ## 폴더
