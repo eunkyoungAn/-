@@ -6,19 +6,23 @@ description: 지정 유튜브 채널의 AI(Claude, ChatGPT 등) 최신 영상 �
 # AI 유튜브 이슈 리포트
 
 ## 원칙 (꼭 지킨다)
-- 영상 **제목·설명·자막에서 확인된 내용만** 요약한다. 없는 숫자·기능·출시일·가격을 지어내지 않는다.
+- 영상 **제목과 공식 출처에서 확인된 내용만** 요약한다. 없는 숫자·기능·출시일·가격을 지어내지 않는다.
 - 릴리스·가격·기능 같은 사실 주장은 가능하면 **공식 블로그/문서로 교차확인**(`office-researcher`)한다.
-- 항목마다 확인 수준 라벨을 붙인다: `공식 확인` / `자막 확인` / `제목·설명 기준` / `검색요약`.
+- 항목마다 확인 수준 라벨을 붙인다: `공식 확인` / `제목 기준` / `검색요약` (Phase 4 API 도입 후 `설명 확인` 추가).
 - 모든 항목에 원본 영상 링크·채널명·게시일을 넣는다. 영상 내용을 길게 인용하지 않고 요약만 한다.
 - 썸네일 이미지는 포스터에 넣지 않는다(저작권). 링크만 건다.
 - 수집이 막히면(네트워크 403 등) 지어내지 말고 WebSearch로 폴백하고 라벨을 `검색요약`으로 한다. 그것도 안 되면 슬랙에 사유만 남기고 종료한다.
 - 브랜드·문체 기준은 `careercatcher-skill-os`. 개인정보·내부정보는 넣지 않는다.
 
 ## 1. 입력 수집 (일간)
-- `ai-report/sources.md` 에서 id가 확인된 채널의 RSS(`https://www.youtube.com/feeds/videos.xml?channel_id=<id>`)로 최근 24시간(월요일은 72시간) 영상을 읽는다.
-- WebSearch 로 `ai-report/keywords.md` 키워드 보강 검색(최근 1~2일).
+- `ai-report/sources.md` 의 채널마다 `python3 -I ai-report/tools/fetch_channel.py <핸들> 10` 을 실행한다.
+  - 이 환경에서는 RSS가 404, 영상 페이지(/watch)는 구글 봇 확인으로 막힌다. **봇 확인을 우회하지 않는다.**
+  - 그래서 얻는 정보는 제목·조회수·상대시간(`age`: "5시간 전", "1일 전")뿐이다. 설명·자막은 없다.
+- `age` 가 "분 전/시간 전/1일 전"인 영상만 최근 24시간으로 본다(월요일은 "3일 전"까지).
+- 영상 내용 보충은 WebSearch(영상 제목·관련 공식 발표)로 한다. 라벨은 `제목 기준` 또는 `검색요약`.
 - `state/youtube_seen.json` 의 `seen` 에 있는 videoId 는 제외한다.
 - `ai-report/keywords.md` 로 분류(Claude / 경쟁 모델 / 도구·팁)하고 제외 규칙을 적용한다.
+- 수집기가 실패하면(구조 변경·차단) 지어내지 말고 WebSearch 만으로 진행하고 meta.md `notes` 에 사유를 적는다.
 
 ## 2. 선정·요약
 - TOP 5 선정: 공식 채널 > 발표·릴리스 > 데모·실습 > 의견. 분류가 한쪽으로 쏠리지 않게 한다.
@@ -38,7 +42,7 @@ description: 지정 유튜브 채널의 AI(Claude, ChatGPT 등) 최신 영상 �
 ```
 status: drafted        # drafted → sent
 type: daily            # daily | weekly
-collected_via: rss     # rss | websearch | api
+collected_via: page    # page | websearch | api
 slack_thread: <링크>
 videos: <videoId 목록>
 notes: <수집 실패·미확인 사항>
