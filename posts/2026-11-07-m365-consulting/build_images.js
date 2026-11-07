@@ -30,8 +30,8 @@ ${BUB.map((e,i)=>`<div style="position:absolute;left:${e.cx-e.rx+9}px;top:${e.cy
 <div class="brand">커리어캐쳐(CareerCatcher)</div></div>`;
 const B=`<div class="a" style="width:1080px;height:1640px;background:#fff"><img src="${b64(SRC_B,'image/webp')}" style="position:absolute;left:0;top:200px;width:1080px;height:1440px">
 <div class="fit title" style="position:absolute;left:0;top:28px;width:1080px;height:96px;font-size:76px;font-weight:900;line-height:96px;text-align:center">면접 전날 이동 중 나:</div>
-<div class="chip" style="top:134px;font-size:44px;padding:2px 30px;border-width:4px;border-radius:36px">가상 장면</div>
-<div class="brand" style="top:146px;bottom:auto;right:30px;font-size:22px">커리어캐쳐(CareerCatcher)</div>
+<div class="chip" style="top:122px;font-size:42px;line-height:1.25;padding:0 30px;border-width:4px;border-radius:36px">가상 장면</div>
+<div class="brand" style="top:140px;bottom:auto;right:30px;font-size:22px">커리어캐쳐(CareerCatcher)</div>
 <div style="position:absolute;left:0;top:1380px;width:1080px;height:260px;background:linear-gradient(transparent,rgba(0,0,0,.62) 35%)"></div>
 <div class="cap" style="top:1440px;font-size:80px">머릿속 답변은 완벽함</div>
 <div class="cap" style="top:1550px;font-size:50px;font-weight:800">입 밖으로 꺼내면 딴 얘기</div></div>`;
