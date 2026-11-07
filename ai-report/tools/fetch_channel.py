@@ -5,7 +5,7 @@
 페이지로 리다이렉트된다(2026-11-07 확인). 봇 확인은 우회하지 않는다. 그래서 정상 응답하는
 채널 /videos 페이지(ytInitialData)만 파싱한다. 정확한 게시일·설명이 필요하면 YouTube Data API(Phase 4).
 사용: python3 -I ai-report/tools/fetch_channel.py @anthropic-ai [N=10]
-출력: [{channel, video_id, title, views, age(상대시간: "3시간 전", "1일 전"), url}]
+출력: [{channel, video_id, title, views, age(상대시간), age_hours(시간 환산), url}]
 """
 import json, re, sys, urllib.request
 
@@ -20,6 +20,16 @@ def get(url):
 def json_after(html, marker):
     i = html.index(marker) + len(marker)
     return json.JSONDecoder().raw_decode(html[i:])[0]
+
+
+UNIT_H = {"분": 1 / 60, "시간": 1, "일": 24, "주": 168, "개월": 720, "년": 8760,
+          "minute": 1 / 60, "hour": 1, "day": 24, "week": 168, "month": 720, "year": 8760}
+
+
+def age_hours(age):
+    """'9시간 전', '1일 전', '3 days ago' → 시간(float). 알 수 없으면 None."""
+    m = re.search(r"(\d+)\s*(분|시간|일|주|개월|년|minute|hour|day|week|month|year)", age or "")
+    return float(m.group(1)) * UNIT_H[m.group(2)] if m else None
 
 
 def list_videos(handle):
@@ -56,5 +66,6 @@ if __name__ == "__main__":
     vids = list_videos(handle)[:n]
     for v in vids:
         v["channel"] = handle
+        v["age_hours"] = age_hours(v.get("age"))
         v["url"] = f"https://www.youtube.com/watch?v={v['video_id']}"
     print(json.dumps(vids, ensure_ascii=False, indent=1))
