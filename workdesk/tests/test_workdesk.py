@@ -289,3 +289,37 @@ class StatusAndReportTests(Base):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ProjectGroupingTests(Base):
+    def test_project_from_source_and_grouped_report(self):
+        code, out = run("ingest", str(SAMPLES / "운영팀_대화_가상.txt"), "--by", "t", "--project", "A센터 운영")
+        self.assertIn("A센터 운영", out)
+        f = self.save(self.example())
+        run("approve", f, "cand_001", "--by", "t")
+        run("approve", f, "cand_003", "--by", "t", "--due", "2026-11-06", "--project", "B대학 캠프")
+        tasks = self.tasks()
+        self.assertEqual([t["project"] for t in tasks], ["A센터 운영", "B대학 캠프"])
+        text = workdesk.build_report(workdesk.dt.date(2026, 11, 10))
+        self.assertIn("## A센터 운영", text)
+        self.assertIn("## B대학 캠프", text)
+        self.assertIn("[지연] 보도자료 초안 업로드", text)
+        self.assertLess(text.index("## A센터 운영"), text.index("## B대학 캠프"))
+
+    def test_candidate_project_validated_and_updatable(self):
+        self.ingest_sample()
+        d = self.example()
+        d["candidates"][0]["project"] = ""
+        self.assertTrue(any("project" in e for e in workdesk.validate_candidates(d)))
+        d["candidates"][0]["project"] = "C기관"
+        f = self.save(d)
+        run("approve", f, "cand_001", "--by", "t")
+        self.assertEqual(self.tasks()[0]["project"], "C기관")
+        self.assertEqual(run("update", "task_001", "--by", "t", "--project", "D기관", "--reason", "기관 정정")[0], 0)
+        self.assertEqual(self.tasks()[0]["project"], "D기관")
+
+    def test_flat_report_without_projects(self):
+        self.ingest_sample()
+        run("approve", self.save(self.example()), "cand_001", "--by", "t")
+        text = workdesk.build_report(workdesk.dt.date(2026, 11, 10))
+        self.assertIn("## 진행 중", text)

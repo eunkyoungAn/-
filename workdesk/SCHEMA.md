@@ -38,6 +38,7 @@
 | `due_basis` | explicit / inferred / ambiguous / unknown | ambiguous·unknown이면 due는 null. inferred는 근거 메시지에 시각이 있어야 함. explicit 외에는 질문 필수 |
 | `evidence` | 1개 이상 | 원문에 실제로 있는 message_id, 줄 범위 일치 |
 | `status` | needs_review | AI가 만든 후보는 항상 이 값 |
+| `project` (선택) | 기관·과정 이름 또는 null | 없으면 원문 등록 때 `--project` 값을 씀. 주간 보고를 기관·과정별로 묶는 데 사용 |
 
 ## 상태 흐름
 - 후보: `needs_review → approved(확정 업무로 저장) / rejected`
