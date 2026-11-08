@@ -25,8 +25,10 @@
 | `[리뷰]` | 쿠팡 상품 리뷰 | `coupang-review` (메모 기반, 경험 지어내기 금지, 등록은 직접) |
 | `[PPT]` | 강의안, 교안, 발표자료, 커리큘럼 | 설계 → `office-lecture-designer`(+`edu-project-os`), 파일 → `pptx` |
 | `[AI리포트]` | 유튜브 AI 이슈 일간·주간 리포트(포스터) | `ai-youtube-report`(+`office-researcher` 교차확인, 주간은 `office-reviewer` 검수) |
-| `[설정]` | 작업 환경, 자동화, 배포 | 별도 스킬 없음 |
+| `[코칭]` | 자기소개서, 면접 자료 | 자소서 → `office-coverletter-writer`, 면접 → `interview-material-builder` |
+| `[설정]` | 작업 환경, 자동화, 배포 | 별도 스킬 없음 (스킬 만들기는 `skill-creator`) |
 
+- 업무 단위 전체 목록·절차·품질 기준은 `ai-assistant/`(AI비서 플랫폼)를 따른다.
 - 큰 주제 하나를 처음부터 끝까지 맡기면 `/office`(리서치→기획→작성→검수)를 쓴다.
 - 같은 자료(예: 경험노트)는 업무가 달라도 원본 파일을 공유한다. 새로 쓰기 전에 `posts/`, `output/`에서 같은 주제를 먼저 찾는다.
 - 세션 이름은 `[업무] 자료명 | 산출물` 형식으로 짓는다. 예: `[블로그] 경험노트 | 카드뉴스`.
