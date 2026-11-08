@@ -117,6 +117,13 @@ header p{margin:0;color:var(--muted)}
 .node h2{font-size:1.05rem;margin:2px 0}
 .node p{margin:2px 0;color:var(--muted);font-size:.9rem}
 .kind{display:inline-block;font-size:.72rem;border:1px solid var(--line);border-radius:6px;padding:0 6px;color:var(--muted)}
+.dispatch{margin:0 0 4px;width:100%;max-width:1200px}
+.dispatch h2{font-size:.95rem;margin:0 0 8px;text-align:center}
+.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.steps li{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:.82rem;color:var(--muted)}
+.steps b{display:block;color:var(--ink);font-size:.9rem}
+.steps .n{display:inline-block;background:var(--accent);color:var(--surface);border-radius:999px;width:20px;height:20px;line-height:20px;text-align:center;font-size:.75rem;margin-right:6px}
+.dispatch .rf{text-align:center;font-size:.8rem;color:var(--muted);margin:8px 0 0}
 .vline{width:2px;height:22px;background:var(--line)}
 .teams{position:relative;display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px;padding-top:22px;border-top:2px solid var(--line);margin-top:0}
 .team{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;position:relative}
@@ -147,7 +154,7 @@ button.member:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 <header>
 <button class="theme" id="theme" type="button" aria-label="밝기 전환">밝게/어둡게</button>
 <h1>__TITLE__</h1>
-<p>나는 오케스트레이터, AI는 비서팀. 일을 나누어 맡기고, 결과를 승인하고, 합친다. · 기준일 __UPDATED__</p>
+<p>대표가 일을 주면 대장이 팀에 나눠 맡기고, 정해진 규칙대로 해내도록 이끌어 결과를 합친다. · 기준일 __UPDATED__</p>
 </header>
 <div class="stats" id="stats"></div>
 <p class="std">모든 팀 공통 기준: <b id="std"></b></p>
@@ -155,6 +162,8 @@ button.member:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
   <div class="node head" id="head"></div>
   <div class="vline" aria-hidden="true"></div>
   <div class="node" id="chief"></div>
+  <div class="vline" aria-hidden="true"></div>
+  <div class="dispatch" id="dispatch"></div>
   <div class="vline" aria-hidden="true"></div>
 </section>
 <section class="teams" id="teams" aria-label="팀"></section>
@@ -178,7 +187,11 @@ const renderNode = (el, n, kind) => {
     (n.does_not?.length ? `<p>하지 않는 일: ${n.does_not.map(esc).join(" · ")}</p>` : "");
 };
 renderNode("head", ORG.head, "사람");
-renderNode("chief", ORG.chief, "메인 세션 (Claude)");
+renderNode("chief", ORG.chief, "팀장 · 메인 세션 (Claude)");
+const dp = ORG.dispatch;
+document.getElementById("dispatch").innerHTML =
+  `<h2>${esc(dp.title)}</h2><ol class="steps">${dp.steps.map((s, i) => `<li><b><span class="n">${i + 1}</span>${esc(s.name)}</b>${esc(s.text)}</li>`).join("")}</ol>` +
+  `<p class="rf">자세한 규칙: <code>${esc(dp.rule_file)}</code></p>`;
 document.getElementById("teams").innerHTML = ORG.teams.map((t, ti) => `
   <article class="team">
     <h3>${esc(t.name)}</h3><span class="tag">${esc(t.tag)}</span>
