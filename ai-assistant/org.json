@@ -11,7 +11,7 @@
     "name": "대표 · 오케스트레이터",
     "kind": "person",
     "role": "일을 맡기고, 결과를 승인하고, 최종 품질을 책임진다.",
-    "does": ["업무 지시(세션 말머리)", "업무 후보·알림·외부 발송 승인", "최종 검수(사람의 마무리)"],
+    "does": ["업무 지시(세션 말머리)", "업무 후보 승인", "최종 검수(사람의 마무리)"],
     "does_not": []
   },
   "chief": {
@@ -90,16 +90,15 @@
       "id": "workdesk",
       "name": "업무정리팀",
       "tag": "[업무정리]",
-      "mission": "대화·회의에서 근거 있는 업무를 뽑아 승인받고 관리",
-      "approval_required": ["업무 후보 → 확정 업무", "업무 완료 처리(근거 필요)", "카카오 알림 전송"],
+      "mission": "대화·회의에서 근거 있는 업무를 뽑아 승인받고 관리 (강의용 버전: workdesk/강의용)",
+      "approval_required": ["업무 후보 → 확정 업무", "업무 완료 처리(근거 필요)"],
       "members": [
         {"id": "work-extractor", "name": "추출 담당", "kind": "agent", "role": "요약·결정·업무 후보 + 근거", "does_not": ["승인", "외부 전송", "없는 담당자·기한 생성"]},
         {"id": "evidence-verifier", "name": "검토 담당", "kind": "agent", "role": "원문 대조 판정표", "does_not": ["후보 수정", "다른 역할 말만 보고 판정"]},
         {"id": "extract-work-items", "name": "추출 절차", "kind": "skill", "role": "입력 → 후보 → 검증 → 승인 요청"},
         {"id": "verify-evidence", "name": "대조 절차", "kind": "skill", "role": "근거·날짜·악성 지시 점검"},
         {"id": "weekly-status-report", "name": "주간 보고", "kind": "skill", "role": "확정 업무로만 보고서"},
-        {"id": "workdesk/tools/workdesk.py", "name": "업무 원장", "kind": "tool", "role": "근거 검증·승인 기록·상태·보고 (규칙을 코드로 강제)"},
-        {"id": "workdesk/tools/kakao_notify.py", "name": "카카오 알림", "kind": "tool", "role": "승인된 최소 정보만 나와의 채팅으로", "does_not": ["대화방 읽기", "다른 사람에게 발송"]}
+        {"id": "workdesk/tools/workdesk.py", "name": "업무 원장", "kind": "tool", "role": "근거 검증·승인 기록·상태·보고 (규칙을 코드로 강제)"}
       ]
     },
     {

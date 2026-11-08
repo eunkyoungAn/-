@@ -1,5 +1,9 @@
 # 업무정리 데스크 (AI비서 · 업무 정리 에이전트)
 
+> **두 가지 버전**
+> - **강의용 (코딩 없음)**: claude.ai 프로젝트 + 스킬 하나. 누구나 60분 안에 만든다 → [`강의용/`](강의용/README.md)
+> - **확장판 (이 문서)**: Claude Code + 원장 도구. 근거 검증·승인 기록·중복 방지를 코드로 강제한다.
+
 대화·회의 메모에 흩어진 업무를 **근거와 함께** 뽑고, **사람이 확인한 업무만** 저장해서 진행 보고까지 만든다.
 기준 문서: 「직장인 업무 자동화 프로젝트 기술 적용 계획」(2026-11-08) 0~2단계.
 
@@ -13,7 +17,6 @@
   ↓ approve           (도구) 승인 기록 + 확정 업무 원장
   ↓ status / update   진행 상태·변경 이력
   ↓ weekly-status-report  확정 업무만으로 주간 보고서
-  ↓ notify (선택)     숫자만 담은 알림 → 승인 → 카카오 나와의 채팅
 ```
 
 ## 쓰는 법 (Claude에게 말하기)
@@ -38,7 +41,6 @@ python3 workdesk/tools/workdesk.py validate workdesk/runs/폴더/candidates.json
 python3 workdesk/tools/workdesk.py approve 후보파일 cand_001 --by 홍길동 [--owner 이름 --due 2026-11-20]
 python3 workdesk/tools/workdesk.py status task_001 done --by 홍길동 --evidence "드라이브/보고서.docx"
 python3 workdesk/tools/workdesk.py report --out 보고서.md
-python3 workdesk/tools/workdesk.py notify draft --by 홍길동     # 카카오 알림 (KAKAO-ALIM.md 참고)
 python3 workdesk/tools/workdesk.py purge           # 보존 기한(기본 90일) 지난 원문 확인 후 --yes로 삭제
 ```
 
@@ -52,11 +54,11 @@ python3 workdesk/tools/workdesk.py purge           # 보존 기한(기본 90일)
 ```bash
 python3 -m unittest discover -s workdesk/tests -v
 ```
-계획서 11장 시나리오와 알림 시나리오(승인 후 변경, 전송 불명확, 토큰 갱신 등) 중 도구로 확인 가능한 것(중복 파일, 형식 오류, 근거 누락, 날짜 불명확, 승인 후 변경, 완료 근거 등)을 자동 테스트한다.
+계획서 11장 시나리오 중 도구로 확인 가능한 것(중복 파일, 형식 오류, 근거 누락, 날짜 불명확, 승인 후 변경, 완료 근거 등)을 자동 테스트한다.
 AI 추출 품질(정밀도·재현율)은 사람이 만든 정답과 비교해야 하며 아직 측정하지 않았다.
 
-## 카카오 알림 (5단계, 구현됨 · 실제 전송 미확인)
-공식 '나에게 보내기' API로 승인된 최소 정보만 보낸다. 연결 방법과 확인 범위는 `KAKAO-ALIM.md`.
+## 카카오 알림은 번외
+카카오 '나와의 채팅' 알림은 API 키·로그인이 필요해 기본 버전에서 뺐다. 조사 내용은 `ai-assistant/번외/카카오-나와의채팅-알림.md`.
 
 ## 다음 단계 (아직 안 함)
 | 단계 | 내용 |
