@@ -26,8 +26,10 @@
 | `[PPT]` | 강의안, 교안, 발표자료, 커리큘럼 | 설계 → `office-lecture-designer`(+`edu-project-os`), 파일 → `pptx` |
 | `[AI리포트]` | 유튜브 AI 이슈 일간·주간 리포트(포스터) | `ai-youtube-report`(+`office-researcher` 교차확인, 주간은 `office-reviewer` 검수) |
 | `[코칭]` | 자기소개서, 면접 자료 | 자소서 → `office-coverletter-writer`, 면접 → `interview-material-builder` |
+| `[업무정리]` | 단톡방·회의 메모에서 할 일 뽑기, 업무 현황, 주간 보고 | `extract-work-items`(+`work-extractor`) → `verify-evidence`(+`evidence-verifier`) → 사람 승인 → `weekly-status-report`. 흐름·규칙은 `workdesk/README.md`, `workdesk/RULES.md` |
 | `[설정]` | 작업 환경, 자동화, 배포 | 별도 스킬 없음 (스킬 만들기는 `skill-creator`) |
 
+- 업무정리 데스크의 실제 대화 원문·업무 원장(`workdesk/data/`)은 커밋하지 않는다. 승인 전에는 업무를 확정하지 않는다.
 - 업무 단위 전체 목록·절차·품질 기준은 `ai-assistant/`(AI비서 플랫폼)를 따른다.
 - 큰 주제 하나를 처음부터 끝까지 맡기면 `/office`(리서치→기획→작성→검수)를 쓴다.
 - 같은 자료(예: 경험노트)는 업무가 달라도 원본 파일을 공유한다. 새로 쓰기 전에 `posts/`, `output/`에서 같은 주제를 먼저 찾는다.
