@@ -11,17 +11,30 @@
     "name": "대표 · 오케스트레이터",
     "kind": "person",
     "role": "일을 맡기고, 결과를 승인하고, 최종 품질을 책임진다.",
-    "does": ["업무 지시(세션 말머리)", "업무 후보 승인", "최종 검수(사람의 마무리)"],
+    "does": [
+      "업무 지시(세션 말머리)",
+      "업무 후보 승인",
+      "최종 검수(사람의 마무리)"
+    ],
     "does_not": []
   },
   "chief": {
-    "id": "chief-of-staff",
-    "name": "비서실장",
+    "id": "daejang",
+    "name": "대장 (팀장)",
     "kind": "session",
-    "ref": "CLAUDE.md",
-    "role": "요청을 받아 업무 단위를 판단하고 팀에 나눠 맡긴 뒤 결과를 합친다.",
-    "does": ["말머리로 업무 판단", "팀·스킬 배정", "결과 통합·커밋·PR"],
-    "does_not": ["근거 없이 업무 확정", "승인 없이 외부 발송"]
+    "ref": "ai-assistant/대장-업무규칙.md",
+    "role": "대표의 일을 받아 팀에 나눠 맡기고, 정해진 업무 규칙대로 해내도록 이끌고, 결과를 합쳐 돌려준다.",
+    "does": [
+      "말머리로 업무 판단",
+      "팀·스킬 배정",
+      "팀 결과 검수 의뢰",
+      "결과 통합·커밋·PR·보드 갱신"
+    ],
+    "does_not": [
+      "자료에 없는 사실 만들기",
+      "승인 없이 업무 확정",
+      "승인 없이 외부 발송·발행 표시"
+    ]
   },
   "teams": [
     {
@@ -30,11 +43,36 @@
       "tag": "공통 지원",
       "mission": "모든 팀이 쓰는 리서치·기획·검수",
       "members": [
-        {"id": "office-researcher", "name": "리서치 담당", "kind": "agent", "role": "자료 조사·사실 확인·출처 수집"},
-        {"id": "office-planner", "name": "기획 담당", "kind": "agent", "role": "목표·목차·실행계획 설계"},
-        {"id": "office-writer", "name": "작성 담당", "kind": "agent", "role": "기획안대로 초안 작성"},
-        {"id": "office-reviewer", "name": "검수 담당", "kind": "agent", "role": "사실 오류·논리·누락·문장 점검"},
-        {"id": "deep-research", "name": "심층 리서치", "kind": "plugin-skill", "role": "여러 출처 종합 보고"}
+        {
+          "id": "office-researcher",
+          "name": "리서치 담당",
+          "kind": "agent",
+          "role": "자료 조사·사실 확인·출처 수집"
+        },
+        {
+          "id": "office-planner",
+          "name": "기획 담당",
+          "kind": "agent",
+          "role": "목표·목차·실행계획 설계"
+        },
+        {
+          "id": "office-writer",
+          "name": "작성 담당",
+          "kind": "agent",
+          "role": "기획안대로 초안 작성"
+        },
+        {
+          "id": "office-reviewer",
+          "name": "검수 담당",
+          "kind": "agent",
+          "role": "사실 오류·논리·누락·문장 점검"
+        },
+        {
+          "id": "deep-research",
+          "name": "심층 리서치",
+          "kind": "plugin-skill",
+          "role": "여러 출처 종합 보고"
+        }
       ]
     },
     {
@@ -43,13 +81,48 @@
       "tag": "[보고서]",
       "mission": "공공기관 제출용 보고서·양식",
       "members": [
-        {"id": "one-page-report-docx", "name": "한 장 보고서(워드)", "kind": "plugin-skill", "role": "개요-본문-결론 한 장 docx"},
-        {"id": "one-page-report-hwpx", "name": "한 장 보고서(한글)", "kind": "plugin-skill", "role": "한 장 보고서 hwpx 채우기"},
-        {"id": "two-page-report-docx", "name": "두 장 보고서", "kind": "plugin-skill", "role": "두 장 분량 docx"},
-        {"id": "hwpx-autofill-conversion", "name": "양식 채우기", "kind": "plugin-skill", "role": "첨부 hwpx 양식 자동 작성"},
-        {"id": "operation-log-hwpx", "name": "운영일지", "kind": "plugin-skill", "role": "회기별 운영일지 hwpx"},
-        {"id": "biz-health-check", "name": "기업 실사", "kind": "plugin-skill", "role": "사업자번호로 공공데이터 교차 조회"},
-        {"id": "docs", "name": "일반 문서", "kind": "plugin-skill", "role": "그 외 문서"}
+        {
+          "id": "one-page-report-docx",
+          "name": "한 장 보고서(워드)",
+          "kind": "plugin-skill",
+          "role": "개요-본문-결론 한 장 docx"
+        },
+        {
+          "id": "one-page-report-hwpx",
+          "name": "한 장 보고서(한글)",
+          "kind": "plugin-skill",
+          "role": "한 장 보고서 hwpx 채우기"
+        },
+        {
+          "id": "two-page-report-docx",
+          "name": "두 장 보고서",
+          "kind": "plugin-skill",
+          "role": "두 장 분량 docx"
+        },
+        {
+          "id": "hwpx-autofill-conversion",
+          "name": "양식 채우기",
+          "kind": "plugin-skill",
+          "role": "첨부 hwpx 양식 자동 작성"
+        },
+        {
+          "id": "operation-log-hwpx",
+          "name": "운영일지",
+          "kind": "plugin-skill",
+          "role": "회기별 운영일지 hwpx"
+        },
+        {
+          "id": "biz-health-check",
+          "name": "기업 실사",
+          "kind": "plugin-skill",
+          "role": "사업자번호로 공공데이터 교차 조회"
+        },
+        {
+          "id": "docs",
+          "name": "일반 문서",
+          "kind": "plugin-skill",
+          "role": "그 외 문서"
+        }
       ]
     },
     {
@@ -58,11 +131,40 @@
       "tag": "[블로그] [리뷰] [AI리포트]",
       "mission": "블로그·카드뉴스·리뷰·AI 리포트",
       "members": [
-        {"id": "blog-post", "name": "블로그 절차", "kind": "skill", "role": "슬랙 인터뷰 → 붙여넣기용 md"},
-        {"id": "office-blogger", "name": "블로그 작가", "kind": "agent", "role": "검색 노출 고려한 블로그 글"},
-        {"id": "office-cardnews-designer", "name": "카드뉴스 디자이너", "kind": "agent", "role": "카드뉴스 6~10장 기획·디자인"},
-        {"id": "coupang-review", "name": "쿠팡 리뷰", "kind": "skill", "role": "메모 기반 사용 후기", "does_not": ["경험 지어내기", "직접 등록"]},
-        {"id": "ai-youtube-report", "name": "AI 유튜브 리포트", "kind": "skill", "role": "AI 이슈 포스터 + 슬랙"}
+        {
+          "id": "blog-post",
+          "name": "블로그 절차",
+          "kind": "skill",
+          "role": "슬랙 인터뷰 → 붙여넣기용 md"
+        },
+        {
+          "id": "office-blogger",
+          "name": "블로그 작가",
+          "kind": "agent",
+          "role": "검색 노출 고려한 블로그 글"
+        },
+        {
+          "id": "office-cardnews-designer",
+          "name": "카드뉴스 디자이너",
+          "kind": "agent",
+          "role": "카드뉴스 6~10장 기획·디자인"
+        },
+        {
+          "id": "coupang-review",
+          "name": "쿠팡 리뷰",
+          "kind": "skill",
+          "role": "메모 기반 사용 후기",
+          "does_not": [
+            "경험 지어내기",
+            "직접 등록"
+          ]
+        },
+        {
+          "id": "ai-youtube-report",
+          "name": "AI 유튜브 리포트",
+          "kind": "skill",
+          "role": "AI 이슈 포스터 + 슬랙"
+        }
       ]
     },
     {
@@ -71,9 +173,24 @@
       "tag": "[PPT]",
       "mission": "강의 설계·교안·발표자료",
       "members": [
-        {"id": "office-lecture-designer", "name": "강의 설계", "kind": "agent", "role": "학습목표·차시·활동지 설계"},
-        {"id": "edu-project-os", "name": "교육 프로젝트 진행", "kind": "plugin-skill", "role": "의뢰 접수부터 인수인계까지"},
-        {"id": "pptx", "name": "PPT 제작", "kind": "plugin-skill", "role": "pptx 파일"}
+        {
+          "id": "office-lecture-designer",
+          "name": "강의 설계",
+          "kind": "agent",
+          "role": "학습목표·차시·활동지 설계"
+        },
+        {
+          "id": "edu-project-os",
+          "name": "교육 프로젝트 진행",
+          "kind": "plugin-skill",
+          "role": "의뢰 접수부터 인수인계까지"
+        },
+        {
+          "id": "pptx",
+          "name": "PPT 제작",
+          "kind": "plugin-skill",
+          "role": "pptx 파일"
+        }
       ]
     },
     {
@@ -82,8 +199,18 @@
       "tag": "[코칭]",
       "mission": "자기소개서·면접",
       "members": [
-        {"id": "office-coverletter-writer", "name": "자소서 담당", "kind": "agent", "role": "자기소개서 작성·첨삭"},
-        {"id": "interview-material-builder", "name": "면접 자료", "kind": "plugin-skill", "role": "예상질문·경험노트·STAR 표"}
+        {
+          "id": "office-coverletter-writer",
+          "name": "자소서 담당",
+          "kind": "agent",
+          "role": "자기소개서 작성·첨삭"
+        },
+        {
+          "id": "interview-material-builder",
+          "name": "면접 자료",
+          "kind": "plugin-skill",
+          "role": "예상질문·경험노트·STAR 표"
+        }
       ]
     },
     {
@@ -91,14 +218,56 @@
       "name": "업무정리팀",
       "tag": "[업무정리]",
       "mission": "대화·회의에서 근거 있는 업무를 뽑아 승인받고 관리 (강의용 버전: workdesk/강의용)",
-      "approval_required": ["업무 후보 → 확정 업무", "업무 완료 처리(근거 필요)"],
+      "approval_required": [
+        "업무 후보 → 확정 업무",
+        "업무 완료 처리(근거 필요)"
+      ],
       "members": [
-        {"id": "work-extractor", "name": "추출 담당", "kind": "agent", "role": "요약·결정·업무 후보 + 근거", "does_not": ["승인", "외부 전송", "없는 담당자·기한 생성"]},
-        {"id": "evidence-verifier", "name": "검토 담당", "kind": "agent", "role": "원문 대조 판정표", "does_not": ["후보 수정", "다른 역할 말만 보고 판정"]},
-        {"id": "extract-work-items", "name": "추출 절차", "kind": "skill", "role": "입력 → 후보 → 검증 → 승인 요청"},
-        {"id": "verify-evidence", "name": "대조 절차", "kind": "skill", "role": "근거·날짜·악성 지시 점검"},
-        {"id": "weekly-status-report", "name": "주간 보고", "kind": "skill", "role": "확정 업무로만 보고서"},
-        {"id": "workdesk/tools/workdesk.py", "name": "업무 원장", "kind": "tool", "role": "근거 검증·승인 기록·상태·보고 (규칙을 코드로 강제)"}
+        {
+          "id": "work-extractor",
+          "name": "추출 담당",
+          "kind": "agent",
+          "role": "요약·결정·업무 후보 + 근거",
+          "does_not": [
+            "승인",
+            "외부 전송",
+            "없는 담당자·기한 생성"
+          ]
+        },
+        {
+          "id": "evidence-verifier",
+          "name": "검토 담당",
+          "kind": "agent",
+          "role": "원문 대조 판정표",
+          "does_not": [
+            "후보 수정",
+            "다른 역할 말만 보고 판정"
+          ]
+        },
+        {
+          "id": "extract-work-items",
+          "name": "추출 절차",
+          "kind": "skill",
+          "role": "입력 → 후보 → 검증 → 승인 요청"
+        },
+        {
+          "id": "verify-evidence",
+          "name": "대조 절차",
+          "kind": "skill",
+          "role": "근거·날짜·악성 지시 점검"
+        },
+        {
+          "id": "weekly-status-report",
+          "name": "주간 보고",
+          "kind": "skill",
+          "role": "확정 업무로만 보고서"
+        },
+        {
+          "id": "workdesk/tools/workdesk.py",
+          "name": "업무 원장",
+          "kind": "tool",
+          "role": "근거 검증·승인 기록·상태·보고 (규칙을 코드로 강제)"
+        }
       ]
     },
     {
@@ -107,8 +276,47 @@
       "tag": "[설정]",
       "mission": "작업 환경·자동화·스킬 관리",
       "members": [
-        {"id": "skill-creator", "name": "스킬 제작", "kind": "plugin-skill", "role": "반복 업무를 스킬로"}
+        {
+          "id": "skill-creator",
+          "name": "스킬 제작",
+          "kind": "plugin-skill",
+          "role": "반복 업무를 스킬로"
+        }
       ]
     }
-  ]
+  ],
+  "dispatch": {
+    "title": "대장의 업무 순서",
+    "rule_file": "ai-assistant/대장-업무규칙.md",
+    "steps": [
+      {
+        "name": "접수",
+        "text": "말머리로 업무 판단, 모자란 정보는 최대 3개 질문, 보드 등록"
+      },
+      {
+        "name": "중복 확인",
+        "text": "posts·output·office에서 같은 주제 먼저 찾기"
+      },
+      {
+        "name": "배정",
+        "text": "업무에 맞는 팀 지정, 공통 기준 적용, 큰 주제는 /office"
+      },
+      {
+        "name": "실행",
+        "text": "팀원별 읽을 파일·저장할 파일을 정해 맡김"
+      },
+      {
+        "name": "검수",
+        "text": "검수 담당 점검, 수정 최대 2회"
+      },
+      {
+        "name": "승인",
+        "text": "결과를 보여 주고 대표가 진행 여부 결정"
+      },
+      {
+        "name": "납품",
+        "text": "커밋·PR·병합, 슬랙 링크, 보드 갱신"
+      }
+    ]
+  }
 }
