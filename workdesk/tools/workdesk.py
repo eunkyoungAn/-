@@ -258,12 +258,14 @@ def cmd_ingest(args) -> int:
         "input_by": args.by, "timezone": args.tz, "imported_at": now_iso(args.tz),
         "retain_until": retain.isoformat(), "message_count": len(msgs),
         "has_timestamps": any(m["sent_at"] for m in msgs),
+        "project": args.project,
     }
     registry.append(entry)
     write_json(reg_path, registry)
     audit(args.by, "ingest", source_id, after={"filename": path.name, "format": fmt, "messages": len(msgs)})
 
-    print(f"[입력 완료] {source_id} · 형식 {fmt} · 메시지 {len(msgs)}개 · 보존 기한 {retain}")
+    label = f" · 기관·과정 {args.project}" if args.project else ""
+    print(f"[입력 완료] {source_id} · 형식 {fmt} · 메시지 {len(msgs)}개 · 보존 기한 {retain}{label}")
     if not entry["has_timestamps"]:
         print("  주의: 시각 정보가 없습니다. '내일', '금요일' 같은 표현은 날짜를 확정하지 마세요.")
     for sid, n in overlaps:
@@ -355,6 +357,8 @@ def validate_candidates(doc: dict) -> list[str]:
                 errors.append(f"{where}: 필수 항목 누락 {key}")
         if any(e.startswith(where + ": 필수") for e in errors):
             continue
+        if "project" in c and c["project"] is not None and not (isinstance(c["project"], str) and c["project"].strip()):
+            errors.append(f"{where}: project(기관·과정)는 글자 또는 null이어야 합니다.")
         if not str(c["title"]).strip():
             errors.append(f"{where}: 제목이 비어 있습니다.")
         if c["status"] != "needs_review":
@@ -424,8 +428,17 @@ def cmd_validate(args) -> int:
 # ---------------------------------------------------------------- approve / reject
 
 def candidate_payload(c: dict) -> dict:
-    return {k: c[k] for k in ("candidate_id", "version", "title", "proposed_owner", "proposed_due_at",
-                              "timezone", "evidence")}
+    payload = {k: c[k] for k in ("candidate_id", "version", "title", "proposed_owner", "proposed_due_at",
+                                 "timezone", "evidence")}
+    payload["project"] = c.get("project")
+    return payload
+
+
+def source_project(source_id: str):
+    for s in read_json(data_dir() / "sources.json", []):
+        if s["source_id"] == source_id:
+            return s.get("project")
+    return None
 
 
 def cmd_approve(args) -> int:
@@ -451,7 +464,11 @@ def cmd_approve(args) -> int:
             raise WorkdeskError("--due는 YYYY-MM-DD 또는 none 입니다.")
         else:
             edits["proposed_due_at"] = args.due
+    if args.project is not None:
+        edits["project"] = args.project
     final.update(edits)
+    if not final.get("project"):
+        final["project"] = source_project(final["evidence"][0]["source_id"])
     if not final["proposed_owner"]:
         raise WorkdeskError("담당자가 정해지지 않았습니다. 확인 후 --owner로 지정해 주세요.")
     if cand["due_basis"] == "inferred" and "proposed_due_at" not in edits:
@@ -489,6 +506,7 @@ def cmd_approve(args) -> int:
     task = {
         "task_id": task_id, "title": final["title"], "owner": final["proposed_owner"],
         "due_at": final["proposed_due_at"], "timezone": final["timezone"], "status": "todo",
+        "project": final.get("project"),
         "candidate_id": cand["candidate_id"], "candidate_version": cand["version"],
         "source_ids": doc["source_ids"], "evidence": final["evidence"],
         "approval_id": approval_id, "payload_hash": payload_hash,
@@ -500,7 +518,8 @@ def cmd_approve(args) -> int:
     write_json(tasks_path, tasks)
     audit(args.by, "approve", task_id, after={"candidate": cand["candidate_id"], "edits": edits})
     due = task["due_at"] or "기한 미정"
-    print(f"[확정] {task_id} · {task['title']} · {task['owner']} · {due}")
+    proj = f" · {task['project']}" if task.get("project") else ""
+    print(f"[확정] {task_id} · {task['title']} · {task['owner']} · {due}{proj}")
     return 0
 
 
@@ -570,11 +589,13 @@ def cmd_update(args) -> int:
             raise WorkdeskError("--due는 YYYY-MM-DD 또는 none 입니다.")
         else:
             changes["due_at"] = args.due
+    if args.project is not None:
+        changes["project"] = args.project or None
     if not changes:
-        raise WorkdeskError("바꿀 내용(--title, --owner, --due)을 하나 이상 지정하세요.")
+        raise WorkdeskError("바꿀 내용(--title, --owner, --due, --project)을 하나 이상 지정하세요.")
     if not args.reason:
         raise WorkdeskError("변경 이유(--reason)를 적어 주세요. 원문 근거가 있으면 메시지 ID도 함께.")
-    before = {k: t[k] for k in changes}
+    before = {k: t.get(k) for k in changes}
     at = now_iso()
     t.update(changes)
     t["updated_at"] = at
@@ -594,7 +615,7 @@ def cmd_list(args) -> int:
         print("확정 업무가 없습니다.")
         return 0
     for t in tasks:
-        print(f"{t['task_id']} | {t['status']:9} | {t['owner']} | {t['due_at'] or '기한 미정'} | {t['title']}")
+        print(f"{t['task_id']} | {t['status']:9} | {t.get('project') or '-'} | {t['owner']} | {t['due_at'] or '기한 미정'} | {t['title']}")
     return 0
 
 
@@ -638,16 +659,32 @@ def build_report(today: dt.date) -> str:
         L.extend(fmt(t) for t in items) if items else L.append("- 없음")
         L.append("")
 
-    section("완료", done, lambda t: f"- {t['task_id']} {t['title']} — {t['owner']} · 완료 근거: {t.get('done_evidence')} · {ev(t)}")
-    section("진행 중", on_track, lambda t: f"- {t['task_id']} {t['title']} — {t['owner']} · 기한 {t['due_at'] or '미정'} · {t['status']} · {ev(t)}")
-    section("지연", late, lambda t: f"- {t['task_id']} {t['title']} — {t['owner']} · 기한 {t['due_at']} 경과 · {ev(t)}")
-
-    def blocked_line(t):
+    def blocked_note(t):
         notes = [h.get("note") for h in t["history"] if h.get("to") == "blocked" and h.get("note")]
-        return f"- {t['task_id']} {t['title']} — {t['owner']} · 이유: {notes[-1] if notes else '[확인 필요]'}"
+        return notes[-1] if notes else "[확인 필요]"
 
-    section("막힘", blocked, blocked_line)
-    section("확인 필요 (기한 미정)", no_due, lambda t: f"- {t['task_id']} {t['title']} — {t['owner']} · 기한을 정해 주세요")
+    if any(t.get("project") for t in tasks):
+        # 기관·과정별로 묶기: 급한 것(지연·막힘)부터
+        groups = {}
+        for t in tasks:
+            groups.setdefault(t.get("project") or "기관·과정 미지정", []).append(t)
+        order = sorted(groups, key=lambda g: (g == "기관·과정 미지정", g))
+        for g in order:
+            items = groups[g]
+            rows = []
+            rows += [f"- [지연] {t['title']} — {t['owner']} · 기한 {t['due_at']} 경과 · {ev(t)}" for t in items if t in late]
+            rows += [f"- [막힘] {t['title']} — {t['owner']} · 이유: {blocked_note(t)}" for t in items if t in blocked]
+            rows += [f"- [진행] {t['title']} — {t['owner']} · 기한 {t['due_at']} · {ev(t)}" for t in items if t in on_track and t["due_at"]]
+            rows += [f"- [기한 미정] {t['title']} — {t['owner']} · 기한을 정해 주세요" for t in items if t in no_due and t not in blocked]
+            rows += [f"- [완료] {t['title']} — {t['owner']} · 완료 근거: {t.get('done_evidence')}" for t in items if t in done]
+            if not rows:
+                continue
+            L.append(f"## {g}")
+            L.append("")
+            L.extend(rows)
+            L.append("")
+    else:
+        _flat_sections(section, done, on_track, late, blocked, no_due, ev, blocked_note)
     L.append("## 이번 주 변경 내역")
     L.append("")
     if changes:
@@ -660,6 +697,14 @@ def build_report(today: dt.date) -> str:
         L.append("- 없음")
     L.append("")
     return "\n".join(L)
+
+
+def _flat_sections(section, done, on_track, late, blocked, no_due, ev, blocked_note):
+    section("완료", done, lambda t: f"- {t['task_id']} {t['title']} — {t['owner']} · 완료 근거: {t.get('done_evidence')} · {ev(t)}")
+    section("진행 중", on_track, lambda t: f"- {t['task_id']} {t['title']} — {t['owner']} · 기한 {t['due_at'] or '미정'} · {t['status']} · {ev(t)}")
+    section("지연", late, lambda t: f"- {t['task_id']} {t['title']} — {t['owner']} · 기한 {t['due_at']} 경과 · {ev(t)}")
+    section("막힘", blocked, lambda t: f"- {t['task_id']} {t['title']} — {t['owner']} · 이유: {blocked_note(t)}")
+    section("확인 필요 (기한 미정)", no_due, lambda t: f"- {t['task_id']} {t['title']} — {t['owner']} · 기한을 정해 주세요")
 
 
 def cmd_report(args) -> int:
@@ -714,6 +759,7 @@ def main(argv=None) -> int:
     s.add_argument("--tz", default=DEFAULT_TZ)
     s.add_argument("--format", choices=["kakao_pc_txt", "kakao_mobile_txt", "kakao_csv", "memo"])
     s.add_argument("--retain-days", type=int, default=DEFAULT_RETAIN_DAYS)
+    s.add_argument("--project", help="기관·과정 이름 (예: ○○센터 AI 실무과정)")
     s.set_defaults(func=cmd_ingest)
 
     s = sub.add_parser("show", help="원문 메시지 보기")
@@ -734,6 +780,7 @@ def main(argv=None) -> int:
     s.add_argument("--due", help="YYYY-MM-DD 또는 none")
     s.add_argument("--allow-no-due", action="store_true")
     s.add_argument("--confirm-inferred", action="store_true", help="추정 담당자를 그대로 확인")
+    s.add_argument("--project", help="기관·과정 지정(없으면 후보·원문 설정을 따름)")
     s.set_defaults(func=cmd_approve)
 
     s = sub.add_parser("reject", help="후보 제외")
@@ -757,6 +804,7 @@ def main(argv=None) -> int:
     s.add_argument("--title")
     s.add_argument("--owner")
     s.add_argument("--due")
+    s.add_argument("--project", help="기관·과정 (빈 문자열이면 지움)")
     s.add_argument("--reason")
     s.set_defaults(func=cmd_update)
 

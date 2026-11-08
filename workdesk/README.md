@@ -3,6 +3,7 @@
 > **두 가지 버전**
 > - **강의용 (코딩 없음)**: claude.ai 프로젝트 + 스킬 하나. 누구나 60분 안에 만든다 → [`강의용/`](강의용/README.md)
 > - **확장판 (이 문서)**: Claude Code + 원장 도구. 근거 검증·승인 기록·중복 방지를 코드로 강제한다.
+> - **내 비서 (안은경 강사용)**: 기관·과정별 정리 버전 → [`내비서/`](내비서/README.md)
 
 대화·회의 메모에 흩어진 업무를 **근거와 함께** 뽑고, **사람이 확인한 업무만** 저장해서 진행 보고까지 만든다.
 기준 문서: 「직장인 업무 자동화 프로젝트 기술 적용 계획」(2026-11-08) 0~2단계.
@@ -35,7 +36,7 @@
 
 ## 도구 명령 (직접 써도 됨)
 ```bash
-python3 workdesk/tools/workdesk.py ingest 파일.txt --by 홍길동
+python3 workdesk/tools/workdesk.py ingest 파일.txt --by 홍길동 [--project "기관·과정"]
 python3 workdesk/tools/workdesk.py show src_001
 python3 workdesk/tools/workdesk.py validate workdesk/runs/폴더/candidates.json
 python3 workdesk/tools/workdesk.py approve 후보파일 cand_001 --by 홍길동 [--owner 이름 --due 2026-11-20]

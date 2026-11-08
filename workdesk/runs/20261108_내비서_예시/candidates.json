@@ -1,0 +1,148 @@
+{
+  "source_ids": ["src_001", "src_002", "src_003"],
+  "run": {"by": "extract-work-items", "skill_version": "1", "created_at": "2026-11-08T10:00:00+09:00", "model": "claude-opus-5-5"},
+  "summary": [
+    "A센터 AI 실무과정(담당자 단톡): 3회차 교안을 11월 10일까지 보내기로 했고, 2회차 운영일지를 '이번 주 안'에 내 달라는 요청이 있었습니다. 만족도 조사 정리본은 '있으면 좋겠다'는 바람이라 업무 후보로 만들지 않았습니다.",
+    "A센터 AI 실무과정(수강생 단톡): 강사가 패들렛 링크를 '내일' 공지하기로 했고, 수강생 과제(업무 대화 파일 준비)와 지난 실습 파일을 못 받았다는 말이 있었습니다.",
+    "B대학 취업캠프(협업 강사 대화): 2일차 면접 세션은 이코치가 맡고, 1일차 자소서 세션 슬라이드는 안강사가 '다음 주 수요일'까지 공유하기로 했습니다."
+  ],
+  "decisions": [
+    {"text": "A센터 AI 실무과정: 강사료 지급용 통장 사본은 지난번 것을 그대로 쓴다",
+     "evidence": [{"source_id": "src_001", "message_id": "msg_0004", "line_start": 8, "line_end": 8}]},
+    {"text": "B대학 취업캠프: 2일차 면접 세션은 이코치가 맡는다",
+     "evidence": [{"source_id": "src_003", "message_id": "msg_0001", "line_start": 5, "line_end": 5}]}
+  ],
+  "candidates": [
+    {
+      "candidate_id": "cand_001",
+      "project": "A센터 AI 실무과정",
+      "title": "3회차 교안 보내기(인쇄용)",
+      "proposed_owner": "안강사",
+      "owner_basis": "explicit",
+      "proposed_due_at": "2026-11-10",
+      "due_basis": "explicit",
+      "timezone": "Asia/Seoul",
+      "evidence": [
+        {"source_id": "src_001", "message_id": "msg_0001", "line_start": 5, "line_end": 5},
+        {"source_id": "src_001", "message_id": "msg_0002", "line_start": 6, "line_end": 6}
+      ],
+      "questions": [],
+      "status": "needs_review",
+      "version": 1
+    },
+    {
+      "candidate_id": "cand_002",
+      "project": "A센터 AI 실무과정",
+      "title": "2회차 운영일지 제출",
+      "proposed_owner": "안강사",
+      "owner_basis": "inferred",
+      "proposed_due_at": null,
+      "due_basis": "ambiguous",
+      "timezone": "Asia/Seoul",
+      "evidence": [
+        {"source_id": "src_001", "message_id": "msg_0003", "line_start": 7, "line_end": 7}
+      ],
+      "questions": [
+        "근거 문장에 이름이 없고 강사에게 한 요청으로 보입니다. 담당자를 안강사로 둘까요?",
+        "'이번 주 안'(11월 4일 수요일 기준)이 11월 6일(금)인가요, 11월 8일(일)인가요? 오늘(11월 8일) 기준 이미 제출했는지도 알려 주세요."
+      ],
+      "status": "needs_review",
+      "version": 1
+    },
+    {
+      "candidate_id": "cand_003",
+      "project": "A센터 AI 실무과정",
+      "title": "과제 제출용 패들렛 링크 공지",
+      "proposed_owner": "안강사",
+      "owner_basis": "explicit",
+      "proposed_due_at": "2026-11-06",
+      "due_basis": "inferred",
+      "timezone": "Asia/Seoul",
+      "evidence": [
+        {"source_id": "src_002", "message_id": "msg_0003", "line_start": 7, "line_end": 7}
+      ],
+      "questions": [
+        "'내일'을 메시지 시각(11월 5일 20:15) 기준 11월 6일로 계산했습니다. 맞나요? 이미 공지했는지도 알려 주세요."
+      ],
+      "status": "needs_review",
+      "version": 1
+    },
+    {
+      "candidate_id": "cand_004",
+      "project": "A센터 AI 실무과정",
+      "title": "지난 시간 실습 파일 다시 공유",
+      "proposed_owner": "안강사",
+      "owner_basis": "inferred",
+      "proposed_due_at": null,
+      "due_basis": "unknown",
+      "timezone": "Asia/Seoul",
+      "evidence": [
+        {"source_id": "src_002", "message_id": "msg_0004", "line_start": 8, "line_end": 8}
+      ],
+      "questions": [
+        "수강생이 실습 파일을 못 받았다고만 했고 누가 보낼지 정해지지 않았습니다. 안강사가 다시 공유하는 업무로 둘까요?",
+        "기한 언급이 없습니다. 다음 수업 전까지로 할까요? 다음 수업 날짜를 알려 주세요."
+      ],
+      "status": "needs_review",
+      "version": 1
+    },
+    {
+      "candidate_id": "cand_005",
+      "project": "A센터 AI 실무과정",
+      "title": "수강생 과제: 실명 지운 업무 대화 파일 1개 준비",
+      "proposed_owner": "수강생 전체",
+      "owner_basis": "inferred",
+      "proposed_due_at": null,
+      "due_basis": "ambiguous",
+      "timezone": "Asia/Seoul",
+      "evidence": [
+        {"source_id": "src_002", "message_id": "msg_0001", "line_start": 5, "line_end": 5}
+      ],
+      "questions": [
+        "수강생 과제를 강사 업무 원장에 넣을까요, 아니면 제외할까요?",
+        "'다음 시간'이 언제인지 원문에 없습니다. 다음 수업 날짜를 알려 주세요."
+      ],
+      "status": "needs_review",
+      "version": 1
+    },
+    {
+      "candidate_id": "cand_006",
+      "project": "B대학 취업캠프",
+      "title": "1일차 자소서 세션 슬라이드 공유",
+      "proposed_owner": "안강사",
+      "owner_basis": "explicit",
+      "proposed_due_at": "2026-11-11",
+      "due_basis": "inferred",
+      "timezone": "Asia/Seoul",
+      "evidence": [
+        {"source_id": "src_003", "message_id": "msg_0002", "line_start": 6, "line_end": 6},
+        {"source_id": "src_003", "message_id": "msg_0003", "line_start": 7, "line_end": 7}
+      ],
+      "questions": [
+        "'다음 주 수요일'을 메시지 시각(11월 6일 금요일) 기준 11월 11일로 계산했습니다. 맞나요?",
+        "요청 문장의 '은경쌤'과 '쌤'이 안강사 본인이 맞나요? (이름만으로 연결하지 않았습니다)"
+      ],
+      "status": "needs_review",
+      "version": 1
+    },
+    {
+      "candidate_id": "cand_007",
+      "project": "B대학 취업캠프",
+      "title": "2일차 면접 세션 진행(협업 강사 담당)",
+      "proposed_owner": "이코치",
+      "owner_basis": "explicit",
+      "proposed_due_at": null,
+      "due_basis": "unknown",
+      "timezone": "Asia/Seoul",
+      "evidence": [
+        {"source_id": "src_003", "message_id": "msg_0001", "line_start": 5, "line_end": 5}
+      ],
+      "questions": [
+        "캠프 2일차 날짜가 원문에 없습니다. 날짜를 알려 주세요.",
+        "협업 강사가 맡은 일이라 안강사 원장에서 참고용으로만 둘까요, 제외할까요?"
+      ],
+      "status": "needs_review",
+      "version": 1
+    }
+  ]
+}
