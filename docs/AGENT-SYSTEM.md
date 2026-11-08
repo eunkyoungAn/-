@@ -4,6 +4,10 @@
 하나의 흐름으로 묶는 운영 설계. 기존 `CLAUDE.md` 말머리 표와 `.claude/agents/`를 그대로 쓰고,
 빠져 있던 "접수 → 체인 → 게이트 → 기록"만 더한다. 100개 스킬 라우팅 표는 참고용이며 전부 만들지 않는다.
 
+> **위치**: 구조(조직도·업무 단위·품질 기준)의 정본은 `ai-assistant/`(`README.md`, `업무단위.md`, `checklist-품질.md`, `org.json`)다.
+> 이 문서는 그 위에서 매일 돌리는 **운영 층**만 다룬다: 슬랙 접수 루틴, 업무별 체인 순서, 게이트, 작업 보드.
+> 내용이 겹치면 `ai-assistant/`를 따른다. 에이전트·스킬을 추가하면 `ai-assistant/org.json`도 고친다.
+
 ## 1. 한눈에 보는 흐름
 
 ```
@@ -45,6 +49,8 @@
 | `[AI리포트]` | `ai-youtube-report` → 교차확인(`office-researcher`) → 주간은 `office-reviewer` | 포스터 PNG, 슬랙 `#ai-youtube-report` |
 | `[보고서]` | 분량에 맞는 보고서 스킬(한 장/두 장/hwpx) → 검수 | docx 또는 hwpx |
 | `[PPT]` | `office-lecture-designer`(+`edu-project-os`) → `pptx` → 검수 | pptx |
+| `[코칭]` | 자소서 → `office-coverletter-writer`, 면접 → `interview-material-builder` → 검수 | 자소서 첨삭본, 면접 질문·경험노트 파일 |
+| `[업무정리]` | `extract-work-items` → `verify-evidence` → 사람 승인 → `weekly-status-report` (규칙은 `workdesk/RULES.md`) | 승인된 업무 원장, 주간 보고 (원문·원장은 커밋하지 않음) |
 | `[리뷰]` | `coupang-review` (메모 기반, 경험 지어내기 금지) | `reviews/` 원고, 등록은 직접 |
 | 큰 주제 | `/office` (리서치 → 기획 → 작성 → 검수, 수정 최대 2회) | `office/날짜_주제/` |
 
