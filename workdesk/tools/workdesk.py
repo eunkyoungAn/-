@@ -23,6 +23,9 @@ import tempfile
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import kakao_notify as kn  # noqa: E402
+
 SCHEMA_VERSION = "1"
 DEFAULT_TZ = "Asia/Seoul"
 DEFAULT_RETAIN_DAYS = 90
@@ -701,6 +704,139 @@ def cmd_purge(args) -> int:
     return 0
 
 
+
+# ---------------------------------------------------------------- 카카오 '나와의 채팅' 알림
+
+NOTIFY_TARGET = "카카오톡 나와의 채팅 (토큰 주인 본인)"
+
+
+def ledger_summary(today: dt.date) -> dict:
+    tasks = read_json(data_dir() / "tasks.json", [])
+    week_start = today - dt.timedelta(days=today.weekday())
+    active = [t for t in tasks if t["status"] in {"todo", "doing"}]
+
+    def done_this_week(t):
+        return t["status"] == "done" and any(
+            h.get("to") == "done" and week_start <= dt.date.fromisoformat(h["at"][:10]) <= today
+            for h in t["history"])
+
+    return {
+        "date": today.isoformat(),
+        "active": len(active),
+        "late": sum(1 for t in active if t["due_at"] and dt.date.fromisoformat(t["due_at"]) < today),
+        "blocked": sum(1 for t in tasks if t["status"] == "blocked"),
+        "no_due": sum(1 for t in tasks if t["status"] in {"todo", "doing", "blocked"} and not t["due_at"]),
+        "done_week": sum(1 for t in tasks if done_this_week(t)),
+    }
+
+
+def find_notification(items: list[dict], nid: str) -> dict:
+    for n in items:
+        if n["notification_id"] == nid:
+            return n
+    raise WorkdeskError(f"알림이 없습니다: {nid}")
+
+
+def cmd_notify(args) -> int:
+    path = data_dir() / "notifications.json"
+    items = read_json(path, [])
+
+    if args.action == "draft":
+        today = dt.date.fromisoformat(args.date) if args.date else dt.date.fromisoformat(kn.today_str())
+        try:
+            text = kn.build_text(ledger_summary(today))
+        except kn.NotifyError as e:
+            raise WorkdeskError(str(e))
+        nid = next_id("noti", [n["notification_id"] for n in items])
+        items.append({"notification_id": nid, "target": NOTIFY_TARGET, "text": text,
+                      "payload_hash": canonical_hash({"target": NOTIFY_TARGET, "text": text}),
+                      "status": "draft", "created_at": now_iso(), "approval": None, "attempts": []})
+        write_json(path, items)
+        audit(args.by, "notify_draft", nid)
+        print(f"[알림 초안] {nid}\n받는 곳: {NOTIFY_TARGET}\n---\n{text}\n---\n"
+              f"보내려면: notify approve {nid} --by <이름>  →  notify send {nid} --by <이름>")
+        return 0
+
+    n = find_notification(items, args.notification_id)
+
+    if args.action == "show":
+        print(json.dumps({k: v for k, v in n.items()}, ensure_ascii=False, indent=2))
+        return 0
+
+    if args.action == "approve":
+        if n["status"] != "draft":
+            raise WorkdeskError(f"draft 상태만 승인할 수 있습니다(현재 {n['status']}).")
+        n["approval"] = {"by": args.by, "at": now_iso(), "payload_hash": n["payload_hash"], "target": n["target"]}
+        n["status"] = "approved"
+        write_json(path, items)
+        audit(args.by, "notify_approve", n["notification_id"])
+        print(f"[승인] {n['notification_id']} · 받는 곳 {n['target']}")
+        return 0
+
+    if args.action == "send":
+        if n["status"] == "sent":
+            print(f"[중복] {n['notification_id']}은(는) 이미 보냈습니다. 다시 보내지 않습니다.")
+            return 0
+        if n["status"] == "unknown" and not args.confirmed_not_received:
+            raise WorkdeskError("지난 전송 결과가 불명확합니다. 카카오톡 나와의 채팅에 도착했는지 먼저 확인하세요. "
+                                "도착하지 않았다면 --confirmed-not-received를 붙여 다시 보냅니다.")
+        if n["status"] == "sending":
+            raise WorkdeskError("전송 중에 멈춘 알림입니다. notify-recover로 상태를 정리하고 도착 여부를 먼저 확인하세요.")
+        if n["status"] not in {"approved", "failed", "unknown"}:
+            raise WorkdeskError(f"승인되지 않은 알림입니다(현재 {n['status']}). notify approve가 먼저입니다.")
+        current = canonical_hash({"target": n["target"], "text": n["text"]})
+        if not n.get("approval") or n["approval"]["payload_hash"] != current:
+            n["status"], n["approval"] = "draft", None
+            write_json(path, items)
+            raise WorkdeskError("승인 뒤 내용이 바뀌었습니다. 승인을 취소했으니 다시 승인하세요.")
+        n["status"] = "sending"
+        write_json(path, items)  # 보내기 직전 상태를 먼저 남긴다(중간에 꺼져도 흔적이 남음)
+        result, detail = kn.send_memo(n["text"], post=args.post or kn.http_post)
+        n["status"] = result
+        n["attempts"].append({"at": now_iso(), "by": args.by, "result": result, "detail": detail})
+        write_json(path, items)
+        audit(args.by, "notify_send", n["notification_id"], after=result)
+        label = {"sent": "[전송 완료]", "failed": "[전송 실패]", "unknown": "[결과 불명확]"}[result]
+        print(f"{label} {n['notification_id']} {detail}")
+        if result == "unknown":
+            print("  나와의 채팅을 확인한 뒤에만 다시 보내세요. 자동 재발송은 하지 않습니다.")
+        return 0 if result == "sent" else 1
+
+    raise WorkdeskError("알 수 없는 동작")
+
+
+def cmd_notify_recover(args) -> int:
+    """'sending'에서 멈춘 알림(프로그램이 꺼진 경우)을 unknown으로 바꾼다. 자동 재발송은 하지 않는다."""
+    path = data_dir() / "notifications.json"
+    items = read_json(path, [])
+    stuck = [n for n in items if n["status"] == "sending"]
+    for n in stuck:
+        n["status"] = "unknown"
+        n["attempts"].append({"at": now_iso(), "by": "recover", "result": "unknown",
+                              "detail": {"reason": "전송 중 중단됨"}})
+    if stuck:
+        write_json(path, items)
+    print(f"[복구] 전송 중 멈춘 알림 {len(stuck)}건을 '결과 불명확'으로 표시했습니다." if stuck else "멈춘 알림이 없습니다.")
+    return 0
+
+
+def cmd_kakao_auth(args) -> int:
+    try:
+        if args.step == "url":
+            print("1) 아래 주소를 브라우저에서 열고 카카오 로그인·동의(카카오톡 메시지 전송)를 합니다.")
+            print("2) 이동한 주소창의 code= 뒤 값을 복사해 'kakao-auth exchange --code <값>'에 넣습니다.\n")
+            print(kn.authorize_url(args.redirect_uri))
+            return 0
+        if not args.code:
+            raise WorkdeskError("--code가 필요합니다.")
+        tok = kn.exchange_code(args.code, args.redirect_uri)
+        print(f"[연결 완료] 토큰을 {kn.token_path()}에 저장했습니다(본인만 읽기). 동의 범위: {tok.get('scope', '확인 불가')}")
+        return 0
+    except kn.NotifyError as e:
+        raise WorkdeskError(str(e))
+    except (OSError, kn.TransportTimeout) as e:
+        raise WorkdeskError(f"카카오 서버에 연결하지 못했습니다: {e}")
+
 # ---------------------------------------------------------------- CLI
 
 def main(argv=None) -> int:
@@ -773,7 +909,27 @@ def main(argv=None) -> int:
     s.add_argument("--yes", action="store_true")
     s.set_defaults(func=cmd_purge)
 
+    s = sub.add_parser("notify", help="카카오 나와의 채팅 알림 (초안→승인→전송)")
+    s.add_argument("action", choices=["draft", "show", "approve", "send"])
+    s.add_argument("notification_id", nargs="?")
+    s.add_argument("--by", default="system")
+    s.add_argument("--date", help="draft 기준일 YYYY-MM-DD")
+    s.add_argument("--confirmed-not-received", action="store_true",
+                   help="결과 불명확 알림이 실제로 도착하지 않았음을 확인했을 때만")
+    s.set_defaults(func=cmd_notify, post=None)
+
+    s = sub.add_parser("notify-recover", help="전송 중 멈춘 알림을 결과 불명확으로 표시")
+    s.set_defaults(func=cmd_notify_recover)
+
+    s = sub.add_parser("kakao-auth", help="카카오 로그인 연결 (내 컴퓨터에서 1회)")
+    s.add_argument("step", choices=["url", "exchange"])
+    s.add_argument("--redirect-uri", default="https://localhost:8765/kakao")
+    s.add_argument("--code")
+    s.set_defaults(func=cmd_kakao_auth)
+
     args = p.parse_args(argv)
+    if getattr(args, "func", None) is cmd_notify and args.action != "draft" and not args.notification_id:
+        p.error("notification_id가 필요합니다.")
     try:
         return args.func(args)
     except WorkdeskError as e:

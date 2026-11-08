@@ -13,6 +13,7 @@
   ↓ approve           (도구) 승인 기록 + 확정 업무 원장
   ↓ status / update   진행 상태·변경 이력
   ↓ weekly-status-report  확정 업무만으로 주간 보고서
+  ↓ notify (선택)     숫자만 담은 알림 → 승인 → 카카오 나와의 채팅
 ```
 
 ## 쓰는 법 (Claude에게 말하기)
@@ -37,6 +38,7 @@ python3 workdesk/tools/workdesk.py validate workdesk/runs/폴더/candidates.json
 python3 workdesk/tools/workdesk.py approve 후보파일 cand_001 --by 홍길동 [--owner 이름 --due 2026-11-20]
 python3 workdesk/tools/workdesk.py status task_001 done --by 홍길동 --evidence "드라이브/보고서.docx"
 python3 workdesk/tools/workdesk.py report --out 보고서.md
+python3 workdesk/tools/workdesk.py notify draft --by 홍길동     # 카카오 알림 (KAKAO-ALIM.md 참고)
 python3 workdesk/tools/workdesk.py purge           # 보존 기한(기본 90일) 지난 원문 확인 후 --yes로 삭제
 ```
 
@@ -50,13 +52,15 @@ python3 workdesk/tools/workdesk.py purge           # 보존 기한(기본 90일)
 ```bash
 python3 -m unittest discover -s workdesk/tests -v
 ```
-계획서 11장 시나리오 중 도구로 확인 가능한 것(중복 파일, 형식 오류, 근거 누락, 날짜 불명확, 승인 후 변경, 완료 근거 등)을 자동 테스트한다.
+계획서 11장 시나리오와 알림 시나리오(승인 후 변경, 전송 불명확, 토큰 갱신 등) 중 도구로 확인 가능한 것(중복 파일, 형식 오류, 근거 누락, 날짜 불명확, 승인 후 변경, 완료 근거 등)을 자동 테스트한다.
 AI 추출 품질(정밀도·재현율)은 사람이 만든 정답과 비교해야 하며 아직 측정하지 않았다.
+
+## 카카오 알림 (5단계, 구현됨 · 실제 전송 미확인)
+공식 '나에게 보내기' API로 승인된 최소 정보만 보낸다. 연결 방법과 확인 범위는 `KAKAO-ALIM.md`.
 
 ## 다음 단계 (아직 안 함)
 | 단계 | 내용 |
 |---|---|
 | 3 | 웹 검토 화면(왼쪽 원문 · 오른쪽 후보, 근거 클릭 이동) — `frontend-design` 스킬 |
 | 4 | 역할 관리 확장(Paperclip·Hermes 등)은 업무량이 늘 때 검토 |
-| 5 | 카카오 '나와의 채팅' 알림 — 공식 API·승인 후 최소 정보만 |
 | 6 | 팀 사용: 로그인·권한·DB 전환 |

@@ -5,3 +5,5 @@ node_modules/
 .DS_Store
 source/dist/
 source/*.tsbuildinfo
+__pycache__/
+*.pyc
