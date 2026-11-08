@@ -1,0 +1,298 @@
+<title>대장 지시판</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<style>
+/* 배치: 위에서 아래로 팀 선택 → 지시 작성 → 진행 보드. 색은 조직도(org.html)와 같은 초록 계열. */
+:root{--bg:#f6f5f1;--surface:#fff;--ink:#1d1c1a;--muted:#6b6862;--line:#d9d5cc;--accent:#2f5d50;--accent-soft:#e3ece8;--warn:#8a4b12;--warn-soft:#f6ead9;--chip:#efede7;--on-accent:#fff;--font:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#161615;--surface:#21201e;--ink:#ecebe7;--muted:#a19e97;--line:#3a3834;--accent:#8cc4b2;--accent-soft:#1f3530;--warn:#f0b878;--warn-soft:#3a2a17;--chip:#2c2b28;--on-accent:#10201b;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#161615;--surface:#21201e;--ink:#ecebe7;--muted:#a19e97;--line:#3a3834;--accent:#8cc4b2;--accent-soft:#1f3530;--warn:#f0b878;--warn-soft:#3a2a17;--chip:#2c2b28;--on-accent:#10201b;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.55;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 48px}
+main{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+h1{font-size:1.55rem;margin:0 0 4px;letter-spacing:-.01em;text-wrap:balance}
+h2{font-size:1.05rem;margin:0 0 10px}
+p{margin:0}
+.sub{color:var(--muted)}
+.top{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+.pulse{font-size:.82rem;color:var(--muted);background:var(--chip);border-radius:999px;padding:4px 12px}
+.pulse b{color:var(--ink);font-weight:500}
+.teams{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+button{font:inherit;color:inherit}
+.team{all:unset;box-sizing:border-box;cursor:pointer;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.team:hover{border-color:var(--accent)}
+.team:focus-visible,.btn:focus-visible,input:focus-visible,textarea:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.team[aria-pressed="true"]{border:2px solid var(--accent);background:var(--accent-soft);padding:9px 11px}
+.team b{font-size:.98rem}
+.team .tag{font-size:.78rem;color:var(--accent);font-weight:500}
+.team .lead{font-size:.8rem;color:var(--muted)}
+.route{margin-top:10px;font-size:.88rem;color:var(--muted)}
+.route b{color:var(--ink);font-weight:500}
+form{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:grid;gap:12px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+label{display:flex;flex-direction:column;gap:4px;font-size:.86rem;font-weight:500;min-width:0}
+label small{font-weight:400;color:var(--muted)}
+input,textarea{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 10px;width:100%;min-width:0}
+textarea{min-height:104px;resize:vertical}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{all:unset;box-sizing:border-box;cursor:pointer;border:1px solid var(--line);border-radius:10px;padding:7px 14px;font-size:.88rem;background:var(--surface);text-align:center}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--on-accent);border-color:var(--accent);font-weight:700}
+.btn[disabled],.btn[aria-disabled="true"]{opacity:.5;cursor:default}
+.msg{font-size:.86rem;color:var(--muted)}
+.msg.err{color:var(--warn)}
+#copybox{display:none;font-family:var(--mono);font-size:.82rem}
+.gate{font-size:.84rem;color:var(--muted);background:var(--chip);border-radius:10px;padding:8px 12px}
+.board{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;align-items:start}
+.col{background:var(--chip);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.col h3{margin:2px 4px 2px;font-size:.92rem;display:flex;justify-content:space-between;gap:8px}
+.col h3 span{color:var(--muted);font-weight:400}
+.empty{font-size:.82rem;color:var(--muted);padding:6px 4px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.card h4{margin:0;font-size:.95rem;overflow-wrap:anywhere}
+.meta{font-size:.78rem;color:var(--muted);display:flex;gap:6px;flex-wrap:wrap}
+.chip{background:var(--accent-soft);color:var(--accent);border-radius:6px;padding:0 7px;font-weight:500}
+.chip.warn{background:var(--warn-soft);color:var(--warn)}
+.card details{font-size:.86rem}
+.card summary{cursor:pointer;color:var(--muted)}
+.card details p{white-space:pre-wrap;overflow-wrap:anywhere;margin-top:4px}
+.q,.res{font-size:.84rem;border-radius:8px;padding:6px 10px;overflow-wrap:anywhere}
+.q{background:var(--warn-soft)}
+.q b{color:var(--warn)}
+.res{background:var(--accent-soft)}
+.res a{color:var(--accent);font-weight:500}
+.q ul,.res ul{margin:2px 0 0;padding-left:18px}
+.fb{display:flex;flex-direction:column;gap:6px}
+.fb textarea{min-height:64px}
+.hold{margin-top:4px}
+.hold summary{cursor:pointer;color:var(--muted);font-size:.88rem}
+.hold .col{margin-top:8px}
+.foot{font-size:.82rem;color:var(--muted);display:grid;gap:4px}
+.theme{all:unset;cursor:pointer;border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:.82rem}
+.theme:focus-visible{outline:3px solid var(--accent)}
+@media (max-width:640px){.row2{grid-template-columns:1fr}h1{font-size:1.35rem}}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+
+<main>
+<header class="top">
+  <div>
+    <h1>대장 지시판</h1>
+    <p class="sub">팀을 고르고 일을 적으면 대장이 팀장에게 지시서를 받아 팀원에게 나눠 맡깁니다.</p>
+  </div>
+  <div class="actions">
+    <span class="pulse" id="pulse">대장 마지막 확인: <b>불러오는 중</b></span>
+    <button class="theme" id="theme" type="button">밝게/어둡게</button>
+  </div>
+</header>
+
+<section aria-labelledby="h-team">
+  <h2 id="h-team">1. 어느 팀에 맡길까요?</h2>
+  <div class="teams" id="teams" role="group" aria-labelledby="h-team"></div>
+  <p class="route" id="route"></p>
+</section>
+
+<section aria-labelledby="h-form">
+  <h2 id="h-form">2. 무엇을 맡길까요?</h2>
+  <form id="form" autocomplete="off">
+    <label for="f-title">한 줄 제목
+      <input id="f-title" maxlength="80" placeholder="예: M365 수료생 1:1 컨설팅 블로그 글" required>
+    </label>
+    <label for="f-body">지시 내용 <small>대상, 하고 싶은 말, 꼭 넣을 것, 아는 사실을 적어 주세요. 적지 않은 사실은 지어내지 않습니다.</small>
+      <textarea id="f-body" maxlength="4000" required></textarea>
+    </label>
+    <div class="row2">
+      <label for="f-scope">범위 제한 <small>예: 블로그만, 릴스 제외</small>
+        <input id="f-scope" maxlength="120">
+      </label>
+      <label for="f-ref">참고 자료 위치 <small>저장소 폴더, 슬랙 스레드, 링크</small>
+        <input id="f-ref" maxlength="300">
+      </label>
+    </div>
+    <div class="gate">결과는 아래 보드의 <b>확인 대기</b>에 올라오고, 대표가 승인해야 완료됩니다. 발행·슬랙 게시·외부 발송은 따로 요청한 경우에만 합니다.</div>
+    <div class="actions">
+      <button class="btn primary" id="send" type="submit">대장에게 지시</button>
+      <button class="btn" id="copy" type="button">세션에 붙여넣을 문장 복사</button>
+      <span class="msg" id="msg" role="status"></span>
+    </div>
+    <textarea id="copybox" readonly aria-label="복사할 문장"></textarea>
+  </form>
+</section>
+
+<section aria-labelledby="h-board">
+  <h2 id="h-board">3. 진행 보드</h2>
+  <p class="msg" id="load" role="status">지시 목록을 불러오는 중…</p>
+  <div class="board" id="board"></div>
+  <details class="hold" id="holdwrap" hidden><summary id="holdsum">보류</summary><div class="col" id="holdlist"></div></details>
+</section>
+
+<footer class="foot">
+  <p>지시는 이 판에 저장되고, 대장(Claude)이 확인하는 때에 처리됩니다. 정기 확인이나 세션에서 "지시판 확인해줘"라고 요청할 때입니다. 실시간으로 바로 실행되지는 않습니다.</p>
+  <p>보드의 상태 변경과 승인은 편집 권한이 있는 사람만 할 수 있습니다. 조직 구성은 저장소의 <code>ai-assistant/org.html</code>, 규칙은 <code>ai-assistant/대장-업무규칙.md</code>에 있습니다.</p>
+</footer>
+</main>
+
+<script>
+const TEAMS = __TEAMS__;
+const STATUS = {received:"접수됨", working:"진행 중", review:"확인 대기", done:"완료", hold:"보류"};
+const COLS = ["received","working","review","done"];
+const $ = id => document.getElementById(id);
+let db = null, canWrite = true, selected = "auto", tasks = [], busy = false;
+
+function h(tag, props, ...kids) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(props || {})) {
+    if (k === "class") e.className = v;
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2), v);
+    else if (v === true) e.setAttribute(k, "");
+    else if (v !== false && v != null) e.setAttribute(k, v);
+  }
+  for (const c of kids.flat()) { if (c == null || c === false) continue; e.append(c.nodeType ? c : document.createTextNode(String(c))); }
+  return e;
+}
+const when = ms => ms ? new Date(ms).toLocaleString("ko-KR", {month:"numeric", day:"numeric", hour:"2-digit", minute:"2-digit"}) : "";
+const teamOf = id => TEAMS.find(t => t.id === id) || TEAMS[0];
+const arr = v => Array.isArray(v) ? v.filter(x => typeof x === "string") : [];
+
+function renderTeams() {
+  const box = $("teams"); box.replaceChildren();
+  for (const t of TEAMS) {
+    box.append(h("button", {class:"team", type:"button", "aria-pressed": String(t.id === selected), onclick: () => { selected = t.id; renderTeams(); }},
+      h("b", {}, t.name), h("span", {class:"tag"}, t.tag), h("span", {class:"lead"}, t.lead ? "팀장 " + t.lead : t.sub)));
+  }
+  const t = teamOf(selected);
+  const r = $("route"); r.replaceChildren();
+  if (t.id === "auto") r.append("대장이 말머리로 팀을 판단해 배정합니다.");
+  else if (t.lead) r.append(h("b", {}, t.lead), " 작업 지시서 → 대장이 팀원에게 전달 → 팀 점검 → 검수 → 대표 승인");
+  else r.append("대장이 팀원에게 직접 전달 → 검수 → 대표 승인 (이 팀은 팀장이 없습니다)");
+}
+
+function composeText() {
+  const t = teamOf(selected);
+  const lines = [(t.id === "auto" ? "" : t.tag.split(" ")[0] + " ") + $("f-title").value.trim()];
+  const body = $("f-body").value.trim(); if (body) lines.push(body);
+  const sc = $("f-scope").value.trim(); if (sc) lines.push("범위: " + sc);
+  const rf = $("f-ref").value.trim(); if (rf) lines.push("참고 자료: " + rf);
+  return lines.join("\n");
+}
+
+function setMsg(text, err) { const m = $("msg"); m.textContent = text; m.className = "msg" + (err ? " err" : ""); }
+
+$("copy").addEventListener("click", async () => {
+  const text = composeText();
+  if (!$("f-title").value.trim()) { setMsg("제목을 먼저 적어 주세요.", true); return; }
+  const box = $("copybox");
+  try { await navigator.clipboard.writeText(text); setMsg("복사했어요. Claude 세션에 붙여넣으면 바로 시작합니다."); box.style.display = "none"; }
+  catch (e) { box.value = text; box.style.display = "block"; box.select(); setMsg("자동 복사가 안 돼서 아래에 띄웠어요. 선택한 채로 복사해 주세요.", true); }
+});
+
+$("form").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  if (!db) { setMsg("저장소에 연결되지 않아 지금은 지시를 저장할 수 없어요. 문장 복사를 쓰세요.", true); return; }
+  if (!canWrite) { setMsg("보기 전용 권한이라 지시할 수 없어요.", true); return; }
+  const title = $("f-title").value.trim(), body = $("f-body").value.trim();
+  if (!title || !body) { setMsg("제목과 지시 내용을 적어 주세요.", true); return; }
+  const t = teamOf(selected);
+  $("send").setAttribute("aria-disabled", "true"); setMsg("저장하는 중…");
+  try {
+    await db.collection("tasks").add({title, body, scope: $("f-scope").value.trim(), ref: $("f-ref").value.trim(),
+      team: t.id, teamName: t.name, tag: t.tag, status: "received", unread: false, createdAt: Date.now()});
+    $("form").reset(); $("copybox").style.display = "none";
+    setMsg("접수했어요. 대장이 확인하면 '진행 중'으로 바뀝니다.");
+  } catch (e) {
+    setMsg(e && e.code === "invalid_argument" ? "저장할 권한이 없어요. 편집 권한이 필요합니다." : "저장하지 못했어요. 잠시 뒤 다시 눌러 주세요.", true);
+  } finally { $("send").removeAttribute("aria-disabled"); }
+});
+
+async function patch(id, data) {
+  if (busy || !db) return; busy = true;
+  try { await db.doc("tasks/" + id).update(data); }
+  catch (e) { $("load").textContent = "변경하지 못했어요. 권한을 확인해 주세요."; }
+  finally { busy = false; }
+}
+
+function card(t) {
+  const q = arr(t.questions), links = Array.isArray(t.result && t.result.links) ? t.result.links : [];
+  const el = h("article", {class:"card"},
+    h("h4", {}, t.title),
+    h("div", {class:"meta"}, h("span", {class:"chip"}, t.teamName || "대장 판단"), t.unread ? h("span", {class:"chip warn"}, "대장 확인 대기") : null, when(t.createdAt)),
+    h("details", {}, h("summary", {}, "지시 내용"), h("p", {}, t.body), t.scope ? h("p", {}, "범위: " + t.scope) : null, t.ref ? h("p", {}, "참고: " + t.ref) : null),
+    q.length ? h("div", {class:"q"}, h("b", {}, "대장의 질문"), h("ul", {}, q.map(x => h("li", {}, x)))) : null,
+    t.progress ? h("p", {class:"msg"}, String(t.progress)) : null,
+    t.result && (t.result.summary || links.length || t.result.folder) ? h("div", {class:"res"},
+      t.result.summary ? h("p", {}, String(t.result.summary)) : null,
+      t.result.folder ? h("p", {}, "폴더: " + t.result.folder) : null,
+      links.length ? h("ul", {}, links.filter(l => l && typeof l.url === "string" && l.url.startsWith("https://")).map(l => h("li", {}, h("a", {href:l.url, target:"_blank", rel:"noopener"}, String(l.label || l.url))))) : null) : null,
+    arr((t.feedback || []).map(f => f && f.text)).length ? h("details", {}, h("summary", {}, "내가 보낸 의견 " + t.feedback.length + "건"), h("p", {}, t.feedback.map(f => when(f.at) + "  " + f.text).join("\n"))) : null);
+  if (!canWrite) return el;
+  const act = h("div", {class:"actions"});
+  const feedback = (label, nextStatus) => {
+    const wrap = h("div", {class:"fb", hidden:true});
+    const ta = h("textarea", {"aria-label": label, maxlength:"2000", placeholder: label});
+    wrap.append(ta, h("button", {class:"btn primary", type:"button", onclick: () => {
+      const text = ta.value.trim(); if (!text) return;
+      patch(t.id, {status: nextStatus, unread: true, feedback: [...(t.feedback || []), {at: Date.now(), text}]});
+    }}, "보내기"));
+    act.append(h("button", {class:"btn", type:"button", onclick: () => { wrap.hidden = !wrap.hidden; if (!wrap.hidden) ta.focus(); }}, label));
+    el.append(wrap);
+  };
+  if (t.status === "review") {
+    act.append(h("button", {class:"btn primary", type:"button", onclick: () => patch(t.id, {status:"done", approvedAt: Date.now(), unread:false})}, "승인 (완료)"));
+    feedback("수정 요청", "received");
+  } else if (t.status === "received" || t.status === "working") {
+    feedback(q.length ? "질문에 답하기" : "의견 보태기", t.status);
+    act.append(h("button", {class:"btn", type:"button", onclick: () => patch(t.id, {status:"hold"})}, "보류"));
+  } else if (t.status === "hold") {
+    act.append(h("button", {class:"btn", type:"button", onclick: () => patch(t.id, {status:"received", unread:true})}, "다시 접수"));
+  }
+  el.insertBefore(act, el.querySelector(".fb"));
+  return el;
+}
+
+function renderBoard() {
+  $("load").hidden = true;
+  const board = $("board"); board.replaceChildren();
+  const by = s => tasks.filter(t => t.status === s);
+  for (const s of COLS) {
+    const list = by(s);
+    board.append(h("div", {class:"col"}, h("h3", {}, STATUS[s], h("span", {}, list.length)),
+      list.length ? list.map(card) : h("p", {class:"empty"}, s === "received" ? "맡긴 일이 아직 없어요. 위에서 첫 지시를 적어 보세요." : "비어 있어요.")));
+  }
+  const held = by("hold"), wrap = $("holdwrap");
+  wrap.hidden = held.length === 0; $("holdsum").textContent = "보류 " + held.length + "건";
+  $("holdlist").replaceChildren(...held.map(card));
+}
+
+function start(dbx, userx) {
+  db = dbx;
+  if (userx && typeof userx.canEdit === "function") canWrite = !!userx.canEdit();
+  if (!canWrite) { setMsg("보기 전용입니다. 지시와 승인은 편집 권한이 있어야 합니다.", true); $("send").setAttribute("aria-disabled", "true"); }
+  const timer = setTimeout(() => { $("load").textContent = "아직 불러오지 못했어요. 연결을 확인해 주세요."; }, 10000);
+  db.collection("tasks").orderBy("createdAt", "desc").limit(100).onSnapshot(snap => {
+    clearTimeout(timer);
+    tasks = snap.docs.map(d => ({id: d.id, ...d.data()}));
+    renderBoard();
+  }, () => { clearTimeout(timer); $("load").textContent = "지시 목록을 불러오지 못했어요."; });
+  db.doc("meta/heartbeat").onSnapshot(s => {
+    const b = $("pulse").querySelector("b"), d = s.exists ? s.data() : null;
+    b.textContent = d && d.checkedAt ? when(d.checkedAt) : "아직 없음";
+  });
+}
+
+renderTeams(); renderBoard();
+$("load").hidden = false; $("load").textContent = "저장소에 연결하는 중…";
+(async () => {
+  const c = window.claude;
+  if (!c || !c.use) { $("load").textContent = "이 화면에서는 저장소를 쓸 수 없어요. 문장 복사로 세션에 지시해 주세요."; $("pulse").querySelector("b").textContent = "연결 안 됨"; return; }
+  const [dbx, userx] = await Promise.all([c.use("db"), c.use("user")]);
+  if (!dbx) { $("load").textContent = "이 화면에서는 저장소를 쓸 수 없어요. 문장 복사로 세션에 지시해 주세요."; $("pulse").querySelector("b").textContent = "연결 안 됨"; return; }
+  start(dbx, userx);
+})();
+
+const root = document.documentElement;
+try { const s = localStorage.getItem("board-theme"); if (s) root.dataset.theme = s; } catch (e) {}
+$("theme").addEventListener("click", () => {
+  const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  root.dataset.theme = dark ? "light" : "dark";
+  try { localStorage.setItem("board-theme", root.dataset.theme); } catch (e) {}
+});
+</script>
