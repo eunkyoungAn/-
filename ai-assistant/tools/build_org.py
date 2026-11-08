@@ -45,7 +45,7 @@ def member_path(m: dict) -> Path | None:
 
 def check(org: dict) -> list[str]:
     problems = []
-    members = [m for t in org["teams"] for m in t["members"]]
+    members = [m for t in org["teams"] for m in t["members"] + ([t["lead"]] if t.get("lead") else [])]
     ids = [m["id"] for m in members]
     for dup in {i for i in ids if ids.count(i) > 1}:
         problems.append(f"조직도에 두 번 나옵니다: {dup}")
@@ -78,14 +78,15 @@ def describe(path: Path | None) -> str:
 
 def enrich(org: dict) -> dict:
     for t in org["teams"]:
-        for m in t["members"]:
+        for m in t["members"] + ([t["lead"]] if t.get("lead") else []):
             p = member_path(m)
             m["kind_label"] = KIND_LABEL[m["kind"]]
             m["path"] = str(p.relative_to(ROOT)) if p else None
             m["description"] = describe(p)
     org["counts"] = {
         "teams": len(org["teams"]),
-        "agents": sum(1 for t in org["teams"] for m in t["members"] if m["kind"] == "agent"),
+        "agents": sum(1 for t in org["teams"] for m in t["members"] + ([t["lead"]] if t.get("lead") else []) if m["kind"] == "agent"),
+        "leads": sum(1 for t in org["teams"] if t.get("lead")),
         "skills": sum(1 for t in org["teams"] for m in t["members"] if m["kind"] in {"skill", "plugin-skill"}),
         "tools": sum(1 for t in org["teams"] for m in t["members"] if m["kind"] == "tool"),
     }
@@ -119,7 +120,8 @@ header p{margin:0;color:var(--muted)}
 .kind{display:inline-block;font-size:.72rem;border:1px solid var(--line);border-radius:6px;padding:0 6px;color:var(--muted)}
 .dispatch{margin:0 0 4px;width:100%;max-width:1200px}
 .dispatch h2{font-size:.95rem;margin:0 0 8px;text-align:center}
-.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+@media (max-width:640px){.steps{grid-template-columns:repeat(2,1fr)}}
 .steps li{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:.82rem;color:var(--muted)}
 .steps b{display:block;color:var(--ink);font-size:.9rem}
 .steps .n{display:inline-block;background:var(--accent);color:var(--surface);border-radius:999px;width:20px;height:20px;line-height:20px;text-align:center;font-size:.75rem;margin-right:6px}
@@ -129,6 +131,10 @@ header p{margin:0;color:var(--muted)}
 .team{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;position:relative}
 .team h3{margin:0;font-size:1.02rem}
 .tag{display:inline-block;margin:4px 0 6px;font-size:.78rem;background:var(--accent-soft);color:var(--accent);border-radius:6px;padding:1px 8px;font-weight:600}
+button.member.lead{margin:0 0 10px;padding:8px 10px;border:2px solid var(--accent);border-radius:10px;background:var(--accent-soft)}
+button.member.lead .mname{font-size:.95rem}
+button.member.lead .kind{background:var(--surface)}
+.nolead{margin:0 0 10px;font-size:.8rem;color:var(--muted)}
 .mission{margin:0 0 10px;color:var(--muted);font-size:.86rem}
 ul{list-style:none;margin:0;padding:0}
 li+li{margin-top:6px}
@@ -178,7 +184,7 @@ const ORG = __DATA__;
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const c = ORG.counts;
 document.getElementById("stats").innerHTML =
-  [`팀 ${c.teams}개`, `에이전트 ${c.agents}명`, `스킬 ${c.skills}개`, `도구 ${c.tools}개`].map(t => `<span class="stat">${t}</span>`).join("");
+  [`팀 ${c.teams}개`, `팀장 ${c.leads}명`, `에이전트 ${c.agents}명`, `스킬 ${c.skills}개`, `도구 ${c.tools}개`].map(t => `<span class="stat">${t}</span>`).join("");
 document.getElementById("std").textContent = `${ORG.common_standard.name} (${ORG.common_standard.role})`;
 const renderNode = (el, n, kind) => {
   document.getElementById(el).innerHTML =
@@ -196,6 +202,15 @@ document.getElementById("teams").innerHTML = ORG.teams.map((t, ti) => `
   <article class="team">
     <h3>${esc(t.name)}</h3><span class="tag">${esc(t.tag)}</span>
     <p class="mission">${esc(t.mission)}</p>
+    ${t.lead ? `<button class="member lead" type="button" aria-expanded="false" aria-controls="l${ti}">
+        <span class="kind">팀장</span> <span class="mname">${esc(t.lead.name)}</span>
+        <span class="mrole">${esc(t.lead.role)}</span></button>
+      <div class="detail" id="l${ti}" hidden>
+        <div><code>${esc(t.lead.id)}</code></div>
+        ${t.lead.description ? `<div>${esc(t.lead.description)}</div>` : ""}
+        <div class="no">하지 않는 일: ${t.lead.does_not.map(esc).join(" · ")}</div>
+        <div>파일: <code>${esc(t.lead.path)}</code></div>
+      </div>` : `<p class="nolead">팀장 없음 · 대장이 직접 배정</p>`}
     <ul>${t.members.map((m, mi) => `
       <li><button class="member" type="button" aria-expanded="false" aria-controls="d${ti}_${mi}">
         <span class="kind">${esc(m.kind_label)}</span> <span class="mname">${esc(m.name)}</span>

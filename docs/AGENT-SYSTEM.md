@@ -30,6 +30,7 @@
 |---|---|---|
 | 접수·확인 | 루틴 "블로그 슬랙 자동 확인" | 새 메시지 감지, `state/slack_last_ts` 갱신, 변경 없으면 아무것도 보내지 않음 |
 | 대장(팀장) | 메인 Claude (`ai-assistant/대장-업무규칙.md`) | 말머리 판단, 체인 순서 결정, 사용자 승인 요청, 보드 갱신 |
+| 팀장 5명 | `lead-content` `lead-report` `lead-edu` `lead-coaching` `lead-workdesk` | 팀 작업 지시서 작성, 팀 결과 점검 (실행·승인은 하지 않음) |
 | 조사 | `office-researcher` | 사실·출처 수집, 교차확인 |
 | 기획 | `office-planner` | 목표·구조·목차 |
 | 작성 | `office-blogger` / `office-writer` / `office-coverletter-writer` | 블로그·일반 문서·자소서 |
