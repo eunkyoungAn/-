@@ -237,3 +237,10 @@ details summary { cursor: pointer; font-weight: 600; }
 .follow p { margin: 6px 0 0; }
 .critlist { margin: 0; padding-left: 18px; font-size: 15px; }
 @media print { .print-open blockquote { display: block; } details.print-open > *:not(summary) { display: block; } .qcard { break-inside: avoid; } }
+
+/* 정량·성과 */
+.nums { margin-top: 12px; padding: 10px 12px; border-radius: 12px; border: 1px dashed var(--focus-line); background: var(--focus); }
+.nums ul, .nums-fb ul { margin: 4px 0 0; padding-left: 18px; font-size: 15px; }
+.nums li.need { color: var(--warn); }
+.nums-fb p { margin: 8px 0 0; }
+.tag { display: inline-block; padding: 1px 8px; margin: 2px 2px 0 0; border-radius: 99px; background: var(--soft); color: var(--accent); font-weight: 700; font-size: 14px; }

@@ -155,5 +155,16 @@ export function localEvaluate({ answer, metrics, limitSec }) {
     next_fix: TIPS[worst].fix,
     rewrite_example: TIPS[worst].example,
     comparison: '',
+    ...numberHints(text),
   };
+}
+
+// 답변 속 정량 표현을 찾고, 빠진 종류(결과 증감, 규모, 기간)를 채울 거리로 제안한다.
+export function numberHints(text) {
+  const found = [...new Set((text.match(/[0-9]+(?:[.,][0-9]+)?\s?(?:%|퍼센트|명|건|개|번|회|배|점|시간|일|주|개월|달|년|만\s?원|원|위|곳)|(?:한|두|세|네|다섯|여섯|일곱|여덟|아홉|열)\s?(?:명|개|번|달|해|가지|시간|주|곳|건|배)/g) || []).map(t => t.trim()))].slice(0, 6);
+  const add = [];
+  if (!/(%|퍼센트|배|늘|줄|증가|감소|단축|→|에서 .{1,8}로)/.test(text)) add.push('결과: 바꾸기 전과 후를 숫자로 비교(예: [전]건 → [후]건, [증가율]%)');
+  if (!/[0-9]+\s?(명|건|개|곳)|(한|두|세|네|다섯)\s?(명|건|개|곳)/.test(text)) add.push('규모: 몇 명, 몇 건을 대상으로 했는지');
+  if (!/[0-9]+\s?(개월|달|주|년|일|시간)|(한|두|세)\s?(달|해|주)/.test(text)) add.push('기간: 얼마 동안 했는지');
+  return { numbers_found: found, numbers_to_add: add };
 }
