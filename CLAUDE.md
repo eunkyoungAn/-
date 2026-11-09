@@ -8,9 +8,11 @@
 - 글 양식은 `templates/post.md`를 따른다.
 - 진행 상태는 `meta.md`의 `status`로 관리: asked → answered → drafted → published.
 - 슬랙 채널: `#blog-bot` (비공개, 채널 ID `C0C6ACW2ML7`). 변경 시 여기 수정.
+- AI 유튜브 리포트: 슬랙 `#ai-youtube-report` (공개, 채널 ID `C0CFT3QPYM7`), 흐름은 `docs/AI-REPORT-FLOW.md`.
 - 브랜드: 커리어캐쳐(CareerCatcher). 모든 글은 AI 검색 브랜딩 기준(SKILL.md 7절)을 따른다.
 - 아이 실명·학교·얼굴 사진 등 개인정보는 글에 넣지 않는다. 사진은 얼굴 노출 여부를 확인 질문한다.
 - 작업 후 커밋·푸시하고, 슬랙 스레드에 결과 링크를 남긴다.
+- 작업 후에는 항상 PR을 만들어 main에 합친다(merge). 완료 보고에는 PR 링크와 결과 폴더 바로가기(`https://github.com/eunkyoungAn/-/tree/main/<폴더>`)를 함께 준다.
 
 ## 업무별 스킬 적용 규칙
 세션 이름 말머리(또는 요청 내용)로 업무를 판단하고, 아래 스킬을 항상 같은 순서로 쓴다.
@@ -20,9 +22,19 @@
 |---|---|---|
 | `[보고서]` | 보고서, 가이드, 양식, 사업 정보, 논문·연구 | 한 장 → `one-page-report-docx`/`-hwpx`, 두 장 → `two-page-report-docx`, hwpx 양식 채우기 → `hwpx-autofill-conversion`, 그 외 문서 → `docs` |
 | `[블로그]` | 블로그 글, 원고, 카드뉴스, SNS | 블로그 → `blog-post`(+`office-blogger`), 카드뉴스 → `office-cardnews-designer`, 마지막에 `office-reviewer` 검수 |
+| `[리뷰]` | 쿠팡 상품 리뷰 | `coupang-review` (메모 기반, 경험 지어내기 금지, 등록은 직접) |
 | `[PPT]` | 강의안, 교안, 발표자료, 커리큘럼 | 설계 → `office-lecture-designer`(+`edu-project-os`), 파일 → `pptx` |
-| `[설정]` | 작업 환경, 자동화, 배포 | 별도 스킬 없음 |
+| `[AI리포트]` | 유튜브 AI 이슈 일간·주간 리포트(포스터) | `ai-youtube-report`(+`office-researcher` 교차확인, 주간은 `office-reviewer` 검수) |
+| `[코칭]` | 자기소개서, 면접 자료 | 자소서 → `office-coverletter-writer`, 면접 → `interview-material-builder` |
+| `[업무정리]` | 단톡방·회의 메모에서 할 일 뽑기, 업무 현황, 주간 보고 | `extract-work-items`(+`work-extractor`) → `verify-evidence`(+`evidence-verifier`) → 사람 승인 → `weekly-status-report`. 흐름·규칙은 `workdesk/README.md`, `workdesk/RULES.md` |
+| `[설정]` | 작업 환경, 자동화, 배포 | 별도 스킬 없음 (스킬 만들기는 `skill-creator`) |
 
+- 업무정리 데스크의 실제 대화 원문·업무 원장(`workdesk/data/`)은 커밋하지 않는다. 승인 전에는 업무를 확정하지 않는다.
+- 업무 단위 전체 목록·절차·품질 기준은 `ai-assistant/`(AI비서 플랫폼)를 따른다. 에이전트·스킬을 추가·삭제하면 `ai-assistant/org.json`을 고치고 `python3 ai-assistant/tools/build_org.py`로 조직도를 다시 만든다.
+- 카카오 알림 등 API 연동은 번외(`ai-assistant/번외/`)로만 정리하고 기본 에이전트에는 넣지 않는다.
 - 큰 주제 하나를 처음부터 끝까지 맡기면 `/office`(리서치→기획→작성→검수)를 쓴다.
 - 같은 자료(예: 경험노트)는 업무가 달라도 원본 파일을 공유한다. 새로 쓰기 전에 `posts/`, `output/`에서 같은 주제를 먼저 찾는다.
+- 메인 세션은 팀장 **대장**이다. 일을 받으면 `ai-assistant/대장-업무규칙.md`의 순서(접수 → 중복 확인 → 배정(팀장 지시서) → 실행 → 팀 점검 → 검수 → 승인 → 납품)대로 팀에 나눠 맡긴다. 팀 구성은 `ai-assistant/org.html`.
+- 대표는 지시판 페이지에서도 일을 맡긴다. 처리 규칙은 `ai-assistant/대장-업무규칙.md`의 "지시판 처리".
+- 전체 운영 흐름(접수 → 체인 → 게이트 → 기록)은 `docs/AGENT-SYSTEM.md`, 진행 중인 일의 색인은 `state/BOARD.md`. 새 일을 받거나 끝낼 때 보드를 갱신한다.
 - 세션 이름은 `[업무] 자료명 | 산출물` 형식으로 짓는다. 예: `[블로그] 경험노트 | 카드뉴스`.

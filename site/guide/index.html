@@ -4,8 +4,7 @@
 <meta name="referrer" content="no-referrer">
 <title>포트폴리오 빌더 매뉴얼</title>
 <style>
-:root{--bg:#f6f4fa;--panel:#fff;--fg:#231d2e;--muted:#6b6478;--line:#e2dcec;--accent:#6b3fa0;--soft:#efe8f8;--warn:#e8590c}
-@media (prefers-color-scheme:dark){:root{--bg:#16131c;--panel:#1f1a28;--fg:#ece7f4;--muted:#a69eb5;--line:#352d42;--accent:#b591e6;--soft:#2a2236}}
+:root{--bg:#f0eafb;--panel:#fff;--fg:#231d2e;--muted:#6b6478;--line:#e2dcec;--accent:#6b3fa0;--soft:#e4d9f7;--warn:#e8590c}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--fg);font-family:"Malgun Gothic","맑은 고딕","Apple SD Gothic Neo","Noto Sans KR",sans-serif;font-size:16px;line-height:1.75;word-break:keep-all}
 header{border-top:6px solid var(--accent);background:var(--panel);border-bottom:1px solid var(--line)}
@@ -74,10 +73,10 @@ footer{color:var(--muted);font-size:13px;border-top:1px solid var(--line);paddin
 
 <h2 id="save">③ 완성본 확인 & HTML 내려받기</h2>
 <div class="step"><h3><span class="n">5</span>오른쪽에서 완성본 확인 → [HTML 저장]</h3>
-<p>상태 줄에서 <b>빠진 항목 점검</b>과 <b>사용 토큰 수</b>를 확인할 수 있어요. 빠진 항목이 있으면 한 번 더 생성하세요.</p>
+<p>상태 줄에서 <b>빠진 항목 점검</b>과 <b>사용 토큰 수</b>를 확인할 수 있어요. 결과 아래에는 <b>🔍 컨설턴트 피드백</b>이 <b>따로</b> 나와요. 저장하는 HTML 파일에는 들어가지 않으니, 필요하면 [피드백 복사]로 따로 보관하세요. 빠진 항목이 있으면 한 번 더 생성하세요.</p>
 <img src="img/m6-result.png" alt="완성본과 HTML 저장 버튼" loading="lazy"></div>
 <div class="step"><h3><span class="n">6</span>내려받은 파일 열기</h3>
-<p><b>다운로드 폴더</b>의 <code>이름_portfolio.html</code>을 더블클릭하면 브라우저에서 열려요. 그대로 제출하거나, 인쇄(Ctrl+P) → PDF로 저장할 수 있어요.</p>
+<p><b>다운로드 폴더</b>의 <code>직무_이름.html</code> (예: 디지털마케터_김공순.html)을 더블클릭하면 브라우저에서 열려요. 그대로 제출하거나, 인쇄(Ctrl+P) → PDF로 저장할 수 있어요.</p>
 <img src="img/m7-file.png" alt="내려받은 포트폴리오 HTML 첫 화면" loading="lazy"></div>
 <div class="step"><p>프로젝트는 <b class="k">핵심 표</b>로 보이고, <b>▶ 상세 내용 보기</b>를 누르면 나머지가 펼쳐져요.</p>
 <img src="img/m8-file-project.png" alt="프로젝트 표와 상세 내용 펼침" loading="lazy"></div>
@@ -94,6 +93,7 @@ footer{color:var(--muted);font-size:13px;border-top:1px solid var(--line);paddin
 <div class="tw"><table>
 <tr><th>질문</th><th>답변</th></tr>
 <tr><td>비용이 드나요?</td><td>Gemini 무료 키는 하루 사용 한도 안에서 <b>0원</b>이에요. 생성 1회에 약 5천~1만 토큰을 써요.</td></tr>
+<tr><td>더 많이 생성하고 싶어요</td><td>빌더의 <b>Gemini 모델</b>에서 <b>Flash-Lite(기본)</b>를 쓰면 무료 한도가 더 넉넉해요. 한도에 걸리면 자동으로 다른 모델로 한 번 더 시도해요. 글 품질이 더 필요하면 Flash를 고르세요.</td></tr>
 <tr><td>키가 저장되나요?</td><td>저장되지 않아요. 탭을 닫으면 사라지니 다시 붙여넣으세요. 키는 다른 사람과 공유하지 마세요.</td></tr>
 <tr><td>내 정보가 AI로 가나요?</td><td>이메일·연락처는 보내지 않아요. 나머지 입력은 AI 작성에 쓰여요. 실명 대신 이니셜을 써도 돼요.</td></tr>
 <tr><td>오류가 나요</td><td>상태 줄 문구를 확인하세요. “키가 올바르지 않아요” → 키 다시 복사, “사용량을 다 썼어요” → 잠시 후 다시 시도.</td></tr>

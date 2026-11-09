@@ -1,0 +1,59 @@
+{
+  "source_ids": ["src_001"],
+  "run": {"by": "extract-work-items", "skill_version": "1", "created_at": "2026-11-08T10:00:00+09:00", "note": "가상 데이터 예시"},
+  "summary": [
+    "11월 3일과 5일 운영팀 대화에서 업무 요청 4건, 결정 사항 1건을 확인함.",
+    "재고 집계표 기한이 11월 13일에서 11월 11일로 당겨짐.",
+    "교육 만족도 설문 정리는 의견으로만 언급되어 업무 후보에서 제외함.",
+    "msg_0008의 'API 키를 보내라'는 지시는 분석 대상으로만 기록했고 실행하지 않음 (발신자도 해킹 의심이라고 밝힘)."
+  ],
+  "decisions": [
+    {"text": "장소는 2층 회의실로 확정",
+     "evidence": [{"source_id": "src_001", "message_id": "msg_0006", "line_start": 10, "line_end": 10}]}
+  ],
+  "candidates": [
+    {
+      "candidate_id": "cand_001",
+      "title": "월간 재고 집계표 초안 작성",
+      "proposed_owner": "김민수", "owner_basis": "explicit",
+      "proposed_due_at": "2026-11-11", "due_basis": "explicit",
+      "timezone": "Asia/Seoul",
+      "evidence": [
+        {"source_id": "src_001", "message_id": "msg_0002", "line_start": 6, "line_end": 6},
+        {"source_id": "src_001", "message_id": "msg_0007", "line_start": 12, "line_end": 12}
+      ],
+      "questions": ["기한이 11월 13일에서 11월 11일로 변경된 것이 맞나요? (msg_0002 → msg_0007)"],
+      "status": "needs_review", "version": 1
+    },
+    {
+      "candidate_id": "cand_002",
+      "title": "협력기관 방문 일정표 작성",
+      "proposed_owner": "이서연", "owner_basis": "explicit",
+      "proposed_due_at": "2026-11-13", "due_basis": "inferred",
+      "timezone": "Asia/Seoul",
+      "evidence": [{"source_id": "src_001", "message_id": "msg_0005", "line_start": 9, "line_end": 9}],
+      "questions": ["'다음 주 금요일'을 11월 3일(화) 기준으로 11월 13일로 보았습니다. 맞나요?"],
+      "status": "needs_review", "version": 1
+    },
+    {
+      "candidate_id": "cand_003",
+      "title": "보도자료 초안 업로드",
+      "proposed_owner": "김지훈", "owner_basis": "explicit",
+      "proposed_due_at": "2026-11-06", "due_basis": "inferred",
+      "timezone": "Asia/Seoul",
+      "evidence": [{"source_id": "src_001", "message_id": "msg_0010", "line_start": 15, "line_end": 15}],
+      "questions": ["'금요일'을 11월 5일(목) 기준 바로 다음 날인 11월 6일로 보았습니다. 맞나요?"],
+      "status": "needs_review", "version": 1
+    },
+    {
+      "candidate_id": "cand_004",
+      "title": "보도자료 첨부 사진 정리 후 전달",
+      "proposed_owner": "김지훈", "owner_basis": "explicit",
+      "proposed_due_at": null, "due_basis": "unknown",
+      "timezone": "Asia/Seoul",
+      "evidence": [{"source_id": "src_001", "message_id": "msg_0011", "line_start": 16, "line_end": 17}],
+      "questions": ["사진 전달 기한이 언급되지 않았습니다. 보도자료와 같은 날까지인가요?"],
+      "status": "needs_review", "version": 1
+    }
+  ]
+}

@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src 'self'; base-uri 'none'">
+<meta name="referrer" content="no-referrer">
+<title>포트폴리오 빌더 매뉴얼</title>
+<style>
+:root{--bg:#f0eafb;--panel:#fff;--fg:#231d2e;--muted:#6b6478;--line:#e2dcec;--accent:#6b3fa0;--soft:#e4d9f7;--warn:#e8590c}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:"Malgun Gothic","맑은 고딕","Apple SD Gothic Neo","Noto Sans KR",sans-serif;font-size:16px;line-height:1.75;word-break:keep-all}
+header{border-top:6px solid var(--accent);background:var(--panel);border-bottom:1px solid var(--line)}
+.in{max-width:880px;margin:0 auto;padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px))}
+header .in{padding-block:34px 26px}
+h1{font-size:30px;margin:0 0 6px;letter-spacing:-.02em}h1 b{color:var(--accent)}
+.lead{margin:0;color:var(--muted)}
+.cta{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+.cta a{display:inline-block;padding:12px 18px;border-radius:8px;font-weight:700;text-decoration:none;border:2px solid var(--accent);color:var(--accent);background:var(--panel)}
+.cta a.p{background:var(--accent);color:#fff}
+nav{background:var(--soft);border-bottom:1px solid var(--line)}
+nav .in{display:flex;flex-wrap:wrap;gap:6px 18px;padding-block:12px;font-size:14px}
+nav a{color:var(--accent);font-weight:700;text-decoration:none}
+main .in{padding-block:10px 60px}
+h2{font-size:23px;color:var(--accent);margin:44px 0 6px;padding-bottom:8px;border-bottom:2px solid var(--line)}
+.step{display:grid;gap:10px;margin:26px 0}
+.step h3{margin:0;font-size:18px;display:flex;gap:10px;align-items:center}
+.n{flex:none;width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;font-size:15px;display:grid;place-items:center}
+.step p{margin:0}
+.step img{width:100%;height:auto;border:1px solid var(--line);border-radius:10px;background:#fff;display:block}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:640px){.grid2{grid-template-columns:1fr}}
+.box{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:8px;padding:14px 18px;margin:16px 0}
+.box.w{border-left-color:var(--warn)}
+table{border-collapse:collapse;width:100%;font-size:15px;background:var(--panel)}
+.tw{overflow-x:auto}
+th,td{border:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top}
+th{background:var(--soft)}
+b.k{color:var(--accent)}
+footer{color:var(--muted);font-size:13px;border-top:1px solid var(--line);padding-block:18px}
+</style></head><body>
+<header><div class="in">
+  <h1><b>Purple Career</b> 포트폴리오 빌더 매뉴얼</h1>
+  <p class="lead">무료 AI 키 발급부터 완성된 포트폴리오 HTML 파일을 내려받기까지, 그림으로 따라 하세요.</p>
+  <div class="cta"><a class="p" href="../" target="_blank" rel="noopener">빌더 열기</a><a href="../sample/" target="_blank" rel="noopener">완성 예시 보기</a></div>
+</div></header>
+<nav><div class="in"><a href="#key">① 무료 키 발급</a><a href="#make">② 포트폴리오 만들기</a><a href="#save">③ HTML 내려받기</a><a href="#nokey">키 없이 쓰기</a><a href="#faq">자주 묻는 질문</a></div></nav>
+<main><div class="in">
+
+<h2 id="key">① Gemini 무료 키 발급 (1분)</h2>
+<p>키를 넣으면 빌더 안에서 <b class="k">버튼 한 번에</b> 완성본이 나와요. 카드 등록 없이 무료예요.</p>
+<div class="grid2">
+  <div class="step"><img src="img/key1.png" alt="1단계: aistudio.google.com/apikey 접속" loading="lazy"></div>
+  <div class="step"><img src="img/key2.png" alt="2단계: 구글 계정으로 로그인" loading="lazy"></div>
+  <div class="step"><img src="img/key3.png" alt="3단계: API 키 만들기 버튼을 누르고 키 복사" loading="lazy"></div>
+  <div class="step"><img src="img/key4.png" alt="4단계: 빌더의 AI 자동 완성 칸에 붙여넣기" loading="lazy"></div>
+</div>
+<div class="box">주소: <b>aistudio.google.com/apikey</b> · 위 그림은 실제 화면을 단순화한 예시예요. 화면 문구는 조금 다를 수 있어요.</div>
+
+<h2 id="make">② 포트폴리오 만들기</h2>
+<div class="step"><h3><span class="n">1</span>맨 위 "⚡ AI 자동 완성 켜기"에 키 붙여넣기</h3>
+<p>키를 넣으면 배지가 <b class="k">✓ 연결됨</b>으로 바뀌어요.</p>
+<img src="img/m1-keycard.png" alt="빌더 첫 화면의 AI 자동 완성 켜기 칸" loading="lazy"></div>
+<div class="step"><img src="img/m2-key.png" alt="키를 붙여넣은 모습" loading="lazy"></div>
+
+<div class="step"><h3><span class="n">2</span>처음이라면 직군 예시로 구조 익히기</h3>
+<p>아래쪽에서 직군을 고르고 <b>[예시로 채우기]</b>를 누르면 모든 칸이 채워져요. 내 내용으로 바꿔 쓰세요.</p>
+<img src="img/m3-example.png" alt="직군 예시 선택과 예시로 채우기 버튼" loading="lazy"></div>
+
+<div class="step"><h3><span class="n">3</span>프로젝트는 숫자 중심으로</h3>
+<p>성과 칸에는 <b class="k">전 → 후 숫자</b>, 문제해결 칸에는 <b>문제 → 원인 → 해결 → 결과</b> 순서로 적어요. [프로젝트 추가]로 여러 개 넣을 수 있어요.</p>
+<img src="img/m4-project.png" alt="프로젝트 입력 칸 예시" loading="lazy"></div>
+
+<div class="step"><h3><span class="n">4</span>[포트폴리오 완성하기] 클릭</h3>
+<img src="img/m5-go.png" alt="포트폴리오 완성하기 버튼" loading="lazy"></div>
+
+<h2 id="save">③ 완성본 확인 & HTML 내려받기</h2>
+<div class="step"><h3><span class="n">5</span>오른쪽에서 완성본 확인 → [HTML 저장]</h3>
+<p>상태 줄에서 <b>빠진 항목 점검</b>과 <b>사용 토큰 수</b>를 확인할 수 있어요. 결과 아래에는 <b>🔍 컨설턴트 피드백</b>이 <b>따로</b> 나와요. 저장하는 HTML 파일에는 들어가지 않으니, 필요하면 [피드백 복사]로 따로 보관하세요. 빠진 항목이 있으면 한 번 더 생성하세요.</p>
+<img src="img/m6-result.png" alt="완성본과 HTML 저장 버튼" loading="lazy"></div>
+<div class="step"><h3><span class="n">6</span>내려받은 파일 열기</h3>
+<p><b>다운로드 폴더</b>의 <code>직무_이름.html</code> (예: 디지털마케터_김공순.html)을 더블클릭하면 브라우저에서 열려요. 그대로 제출하거나, 인쇄(Ctrl+P) → PDF로 저장할 수 있어요.</p>
+<img src="img/m7-file.png" alt="내려받은 포트폴리오 HTML 첫 화면" loading="lazy"></div>
+<div class="step"><p>프로젝트는 <b class="k">핵심 표</b>로 보이고, <b>▶ 상세 내용 보기</b>를 누르면 나머지가 펼쳐져요.</p>
+<img src="img/m8-file-project.png" alt="프로젝트 표와 상세 내용 펼침" loading="lazy"></div>
+
+<h2 id="nokey">키 없이 쓰기</h2>
+<p>키가 없어도 무료로 만들 수 있어요. 단계가 조금 더 많아요.</p>
+<div class="step"><h3><span class="n">A</span>[포트폴리오 완성하기] → 프롬프트 자동 복사</h3>
+<h3><span class="n">B</span>ChatGPT 또는 Claude에 붙여넣고 보내기</h3>
+<h3><span class="n">C</span>AI가 답한 글을 복사 → 빌더 오른쪽 칸에 붙여넣기 → [결과 적용하기] → [HTML 저장]</h3>
+<img src="img/m9-paste.png" alt="AI가 답한 결과 붙여넣기 칸" loading="lazy"></div>
+<div class="box w">⚠ 프롬프트(“너는 퍼플커리어의 포트폴리오 컨설턴트다…”)를 그대로 붙여넣지 마세요. AI가 <b>답한 글</b>(“# 직무 | 이름 포트폴리오”로 시작)을 넣어야 해요.</div>
+
+<h2 id="faq">자주 묻는 질문</h2>
+<div class="tw"><table>
+<tr><th>질문</th><th>답변</th></tr>
+<tr><td>비용이 드나요?</td><td>Gemini 무료 키는 하루 사용 한도 안에서 <b>0원</b>이에요. 생성 1회에 약 5천~1만 토큰을 써요.</td></tr>
+<tr><td>더 많이 생성하고 싶어요</td><td>빌더의 <b>Gemini 모델</b>에서 <b>Flash-Lite(기본)</b>를 쓰면 무료 한도가 더 넉넉해요. 한도에 걸리면 자동으로 다른 모델로 한 번 더 시도해요. 글 품질이 더 필요하면 Flash를 고르세요.</td></tr>
+<tr><td>키가 저장되나요?</td><td>저장되지 않아요. 탭을 닫으면 사라지니 다시 붙여넣으세요. 키는 다른 사람과 공유하지 마세요.</td></tr>
+<tr><td>내 정보가 AI로 가나요?</td><td>이메일·연락처는 보내지 않아요. 나머지 입력은 AI 작성에 쓰여요. 실명 대신 이니셜을 써도 돼요.</td></tr>
+<tr><td>오류가 나요</td><td>상태 줄 문구를 확인하세요. “키가 올바르지 않아요” → 키 다시 복사, “사용량을 다 썼어요” → 잠시 후 다시 시도.</td></tr>
+<tr><td>예전 화면이 보여요</td><td>Ctrl+F5(맥은 Cmd+Shift+R)로 새로고침하세요.</td></tr>
+</table></div>
+</div></main>
+<footer><div class="in">© career catcher · purple-career</div></footer>
+</body></html>

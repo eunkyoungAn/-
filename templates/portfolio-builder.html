@@ -3,12 +3,10 @@
 <style>
 /* Layout: 좌측 입력 시트(섹션 탭 순서 = 노션 양식 순서) / 우측 노션형 미리보기 */
 :root{
-  --bg:#f6f4fa; --panel:#ffffff; --fg:#231d2e; --muted:#6b6478; --line:#e2dcec;
-  --accent:#6b3fa0; --accent-fg:#ffffff; --soft:#efe8f8; --chip:#e6dbf5;
+  --bg:#f0eafb; --panel:#ffffff; --fg:#231d2e; --muted:#6b6478; --line:#e2dcec;
+  --accent:#6b3fa0; --accent-fg:#ffffff; --soft:#e4d9f7; --chip:#d9caf2;
   --font:"Malgun Gothic","맑은 고딕","Apple SD Gothic Neo","Noto Sans KR",sans-serif;
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#16131c;--panel:#1f1a28;--fg:#ece7f4;--muted:#a69eb5;--line:#352d42;--accent:#b591e6;--accent-fg:#1a1422;--soft:#2a2236;--chip:#3a2d4d;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#16131c;--panel:#1f1a28;--fg:#ece7f4;--muted:#a69eb5;--line:#352d42;--accent:#b591e6;--accent-fg:#1a1422;--soft:#2a2236;--chip:#3a2d4d;color-scheme:dark}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:14px;line-height:1.65;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
 .top{border-bottom:3px solid var(--accent);padding-block:22px 16px;margin-bottom:22px}
@@ -80,6 +78,10 @@ input:focus,textarea:focus,select:focus,button:focus-visible,summary:focus-visib
 .kc-badge{font-style:normal;font-size:11px;background:var(--accent);color:var(--accent-fg);padding:2px 8px;border-radius:999px}
 .kc-badge.on{background:#2e8b57;color:#fff}
 .keycard summary small{flex-basis:100%;margin-left:0}
+.fbbox{order:3;border-top:2px dashed var(--accent);background:var(--soft)}
+.fb-h{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;padding:10px 14px;color:var(--accent)}
+.fb-h span{font-size:12px;color:var(--muted);flex:1 1 200px}
+.fb-doc{padding:0 18px 14px!important;background:transparent;max-height:200px}
 .hint{margin:0;font-size:12px;color:var(--muted)}
 .note{font-size:12px;color:var(--muted);padding:0 14px 12px;margin:0}
 </style>
@@ -99,6 +101,7 @@ input:focus,textarea:focus,select:focus,button:focus-visible,summary:focus-visib
       <summary><span class="kc-t">⚡ AI 자동 완성 켜기 <em class="kc-badge" id="kcstate">무료 · 1분 설정</em></span><small>키를 넣으면 버튼 한 번에 완성본이 나와요</small></summary>
       <div class="body">
         <label>AI 선택<select id="provider"><option value="gemini">Google Gemini (무료)</option><option value="claude">Claude (유료)</option></select></label>
+        <label>Gemini 모델 <small>(무료 한도가 모델마다 따로 있어요)</small><select id="gemmodel"><option value="lite">Flash-Lite · 더 많이 생성 (기본)</option><option value="flash">Flash · 품질 우선 (한도 적음)</option></select></label>
         <label>API 키<input id="apikey" type="password" autocomplete="off" spellcheck="false" placeholder="AIza... 또는 sk-ant-..."></label>
         <p class="hint">📘 처음이라면 <a href="https://eunkyoungan.github.io/-/portfolio/guide/" target="_blank" rel="noopener noreferrer"><b>그림으로 보는 키 발급·사용 매뉴얼</b></a></p>
         <p class="hint"><b>무료 키 받기</b>: <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">aistudio.google.com/apikey</a> 접속 → 구글 로그인 → "API 키 만들기" → 복사해서 붙여넣기 (카드 등록 없음, 하루 사용량 제한 있음)</p>
@@ -117,6 +120,7 @@ input:focus,textarea:focus,select:focus,button:focus-visible,summary:focus-visib
           <label>연락처<input id="phone" placeholder="010-0000-0000"></label>
         </div>
         <label>링크 (블로그·깃허브·링크드인·인스타)<input id="links"></label>
+        <label>M365 신입 공고 불러오기 <small>(M365 수료자용 · 지원 직무와 공고 요약이 채워져요)</small><select id="jdsel"><option value="">선택 안 함</option><option value="j1">씨앤토트 · Microsoft 365 엔지니어 (신입)</option><option value="j2">소프트피플코리아 · M365·AD·Exchange 기술지원</option><option value="j3">에이피드 · Microsoft 365 / EMS 엔지니어</option><option value="j4">에이스엔지니어링 · 사내 IT 운영담당자</option></select></label>
         <label>채용공고 핵심 내용 <small>(선택, 키워드 매칭용)</small><textarea id="jd"></textarea></label>
       </div>
     </details>
@@ -175,9 +179,10 @@ input:focus,textarea:focus,select:focus,button:focus-visible,summary:focus-visib
 
     <div class="actions">
       <button type="submit" class="btn primary" id="go">포트폴리오 완성하기</button>
+      <button type="button" class="btn" id="stopgen" hidden>중단</button>
       <button type="button" class="btn" id="savehtml2">HTML 저장</button>
       <select id="exsel" aria-label="예시 직군" class="btn">
-        <option value="data">예시: 데이터 분석</option><option value="be">예시: 백엔드 개발</option><option value="fe">예시: 프론트엔드</option><option value="ux">예시: UX/UI 디자인</option><option value="pm">예시: 서비스 기획·PM</option><option value="mkt">예시: 디지털 마케팅</option><option value="sales">예시: B2B 영업</option><option value="hr">예시: 인사(HR)</option>
+        <option value="data">예시: 데이터 분석</option><option value="be">예시: 백엔드 개발</option><option value="fe">예시: 프론트엔드</option><option value="ux">예시: UX/UI 디자인</option><option value="pm">예시: 서비스 기획·PM</option><option value="mkt">예시: 디지털 마케팅</option><option value="sales">예시: B2B 영업</option><option value="hr">예시: 인사(HR)</option><option value="m365">예시: M365 엔지니어</option>
       </select>
       <button type="button" class="btn" id="ex">예시로 채우기</button>
       <button type="button" class="btn" id="clr">모두 지우기</button>
@@ -190,6 +195,10 @@ input:focus,textarea:focus,select:focus,button:focus-visible,summary:focus-visib
       <span class="actions"><button type="button" class="btn" id="copy">노션용 복사</button><button type="button" class="btn primary" id="savehtml">HTML 저장</button></span>
     </div>
     <div class="doc" id="doc"></div>
+    <section class="fbbox" id="fbbox" hidden>
+      <div class="fb-h"><b>🔍 컨설턴트 피드백</b><span>별도 제공 · 저장하는 HTML 파일에는 포함되지 않아요</span><button type="button" class="btn" id="copyfb">피드백 복사</button></div>
+      <div class="doc fb-doc" id="fbdoc"></div>
+    </section>
     <div class="paste" id="pastebox" hidden>
       <ol class="steps"><li>위 프롬프트는 <b>이미 복사됐어요</b> (아래 칸에 넣지 마세요)</li><li><a href="https://chatgpt.com" target="_blank" rel="noopener noreferrer">ChatGPT</a> 또는 <a href="https://claude.ai" target="_blank" rel="noopener noreferrer">Claude</a>에 붙여넣고 보내기</li><li>AI가 <b>답한 글</b>("# 직무 | 이름 포트폴리오"로 시작)을 복사해 아래에 붙여넣기</li></ol>
       <label for="pasted"><b>AI가 답한 결과</b></label>
@@ -277,7 +286,22 @@ about:"구성원의 경험을 데이터로 이해하고 제도로 개선하는 H
 aitools:"ChatGPT - 채용 공고 초안, 면접 질문 구조화\nGemini - 설문 서술형 응답 분류",aiuse:"설문 서술형 응답 300건 분류 3일 → 반나절 (표본 50건 직접 대조 검증)",aiethics:"지원자·구성원 개인정보는 익명 처리 후 사용, AI로 합격·불합격을 판단하지 않음",ailearn:"HR AI 활용 교육 수료",
 projects:[{pname:"신입 온보딩 프로그램 개선",pperiod:"2025.02 ~ 2025.07 (인턴)",psum:"입사 3개월 내 퇴사가 많던 신입 온보딩 개선",pteam:"HR팀 3명 / 온보딩 설계·운영 담당 (기여도 50%)",pimpl:"퇴사자·재직자 인터뷰 15명, 30·60·90일 체크인 제도, 버디 매칭, 온보딩 노션 가이드",presult:"3개월 내 조기 퇴사율 18% → 7%, 온보딩 만족도 3.2 → 4.4점(5점)",ptrouble:"버디 제도 참여율이 낮음 → 설문으로 '업무 부담' 확인 → 버디 활동을 업무 시간으로 인정하도록 팀장 설득 → 참여율 40% → 85%",pai:"Gemini로 인터뷰 응답 주제 분류, 핵심 인용은 원문과 대조해 오분류 4건 수정"}],
 experiences:[{ename:"스타트업 HR 인턴",eperiod:"2025.02 ~ 2025.07",edesc:"채용 공고 12건 운영, 면접 일정 조율 80건"},{ename:"교내 학생회 총무부",eperiod:"2023.03 ~ 2023.12",edesc:"행사 인력 50명 배치·관리"}],
-education:[{sname:"한국대학교",speriod:"2020.03 - 2025.02",smajor:"심리학 전공 (경영학 복수전공)"}],lang:"",other:"공인노무사 1차 준비 중, 컴퓨터활용능력 1급"}};
+education:[{sname:"한국대학교",speriod:"2020.03 - 2025.02",smajor:"심리학 전공 (경영학 복수전공)"}],lang:"",other:"공인노무사 1차 준비 중, 컴퓨터활용능력 1급"},
+m365:{name:"박지후",role:"Microsoft 365 엔지니어 (신입)",email:"jihoo@example.com",phone:"010-0000-0000",links:"github.com/example (구성도·테스트표·사용자 안내)",
+jd:"씨앤토트 Microsoft 365 엔지니어 신입 모집. 정규직, 초대졸 이상, 서울 서초. 잡코리아 공고 기준 마감 표기 2026-10-31, 채용 시 마감. 상세 업무·우대사항은 지원 전 원문에서 확인할 것.",
+about:"M365 엔지니어 교육을 수료하며 서비스·라이선스, 관리센터, 보안·ID 관리 기초를 학습했습니다. 도입·구축 교육 프로젝트에서 계정·공유 권한 설정과 테스트표·사용자 안내 작성을 맡아, 허용·차단 시나리오로 결과를 확인했습니다. 온프레미스 AD와 PowerShell은 아직 실습하지 못해 주 2회 학습 계획으로 보완하고 있습니다.",
+tools:"Notion·구글 문서 - 권한표 공동 검토, 회의록으로 변경 합의 기록, Teams - 팀 회의",
+skills:"Microsoft 365 관리센터 - 사용자·그룹 생성, 라이선스 할당·회수 (테스트 환경 실습)\nExchange Online - 공유 사서함 설정, 메일 수신 문제 점검 (테스트 환경 실습)\nSharePoint Online - 사이트 권한 그룹 설계, 공유 링크 접근 확인 (테스트 환경 실습)\nMicrosoft Entra ID - 사용자·역할 관리 (테스트 환경 실습), 조건부 접근은 설계만 수행\n미실습: 온프레미스 AD, PowerShell, Intune",
+aitools:"ChatGPT - 테스트 시나리오 초안, 사용자 안내문 문장 다듬기",aiuse:"테스트 시나리오 12개 초안을 만든 뒤 권한표와 대조해 3개 수정 (시간은 측정하지 않음)",aiethics:"가상 계정·가상 데이터만 입력. AI가 제안한 설정은 공식 문서와 테스트 환경에서 확인한 뒤 반영",ailearn:"",
+projects:[{pname:"M365 도입 및 구축 교육 프로젝트 (가상 고객사 40명)",pperiod:"2026.08 ~ 2026.09 (교육 프로젝트)",psum:"가상 중소기업 40명을 가정해 메일·협업·접근 권한을 구성하고 검증한 교육 프로젝트",pteam:"4명 / 계정·공유 권한 설정, 테스트표·사용자 안내 작성 담당 (기여율은 산정하지 않음)",pimpl:"요구사항 정리 → 라이선스 선택 이유 정리 → 사용자·그룹 구성 → 공유 사서함·사이트 권한 설정 → 허용/차단 시나리오 테스트 → 사용자 안내 작성. 모두 교육용 테스트 환경에서 수행",presult:"허용·차단 시나리오 12건 중 11건이 기대 결과와 일치, 불일치 1건은 그룹 상속 설정을 수정한 뒤 재검증 통과 (테스트표 기준)",ptrouble:"공유 사서함에서 메일이 보이지 않음 → 라이선스는 정상이어서 배제하고 권한 대상을 확인 → 개인이 아닌 그룹으로 지정된 점 발견 → 대상을 사용자 그룹으로 수정 → 같은 계정으로 재확인해 정상 수신. 설정 후 계정별 재검증 절차를 점검표에 추가",pai:"ChatGPT로 테스트 시나리오 초안 12개 작성 → 실제 권한표와 대조해 3개 수정"}],
+experiences:[{ename:"IT 학습 스터디",eperiod:"2026.03 ~ 2026.06",edesc:"M365 서비스 개념 정리 발표 4회, 서비스·용어 비교표 작성"}],
+education:[{sname:"한국대학교",speriod:"2019.03 - 2026.02",smajor:"경영정보학 전공"},{sname:"M365 엔지니어 과정",speriod:"2026.08 - 2026.10",smajor:"M365 직종 이해·서비스·라이선스·관리센터·보안·ID 관리·도입 구축 프로젝트 / 수료"}],lang:"",other:"수료증(M365 엔지니어 과정). 자격 취득 없음 (MS-900은 2026-03-31 종료되어 학습 이력으로만 기재)"}};
+const JDS={
+j1:{role:"Microsoft 365 엔지니어",jd:"씨앤토트 Microsoft 365 엔지니어 신입 모집. 정규직, 초대졸 이상, 서울 서초. 잡코리아 공고 기준 마감 표기 2026-10-31, 채용 시 마감. 상세 업무·우대사항은 지원 전 원문에서 확인할 것."},
+j2:{role:"M365·AD·Exchange 기술지원 엔지니어",jd:"소프트피플코리아 M365·AD·Exchange 기술지원 직무. 신입·경력, 정규직, 성남. IT 교육원 수료자·관련 자격 보유자 등 우대. 접수기간은 상시채용 표기이며 실제 모집 상태 재확인."},
+j3:{role:"Microsoft 365·EMS 엔지니어",jd:"에이피드 AP-001, 신입·경력. M365 구축과 Exchange·Teams·SharePoint 설정, EMS·Microsoft Entra ID 연동, 고객 기술지원. 관련 기술과 고객 소통에 대한 관심을 제시. 우대 경험과 개인의 실제 수행 범위를 구분."},
+j4:{role:"사내 IT 운영담당자",jd:"에이스엔지니어링 사내 IT 운영 직무. 신입/경력, 관련 경력 3년 이하, 학사, 정규직. M365·IT 인프라, 계정·권한, 라이선스·자산, 사용자 장애 대응과 보안 지원. 시설·물리보안 업무도 포함."}};
+$("jdsel").onchange=()=>{const j=JDS[$("jdsel").value];if(!j)return;$("role").value=j.role;$("jd").value=j.jd;save();$("st").textContent="공고 정보를 채웠어요 · 실제 지원 전 원문에서 모집 상태를 확인하세요"};
 $("ex").onclick=()=>{load(EXS[$("exsel").value]||EX);$("st").textContent="예시를 채웠어요 · 내 내용으로 바꿔 주세요"};
 $("clr").onclick=()=>{load({});try{localStorage.removeItem("pc-pf2")}catch(e){}$("st").textContent="입력과 이 기기 저장 내용을 지웠어요"};
 function missing(){const s=state(),t=md.replace(/\s+/g,"");const names=[...s.projects.map(x=>x.pname),...s.experiences.map(x=>x.ename),...s.education.map(x=>x.sname)].map(x=>(x||"").trim()).filter(Boolean);
@@ -308,7 +332,7 @@ const SAMPLE=`# 데이터 분석가 | 김보라 포트폴리오
 let md=SAMPLE;
 function esc(s){return s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]))}
 function inl(s){return esc(s).replace(/==(.+?)==/g,"<mark>$1</mark>").replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/\[보완 필요[^\]]*\]/g,m=>`<span class="need">${m}</span>`)}
-function render(t){const L=t.split("\n");let h="",i=0,open=0;
+function render(t,target){const L=t.split("\n");let h="",i=0,open=0;
   while(i<L.length){const l=L[i];
     if(l.startsWith("|")){const r=[];while(i<L.length&&L[i].startsWith("|"))r.push(L[i++]);const c=x=>x.replace(/^\||\|$/g,"").split("|").map(s=>s.trim());
       h+='<div class="tw"><table>'+r.filter((x,k)=>!(k===1&&/^[\s|:-]+$/.test(x))).map((x,k)=>"<tr>"+c(x).map(s=>k?`<td>${inl(s)}</td>`:`<th>${inl(s)}</th>`).join("")+"</tr>").join("")+"</table></div>";continue}
@@ -322,8 +346,13 @@ function render(t){const L=t.split("\n");let h="",i=0,open=0;
     else if(/^---+$/.test(l.trim()))h+="<hr>";
     else if(l.trim())h+="<p>"+inl(l)+"</p>";
     i++}
-  $("doc").innerHTML=h}
+  h+="</details>".repeat(open);(target||$("doc")).innerHTML=h}
 render(md);
+let fb="";
+function splitFb(t){const m=t.match(/\n[ \t]*={3}\s*FEEDBACK\s*={3}[ \t]*\n?|\n-{3,}[ \t]*\n(?=##\s*🔍\s*컨설턴트 피드백)|\n(?=##\s*🔍\s*컨설턴트 피드백)/);
+  if(!m)return [t,""];return [t.slice(0,m.index).replace(/\s+$/,""),t.slice(m.index+m[0].length).trim()]}
+function setMd(t){const [a,b]=splitFb(t);md=pii(a);fb=pii(b);render(md);showFb()}
+function showFb(){const box=$("fbbox");if(!fb){box.hidden=true;return}box.hidden=false;render(fb.replace(/^##\s*🔍[^\n]*\n?/,""),$("fbdoc"))}
 
 function buildPrompt(){
   const s=state();delete s.email;delete s.phone;
@@ -334,6 +363,7 @@ ${JSON.stringify(s,null,1)}
 
 [규칙]
 - 입력에 없는 사실·수치·학교·회사는 절대 만들지 않는다. 비었거나 부족하면 "[보완 필요: 무엇을 적으면 좋은지]"로 표시한다.
+- 교육·학습 프로젝트를 근무 경력으로, 수료를 자격 취득으로 바꾸지 않는다. 입력에 없는 기술·자격·고객사·기여율(%)을 만들지 않고, 기술마다 입력된 수준(학습/설계/테스트 환경/실제 운영)을 그대로 표시한다. 성과에 숫자가 없으면 검증 결과·산출물로 쓴다.
 - [가장 중요] 입력한 내용을 요약하거나 빼지 않는다. 모든 프로젝트·경험·학력·기술·자격·어학과 그 안의 수치, 고유명사, 과정, 결과를 빠짐없이 옮기고, 문장만 더 전문적으로 다듬는다. 완성본은 입력보다 짧아지면 안 된다.
 - 입력이 한 줄이면 직무 관점에서 의미를 덧붙여 1~2줄로 풀어 쓰되, 입력에 없는 사실은 추가하지 않는다.
 - 지원 직무 관점에서 강점이 드러나게 다듬되, 태도는 형용사 대신 행동 장면으로 쓴다.
@@ -396,9 +426,11 @@ ${JSON.stringify(s,null,1)}
 
 ## 💬 Language
 ## 🎳 Other
----
+
+[포트폴리오 본문은 여기서 끝낸다. 컨설턴트 피드백은 본문에 넣지 말고, 아래 구분선 한 줄 뒤에 따로 쓴다]
+===FEEDBACK===
 ## 🔍 컨설턴트 피드백
-- 보완하면 더 강해지는 점 3가지`;
+- 보완하면 더 강해지는 점 3가지 (본문에는 절대 넣지 않는다)`;
 }
 
 const sampleP=window.claude?.use?window.claude.use("sample"):Promise.resolve(null);
@@ -411,40 +443,58 @@ $("f").addEventListener("submit",async e=>{
   const key=$("apikey").value.trim();
   if(!sample&&key){await viaApi(key);return}
   if(!sample){
-    const p=buildPrompt();md=p;
+    const p=buildPrompt();md=p;fb="";showFb();
     try{await navigator.clipboard.writeText(p);$("st").textContent="AI 프롬프트를 복사했어요"}catch(err){$("st").textContent="아래 프롬프트를 선택해 복사하세요"}
     $("na").hidden=false;$("pastebox").hidden=false;if(innerWidth<=940)document.querySelector(".out").scrollIntoView({behavior:"smooth"});$("doc").innerHTML="";const pre=document.createElement("pre");pre.textContent=p;pre.style.cssText="white-space:pre-wrap;font:inherit;font-size:12px";$("doc").appendChild(pre);return}
   ctl?.abort();ctl=new AbortController();
   $("go").disabled=true;$("st").textContent="작성 중…";if(innerWidth<=940)document.querySelector(".out").scrollIntoView({behavior:"smooth"});
   try{
-    const r=await sample(buildPrompt(),{signal:ctl.signal,modelTier:"default",cache:false,onText:({text})=>{md=pii(text);render(md)}});
-    md=pii(r.text);render(md);$("st").textContent=doneMsg("");
+    const r=await sample(buildPrompt(),{signal:ctl.signal,modelTier:"default",cache:false,onText:({text})=>{setMd(text)}});
+    setMd(r.text);$("st").textContent=doneMsg("");
   }catch(err){
-    if(err?.text){md=err.text;render(md)}
+    if(err?.text){setMd(err.text)}
     $("st").textContent=err?.code==="rate_limited"?"요청이 많아요. 잠시 후 다시 눌러 주세요.":err?.code==="not_granted"?"AI 사용 권한이 허용되지 않았어요.":"생성에 실패했어요. 다시 눌러 주세요.";
   }finally{$("go").disabled=false}
 });
-let gemModel=null;
-async function gemPick(key){
+let gemModel={};
+async function gemPick(key,lite){
   const res=await fetch("https://generativelanguage.googleapis.com/v1beta/models?pageSize=200",{headers:{"x-goog-api-key":key},referrerPolicy:"no-referrer",signal:ctl.signal});
   if(!res.ok)return null;
   const ms=((await res.json()).models||[]).filter(m=>(m.supportedGenerationMethods||[]).includes("generateContent")).map(m=>m.name.replace(/^models\//,""));
-  const score=n=>(/flash/.test(n)?100:/pro/.test(n)?40:0)-(/lite/.test(n)?30:0)-(/preview|exp|tts|image|audio|live|embed|thinking/.test(n)?60:0)+(/latest/.test(n)?5:0)+(parseFloat((n.match(/(\d+(\.\d+)?)/)||[0,0])[1])||0);
+  const score=n=>(/flash/.test(n)?100:/pro/.test(n)?40:0)+(/lite/.test(n)?(lite?60:-30):(lite?-30:0))-(/preview|exp|tts|image|audio|live|embed|thinking/.test(n)?60:0)+(/latest/.test(n)?5:0)+(parseFloat((n.match(/(\d+(\.\d+)?)/)||[0,0])[1])||0);
   return ms.filter(n=>/^gemini/.test(n)).sort((a,b)=>score(b)-score(a))[0]||null;
 }
-async function gemFetch(key){
-  const call=m=>fetch("https://generativelanguage.googleapis.com/v1beta/models/"+encodeURIComponent(m)+":streamGenerateContent?alt=sse",{method:"POST",signal:ctl.signal,referrerPolicy:"no-referrer",
+let usedModel="";
+async function gemCall(key,m,think){
+  return fetch("https://generativelanguage.googleapis.com/v1beta/models/"+encodeURIComponent(m)+":streamGenerateContent?alt=sse",{method:"POST",signal:ctl.signal,referrerPolicy:"no-referrer",
     headers:{"content-type":"application/json","x-goog-api-key":key},
-    body:JSON.stringify({contents:[{role:"user",parts:[{text:buildPrompt()}]}],generationConfig:{maxOutputTokens:32768}})});
-  let res=await call(gemModel||"gemini-2.5-flash");
-  if(res.status===404){const m=await gemPick(key);if(m){gemModel=m;res=await call(m)}}
-  return res;
+    body:JSON.stringify({contents:[{role:"user",parts:[{text:buildPrompt()}]}],generationConfig:Object.assign({maxOutputTokens:16384},think?{thinkingConfig:{thinkingBudget:0}}:{})})});
+}
+async function errDetail(res){try{return (await res.clone().json()).error?.message||""}catch(e){return ""}}
+const GEM={lite:"gemini-2.5-flash-lite",flash:"gemini-2.5-flash"};
+async function gemFetch(key){
+  const want=$("gemmodel").value==="flash"?"flash":"lite",order=[want,want==="lite"?"flash":"lite"];
+  let res,d="";
+  for(const kind of order){
+    let m=gemModel[kind]||GEM[kind],think=true;
+    for(let n=0;n<4;n++){
+      res=await gemCall(key,m,think);
+      if(res.ok){gemModel[kind]=m;usedModel=m;return res}
+      d=await errDetail(res);
+      if(res.status===400&&think&&/thinking/i.test(d)){think=false;continue}
+      if(res.status===404||(res.status===400&&/not supported|not found|deprecated|no longer/i.test(d))){const pk=await gemPick(key,kind==="lite");if(pk&&pk!==m){m=pk;continue}}
+      break}
+    if(res.status!==429&&res.status!==404&&res.status!==503)break;   // 한도·모델 문제일 때만 다른 모델로 넘어가요
+    $("st").textContent=`${m} 한도·응답 문제(${res.status}) · 다른 Gemini 모델로 다시 시도해요…`}
+  res.detail=d;return res;
 }
 async function viaApi(key){
   ctl?.abort();ctl=new AbortController();
-  $("go").disabled=true;$("na").hidden=true;$("st").textContent="AI가 작성 중…";
+  $("go").disabled=true;$("na").hidden=true;$("stopgen").hidden=false;
   if(innerWidth<=940)document.querySelector(".out").scrollIntoView({behavior:"smooth"});
-  let text="",use={};
+  let text="",use={},t0=Date.now(),timedOut=false;usedModel="";
+  const tick=()=>{const sec=Math.round((Date.now()-t0)/1000);$("st").textContent=text.length?`✍️ 작성 중… ${sec}초 · ${text.length.toLocaleString()}자`+(usedModel?` · ${usedModel}`:""):`⏳ AI 응답 대기 중… ${sec}초`+(sec>25?" · 무료 서버가 혼잡하면 1분 넘게 걸려요. 계속 기다리거나 [중단] 후 다시 눌러 주세요":"")};
+  tick();const timer=setInterval(tick,1000),limit=setTimeout(()=>{timedOut=true;ctl.abort()},180000);
   try{
     const gem=$("provider").value==="gemini";
     const res=gem
@@ -452,7 +502,9 @@ async function viaApi(key){
       :await fetch("https://api.anthropic.com/v1/messages",{method:"POST",signal:ctl.signal,referrerPolicy:"no-referrer",
         headers:{"content-type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01","anthropic-beta":"server-side-fallback-2026-07-01","anthropic-dangerous-direct-browser-access":"true"},
         body:JSON.stringify({model:"claude-opus-5-5",max_tokens:16000,stream:true,output_config:{effort:"medium"},fallbacks:"default",messages:[{role:"user",content:buildPrompt()}]})});
-    if(!res.ok){const code=res.status;throw new Error(code===401||code===403||(gem&&code===400)?"API 키가 올바르지 않아요. 다시 확인해 주세요.":code===429?(gem?"무료 사용량을 다 썼어요. 잠시 후(또는 내일) 다시 시도해 주세요.":"요청이 많아요. 잠시 후 다시 눌러 주세요."):code===404?"사용할 수 있는 Gemini 모델을 찾지 못했어요. 키를 새로 발급해 보세요.":code===400?"요청을 처리하지 못했어요. 입력을 줄이거나 다시 시도해 주세요.":"AI 서버 오류("+code+")예요. 잠시 후 다시 시도해 주세요.")}
+    if(!res.ok){const code=res.status,d=((res.detail??await errDetail(res))||"").replace(/\s+/g," ").slice(0,160);
+      const keyBad=code===401||code===403||/api key|permission|credential/i.test(d);
+      throw new Error(keyBad?"API 키가 올바르지 않거나 권한이 없어요. 키를 다시 복사해 주세요."+(d?` (${d})`:""):code===429?(gem?"무료 사용량·속도 한도에 걸렸어요. 1분 뒤 다시 누르거나 내일 시도해 주세요.":"요청이 많아요. 잠시 후 다시 눌러 주세요.")+(d?` (${d})`:""):code===404?"사용할 수 있는 Gemini 모델을 찾지 못했어요. 키를 새로 발급해 보세요."+(d?` (${d})`:""):`AI 서버가 요청을 거절했어요 (${code}) ${d}`)}
     const rd=res.body.getReader(),dec=new TextDecoder();let buf="",stop="";
     for(;;){const {done,value}=await rd.read();if(done)break;buf+=dec.decode(value,{stream:true});
       let i;while((i=buf.indexOf("\n"))>=0){const line=buf.slice(0,i).trim();buf=buf.slice(i+1);
@@ -460,21 +512,21 @@ async function viaApi(key){
         if(gem&&ev.usageMetadata)use={i:ev.usageMetadata.promptTokenCount,o:ev.usageMetadata.candidatesTokenCount,t:ev.usageMetadata.thoughtsTokenCount||0};
         if(!gem&&ev.type==="message_start")use.i=ev.message?.usage?.input_tokens;
         if(!gem&&ev.type==="message_delta"&&ev.usage)use.o=ev.usage.output_tokens;
-        if(gem){const c=ev.candidates?.[0];const t=(c?.content?.parts||[]).map(x=>x.text||"").join("");if(t){text+=t;md=pii(text);render(md)}
+        if(gem){const c=ev.candidates?.[0];const t=(c?.content?.parts||[]).map(x=>x.text||"").join("");if(t){text+=t;setMd(text)}
           if(c?.finishReason==="MAX_TOKENS")stop="max_tokens";else if(c?.finishReason==="SAFETY")stop="refusal";if(ev.error)throw new Error("생성 중 오류가 났어요. 다시 시도해 주세요.");continue}
-        if(ev.type==="content_block_delta"&&ev.delta?.type==="text_delta"){text+=ev.delta.text;md=pii(text);render(md)}
+        if(ev.type==="content_block_delta"&&ev.delta?.type==="text_delta"){text+=ev.delta.text;setMd(text)}
         else if(ev.type==="message_delta"&&ev.delta?.stop_reason)stop=ev.delta.stop_reason;
         else if(ev.type==="error")throw new Error("생성 중 오류가 났어요. 다시 시도해 주세요.")}}
     if(stop==="refusal")throw new Error("AI가 이 요청을 처리하지 않았어요. 입력 내용을 확인해 주세요.");
+    if(!text.trim())throw new Error("AI가 빈 응답을 보냈어요. 잠시 후 다시 눌러 주세요. 계속되면 입력을 줄이거나 키를 새로 발급해 보세요.");
     $("st").textContent=doneMsg(stop)+usageMsg(gem,use);
-  }catch(err){$("st").textContent=err.name==="AbortError"?"취소했어요":(err.message||"생성에 실패했어요.")}
-  finally{$("go").disabled=false}
+  }catch(err){$("st").textContent=err.name==="AbortError"?(timedOut?"3분이 지나도 응답이 없어 중단했어요. 다시 눌러 주세요.":"중단했어요"+(text.length?" · 지금까지 쓰인 내용은 오른쪽에 남아 있어요":"")):(err.message||"생성에 실패했어요.")}
+  finally{clearInterval(timer);clearTimeout(limit);$("go").disabled=false;$("stopgen").hidden=true}
 }
 const dlP=window.claude?.use?window.claude.use("downloads"):Promise.resolve(null);
 function htmlDoc(){
   const title=($("doc").querySelector("h1")?.textContent||(($("role").value||"")+" 포트폴리오")).trim();
-  const css=`:root{--bg:#fff;--fg:#231d2e;--muted:#6b6478;--line:#e2dcec;--accent:#6b3fa0;--soft:#efe8f8;--chip:#e6dbf5}
-@media (prefers-color-scheme:dark){:root{--bg:#16131c;--fg:#ece7f4;--muted:#a69eb5;--line:#352d42;--accent:#b591e6;--soft:#2a2236;--chip:#3a2d4d}}
+  const css=`:root{--bg:#f0eafb;--fg:#231d2e;--muted:#6b6478;--line:#e2dcec;--accent:#6b3fa0;--soft:#e4d9f7;--chip:#d9caf2}
 *{box-sizing:border-box}h1,h2,h3,p,li,td{word-break:keep-all;overflow-wrap:anywhere}body{margin:0;background:var(--bg);color:var(--fg);font-family:"Malgun Gothic","맑은 고딕","Apple SD Gothic Neo","Noto Sans KR",sans-serif;font-size:15px;line-height:1.7}
 main{max-width:860px;margin:0 auto;padding:48px max(20px,env(safe-area-inset-left,0px)) 64px}
 header.band{border-top:6px solid var(--accent)}
@@ -494,17 +546,22 @@ details.more[open]{padding-bottom:10px}
 td:first-child{white-space:nowrap;font-weight:700;width:1%}
 @media (max-width:520px){td:first-child{white-space:normal;min-width:4.5em}th,td{word-break:keep-all;overflow-wrap:normal;padding:7px 8px}table{font-size:13px}}
 @media print{details.more{border:0;padding:0}details.more summary{display:none}}
-footer{color:var(--muted);font-size:12px;margin-top:48px;border-top:1px solid var(--line);padding-top:14px}
 @media print{body{background:#fff;color:#000}h2{break-after:avoid}h3{break-after:avoid}}`;
   const e=t=>t.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-  return `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${e(title)}</title><style>${css}</style></head><body><header class="band"></header><main>${$("doc").innerHTML}<footer>Made with CareerCatcher Portfolio Builder · purple-career</footer></main></body></html>`;
+  return `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${e(title)}</title><style>${css}</style></head><body><header class="band"></header><main>${$("doc").innerHTML}</main></body></html>`;
 }
 function markReady(){["savehtml","savehtml2"].forEach(i=>$(i).classList.add("ready"))}
 new MutationObserver(()=>{const ok=$("doc").textContent.trim()&&!$("doc").querySelector("pre")&&!$("go").disabled&&md!==SAMPLE;["savehtml","savehtml2"].forEach(i=>$(i).classList.toggle("ready",!!ok))}).observe($("st"),{childList:true,characterData:true,subtree:true});
+$("stopgen").onclick=()=>ctl?.abort();
 $("savehtml2").onclick=()=>$("savehtml").click();
+function fileName(){
+  const clean=t=>(t||"").replace(/\s*[\(\[（][^\)\]）]*[\)\]）]/g,"").replace(/[\\/:*?"<>|]/g,"").replace(/\s+/g,"").trim();
+  let role=clean($("role").value),nm=clean($("name").value);
+  if(!role||!nm){const h=($("doc").querySelector("h1")?.textContent||"").replace(/포트폴리오\s*$/,"");const [a,b]=h.split("|").map(x=>clean(x));role=role||a;nm=nm||b}
+  return ([role,nm].filter(Boolean).join("_")||"포트폴리오")+".html"}
 $("savehtml").onclick=async()=>{
   if($("doc").querySelector("pre")||!$("doc").textContent.trim()){$("st").textContent="먼저 포트폴리오를 완성해 주세요.";return}
-  const html=htmlDoc();const fname=(($("name").value||"my")+"_portfolio.html").replace(/[\\/:*?"<>|\s]+/g,"_");
+  const html=htmlDoc();const fname=fileName();
   const dl=await dlP;
   if(dl){try{await dl.save({filename:fname,data:html});$("st").textContent="HTML 파일을 저장했어요"}catch(e){$("st").textContent="저장을 취소했어요"}return}
   try{const u=URL.createObjectURL(new Blob([html],{type:"text/html"}));const a=document.createElement("a");a.href=u;a.download=fname;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);$("st").textContent="HTML 파일을 저장했어요 · 브라우저로 열어 보세요"}
@@ -513,9 +570,10 @@ $("savehtml").onclick=async()=>{
 $("applypaste").onclick=()=>{
   const t=$("pasted").value.trim();if(!t){$("st").textContent="먼저 AI 결과를 붙여넣어 주세요.";return}
   if(/\[구직자 입력\]|포트폴리오 컨설턴트다|"projects"\s*:/.test(t)){$("st").textContent="⚠ 붙여넣은 건 프롬프트예요. ChatGPT·Claude에 프롬프트를 보낸 뒤, AI가 답한 글을 복사해서 넣어 주세요.";$("pasted").focus();return}
-  md=pii(t.replace(/^```[a-z]*\n?|```$/g,""));render(md);$("pastebox").hidden=true;$("na").hidden=true;$("pasted").value="";
+  setMd(t.replace(/^```[a-z]*\n?|```$/g,""));$("pastebox").hidden=true;$("na").hidden=true;$("pasted").value="";
   $("st").textContent=doneMsg("")+" · HTML 저장을 눌러 주세요";$("savehtml").scrollIntoView({behavior:"smooth",block:"center"});
 };
+$("copyfb").onclick=async()=>{try{await navigator.clipboard.writeText(fb);$("st").textContent="피드백을 복사했어요"}catch(e){const r=document.createRange();r.selectNodeContents($("fbdoc"));const s=getSelection();s.removeAllRanges();s.addRange(r);$("st").textContent="선택됨 · Ctrl+C로 복사하세요"}};
 $("copy").onclick=async()=>{
   try{await navigator.clipboard.writeText(md.replace(/^\+\+\+\s*(\S.*)$/gm,"**▶ $1**").replace(/^\+\+\+\s*$/gm,"").replace(/==(.+?)==/g,"**$1**"));$("st").textContent="복사했어요 · 노션에 붙여넣으면 서식이 적용돼요"}
   catch(e){const r=document.createRange();r.selectNodeContents($("doc"));const s=getSelection();s.removeAllRanges();s.addRange(r);$("st").textContent="선택됨 · Ctrl+C로 복사하세요"}
