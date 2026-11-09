@@ -240,7 +240,7 @@ function askView() {
   const round = state.attempts.length + 1;
   const f = state.follow;
   const hint = !f && q.keywords && q.keywords.length
-    ? `<details class="card hint"><summary>막히면 키워드 보기</summary><p class="kw">${q.keywords.map(k => `<span>${esc(k)}</span>`).join('')}</p></details>` : '';
+    ? `<details class="card hint"><summary>막히면 키워드 보기</summary><p class="kw">${q.keywords.map(k => `<span>${esc(k)}</span>`).join('')}</p>${q.numbers && q.numbers.length ? `<p class="muted small">넣을 숫자: ${q.numbers.map(esc).join(' / ')}</p>` : ''}</details>` : '';
   return `${header(f ? '꼬리질문' : round === 1 ? '첫 번째 답변' : `${round}번째 답변`)}
   <main class="wrap">
     <section class="question">
@@ -575,6 +575,19 @@ function criteriaSection(a) {
   </section>`;
 }
 
+// 정량·성과 보완: 답변에 나온 숫자와 덧붙일 숫자
+function numbersSection(a) {
+  const found = a.result.numbers_found || [];
+  const add = a.result.numbers_to_add || [];
+  if (!found.length && !add.length) return '';
+  return `<section class="card nums-fb">
+    <h3>숫자로 보완하기 <small class="muted">성과는 숫자와 전후 비교로</small></h3>
+    <p class="small"><b>답변에 나온 숫자</b> ${found.length ? found.map(n => `<span class="tag">${esc(n)}</span>`).join(' ') : '<span class="muted">없음. 결과를 숫자로 말해 보세요.</span>'}</p>
+    ${add.length ? `<p class="small"><b>덧붙이면 좋은 숫자</b></p><ul>${add.map(n => `<li>${esc(n)}</li>`).join('')}</ul>` : ''}
+    <p class="muted small">기억나는 실제 값만 쓰세요. 정확하지 않으면 "약", "이상"을 붙여 말해도 됩니다.</p>
+  </section>`;
+}
+
 function followSection(a) {
   const f = a.follow;
   if (!f) return '';
@@ -600,6 +613,7 @@ function reportView() {
     <p class="qsmall">${esc(state.question.text)}</p>
     ${feedbackBody(a)}
     ${criteriaSection(a)}
+    ${numbersSection(a)}
     ${followSection(a)}
     <section class="card"><h3>항목별 점수 <small class="muted">각 5점</small></h3>${scoreBars(a.result.scores, a.result.reasons)}</section>
     <section class="card"><h3>말하기 지표</h3>${metricsRow(a.metrics)}</section>
@@ -632,6 +646,7 @@ function compareView() {
     </section>
     ${feedbackBody(last)}
     ${criteriaSection(last)}
+    ${numbersSection(last)}
     ${followSection(last)}
     ${nvSection(last, first)}
     ${scoreGuide(last)}
@@ -892,6 +907,7 @@ async function doMakeSet() {
         type: q.type, competency: q.competency, intent: q.intent, must_evidence: q.must_evidence,
         criteria: (q.criteria || []).slice(0, 3), source_quote: q.source_quote, followups: (q.followups || []).slice(0, 2),
         keywords: (q.keywords || []).slice(0, 5), script: q.script,
+        numbers: (q.numbers_to_prepare || []).slice(0, 4),
       })),
     };
     saveQset();
@@ -931,6 +947,7 @@ function qsetView() {
         ${q.criteria.length ? `<dt>평가 기준</dt><dd><ul>${q.criteria.map(c => `<li>${esc(c)}</li>`).join('')}</ul></dd>` : ''}
         ${q.source_quote ? `<dt>내 자료 속 근거</dt><dd class="quote">"${esc(q.source_quote)}"</dd>` : ''}
       </dl>
+      ${q.numbers && q.numbers.length ? `<div class="nums"><p class="eyebrow">준비할 숫자 <small class="muted">성과는 숫자로 말해요</small></p><ul>${q.numbers.map(n => `<li class="${/자료에 없음|확인 필요/.test(n) ? 'need' : ''}">${esc(n)}</li>`).join('')}</ul></div>` : ''}
       <div class="script">
         <p class="eyebrow">핵심 답변 키워드</p>
         <p class="kw">${q.keywords.map(k => `<span>${esc(k)}</span>`).join('')}</p>

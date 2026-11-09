@@ -151,7 +151,7 @@ export async function extractCompetencies(material) {
 - 서로 겹치는 역량을 고르지 않습니다.
 - name: 역량 이름(10자 이내)
 - why: 이 직무에서 왜 중요한지 한 문장
-- evidence: 자료 속에서 이 역량을 보여 줄 수 있는 지원자 경험 요약 한 문장. 자료에 근거 경험이 없으면 "자료에 근거 경험이 없음: 준비 필요"라고 씁니다.
+- evidence: 자료 속에서 이 역량을 보여 줄 수 있는 지원자 경험 요약 한 문장. 자료에 있는 숫자·성과(기간, 규모, 증감)를 함께 적습니다. 자료에 근거 경험이 없으면 "자료에 근거 경험이 없음: 준비 필요"라고 씁니다.
 - source_quote: evidence의 근거가 된 자료 속 문장을 그대로 짧게 인용(없으면 빈 문자열)`;
   const r = await generateJSON(prompt, schema, { maxTokens: 4096, timeoutMs: 60000 });
   if (!r || !Array.isArray(r.competencies) || !r.competencies.length) throw new GeminiError('역량을 뽑지 못했어요. 자료를 조금 더 넣어 다시 시도해 주세요.');
@@ -159,6 +159,12 @@ export async function extractCompetencies(material) {
 }
 
 // ② 예상 질문 + 핵심 답변 스크립트
+const QUANT = `정량·성과 원칙(모든 질문과 답변에 적용):
+- 결과는 "열심히 했다"가 아니라 숫자와 전후 비교로 말합니다. 쓸 수 있는 숫자 종류: 기간(3개월), 규모(12명, 200건), 빈도(주 3회), 증감(15% 증가, 2일→1일), 순위·평가(만족도 4.8점, 우수상), 비용·시간 절감.
+- 성과는 본인 기여로 드러나게 씁니다: "제가 [행동]해서 [지표]가 [전]에서 [후]로 바뀌었습니다."
+- 자료에 숫자가 있으면 그대로 쓰고, 없으면 지어내지 말고 무엇을 넣을지 알 수 있는 빈칸으로 둡니다. 예: [월 처리 건수]건, [증가율]%, [기간]개월.
+`;
+
 const QUESTION_ITEM = S.obj({
   competency: S.str,
   type: { type: 'STRING', enum: ['경험형', '상황형', '직무형', '공통'] },
@@ -169,8 +175,9 @@ const QUESTION_ITEM = S.obj({
   source_quote: S.str,
   followups: S.strs,
   keywords: S.strs,
+  numbers_to_prepare: S.strs,
   script: S.str,
-}, ['competency', 'type', 'question', 'intent', 'must_evidence', 'criteria', 'source_quote', 'followups', 'keywords', 'script']);
+}, ['competency', 'type', 'question', 'intent', 'must_evidence', 'criteria', 'source_quote', 'followups', 'keywords', 'numbers_to_prepare', 'script']);
 
 export async function generateQuestionSet(material, competencies) {
   const schema = S.obj({ questions: S.arr(QUESTION_ITEM) }, ['questions']);
@@ -190,11 +197,14 @@ ${list}
 - question: 면접관이 실제로 말하듯 한 문장
 - intent: 이 질문으로 확인하려는 것 한 문장
 - must_evidence: 이 답변에서 반드시 확인해야 할 근거 한 줄
-- criteria: 평가 기준 2~3개, 각각 "~하는가?"로 끝나는 확인 문장
+- criteria: 평가 기준 2~3개, 각각 "~하는가?"로 끝나는 확인 문장. 그중 1개는 반드시 "결과를 수치나 전후 비교로 말하는가?"처럼 정량 성과를 보는 기준으로 합니다.
 - source_quote: 질문의 근거가 된 자료 속 문장 짧은 인용(공통·상황형은 빈 문자열 가능)
 - followups: 답변에서 근거가 부족할 때 던질 꼬리질문 2개
 - keywords: 답변 핵심 키워드 3~5개(외우지 않고 떠올릴 수 있게 짧게)
-- script: 60~90초 분량(300~450자) 핵심 답변 스크립트. 첫 문장에 결론 → 상황·맡은 일·행동·결과 → 지원 직무에서의 기여로 마무리. 자료에 있는 사실만 쓰고, 자료에 없는 숫자·성과는 [숫자]처럼 빈칸으로 둡니다.`;
+- numbers_to_prepare: 이 답변을 성과 중심으로 만들기 위해 지원자가 준비할 숫자 2~4개. 형식: "지표 이름: 자료 속 값" 또는 "지표 이름: 자료에 없음, 확인 필요". 예: "카드뉴스 저장 수 증가율: 자료에 없음, 확인 필요"
+- script: 60~90초 분량(300~450자) 핵심 답변 스크립트. 첫 문장에 결론(가능하면 핵심 성과 숫자 포함) → 상황·맡은 일·본인 행동 → 정량 결과(숫자 1~2개, 전후 비교) → 지원 직무에서의 기여로 마무리. 공통 질문(자기소개·지원동기)도 대표 성과 숫자 1개를 넣습니다.
+
+${QUANT}`;
   const r = await generateJSON(prompt, schema, { maxTokens: 16384, timeoutMs: 120000 });
   const qs = (r && Array.isArray(r.questions) ? r.questions : []).filter(q => q && q.question && q.script);
   if (!qs.length) throw new GeminiError('질문을 만들지 못했어요. 다시 시도해 주세요.');
@@ -209,7 +219,9 @@ ${q.must_evidence ? `이 질문에서 반드시 확인할 근거: ${q.must_evide
 
 할 일: 이 답변에서 가장 부족한 근거 하나를 찾아(missing, 20자 안팎), 그것을 확인하는 꼬리질문 1개를 만드세요(followup).
 - 꼬리질문은 지원자가 실제로 한 말을 짚어 시작합니다. 예: "팀원들과 방향을 맞췄다고 하셨는데요, 그 과정에서 본인이 직접 제안하거나 실행한 행동은 무엇이었나요?"
-- 한 번에 하나만 묻습니다. 답변이 충분하면 결과나 배운 점을 더 깊게 확인하는 질문을 합니다.`;
+- 한 번에 하나만 묻습니다.
+- 결과를 숫자나 전후 비교 없이 말했다면 그것을 가장 먼저 확인합니다. 예: "저장 수가 늘었다고 하셨는데요, 이전과 비교해 어느 정도 늘었나요?"
+- 답변이 충분하면 본인 기여도나 결과의 의미를 더 깊게 확인하는 질문을 합니다.`;
   return generateJSON(prompt, schema, { maxTokens: 1024, timeoutMs: 40000, temperature: 0.5 });
 }
 
@@ -222,7 +234,8 @@ export async function evaluateAnswer({ q, answer, follow, previous }) {
       criterion: S.str, level: { type: 'STRING', enum: ['충족', '부분', '미흡'] }, comment: S.str,
     }, ['criterion', 'level', 'comment'])),
     strength: S.str, improvement: S.str, next_fix: S.str, rewrite_example: S.str, comparison: S.str,
-  }, ['scores', 'reasons', 'criteria_results', 'strength', 'improvement', 'next_fix', 'rewrite_example', 'comparison']);
+    numbers_found: S.strs, numbers_to_add: S.strs,
+  }, ['scores', 'reasons', 'criteria_results', 'strength', 'improvement', 'next_fix', 'rewrite_example', 'comparison', 'numbers_found', 'numbers_to_add']);
   const criteria = q.criteria && q.criteria.length ? q.criteria : ['질문에 대한 답을 먼저 말하는가?', '본인이 직접 한 행동이 드러나는가?', '결과나 배운 점을 구체적으로 말하는가?'];
   const prompt = `면접 질문: ${q.text}
 ${q.intent ? `질문 의도: ${q.intent}\n` : ''}평가 기준: ${criteria.join(' / ')}
@@ -233,8 +246,17 @@ ${follow ? `꼬리질문: ${follow.text}\n<answer>${follow.answer}</answer>\n` :
 - criteria_results: 위 평가 기준 각각에 대해 level(충족/부분/미흡)과 근거 comment(답변 속 표현을 짧게 인용, 40자 안팎). 꼬리질문 답변도 함께 고려합니다.
 - scores(1~5)와 reasons(각 25자 안팎): lead=첫 문장에 핵심 답이 있는가, structure=상황-과제-행동-결과 흐름, specificity=수치·기간·고유 사례, jobfit=지원 직무 역량과의 연결.
 - strength, improvement: 각 한두 문장, 답변 속 표현을 인용해 근거를 댑니다.
-- next_fix: 다음 답변에서 바로 실천할 행동 하나, 한 문장(40자 안팎).
-- rewrite_example: 참여자 답변을 바탕으로 2~3문장으로 고쳐 쓴 예시. 말하지 않은 사실은 [ ] 빈칸.
+- numbers_found: 답변(꼬리질문 답변 포함)에 실제로 나온 숫자·정량 표현을 그대로 짧게(없으면 빈 배열).
+- numbers_to_add: 이 답변을 성과 중심으로 만들려면 덧붙일 숫자 2~3개를 "무엇을 어떻게": 예 "저장 수: 바꾸기 전과 후 비교(예: 120→180)" 처럼. 지어낸 값은 넣지 않습니다.
+- specificity 점수는 정량 성과 기준으로 엄격하게: 결과 숫자·전후 비교가 없으면 2점 이하, 숫자 1개면 3점, 결과 숫자와 본인 기여가 함께 있으면 4~5점.
+- next_fix: 다음 답변에서 바로 실천할 행동 하나, 한 문장(40자 안팎). 결과 숫자가 없으면 숫자로 결과 말하기를 우선합니다.
+- rewrite_example: 참여자 답변을 바탕으로 2~3문장으로 고쳐 쓴 예시. 반드시 "제가 [행동]해서 [지표]가 [전]에서 [후]로" 같은 정량 결과 문장을 넣고, 말하지 않은 값은 [ ] 빈칸.
+
+정량·성과 원칙(모든 질문과 답변에 적용):
+- 결과는 "열심히 했다"가 아니라 숫자와 전후 비교로 말합니다. 쓸 수 있는 숫자 종류: 기간(3개월), 규모(12명, 200건), 빈도(주 3회), 증감(15% 증가, 2일→1일), 순위·평가(만족도 4.8점, 우수상), 비용·시간 절감.
+- 성과는 본인 기여로 드러나게 씁니다: "제가 [행동]해서 [지표]가 [전]에서 [후]로 바뀌었습니다."
+- 자료에 숫자가 있으면 그대로 쓰고, 없으면 지어내지 말고 무엇을 넣을지 알 수 있는 빈칸으로 둡니다. 예: [월 처리 건수]건, [증가율]%, [기간]개월.
+
 - comparison: previous_answer가 있으면 지난번 고칠 점을 실천했는지와 달라진 점 한두 문장, 없으면 빈 문자열.`;
   const r = await generateJSON(prompt, schema, { maxTokens: 4096, timeoutMs: 60000, temperature: 0.3 });
   if (!r || !r.scores || !r.next_fix) throw new GeminiError('평가 결과를 읽지 못했어요.');

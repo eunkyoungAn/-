@@ -39,6 +39,7 @@ export function buildText(log) {
     if (last.nv) lines.push(nvLine(first, last) + ' / ' + NV_ITEMS.map(r => last.nv.reasons[r.key]).join(' / '));
     if (r.criteria_results && r.criteria_results.length) lines.push('이 질문의 핵심: ' + r.criteria_results.map(c => `[${c.level}] ${c.criterion}`).join(' / '));
     if (last.follow) lines.push(`꼬리질문: ${last.follow.text} / 내 답변: ${last.follow.answer}`);
+    if (r.numbers_to_add && r.numbers_to_add.length) lines.push(`숫자로 보완하기: ${r.numbers_to_add.join(' / ')}`);
     lines.push(`다음에 고칠 한 가지: ${r.next_fix}`);
     lines.push(`잘한 점: ${r.strength}`);
     lines.push(`고칠 점: ${r.improvement}`);
@@ -60,6 +61,7 @@ export function buildSetText(set) {
     if (q.intent) lines.push(`   질문 의도: ${q.intent}`);
     if (q.must_evidence) lines.push(`   꼭 보여 줄 근거: ${q.must_evidence}`);
     if (q.criteria.length) lines.push(`   평가 기준: ${q.criteria.join(' / ')}`);
+    if (q.numbers && q.numbers.length) lines.push(`   준비할 숫자: ${q.numbers.join(' / ')}`);
     lines.push(`   키워드: ${q.keywords.join(', ')}`);
     lines.push(`   핵심 답변 스크립트: ${q.script}`);
     if (q.followups.length) lines.push(`   예상 꼬리질문: ${q.followups.join(' / ')}`);
@@ -136,6 +138,10 @@ function layout(ctx, log, draw) {
       if (r.criteria_results && r.criteria_results.length) {
         y += 12; text('이 질문의 핵심', { size: 24, weight: 700, color: C.muted, ...inner });
         r.criteria_results.forEach(c => text(`[${c.level}] ${c.criterion}`, { size: 27, ...inner }));
+      }
+      if (r.numbers_to_add && r.numbers_to_add.length) {
+        y += 12; text('숫자로 보완하기', { size: 24, weight: 700, color: C.muted, ...inner });
+        r.numbers_to_add.forEach(n => text('· ' + n, { size: 27, ...inner }));
       }
       if (last.follow) {
         y += 12; text('꼬리질문', { size: 24, weight: 700, color: C.muted, ...inner });
