@@ -37,6 +37,8 @@ export function buildText(log) {
     lines.push(`${i + 1}. ${item.question.text}`);
     lines.push(`답변 ${item.attempts.length}번 · 점수(5점) ${scoreLine(first, last)}`);
     if (last.nv) lines.push(nvLine(first, last) + ' / ' + NV_ITEMS.map(r => last.nv.reasons[r.key]).join(' / '));
+    if (r.criteria_results && r.criteria_results.length) lines.push('이 질문의 핵심: ' + r.criteria_results.map(c => `[${c.level}] ${c.criterion}`).join(' / '));
+    if (last.follow) lines.push(`꼬리질문: ${last.follow.text} / 내 답변: ${last.follow.answer}`);
     lines.push(`다음에 고칠 한 가지: ${r.next_fix}`);
     lines.push(`잘한 점: ${r.strength}`);
     lines.push(`고칠 점: ${r.improvement}`);
@@ -45,6 +47,25 @@ export function buildText(log) {
     lines.push('');
   });
   lines.push('점수는 연습용 참고치이며 합격을 예측하지 않습니다.');
+  lines.push(SITE);
+  return lines.join('\n');
+}
+
+// ---------- 예상 질문집 ----------
+export function buildSetText(set) {
+  const lines = [`[커리어캐쳐 면접 리허설] 나의 예상 질문집 · ${set.job}${set.company ? ' · ' + set.company : ''} · ${set.createdAt}`, ''];
+  set.questions.forEach((q, i) => {
+    lines.push(`${i + 1}. ${q.text}`);
+    lines.push(`   유형: ${q.type}${q.type === '공통' ? '' : ' / 역량: ' + q.competency}`);
+    if (q.intent) lines.push(`   질문 의도: ${q.intent}`);
+    if (q.must_evidence) lines.push(`   꼭 보여 줄 근거: ${q.must_evidence}`);
+    if (q.criteria.length) lines.push(`   평가 기준: ${q.criteria.join(' / ')}`);
+    lines.push(`   키워드: ${q.keywords.join(', ')}`);
+    lines.push(`   핵심 답변 스크립트: ${q.script}`);
+    if (q.followups.length) lines.push(`   예상 꼬리질문: ${q.followups.join(' / ')}`);
+    lines.push('');
+  });
+  lines.push('[ ] 표시는 자료에 없던 내용입니다. 본인의 실제 경험으로 채워 주세요.');
   lines.push(SITE);
   return lines.join('\n');
 }
@@ -112,6 +133,15 @@ function layout(ctx, log, draw) {
       y += 14;
       text('다음에 고칠 한 가지', { size: 24, weight: 700, color: C.muted, ...inner });
       text(r.next_fix, { size: 32, weight: 700, ...inner });
+      if (r.criteria_results && r.criteria_results.length) {
+        y += 12; text('이 질문의 핵심', { size: 24, weight: 700, color: C.muted, ...inner });
+        r.criteria_results.forEach(c => text(`[${c.level}] ${c.criterion}`, { size: 27, ...inner }));
+      }
+      if (last.follow) {
+        y += 12; text('꼬리질문', { size: 24, weight: 700, color: C.muted, ...inner });
+        text(last.follow.text, { size: 27, weight: 700, ...inner });
+        text(last.follow.answer, { size: 26, ...inner });
+      }
       y += 10;
       y += 12; text('잘한 점', { size: 24, weight: 700, color: C.muted, ...inner });
       text(r.strength, { size: 28, ...inner });

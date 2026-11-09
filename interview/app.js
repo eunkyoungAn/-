@@ -5,10 +5,12 @@
 
 import { QUESTIONS, CATEGORIES, findQuestion } from './questions.js';
 import { RUBRIC, measure, speedLabel, deliveryScore, localEvaluate } from './scoring.js';
-import { buildText, saveImage, fileName } from './save.js';
+import { buildText, buildSetText, saveImage, fileName } from './save.js';
+import * as gem from './gemini.js';
 import { canRecord, openCamera, stopStream, startRecorder, startAudioAnalysis, startGaze, loadGazeModel, scoreNonverbal, NV_ITEMS, saveVideo } from './video.js';
 
 const PREP_SEC = 30;
+const FOLLOW_PREP_SEC = 10;
 const app = document.getElementById('app');
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
@@ -35,7 +37,13 @@ const CUSTOM_TIP = '첫 문장에 답을 먼저 말하고, 경험 하나를 근�
 let custom = [];
 try { custom = JSON.parse(store.get('custom') || '[]').filter(q => q && q.id && q.text); } catch { custom = []; }
 const saveCustom = () => store.set('custom', custom.length ? JSON.stringify(custom) : '');
-const getQuestion = id => custom.find(q => q.id === id) || findQuestion(id);
+// 내 자료로 만든 예상 질문집. 이 기기 브라우저에만 저장된다.
+let qset = null;
+try { qset = JSON.parse(store.get('qset') || 'null'); } catch { qset = null; }
+const saveQset = () => store.set('qset', qset ? JSON.stringify(qset) : '');
+const setQuestions = () => (qset ? qset.questions : []);
+const getQuestion = id => setQuestions().find(q => q.id === id) || custom.find(q => q.id === id) || findQuestion(id);
+const hasGemini = () => Boolean(gem.getKey());
 
 // 카카오톡 인앱 브라우저는 마이크가 막히는 경우가 많아, 처음 한 번은 외부 브라우저로 자동으로 넘긴다.
 const KAKAO_EXTERNAL = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(location.href);
@@ -54,6 +62,9 @@ const state = {
   consent: false,
   log: [],      // 오늘 연습한 질문들 {question, attempts}. 화면을 닫으면 사라진다.
   saved: false, // 저장(이미지·PDF·복사)을 한 번이라도 했는지
+  follow: null,  // 꼬리질문 진행 중 {text, missing, main}
+  material: { job: '', company: '', docs: { 자기소개서: '', 경력기술서: '', 포트폴리오: '', 경험노트: '' }, posting: '' },
+  comps: null,   // 뽑은 핵심 역량(질문 만들기 전 확인용)
 };
 
 // ---------- 공통 ----------
@@ -157,7 +168,7 @@ function homeView() {
       <h2>시작 전에 확인해 주세요</h2>
       <ul class="plain">
         <li>말한 소리는 휴대폰 브라우저의 음성 인식 기능(Chrome은 Google, 아이폰은 Apple)이 글자로 바꿉니다. 이 앱은 녹음 파일을 만들거나 보관하지 않습니다.</li>
-        <li>${aiOn ? '피드백을 만들 때 질문과 답변 글만 AI 평가 서버로 보냅니다. 서버는 답변을 저장하지 않습니다.' : '피드백은 이 휴대폰 안에서 만들어지며, 답변은 어디에도 전송하지 않습니다.'}</li>
+        <li>${hasGemini() ? '내 Gemini 키가 연결되어 있어, 피드백·꼬리질문을 만들 때 질문과 답변 글(질문 만들기에서는 넣은 자료)이 Google Gemini로 전송됩니다.' : aiOn ? '피드백을 만들 때 질문과 답변 글만 AI 평가 서버로 보냅니다. 서버는 답변을 저장하지 않습니다.' : '피드백은 이 휴대폰 안에서 만들어지며, 답변은 어디에도 전송하지 않습니다.'}</li>
         <li>회원가입이 없고, 화면을 닫으면 답변은 사라집니다. 실명, 학교, 회사 이름은 말하지 않아도 됩니다.</li>
         <li>점수는 연습용 참고치이며 합격을 예측하지 않습니다. 외모, 표정, 목소리 높낮이 자체는 평가하지 않습니다.</li>
         ${settings.video ? '<li>영상 녹화를 켜면 시선 방향, 억양 변화, 말 빠르기를 이 휴대폰 안에서만 분석합니다. 영상은 어디에도 전송되지 않으며, 저장 버튼을 눌러야 휴대폰에 남습니다.</li>' : ''}
@@ -179,6 +190,10 @@ function homeView() {
       </div>
       <p class="muted small">${settings.video ? '실제 화상 면접처럼 내 모습을 보며 답합니다. 시선, 억양, 템포 분석과 영상 저장이 추가됩니다. 휴대폰을 눈높이에 세워 두면 좋아요.' : '카메라 없이 목소리로만 연습합니다. 부담 없이 시작하기 좋아요.'}</p>
     </section>` : ''}
+    <details class="card settings gem" ${hasGemini() ? '' : ''}>
+      <summary>AI 피드백·꼬리질문 (내 Gemini 키) ${hasGemini() ? '<span class="pill ok">연결됨</span>' : '<span class="pill">선택</span>'}</summary>
+      ${keyPanel()}
+    </details>
     <button class="btn primary big" data-act="start">${assigned.length ? `강사가 준 질문 ${assigned.length}개로 시작` : '질문 고르기'}</button>
     <details class="card settings">
       <summary>강사용 설정 ${aiOn ? '<span class="pill ok">AI 연결됨</span>' : '<span class="pill">자동 피드백</span>'}</summary>
@@ -196,6 +211,13 @@ function pickView() {
   const groups = assigned.length ? [['강사가 준 질문', list]] : CATEGORIES.map(c => [c, list.filter(q => q.cat === c)]);
   return `${header('질문 고르기')}
   <main class="wrap">
+    <section class="card mine-set">
+      <h2>내 자료로 예상 질문 만들기</h2>
+      <p class="muted small">자기소개서, 경력기술서, 포트폴리오, 경험노트를 넣으면 지원 직무에서 검증할 역량을 뽑고, 역량별 예상 질문과 핵심 답변 스크립트를 만들어 드려요. 내 Gemini API 키가 필요합니다.</p>
+      <button class="btn primary wide" data-act="${qset ? 'qset' : 'material'}">${qset ? `나의 예상 질문집 보기 (${qset.questions.length}개)` : '자료 넣고 질문 만들기'}</button>
+    </section>
+    ${qset ? `<h2 class="group">내 자료 기반 질문 · ${esc(qset.job)}</h2>
+      <ul class="qlist">${qset.questions.map((q, i) => `<li><button data-act="choose" data-id="${q.id}"><span class="qn">${i + 1}</span>${esc(q.text)}</button></li>`).join('')}</ul>` : ''}
     <section class="card ask-custom">
       <h2>연습하고 싶은 질문이 있나요?</h2>
       <p class="muted small">지원하는 회사에서 나올 것 같은 질문, 받기 두려운 질문을 직접 넣어 보세요. 이 휴대폰에만 저장됩니다.</p>
@@ -216,17 +238,23 @@ function pickView() {
 function askView() {
   const q = state.question;
   const round = state.attempts.length + 1;
-  return `${header(round === 1 ? '첫 번째 답변' : `${round}번째 답변`)}
+  const f = state.follow;
+  const hint = !f && q.keywords && q.keywords.length
+    ? `<details class="card hint"><summary>막히면 키워드 보기</summary><p class="kw">${q.keywords.map(k => `<span>${esc(k)}</span>`).join('')}</p></details>` : '';
+  return `${header(f ? '꼬리질문' : round === 1 ? '첫 번째 답변' : `${round}번째 답변`)}
   <main class="wrap">
     <section class="question">
-      <p class="qcat">${esc(q.cat)} 질문</p>
-      <h1 id="qtext">${esc(q.text)}</h1>
+      <p class="qcat">${f ? '꼬리질문' : `${esc(q.cat)} 질문`}</p>
+      <h1 id="qtext">${esc(f ? f.text : q.text)}</h1>
       <button class="btn ghost sm" data-act="listen">질문 다시 듣기</button>
     </section>
-    ${round > 1 ? `<div class="notice focus"><b>이번에 고칠 한 가지</b>${esc(state.attempts[state.attempts.length - 1].result.next_fix)}</div>` : `<p class="tip">${esc(q.tip)}</p>`}
+    ${f ? `<div class="notice focus"><b>면접관이 더 듣고 싶은 것</b>${esc(f.missing)}</div>`
+      : round > 1 ? `<div class="notice focus"><b>이번에 고칠 한 가지</b>${esc(state.attempts[state.attempts.length - 1].result.next_fix)}</div>`
+      : `<p class="tip">${esc(q.must_evidence ? '이 질문에서 확인하는 것: ' + q.must_evidence : q.tip)}</p>`}
+    ${hint}
     <section class="stage" id="stage">
       ${settings.video && !settings.textMode ? '<div class="cam" id="camWrap"><video id="cam" playsinline muted autoplay></video><span class="cam-tip" id="camTip">카메라를 켜는 중...</span></div>' : ''}
-      <div class="timer" id="timer" aria-live="polite"><span class="tlabel">준비</span><span class="tnum">${PREP_SEC}</span></div>
+      <div class="timer" id="timer" aria-live="polite"><span class="tlabel">준비</span><span class="tnum">${f ? FOLLOW_PREP_SEC : PREP_SEC}</span></div>
       <p class="muted center" id="stageMsg">답할 내용을 머릿속으로 정리해 보세요.</p>
       <div class="live" id="live" hidden></div>
       <textarea id="typed" rows="8" placeholder="여기에 답변을 써 주세요" hidden></textarea>
@@ -243,7 +271,7 @@ function bindAsk() {
   const typed = document.getElementById('typed');
   const btn = document.getElementById('mainBtn');
   let phase = 'prep';
-  let left = PREP_SEC;
+  let left = state.follow ? FOLLOW_PREP_SEC : PREP_SEC;
   let startedAt = 0;
   let rec = null;
   let tick = null;
@@ -279,7 +307,7 @@ function bindAsk() {
     timerEl.classList.toggle('warn', Boolean(warn));
   };
 
-  speak(q.text);
+  speak(state.follow ? state.follow.text : q.text);
   tick = setInterval(() => {
     left -= 1;
     if (phase === 'prep') {
@@ -375,32 +403,81 @@ function bindAsk() {
 function reviewView() {
   const d = state.draft;
   const empty = !d.answer;
-  return `${header('답변 확인')}
+  const willFollow = !state.follow && hasGemini();
+  return `${header(state.follow ? '꼬리질문 답변 확인' : '답변 확인')}
   <main class="wrap">
     <section class="card">
-      <h2>이렇게 답하셨어요</h2>
+      <h2>${state.follow ? '꼬리질문에 이렇게 답하셨어요' : '이렇게 답하셨어요'}</h2>
       <p class="muted">${d.typed ? '' : '음성 인식이 잘못 받아 적은 낱말만 고쳐 주세요. 내용을 새로 쓰면 실제 말하기와 달라집니다. '}답변 시간 ${Math.round(d.durationSec)}초</p>
       <textarea id="answer" rows="9">${esc(d.answer)}</textarea>
       ${empty ? '<p class="warn-text">인식된 답변이 없어요. 다시 답하거나 글로 써 주세요.</p>' : ''}
     </section>
-    <button class="btn primary big" data-act="evaluate">피드백 받기</button>
+    <button class="btn primary big" data-act="evaluate">${willFollow ? '다음: 꼬리질문 받기' : '피드백 받기'}</button>
+    ${willFollow ? '<button class="btn ghost wide" data-act="evaluate-skip">꼬리질문 없이 피드백 받기</button>' : ''}
     <button class="btn ghost wide" data-act="redo">이 답변 버리고 다시 답하기</button>
   </main>`;
 }
 
-async function evaluate() {
+function showLoading(step, text) {
+  cleanup.forEach(fn => fn());
+  cleanup = [];
+  state.screen = 'loading';
+  app.innerHTML = `${header(step)}<main class="wrap"><div class="loading"><div class="spinner" aria-hidden="true"></div><p>${esc(text)}</p></div></main>`;
+  window.scrollTo(0, 0);
+}
+
+async function evaluate(skipFollow) {
   const answer = document.getElementById('answer').value.trim();
   if (answer.length < 5) { toast('답변이 너무 짧아요. 조금 더 말하거나 써 주세요.'); return; }
   const d = state.draft;
   // 지표는 사용자가 고치기 전 원문 기준(군말 수가 지워지지 않도록), 글로 쓴 답은 속도를 보지 않는다.
   const metrics = measure(d.typed ? answer : d.rawAnswer || answer, d.durationSec);
   metrics.typed = d.typed;
-  state.screen = 'loading';
-  app.innerHTML = `${header('피드백 만드는 중')}<main class="wrap"><div class="loading"><div class="spinner" aria-hidden="true"></div><p>답변을 커리어캐쳐 기준으로 살펴보고 있어요.</p></div></main>`;
+  const q = state.question;
 
+  // 꼬리질문 답변이면 본질문 답변과 합쳐 평가한다.
+  if (state.follow) {
+    const f = state.follow;
+    state.follow = null;
+    const follow = { text: f.text, missing: f.missing, answer, metrics };
+    if (d.video && d.video.blob.size) follow.video = { ...d.video, url: URL.createObjectURL(d.video.blob) };
+    state.draft = null;
+    return finalize(f.main, follow);
+  }
+
+  const main = { answer, metrics, d };
+  state.draft = null;
+  if (hasGemini() && !skipFollow) {
+    showLoading('꼬리질문 고르는 중', '답변을 듣고 면접관이 더 확인하고 싶은 부분을 찾고 있어요.');
+    try {
+      const fu = await gem.pickFollowup(q, answer);
+      if (fu && fu.followup) {
+        state.follow = { text: fu.followup, missing: fu.missing || '', main };
+        go('ask');
+        return;
+      }
+    } catch (err) {
+      toast(`꼬리질문을 만들지 못해 바로 피드백으로 넘어가요. (${err.message})`);
+    }
+  }
+  return finalize(main, null);
+}
+
+async function finalize(main, follow) {
+  const { answer, metrics, d } = main;
+  const q = state.question;
+  showLoading('피드백 만드는 중', '답변을 커리어캐쳐 기준으로 살펴보고 있어요.');
   const prev = state.attempts[state.attempts.length - 1];
   let result = null;
-  if (settings.relay) {
+  if (hasGemini()) {
+    try {
+      const r = await gem.evaluateAnswer({ q, answer, follow, previous: prev ? { answer: prev.answer, next_fix: prev.result.next_fix } : null });
+      result = { ...r, source: 'ai' };
+    } catch (err) {
+      toast(`Gemini 평가에 실패해 자동 피드백으로 보여 드려요. (${err.message})`);
+    }
+  }
+  if (!result && settings.relay) {
     try {
       result = await remoteEvaluate({ answer, metrics, prev });
     } catch (err) {
@@ -413,6 +490,7 @@ async function evaluate() {
   else { const dv = deliveryScore(metrics, settings.limit); result.scores.delivery = dv.score; result.reasons.delivery = dv.reason; }
 
   const attempt = { answer, metrics, result };
+  if (follow) attempt.follow = follow;
   if (d.video || d.audio || d.gaze) {
     attempt.nv = scoreNonverbal({ gaze: d.gaze, audio: d.audio, metrics, durationSec: d.durationSec });
     if (d.video && d.video.blob.size) attempt.video = { ...d.video, url: URL.createObjectURL(d.video.blob) };
@@ -487,6 +565,30 @@ function feedbackBody(a) {
     </section>`;
 }
 
+// 질문별 평가 기준(이 질문의 핵심)을 충족했는지
+function criteriaSection(a) {
+  const list = a.result.criteria_results;
+  if (!list || !list.length) return '';
+  return `<section class="card crit">
+    <h3>이 질문의 핵심 <small class="muted">평가 기준별 확인</small></h3>
+    <ul>${list.map(c => `<li><span class="lv lv-${c.level === '충족' ? 'ok' : c.level === '부분' ? 'mid' : 'no'}">${esc(c.level)}</span><div><b>${esc(c.criterion)}</b><p class="muted small">${esc(c.comment)}</p></div></li>`).join('')}</ul>
+  </section>`;
+}
+
+function followSection(a) {
+  const f = a.follow;
+  if (!f) return '';
+  const qi = state.log.findIndex(x => x.attempts.includes(a));
+  const ai = qi >= 0 ? state.log[qi].attempts.indexOf(a) : -1;
+  return `<section class="card follow">
+    <h3>꼬리질문</h3>
+    <p><b>${esc(f.text)}</b></p>
+    <p class="muted small">확인하려던 것: ${esc(f.missing)}</p>
+    <p class="answer">${esc(f.answer)}</p>
+    ${f.video ? `<div class="vid"><video src="${f.video.url}" controls playsinline preload="metadata"></video><button class="btn ghost wide no-print" data-act="save-video" data-q="${qi}" data-a="${ai}" data-f="1">꼬리질문 영상 저장</button></div>` : ''}
+  </section>`;
+}
+
 function disclaimer(a) {
   return `<p class="disclaimer">${a.result.source === 'ai' ? 'AI 피드백' : '자동 피드백(답변 속 표현을 정해진 규칙으로 살펴본 결과로, 내용의 깊이까지는 판단하지 못할 수 있습니다)'}입니다. 점수는 연습용 참고치이며 합격을 예측하지 않습니다. 전달 점수는 받아 적은 글과 시간으로 계산합니다. 음성 인식은 "음, 어" 같은 군말을 빠뜨리기도 합니다.</p>`;
 }
@@ -497,6 +599,8 @@ function reportView() {
   <main class="wrap">
     <p class="qsmall">${esc(state.question.text)}</p>
     ${feedbackBody(a)}
+    ${criteriaSection(a)}
+    ${followSection(a)}
     <section class="card"><h3>항목별 점수 <small class="muted">각 5점</small></h3>${scoreBars(a.result.scores, a.result.reasons)}</section>
     <section class="card"><h3>말하기 지표</h3>${metricsRow(a.metrics)}</section>
     ${nvSection(a)}
@@ -527,6 +631,8 @@ function compareView() {
       <div class="card"><h3>${state.attempts.length > 2 ? '이번' : '다시 한'} 답변</h3>${metricsRow(last.metrics)}<p class="answer">${esc(last.answer)}</p></div>
     </section>
     ${feedbackBody(last)}
+    ${criteriaSection(last)}
+    ${followSection(last)}
     ${nvSection(last, first)}
     ${scoreGuide(last)}
     <button class="btn primary big" data-act="pick">다른 질문 연습하기</button>
@@ -623,6 +729,8 @@ function recordsView() {
           <h3>이렇게 바꿔 말해 보세요</h3><blockquote>${esc(last.result.rewrite_example)}</blockquote>
           <h3>마지막 답변</h3><p class="answer">${esc(last.answer)}</p>
         </div>
+        ${last.result.criteria_results && last.result.criteria_results.length ? `<div class="nv-rec"><h3>이 질문의 핵심</h3><ul class="critlist">${last.result.criteria_results.map(c => `<li><b>${esc(c.level)}</b> ${esc(c.criterion)} <span class="muted">${esc(c.comment)}</span></li>`).join('')}</ul></div>` : ''}
+        ${last.follow ? `<div class="nv-rec"><h3>꼬리질문</h3><p><b>${esc(last.follow.text)}</b></p><p class="answer">${esc(last.follow.answer)}</p></div>` : ''}
         ${last.nv ? `<div class="nv-rec"><h3>영상 분석</h3>${scoreBars(last.nv.scores, last.nv.reasons, item.attempts.length > 1 && first.nv ? first.nv.scores : null, NV_ITEMS)}</div>` : ''}
         ${item.attempts.some(x => x.video) ? `<div class="vids no-print"><h3>녹화한 영상</h3>${item.attempts.map((x, ai) => x.video ? `<p class="muted small">${ai + 1}번째 답변</p>${videoBlock(x, i, ai)}` : '').join('')}</div>` : ''}
       </article>`;
@@ -654,8 +762,189 @@ window.addEventListener('beforeunload', e => {
   if (state.log.length && !state.saved) { e.preventDefault(); e.returnValue = ''; }
 });
 
+// ---------- Gemini 키 ----------
+function keyPanel() {
+  if (hasGemini()) {
+    return `<div class="keybox">
+      <p>Gemini에 연결되어 있어요. ${gem.keyRemembered() ? '키가 이 휴대폰에 저장되어 있습니다.' : '키는 이 화면을 닫으면 지워집니다.'}</p>
+      <p class="muted small">모델: ${esc(gem.getModel())}</p>
+      <button class="btn ghost wide" data-act="key-clear">키 연결 해제</button>
+    </div>`;
+  }
+  return `<div class="keybox">
+    <p class="muted small">Gemini API 키를 넣으면 AI가 답변을 읽고 꼬리질문을 하고, 질문별 기준으로 피드백합니다. 내 자료로 예상 질문을 만들 때도 필요해요. 키는 Google AI Studio(aistudio.google.com)의 "Get API key"에서 만들 수 있어요.</p>
+    <label class="field">Gemini API 키<input id="gemKey" type="password" autocomplete="off" placeholder="AIza로 시작하는 키"></label>
+    <label class="check"><input type="checkbox" id="gemRemember"> 이 휴대폰에 키 기억하기</label>
+    <details><summary class="muted small">모델 바꾸기</summary><label class="field">모델 이름<input id="gemModel" type="text" value="${esc(gem.getModel())}"></label></details>
+    <button class="btn primary wide" data-act="key-save">키 연결</button>
+    <p class="muted small">결제를 연결하지 않은 무료 키는 입력한 내용이 Google 서비스 개선에 쓰이고 사람이 검토할 수 있어요. 실명, 연락처, 회사 내부 정보는 빼고 넣어 주세요. 비용은 키 주인에게 청구됩니다.</p>
+  </div>`;
+}
+
+// ---------- 화면: 내 자료 넣기 ----------
+const DOC_HINTS = {
+  자기소개서: '지원동기, 성장과정, 직무 역량 문항 등',
+  경력기술서: '회사·기간·담당 업무·성과',
+  포트폴리오: '프로젝트 이름, 맡은 역할, 결과를 글로 요약',
+  경험노트: '상황-과제-행동-결과로 정리한 경험',
+};
+function materialView() {
+  const m = state.material;
+  return `${header('내 자료 넣기')}
+  <main class="wrap">
+    ${hasGemini() ? '' : `<section class="card"><h2>1. Gemini 키 연결</h2>${keyPanel()}</section>`}
+    <section class="card form">
+      <h2>${hasGemini() ? '1' : '2'}. 지원 정보</h2>
+      <label class="field">지원 직무 (필수)<input id="mJob" type="text" maxlength="60" placeholder="예: 사무행정, 콘텐츠 마케터, 요양보호사" value="${esc(m.job)}"></label>
+      <label class="field">지원 회사 (선택)<input id="mCompany" type="text" maxlength="60" value="${esc(m.company)}"></label>
+    </section>
+    <section class="card form">
+      <h2>${hasGemini() ? '2' : '3'}. 자료 붙여넣기 <small class="muted">하나 이상</small></h2>
+      ${Object.keys(m.docs).map(k => `<details class="doc" ${m.docs[k] ? 'open' : ''}><summary>${k} <small class="muted">${m.docs[k] ? `${m.docs[k].length}자` : DOC_HINTS[k]}</small></summary><textarea data-doc="${k}" rows="7" maxlength="8000" placeholder="${DOC_HINTS[k]}">${esc(m.docs[k])}</textarea></details>`).join('')}
+      <details class="doc" ${m.posting ? 'open' : ''}><summary>채용공고 (선택) <small class="muted">있으면 직무 역량을 더 정확히 뽑아요</small></summary><textarea id="mPosting" rows="6" maxlength="6000">${esc(m.posting)}</textarea></details>
+      <p class="muted small">보내기 전에 전화번호, 이메일, 주민번호는 자동으로 가립니다. 넣은 자료는 질문을 만들 때만 Gemini로 보내고, 이 앱은 자료를 저장하지 않습니다.</p>
+    </section>
+    <button class="btn primary big" data-act="auto-set">예상 질문 바로 만들기</button>
+    <button class="btn ghost wide" data-act="extract">검증할 역량 먼저 확인하고 만들기</button>
+    <p class="muted small center">바로 만들기는 자료에서 뽑은 핵심 역량으로 질문까지 한 번에 만들어요. 1분 안팎 걸립니다.</p>
+  </main>`;
+}
+
+function readMaterial() {
+  const m = state.material;
+  const job = document.getElementById('mJob');
+  if (!job) return m;
+  m.job = job.value.trim();
+  m.company = document.getElementById('mCompany').value.trim();
+  document.querySelectorAll('[data-doc]').forEach(t => { m.docs[t.dataset.doc] = t.value.trim(); });
+  m.posting = document.getElementById('mPosting').value.trim();
+  return m;
+}
+
+function maskedMaterial() {
+  const m = state.material;
+  let masked = 0;
+  const docs = Object.entries(m.docs).filter(([, v]) => v).map(([k, v]) => { const r = gem.maskPersonal(v); masked += r.count; return [k, r.text]; });
+  const posting = gem.maskPersonal(m.posting);
+  masked += posting.count;
+  return { material: { job: m.job, company: m.company, docs, posting: posting.text }, masked };
+}
+
+// auto=true면 역량 확인 화면 없이 질문집까지 한 번에 만든다.
+async function doExtract(auto) {
+  readMaterial();
+  const m = state.material;
+  if (!hasGemini()) { toast('먼저 Gemini API 키를 연결해 주세요.'); return; }
+  if (!m.job) { toast('지원 직무를 써 주세요.'); document.getElementById('mJob').focus(); return; }
+  const total = Object.values(m.docs).join('').length;
+  if (total < 100) { toast('자료를 100자 이상 넣어 주세요. 경험이 담긴 글일수록 질문이 정확해져요.'); return; }
+  const { material, masked } = maskedMaterial();
+  showLoading('역량 뽑는 중', `"${m.job}" 면접에서 검증할 핵심 역량을 자료에서 찾고 있어요.${masked ? ` (개인정보 ${masked}건을 가리고 보냈어요)` : ''}`);
+  try {
+    const comps = await gem.extractCompetencies(material);
+    state.comps = comps.map(c => ({ ...c, on: true }));
+    if (auto) return doMakeSet();
+    go('comps');
+  } catch (err) {
+    toast(err.message);
+    go('material');
+  }
+}
+
+function compsView() {
+  return `${header('핵심 역량 확인')}
+  <main class="wrap">
+    <section class="hero small">
+      <h1>이 역량들을 검증하는 질문을 만들게요.</h1>
+      <p>질문을 만들기 전에 "무엇을 확인할지"부터 정합니다. 빼고 싶은 역량은 체크를 풀고, 꼭 넣고 싶은 역량은 아래에 추가하세요.</p>
+    </section>
+    ${state.comps.map((c, i) => `<label class="card comp ${c.on ? '' : 'off'}">
+      <input type="checkbox" data-comp="${i}" ${c.on ? 'checked' : ''}>
+      <div><h3>${esc(c.name)}</h3><p class="small">${esc(c.why)}</p><p class="muted small">내 경험: ${esc(c.evidence)}</p>${c.source_quote ? `<p class="quote small">"${esc(c.source_quote)}"</p>` : ''}</div>
+    </label>`).join('')}
+    <section class="card form">
+      <label class="field">역량 직접 추가<input id="compAdd" type="text" maxlength="30" placeholder="예: 고객 응대"></label>
+      <button class="btn ghost wide" data-act="comp-add">추가</button>
+    </section>
+    <button class="btn primary big" data-act="make-set">예상 질문과 답변 스크립트 만들기</button>
+    <button class="btn ghost wide" data-act="material">자료 고치기</button>
+  </main>`;
+}
+
+async function doMakeSet() {
+  const comps = state.comps.filter(c => c.on);
+  if (!comps.length) { toast('역량을 하나 이상 골라 주세요.'); return; }
+  const { material } = maskedMaterial();
+  showLoading('질문 만드는 중', `${comps.map(c => c.name).join(', ')} 역량을 검증하는 예상 질문과 핵심 답변 스크립트를 만들고 있어요. 30초~1분 정도 걸려요.`);
+  try {
+    const qs = await gem.generateQuestionSet(material, comps);
+    const stamp = Date.now().toString(36);
+    qset = {
+      job: state.material.job,
+      company: state.material.company,
+      createdAt: new Date().toISOString().slice(0, 10),
+      competencies: comps.map(({ name, why, evidence }) => ({ name, why, evidence })),
+      questions: qs.map((q, i) => ({
+        id: `g${stamp}-${i}`,
+        cat: q.type === '공통' ? '공통' : `${q.competency} · ${q.type}`,
+        text: q.question,
+        tip: q.must_evidence,
+        type: q.type, competency: q.competency, intent: q.intent, must_evidence: q.must_evidence,
+        criteria: (q.criteria || []).slice(0, 3), source_quote: q.source_quote, followups: (q.followups || []).slice(0, 2),
+        keywords: (q.keywords || []).slice(0, 5), script: q.script,
+      })),
+    };
+    saveQset();
+    state.comps = null;
+    go('qset');
+  } catch (err) {
+    toast(err.message);
+    go('comps');
+  }
+}
+
+// ---------- 화면: 나의 예상 질문집 ----------
+function qsetView() {
+  if (!qset) return materialView();
+  return `${header('나의 예상 질문집')}
+  <main class="wrap qset">
+    <section class="hero small">
+      <p class="eyebrow print-only">커리어캐쳐 면접 리허설</p>
+      <h1>나의 예상 질문집 <small class="muted">${esc(qset.job)}${qset.company ? ' · ' + esc(qset.company) : ''}</small></h1>
+      <p>${qset.createdAt} · 질문 ${qset.questions.length}개. 스크립트는 외우지 말고, 키워드만 떠올리며 내 말로 답해 보세요.</p>
+      ${qset.competencies && qset.competencies.length ? `<p class="kw">${qset.competencies.map(c => `<span>${esc(c.name)}</span>`).join('')}</p><p class="muted small no-print">자료에서 뽑은 검증 역량이에요. 바꾸고 싶으면 "새로 만들기"에서 "역량 먼저 확인하고 만들기"를 눌러 주세요.</p>` : ''}
+    </section>
+    <section class="card no-print">
+      <div class="savebtns">
+        <button class="btn primary" data-act="qset-pdf">질문집 PDF로 저장</button>
+        <button class="btn ghost" data-act="qset-text">글로 복사</button>
+        <button class="btn ghost" data-act="material">새로 만들기</button>
+      </div>
+      <p class="muted small">질문집은 이 휴대폰 브라우저에만 저장돼요. <button class="linkbtn" data-act="qset-del">질문집 지우기</button></p>
+    </section>
+    ${qset.questions.map((q, i) => `<article class="card qcard">
+      <p class="eyebrow">질문 ${i + 1} · ${esc(q.type === '공통' ? '공통' : q.competency)} · ${esc(q.type)}</p>
+      <h2>${esc(q.text)}</h2>
+      <dl class="qmeta">
+        ${q.intent ? `<dt>질문 의도</dt><dd>${esc(q.intent)}</dd>` : ''}
+        ${q.must_evidence ? `<dt>꼭 보여 줄 근거</dt><dd>${esc(q.must_evidence)}</dd>` : ''}
+        ${q.criteria.length ? `<dt>평가 기준</dt><dd><ul>${q.criteria.map(c => `<li>${esc(c)}</li>`).join('')}</ul></dd>` : ''}
+        ${q.source_quote ? `<dt>내 자료 속 근거</dt><dd class="quote">"${esc(q.source_quote)}"</dd>` : ''}
+      </dl>
+      <div class="script">
+        <p class="eyebrow">핵심 답변 키워드</p>
+        <p class="kw">${q.keywords.map(k => `<span>${esc(k)}</span>`).join('')}</p>
+        <details class="print-open"><summary>핵심 답변 스크립트 보기</summary><blockquote>${esc(q.script)}</blockquote><p class="muted small">[ ] 표시는 자료에 없던 내용이에요. 본인의 실제 경험으로 채워 주세요.</p></details>
+      </div>
+      ${q.followups.length ? `<p class="eyebrow">예상 꼬리질문</p><ul class="fu">${q.followups.map(f => `<li>${esc(f)}</li>`).join('')}</ul>` : ''}
+      <button class="btn ghost wide no-print" data-act="choose" data-id="${q.id}">이 질문으로 연습하기</button>
+    </article>`).join('')}
+    <p class="disclaimer">AI가 넣어 주신 자료를 바탕으로 만든 예상 질문과 예시 답변입니다. 실제 면접 질문과 다를 수 있고, 스크립트의 사실 여부는 본인이 확인해 주세요.</p>
+  </main>`;
+}
+
 // ---------- 렌더링 ----------
-const views = { home: homeView, pick: pickView, ask: askView, review: reviewView, report: reportView, compare: compareView, records: recordsView };
+const views = { material: materialView, comps: compsView, qset: qsetView, home: homeView, pick: pickView, ask: askView, review: reviewView, report: reportView, compare: compareView, records: recordsView };
 function render() {
   app.innerHTML = views[state.screen]();
   if (state.screen === 'ask') bindAsk();
@@ -664,6 +953,7 @@ function render() {
 app.addEventListener('change', e => {
   if (e.target.id === 'consent') state.consent = e.target.checked;
   if (e.target.id === 'textmode') settings.textMode = e.target.checked;
+  if (e.target.dataset && e.target.dataset.comp != null && state.comps) { state.comps[Number(e.target.dataset.comp)].on = e.target.checked; e.target.closest('.comp').classList.toggle('off', !e.target.checked); }
 });
 
 app.addEventListener('click', async e => {
@@ -687,11 +977,39 @@ app.addEventListener('click', async e => {
   else if (act === 'evaluate') evaluate();
   else if (act === 'pick') go('pick');
   else if (act === 'records') go('records');
+  else if (act === 'evaluate-skip') evaluate(true);
+  else if (act === 'material') { readMaterial(); go('material'); }
+  else if (act === 'qset') go('qset');
+  else if (act === 'extract') doExtract(false);
+  else if (act === 'auto-set') doExtract(true);
+  else if (act === 'make-set') doMakeSet();
+  else if (act === 'comp-add') {
+    const inp = document.getElementById('compAdd');
+    const name = inp.value.trim();
+    if (!name) return;
+    state.comps.push({ name, why: '직접 추가한 역량', evidence: '자료에서 관련 경험을 찾아 질문을 만듭니다', source_quote: '', on: true });
+    render();
+  }
+  else if (act === 'key-save') {
+    const k = document.getElementById('gemKey').value.trim();
+    if (k.length < 20) { toast('API 키를 확인해 주세요.'); return; }
+    readMaterial();
+    gem.setKey(k, document.getElementById('gemRemember').checked);
+    const md = document.getElementById('gemModel');
+    if (md) gem.setModel(md.value);
+    toast('Gemini 키를 연결했어요. 실제 사용 가능 여부는 첫 요청 때 확인됩니다.');
+    render();
+  }
+  else if (act === 'key-clear') { readMaterial(); gem.setKey('', false); toast('키 연결을 해제했어요.'); render(); }
+  else if (act === 'qset-text') copy(buildSetText(qset), '질문집을 글로 복사했어요.');
+  else if (act === 'qset-pdf') { document.querySelectorAll('details.print-open').forEach(d => { d.open = true; }); toast('인쇄 창에서 "PDF로 저장"을 골라 주세요.'); setTimeout(() => window.print(), 300); }
+  else if (act === 'qset-del') { if (confirm('나의 예상 질문집을 지울까요?')) { qset = null; saveQset(); go('pick'); } }
   else if (act === 'video-mode') { settings.video = el.dataset.v === '1'; store.set('video', settings.video ? '1' : ''); render(); }
   else if (act === 'save-video') {
     const a = state.log[Number(el.dataset.q)]?.attempts[Number(el.dataset.a)];
-    if (!a || !a.video) return;
-    const how = await saveVideo(a.video, fileName('x').replace(/\.x$/, '') + `-q${Number(el.dataset.q) + 1}-${Number(el.dataset.a) + 1}`);
+    const v = a && (el.dataset.f ? a.follow && a.follow.video : a.video);
+    if (!v) return;
+    const how = await saveVideo(v, fileName('x').replace(/\.x$/, '') + `-q${Number(el.dataset.q) + 1}-${Number(el.dataset.a) + 1}${el.dataset.f ? '-follow' : ''}`);
     if (how === 'downloaded') toast('영상을 내려받았어요. 다운로드 폴더나 갤러리에서 확인해 주세요.');
     else if (how === 'shared') toast('"비디오 저장"을 누르면 사진첩에 저장돼요.');
   }
