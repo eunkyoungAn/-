@@ -804,7 +804,9 @@ function materialView() {
       <details class="doc" ${m.posting ? 'open' : ''}><summary>채용공고 (선택) <small class="muted">있으면 직무 역량을 더 정확히 뽑아요</small></summary><textarea id="mPosting" rows="6" maxlength="6000">${esc(m.posting)}</textarea></details>
       <p class="muted small">보내기 전에 전화번호, 이메일, 주민번호는 자동으로 가립니다. 넣은 자료는 질문을 만들 때만 Gemini로 보내고, 이 앱은 자료를 저장하지 않습니다.</p>
     </section>
-    <button class="btn primary big" data-act="extract">검증할 핵심 역량 뽑기</button>
+    <button class="btn primary big" data-act="auto-set">예상 질문 바로 만들기</button>
+    <button class="btn ghost wide" data-act="extract">검증할 역량 먼저 확인하고 만들기</button>
+    <p class="muted small center">바로 만들기는 자료에서 뽑은 핵심 역량으로 질문까지 한 번에 만들어요. 1분 안팎 걸립니다.</p>
   </main>`;
 }
 
@@ -828,7 +830,8 @@ function maskedMaterial() {
   return { material: { job: m.job, company: m.company, docs, posting: posting.text }, masked };
 }
 
-async function doExtract() {
+// auto=true면 역량 확인 화면 없이 질문집까지 한 번에 만든다.
+async function doExtract(auto) {
   readMaterial();
   const m = state.material;
   if (!hasGemini()) { toast('먼저 Gemini API 키를 연결해 주세요.'); return; }
@@ -840,6 +843,7 @@ async function doExtract() {
   try {
     const comps = await gem.extractCompetencies(material);
     state.comps = comps.map(c => ({ ...c, on: true }));
+    if (auto) return doMakeSet();
     go('comps');
   } catch (err) {
     toast(err.message);
@@ -871,7 +875,7 @@ async function doMakeSet() {
   const comps = state.comps.filter(c => c.on);
   if (!comps.length) { toast('역량을 하나 이상 골라 주세요.'); return; }
   const { material } = maskedMaterial();
-  showLoading('질문 만드는 중', `역량 ${comps.length}개에 맞는 예상 질문과 핵심 답변 스크립트를 만들고 있어요. 30초~1분 정도 걸려요.`);
+  showLoading('질문 만드는 중', `${comps.map(c => c.name).join(', ')} 역량을 검증하는 예상 질문과 핵심 답변 스크립트를 만들고 있어요. 30초~1분 정도 걸려요.`);
   try {
     const qs = await gem.generateQuestionSet(material, comps);
     const stamp = Date.now().toString(36);
@@ -908,6 +912,7 @@ function qsetView() {
       <p class="eyebrow print-only">커리어캐쳐 면접 리허설</p>
       <h1>나의 예상 질문집 <small class="muted">${esc(qset.job)}${qset.company ? ' · ' + esc(qset.company) : ''}</small></h1>
       <p>${qset.createdAt} · 질문 ${qset.questions.length}개. 스크립트는 외우지 말고, 키워드만 떠올리며 내 말로 답해 보세요.</p>
+      ${qset.competencies && qset.competencies.length ? `<p class="kw">${qset.competencies.map(c => `<span>${esc(c.name)}</span>`).join('')}</p><p class="muted small no-print">자료에서 뽑은 검증 역량이에요. 바꾸고 싶으면 "새로 만들기"에서 "역량 먼저 확인하고 만들기"를 눌러 주세요.</p>` : ''}
     </section>
     <section class="card no-print">
       <div class="savebtns">
@@ -975,7 +980,8 @@ app.addEventListener('click', async e => {
   else if (act === 'evaluate-skip') evaluate(true);
   else if (act === 'material') { readMaterial(); go('material'); }
   else if (act === 'qset') go('qset');
-  else if (act === 'extract') doExtract();
+  else if (act === 'extract') doExtract(false);
+  else if (act === 'auto-set') doExtract(true);
   else if (act === 'make-set') doMakeSet();
   else if (act === 'comp-add') {
     const inp = document.getElementById('compAdd');
