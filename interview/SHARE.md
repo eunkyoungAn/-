@@ -29,6 +29,7 @@ https://eunkyoungan.github.io/-/interview/
 - 영상과 분석은 내 휴대폰 안에서만 처리, 원하면 휴대폰에 영상 저장
 - 연습이 끝나면 피드백을 이미지·PDF로 내 휴대폰에 저장 가능
 - 받을 것 같은 질문을 직접 추가해서 연습 가능
+- 내 자소서·경험노트를 넣으면 예상 질문과 핵심 답변 스크립트를 만들어 주고, 답변에 맞춰 꼬리질문까지(본인 Gemini API 키 필요)
 
 열기: https://eunkyoungan.github.io/-/interview/
 
