@@ -7,6 +7,7 @@ import { QUESTIONS, CATEGORIES, findQuestion } from './questions.js';
 import { RUBRIC, measure, speedLabel, deliveryScore, localEvaluate } from './scoring.js';
 import { buildText, buildSetText, saveImage, fileName } from './save.js';
 import * as gem from './gemini.js';
+import * as files from './files.js';
 import { canRecord, openCamera, stopStream, startRecorder, startAudioAnalysis, startGaze, loadGazeModel, scoreNonverbal, NV_ITEMS, saveVideo } from './video.js';
 
 const PREP_SEC = 30;
@@ -63,7 +64,7 @@ const state = {
   log: [],      // 오늘 연습한 질문들 {question, attempts}. 화면을 닫으면 사라진다.
   saved: false, // 저장(이미지·PDF·복사)을 한 번이라도 했는지
   follow: null,  // 꼬리질문 진행 중 {text, missing, main}
-  material: { job: '', company: '', docs: { 자기소개서: '', 경력기술서: '', 포트폴리오: '', 경험노트: '' }, posting: '' },
+  material: { job: '', company: '', docs: { 자기소개서: '', 경력기술서: '', 포트폴리오: '', 경험노트: '' }, posting: '', files: [] },
   comps: null,   // 뽑은 핵심 역량(질문 만들기 전 확인용)
 };
 
@@ -213,7 +214,7 @@ function pickView() {
   <main class="wrap">
     <section class="card mine-set">
       <h2>내 자료로 예상 질문 만들기</h2>
-      <p class="muted small">자기소개서, 경력기술서, 포트폴리오, 경험노트를 넣으면 지원 직무에서 검증할 역량을 뽑고, 역량별 예상 질문과 핵심 답변 스크립트를 만들어 드려요. 내 Gemini API 키가 필요합니다.</p>
+      <p class="muted small">자기소개서, 경력기술서, 포트폴리오, 경험노트 파일을 첨부하거나 붙여 넣으면 지원 직무에서 검증할 역량을 뽑고, 역량별 예상 질문과 핵심 답변 스크립트를 만들어 드려요. 내 Gemini API 키가 필요합니다.</p>
       <button class="btn primary wide" data-act="${qset ? 'qset' : 'material'}">${qset ? `나의 예상 질문집 보기 (${qset.questions.length}개)` : '자료 넣고 질문 만들기'}</button>
     </section>
     ${qset ? `<h2 class="group">내 자료 기반 질문 · ${esc(qset.job)}</h2>
@@ -814,15 +815,88 @@ function materialView() {
       <label class="field">지원 회사 (선택)<input id="mCompany" type="text" maxlength="60" value="${esc(m.company)}"></label>
     </section>
     <section class="card form">
-      <h2>${hasGemini() ? '2' : '3'}. 자료 붙여넣기 <small class="muted">하나 이상</small></h2>
-      ${Object.keys(m.docs).map(k => `<details class="doc" ${m.docs[k] ? 'open' : ''}><summary>${k} <small class="muted">${m.docs[k] ? `${m.docs[k].length}자` : DOC_HINTS[k]}</small></summary><textarea data-doc="${k}" rows="7" maxlength="8000" placeholder="${DOC_HINTS[k]}">${esc(m.docs[k])}</textarea></details>`).join('')}
-      <details class="doc" ${m.posting ? 'open' : ''}><summary>채용공고 (선택) <small class="muted">있으면 직무 역량을 더 정확히 뽑아요</small></summary><textarea id="mPosting" rows="6" maxlength="6000">${esc(m.posting)}</textarea></details>
-      <p class="muted small">보내기 전에 전화번호, 이메일, 주민번호는 자동으로 가립니다. 넣은 자료는 질문을 만들 때만 Gemini로 보내고, 이 앱은 자료를 저장하지 않습니다.</p>
+      <h2>${hasGemini() ? '2' : '3'}. 자료 넣기 <small class="muted">파일 첨부 또는 붙여넣기</small></h2>
+      <label class="dropzone" id="dropzone">
+        <input type="file" id="fileTop" multiple accept="${files.ACCEPT}">
+        <b>파일 첨부해서 자동으로 읽기</b>
+        <span class="muted small">자기소개서·경력기술서·포트폴리오·경험노트·채용공고 파일을 한 번에 골라도 돼요. 워드(DOCX), 한글(HWPX), PDF, TXT, 사진을 읽습니다.</span>
+      </label>
+      ${m.files.length ? `<ul class="filelist">${m.files.map(f => `<li class="${f.error ? 'err' : ''}"><b>${esc(f.name)}</b><span>${f.error ? esc(f.error) : `${esc(f.slot)}에 ${f.chars.toLocaleString()}자 · ${f.ai ? 'Gemini로 읽음' : '휴대폰에서 읽음'}${f.cut ? ' · 길어서 일부만' : ''}`}</span></li>`).join('')}</ul><p class="muted small">읽어 온 내용은 아래 칸에 들어갔어요. 잘못 읽힌 부분이 있으면 고쳐 주세요.</p>` : ''}
+      ${SLOTS.map(([k, label, hint]) => {
+        const v = k === '채용공고' ? m.posting : m.docs[k];
+        return `<details class="doc" ${v ? 'open' : ''}><summary>${label} <small class="muted">${v ? `${v.length.toLocaleString()}자` : hint}</small></summary>
+          <textarea ${k === '채용공고' ? 'id="mPosting"' : `data-doc="${k}"`} rows="7" maxlength="${SLOT_MAX}" placeholder="${hint}">${esc(v)}</textarea>
+          <label class="btn ghost sm attach">파일 첨부<input type="file" data-slot="${k}" multiple accept="${files.ACCEPT}"></label>
+        </details>`;
+      }).join('')}
+      <p class="muted small">워드·한글·PDF·TXT 파일은 이 휴대폰 안에서 읽고 파일을 보내지 않아요. 사진·스캔본만 동의를 받은 뒤 Gemini로 보내 글자를 읽습니다. 질문을 만들 때는 칸에 들어간 글만 보내며, 보내기 전에 전화번호·이메일·주민번호를 자동으로 가립니다. 이 앱은 자료를 저장하지 않습니다.</p>
     </section>
     <button class="btn primary big" data-act="auto-set">예상 질문 바로 만들기</button>
     <button class="btn ghost wide" data-act="extract">검증할 역량 먼저 확인하고 만들기</button>
     <p class="muted small center">바로 만들기는 자료에서 뽑은 핵심 역량으로 질문까지 한 번에 만들어요. 1분 안팎 걸립니다.</p>
   </main>`;
+}
+
+const SLOT_MAX = 15000;
+const SLOTS = [
+  ['자기소개서', '자기소개서', DOC_HINTS.자기소개서],
+  ['경력기술서', '경력기술서', DOC_HINTS.경력기술서],
+  ['포트폴리오', '포트폴리오', DOC_HINTS.포트폴리오],
+  ['경험노트', '경험노트', DOC_HINTS.경험노트],
+  ['채용공고', '채용공고 (선택)', '있으면 직무 역량을 더 정확히 뽑아요'],
+];
+
+// 파일 이름으로 어느 칸에 넣을지 짐작한다. 모르면 자기소개서.
+function guessSlot(name) {
+  const n = name.replace(/\s/g, '');
+  if (/공고|채용|모집|JD/i.test(n)) return '채용공고';
+  if (/경력기술|경력|career/i.test(n)) return '경력기술서';
+  if (/포트폴리오|portfolio/i.test(n)) return '포트폴리오';
+  if (/경험|STAR/i.test(n)) return '경험노트';
+  return '자기소개서';
+}
+
+function putText(slot, text) {
+  const m = state.material;
+  const cur = slot === '채용공고' ? m.posting : m.docs[slot];
+  let next = cur ? `${cur}\n\n${text}` : text;
+  const cut = next.length > SLOT_MAX;
+  if (cut) next = next.slice(0, SLOT_MAX);
+  if (slot === '채용공고') m.posting = next; else m.docs[slot] = next;
+  return cut;
+}
+
+async function handleFiles(list, fixedSlot) {
+  readMaterial();
+  const m = state.material;
+  const picked = [...list];
+  if (!picked.length) return;
+  for (const file of picked) {
+    const slot = fixedSlot || guessSlot(file.name);
+    const rec = { name: file.name, slot, chars: 0, ai: false, cut: false, error: '' };
+    m.files.push(rec);
+    toast(`"${file.name}" 읽는 중...`);
+    try {
+      let { text, needsAI } = await files.readLocal(file);
+      if (needsAI) {
+        if (!hasGemini()) throw new Error('사진이나 스캔한 PDF는 Gemini 키를 연결하면 읽을 수 있어요. 글자를 복사해 붙여 넣어도 됩니다.');
+        const ok = confirm(`"${file.name}"은(는) 휴대폰에서 글자를 바로 읽을 수 없는 파일(사진·스캔본)이에요.\n본인 Gemini로 파일을 보내 글자를 읽을까요?\n파일이 그대로 전송되므로 연락처 자동 가림이 적용되지 않아요.`);
+        if (!ok) throw new Error('Gemini로 보내지 않아 읽지 않았어요.');
+        showLoading('파일 읽는 중', `"${file.name}"의 글자를 Gemini로 읽고 있어요.`);
+        text = await gem.transcribeFile(await files.toBase64(file), files.mimeOf(file));
+        rec.ai = true;
+      }
+      text = text.trim();
+      if (!text) throw new Error('파일에 읽을 글자가 없어요.');
+      rec.cut = putText(slot, text);
+      rec.chars = text.length;
+    } catch (err) {
+      rec.error = err.message || '읽지 못했어요.';
+    }
+  }
+  go('material');
+  const okCount = m.files.slice(-picked.length).filter(f => !f.error).length;
+  toast(okCount ? `파일 ${okCount}개를 읽었어요. 내용을 확인해 주세요.` : '파일을 읽지 못했어요. 아래 안내를 확인해 주세요.');
 }
 
 function readMaterial() {
@@ -967,9 +1041,15 @@ function render() {
   if (state.screen === 'ask') bindAsk();
 }
 
+// PC에서는 파일을 끌어다 놓아도 읽는다.
+app.addEventListener('dragover', e => { const z = e.target.closest && e.target.closest('#dropzone'); if (z) { e.preventDefault(); z.classList.add('over'); } });
+app.addEventListener('dragleave', e => { const z = e.target.closest && e.target.closest('#dropzone'); if (z) z.classList.remove('over'); });
+app.addEventListener('drop', e => { const z = e.target.closest && e.target.closest('#dropzone'); if (z) { e.preventDefault(); handleFiles(e.dataTransfer.files, null); } });
+
 app.addEventListener('change', e => {
   if (e.target.id === 'consent') state.consent = e.target.checked;
   if (e.target.id === 'textmode') settings.textMode = e.target.checked;
+  if (e.target.type === 'file' && e.target.files && e.target.files.length) { const fl = [...e.target.files]; e.target.value = ''; handleFiles(fl, e.target.dataset.slot || null); return; }
   if (e.target.dataset && e.target.dataset.comp != null && state.comps) { state.comps[Number(e.target.dataset.comp)].on = e.target.checked; e.target.closest('.comp').classList.toggle('off', !e.target.checked); }
 });
 
