@@ -8,16 +8,44 @@ export const DEFAULT_MODEL = 'gemini-3.1-flash-lite';
 const FALLBACK_MODELS = ['gemini-3.1-flash-lite', 'gemini-2.5-flash-lite', 'gemini-2.5-flash'];
 
 export class GeminiError extends Error {
-  constructor(message, status = 0) { super(message); this.status = status; }
+  constructor(message, status = 0, info = {}) { super(message); this.status = status; Object.assign(this, info); }
 }
 
-function errorFor(status, detail = '') {
-  if (status === 400 && !/API key|API_KEY/i.test(detail)) return new GeminiError(`Gemini가 요청을 처리하지 못했어요. 모델 이름을 확인하거나 잠시 후 다시 시도해 주세요. (${detail.slice(0, 80)})`, status);
-  if (status === 429) return new GeminiError('Gemini 사용량 한도에 도달했어요. 1~2분 뒤 다시 시도해 주세요.', status);
-  if (status === 400 || status === 401 || status === 403) return new GeminiError('API 키를 확인해 주세요. Google AI Studio에서 키가 맞는지, 사용 제한이 있는지 볼 수 있어요.', status);
-  if (status === 404) return new GeminiError('이 모델을 쓸 수 없어요.', status);
-  if (status >= 500) return new GeminiError('Gemini 서버가 잠시 응답하지 않아요. 잠시 후 다시 시도해 주세요.', status);
-  return new GeminiError(`Gemini 요청 오류(${status})`, status);
+// 오류 원인 풀이. status: HTTP 코드, gstatus: Google 오류 이름, detail: Google이 보낸 원문.
+// 돌려주는 값: cause(무슨 일인지), fix(어떻게 고치는지)
+export function explain(status, gstatus = '', detail = '') {
+  const d = String(detail || '');
+  if (status === 0 && gstatus === 'TIMEOUT') return { cause: '응답 시간 초과: Gemini가 정해진 시간 안에 답하지 못했어요.', fix: '잠시 후 다시 시도하거나, 넣은 자료 양을 줄여 보세요. 와이파이 상태도 확인해 주세요.' };
+  if (status === 0) return { cause: '연결 실패: Gemini 서버에 닿지 못했어요.', fix: '인터넷 연결을 확인해 주세요. 회사·기관 와이파이나 광고 차단 앱이 Google AI 주소(generativelanguage.googleapis.com)를 막는 경우도 있어요. 휴대폰 데이터로 바꿔 시도해 보세요.' };
+  if (status === 400 && /API key not valid|API_KEY_INVALID/i.test(d)) return { cause: 'API 키가 올바르지 않아요.', fix: '키를 복사할 때 앞뒤 글자가 빠지거나 공백이 들어가지 않았는지 확인하고, Google AI Studio에서 키를 다시 복사해 넣어 주세요. 삭제한 키도 이 오류가 납니다.' };
+  if (status === 400 && /expired/i.test(d)) return { cause: 'API 키가 만료됐어요.', fix: 'Google AI Studio에서 새 키를 만들어 넣어 주세요.' };
+  if (status === 400 && (gstatus === 'FAILED_PRECONDITION' || /location|region|billing/i.test(d))) return { cause: '이 키로는 무료 사용이 허용되지 않아요(지역 제한 또는 결제 설정 필요).', fix: 'Google AI Studio에서 프로젝트에 결제를 연결하거나, 사용 가능한 지역인지 확인해 주세요.' };
+  if (status === 400) return { cause: '요청 형식 문제: Gemini가 요청 내용을 받아들이지 않았어요.', fix: '설정의 모델 이름이 맞는지 확인해 주세요. 같은 문제가 계속되면 아래 원문 메시지를 강사에게 전달해 주세요.' };
+  if (status === 401) return { cause: '인증 실패: 키가 인식되지 않았어요.', fix: 'Google AI Studio에서 키를 다시 복사해 넣어 주세요.' };
+  if (status === 403 && /referer|referrer|IP address|Android|iOS|restrict/i.test(d)) return { cause: '키에 사용처 제한이 걸려 있어 이 사이트에서 쓸 수 없어요.', fix: 'Google Cloud 콘솔의 키 설정에서 "애플리케이션 제한"을 "없음"으로 바꿔 주세요. 이 앱은 개인정보 보호를 위해 접속 주소를 Google에 알리지 않아서, 웹사이트 제한을 건 키는 쓸 수 없어요. 또는 AI Studio에서 제한 없는 새 키를 만들어 주세요.' };
+  if (status === 403 && /SERVICE_DISABLED|not been used|disabled|not enabled/i.test(d)) return { cause: '이 키의 프로젝트에서 Gemini API(Generative Language API)가 꺼져 있어요.', fix: 'Google AI Studio에서 새 키를 만들면 자동으로 켜집니다. 또는 Google Cloud 콘솔에서 Generative Language API를 "사용"으로 바꿔 주세요.' };
+  if (status === 403 && /leaked|compromised|reported/i.test(d)) return { cause: '이 키는 유출된 것으로 신고되어 Google이 막았어요.', fix: 'Google AI Studio에서 이 키를 지우고 새 키를 만들어 주세요.' };
+  if (status === 403) return { cause: '권한 없음: 이 키로는 이 기능이나 모델을 쓸 수 없어요.', fix: '키의 제한 설정과 프로젝트 상태를 Google AI Studio에서 확인해 주세요.' };
+  if (status === 404) return { cause: '모델을 찾을 수 없어요: 설정한 모델 이름이 없거나 이 키에서 쓸 수 없어요.', fix: '연결 점검의 "쓸 수 있는 모델" 중 하나로 모델 이름을 바꿔 주세요.' };
+  if (status === 429 && /per day|PerDay|daily|free_tier/i.test(d)) return { cause: '하루 무료 사용량을 다 썼어요.', fix: '내일(태평양 시간 자정 이후) 다시 쓰거나, 결제를 연결해 한도를 늘리거나, 다른 모델로 바꿔 보세요.' };
+  if (status === 429) return { cause: '요청이 너무 잦아요: 분당 사용량 한도에 걸렸어요.', fix: '1~2분 기다렸다가 다시 시도해 주세요. 수업에서 여러 명이 같은 키를 쓰면 자주 생깁니다. 각자 자기 키를 쓰게 해 주세요.' };
+  if (status === 500) return { cause: 'Gemini 서버 내부 오류예요.', fix: '잠시 후 다시 시도해 주세요. 자료가 아주 길면 줄여 보세요.' };
+  if (status === 503) return { cause: 'Gemini 서버가 지금 붐벼요(과부하).', fix: '잠시 후 다시 시도하거나 다른 모델로 바꿔 보세요.' };
+  if (status === 504) return { cause: 'Gemini가 시간 안에 처리를 끝내지 못했어요.', fix: '자료 양을 줄여 다시 시도해 주세요.' };
+  if (gstatus === 'BLOCKED') return { cause: `Gemini 안전 필터가 내용을 막았어요(${d || '사유 미상'}).`, fix: '자료에 민감한 표현이 있는지 확인하고 그 부분을 빼고 다시 시도해 주세요.' };
+  if (gstatus === 'MAX_TOKENS') return { cause: '답이 너무 길어 중간에 잘렸어요.', fix: '넣은 자료를 줄이거나 역량 수를 줄여 다시 만들어 주세요.' };
+  if (gstatus === 'BAD_JSON') return { cause: 'Gemini가 정해진 형식으로 답하지 않았어요.', fix: '다시 시도해 주세요. 계속되면 모델을 gemini-2.5-flash로 바꿔 보세요.' };
+  if (gstatus === 'EMPTY') return { cause: 'Gemini가 빈 답을 보냈어요.', fix: '다시 시도해 주세요.' };
+  return { cause: `알 수 없는 오류(${status} ${gstatus})`, fix: '아래 원문 메시지를 강사에게 전달해 주세요.' };
+}
+
+// 마지막 오류를 기억해 두었다가 연결 점검 화면에서 보여 준다(키·자료 내용은 기록하지 않는다).
+let lastError = null;
+export const getLastError = () => lastError;
+function fail(status, gstatus = '', detail = '', model = '') {
+  const { cause, fix } = explain(status, gstatus, detail);
+  lastError = { at: new Date().toLocaleString('ko-KR'), status, gstatus, detail: String(detail || '').slice(0, 300), model, cause, fix };
+  return new GeminiError(`${cause} ${fix}`, status, { gstatus, detail, cause, fix });
 }
 
 // ---------- 키·모델 ----------
@@ -58,14 +86,15 @@ async function call(model, body, timeoutMs) {
     });
     if (!res.ok) {
       let detail = '';
-      try { const j = await res.json(); detail = (j.error && (j.error.message || j.error.status)) || ''; } catch { /* 본문 없음 */ }
-      throw errorFor(res.status, detail);
+      let gstatus = '';
+      try { const j = await res.json(); detail = (j.error && j.error.message) || ''; gstatus = (j.error && j.error.status) || ''; } catch { /* 본문 없음 */ }
+      throw fail(res.status, gstatus, detail, model);
     }
     return await res.json();
   } catch (e) {
     if (e instanceof GeminiError) throw e;
-    if (e.name === 'AbortError') throw new GeminiError('응답 시간이 초과됐어요. 다시 시도해 주세요.');
-    throw new GeminiError('Gemini에 연결하지 못했어요. 인터넷 연결을 확인해 주세요.');
+    if (e.name === 'AbortError') throw fail(0, 'TIMEOUT', '', model);
+    throw fail(0, 'NETWORK', e.message, model);
   } finally {
     clearTimeout(t);
   }
@@ -86,17 +115,87 @@ async function generateJSON(prompt, schema, { maxTokens = 8192, timeoutMs = 9000
     try {
       const data = await call(model, body, timeoutMs);
       const c = data.candidates && data.candidates[0];
-      if (!c) throw new GeminiError(data.promptFeedback && data.promptFeedback.blockReason ? '이 내용은 Gemini가 처리하지 않았어요. 자료를 확인해 주세요.' : '결과를 받지 못했어요. 다시 시도해 주세요.');
-      if (c.finishReason && c.finishReason !== 'STOP') throw new GeminiError(c.finishReason === 'MAX_TOKENS' ? '결과가 너무 길어 잘렸어요. 자료를 조금 줄여 다시 시도해 주세요.' : '완전한 결과를 받지 못했어요. 다시 시도해 주세요.');
+      if (!c) throw (data.promptFeedback && data.promptFeedback.blockReason ? fail(200, 'BLOCKED', data.promptFeedback.blockReason, model) : fail(200, 'EMPTY', '', model));
+      if (c.finishReason && c.finishReason !== 'STOP') throw (c.finishReason === 'MAX_TOKENS' ? fail(200, 'MAX_TOKENS', '', model) : fail(200, 'BLOCKED', c.finishReason, model));
       const text = (c.content && c.content.parts || []).filter(p => !p.thought).map(p => p.text || '').join('')
         .replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '').trim();
-      try { return JSON.parse(text); } catch { throw new GeminiError('결과 형식을 읽지 못했어요. 다시 시도해 주세요.'); }
+      try { return JSON.parse(text); } catch { throw fail(200, 'BAD_JSON', text.slice(0, 120), model); }
     } catch (e) {
       if (e instanceof GeminiError && e.status === 404) continue;
       throw e;
     }
   }
   throw new GeminiError('사용할 수 있는 Gemini 모델을 찾지 못했어요. 설정에서 모델 이름을 확인해 주세요.', 404);
+}
+
+// ---------- 연결 점검 ----------
+// 단계별로 시험하고 결과를 돌려준다. onStep(steps)으로 진행 상황을 알린다.
+export async function diagnose(onStep = () => {}) {
+  const steps = [];
+  const add = (name, state, detail = '', fix = '') => { steps.push({ name, state, detail, fix }); onStep(steps); };
+  const key = getKey();
+  if (!key) { add('키 입력', 'bad', '키가 입력되지 않았어요.', 'Gemini API 키를 넣고 연결해 주세요.'); return steps; }
+  add('키 모양', /^AIza[0-9A-Za-z_-]{30,}$/.test(key) ? 'ok' : 'warn',
+    /^AIza[0-9A-Za-z_-]{30,}$/.test(key) ? `AIza로 시작하는 ${key.length}자 키` : `보통 키는 AIza로 시작하는 39자예요(지금 ${key.length}자).`,
+    /^AIza/.test(key) ? '' : '다른 서비스의 키를 넣지 않았는지 확인해 주세요.');
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) { add('인터넷 연결', 'bad', '휴대폰이 오프라인이에요.', '와이파이나 데이터를 켜 주세요.'); return steps; }
+
+  // 키가 살아 있는지: 모델 목록 요청
+  let models = [];
+  try {
+    const res = await fetch(`${API_ROOT}/models?pageSize=200`, { headers: { 'x-goog-api-key': key }, referrerPolicy: 'no-referrer', cache: 'no-store' });
+    if (!res.ok) {
+      let detail = ''; let gstatus = '';
+      try { const j = await res.json(); detail = (j.error && j.error.message) || ''; gstatus = (j.error && j.error.status) || ''; } catch { /* 없음 */ }
+      const ex = explain(res.status, gstatus, detail);
+      add('키 확인', 'bad', `${ex.cause} [${res.status} ${gstatus}] ${detail.slice(0, 200)}`, ex.fix);
+      return steps;
+    }
+    const data = await res.json();
+    models = (data.models || []).filter(m => (m.supportedGenerationMethods || []).includes('generateContent') && /gemini/.test(m.name) && !/image|tts|embedding|robotics|computer|live|audio/i.test(m.name)).map(m => m.name.replace(/^models\//, ''));
+    add('키 확인', 'ok', `키가 유효해요. 쓸 수 있는 글 생성 모델 ${models.length}개`);
+  } catch (e) {
+    const ex = explain(0, 'NETWORK', e.message);
+    add('서버 연결', 'bad', ex.cause, ex.fix);
+    return steps;
+  }
+
+  // 모델
+  let model = getModel();
+  const flash = models.filter(m => /flash/.test(m)).slice(0, 8);
+  if (models.includes(model)) add('모델', 'ok', `"${model}" 사용 가능`);
+  else {
+    const alt = FALLBACK_MODELS.find(m => models.includes(m)) || flash[0] || models[0];
+    add('모델', alt ? 'warn' : 'bad', `"${model}"은(는) 이 키에서 쓸 수 없어요.${alt ? ` 대신 "${alt}"(으)로 시험합니다.` : ''} 쓸 수 있는 모델: ${flash.join(', ') || '없음'}`, alt ? `모델 이름을 "${alt}"(으)로 바꿔 주세요.` : '키의 프로젝트 설정을 확인해 주세요.');
+    if (!alt) return steps;
+    model = alt;
+  }
+
+  // 실제 요청(짧은 글)
+  const t0 = Date.now();
+  try {
+    await call(model, { contents: [{ role: 'user', parts: [{ text: '"확인"이라고만 답하세요.' }] }], generationConfig: { maxOutputTokens: 64 } }, 30000);
+    add('글 생성 시험', 'ok', `응답 ${((Date.now() - t0) / 1000).toFixed(1)}초`);
+  } catch (e) {
+    add('글 생성 시험', 'bad', `${e.cause || e.message} [${e.status} ${e.gstatus || ''}] ${String(e.detail || '').slice(0, 200)}`, e.fix || '');
+    return steps;
+  }
+
+  // 정해진 형식(JSON)으로 답하는지: 질문 만들기에 꼭 필요
+  try {
+    const data = await call(model, {
+      contents: [{ role: 'user', parts: [{ text: '면접 질문 1개를 만들어 주세요.' }] }],
+      generationConfig: { maxOutputTokens: 512, responseMimeType: 'application/json', responseSchema: { type: 'OBJECT', properties: { question: { type: 'STRING' } }, required: ['question'] } },
+    }, 30000);
+    const c = data.candidates && data.candidates[0];
+    const text = c ? (c.content && c.content.parts || []).filter(p => !p.thought).map(p => p.text || '').join('') : '';
+    const q = JSON.parse(text).question;
+    if (!q) throw new Error('빈 값');
+    add('형식 지정 응답 시험', 'ok', `질문 만들기 준비 완료. 예: ${q.slice(0, 40)}`);
+  } catch (e) {
+    add('형식 지정 응답 시험', 'bad', e.cause ? `${e.cause} [${e.status} ${e.gstatus || ''}] ${String(e.detail || '').slice(0, 200)}` : '이 모델이 정해진 형식으로 답하지 못했어요.', e.fix || '모델을 gemini-2.5-flash로 바꿔 보세요.');
+  }
+  return steps;
 }
 
 // ---------- 개인정보 가리기 ----------
