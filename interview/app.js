@@ -83,7 +83,7 @@ function toast(msg) {
   el.textContent = msg;
   el.classList.add('show');
   clearTimeout(toast.t);
-  toast.t = setTimeout(() => el.classList.remove('show'), 2600);
+  toast.t = setTimeout(() => el.classList.remove('show'), Math.min(9000, Math.max(2600, String(msg).length * 90)));
 }
 function header(step) {
   const showLog = state.log.length && !['ask', 'loading', 'records'].includes(state.screen);
@@ -458,7 +458,7 @@ async function evaluate(skipFollow) {
         return;
       }
     } catch (err) {
-      toast(`꼬리질문을 만들지 못해 바로 피드백으로 넘어가요. (${err.message})`);
+      toast(`꼬리질문을 만들지 못해 바로 피드백으로 넘어가요. (${err.cause || err.message})`);
     }
   }
   return finalize(main, null);
@@ -475,7 +475,7 @@ async function finalize(main, follow) {
       const r = await gem.evaluateAnswer({ q, answer, follow, previous: prev ? { answer: prev.answer, next_fix: prev.result.next_fix } : null });
       result = { ...r, source: 'ai' };
     } catch (err) {
-      toast(`Gemini 평가에 실패해 자동 피드백으로 보여 드려요. (${err.message})`);
+      toast(`Gemini 평가에 실패해 자동 피드백으로 보여 드려요. (${err.cause || err.message}) 자세한 원인은 처음 화면의 연결 점검에서 볼 수 있어요.`);
     }
   }
   if (!result && settings.relay) {
@@ -783,7 +783,9 @@ function keyPanel() {
   if (hasGemini()) {
     return `<div class="keybox">
       <p>Gemini에 연결되어 있어요. ${gem.keyRemembered() ? '키가 이 휴대폰에 저장되어 있습니다.' : '키는 이 화면을 닫으면 지워집니다.'}</p>
-      <p class="muted small">모델: ${esc(gem.getModel())}</p>
+      <label class="field">모델 이름<input id="gemModel2" type="text" value="${esc(gem.getModel())}"></label>
+      <button class="btn primary wide" data-act="diag">연결 점검: 오류 원인 확인하기</button>
+      <button class="btn ghost wide" data-act="model-save">모델 이름 저장</button>
       <button class="btn ghost wide" data-act="key-clear">키 연결 해제</button>
     </div>`;
   }
@@ -795,6 +797,58 @@ function keyPanel() {
     <button class="btn primary wide" data-act="key-save">키 연결</button>
     <p class="muted small">결제를 연결하지 않은 무료 키는 입력한 내용이 Google 서비스 개선에 쓰이고 사람이 검토할 수 있어요. 실명, 연락처, 회사 내부 정보는 빼고 넣어 주세요. 비용은 키 주인에게 청구됩니다.</p>
   </div>`;
+}
+
+// ---------- 화면: 연결 점검 ----------
+let diagSteps = null;
+let diagRunning = false;
+function diagView() {
+  const le = gem.getLastError();
+  const mark = { ok: '정상', warn: '주의', bad: '문제' };
+  const bad = diagSteps && diagSteps.find(x => x.state === 'bad');
+  return `${header('연결 점검')}
+  <main class="wrap">
+    <section class="hero small">
+      <h1>${diagRunning ? '점검하는 중이에요...' : !diagSteps ? 'Gemini 연결을 점검합니다.' : bad ? `"${esc(bad.name)}" 단계에서 문제가 있어요.` : '모두 정상이에요.'}</h1>
+      <p>키 확인 → 모델 확인 → 실제 요청 순서로 시험합니다. 점검에는 아주 짧은 요청 두 번만 쓰고, 자료나 답변은 보내지 않아요.</p>
+    </section>
+    ${diagSteps ? `<section class="card diag"><ol>${diagSteps.map(x => `<li class="d-${x.state}"><span class="lv lv-${x.state === 'ok' ? 'ok' : x.state === 'warn' ? 'mid' : 'no'}">${mark[x.state]}</span><div><b>${esc(x.name)}</b><p class="small">${esc(x.detail)}</p>${x.fix ? `<p class="small fix">해결: ${esc(x.fix)}</p>` : ''}</div></li>`).join('')}</ol></section>` : ''}
+    ${le ? `<section class="card diag"><h3>마지막으로 난 오류 <small class="muted">${esc(le.at)}</small></h3>
+      <p><b>${esc(le.cause)}</b></p><p class="small fix">해결: ${esc(le.fix)}</p>
+      <p class="muted small">코드 ${le.status} ${esc(le.gstatus)} · 모델 ${esc(le.model)}${le.detail ? ` · 원문: ${esc(le.detail)}` : ''}</p></section>` : ''}
+    <button class="btn primary big" data-act="diag-run" ${diagRunning ? 'disabled' : ''}>${diagSteps ? '다시 점검하기' : '점검 시작'}</button>
+    ${diagSteps || le ? '<button class="btn ghost wide" data-act="diag-copy">점검 결과 복사(강사에게 보내기)</button>' : ''}
+    <button class="btn ghost wide" data-act="home">처음으로</button>
+    <details class="card"><summary>자주 나는 오류와 이유</summary>
+      <table class="errtable"><thead><tr><th>코드</th><th>이유</th></tr></thead><tbody>
+        <tr><td>400</td><td>키가 틀렸거나 만료됨, 또는 요청 형식·모델 이름 문제</td></tr>
+        <tr><td>403</td><td>키에 사용처 제한이 걸림, 프로젝트에서 Gemini API가 꺼짐, 유출 신고로 차단됨</td></tr>
+        <tr><td>404</td><td>모델 이름이 없거나 이 키에서 쓸 수 없음</td></tr>
+        <tr><td>429</td><td>분당 또는 하루 무료 사용량 초과(여러 명이 한 키를 쓰면 자주 발생)</td></tr>
+        <tr><td>500·503</td><td>Google 서버 오류 또는 과부하, 잠시 후 재시도</td></tr>
+        <tr><td>연결 실패</td><td>인터넷 끊김, 기관 와이파이·광고 차단 앱이 Google AI 주소를 막음</td></tr>
+        <tr><td>시간 초과</td><td>자료가 길거나 서버가 느림</td></tr>
+        <tr><td>차단·잘림</td><td>안전 필터가 내용을 막음, 답이 너무 길어 잘림</td></tr>
+      </tbody></table>
+    </details>
+  </main>`;
+}
+
+async function runDiag() {
+  if (diagRunning) return;
+  diagRunning = true;
+  diagSteps = [];
+  render();
+  try { diagSteps = await gem.diagnose(steps => { diagSteps = [...steps]; if (state.screen === 'diag') render(); }); }
+  finally { diagRunning = false; if (state.screen === 'diag') render(); }
+}
+
+function diagText() {
+  const le = gem.getLastError();
+  const lines = ['[면접 리허설] Gemini 연결 점검', `모델 설정: ${gem.getModel()}`, `브라우저: ${navigator.userAgent.slice(0, 120)}`];
+  (diagSteps || []).forEach(x => lines.push(`- ${x.name}: ${x.state === 'ok' ? '정상' : x.state === 'warn' ? '주의' : '문제'} / ${x.detail}${x.fix ? ' / 해결: ' + x.fix : ''}`));
+  if (le) lines.push(`마지막 오류(${le.at}): ${le.cause} / 코드 ${le.status} ${le.gstatus} / 모델 ${le.model} / 원문: ${le.detail}`);
+  return lines.join('\n');
 }
 
 // ---------- 화면: 내 자료 넣기 ----------
@@ -1055,7 +1109,7 @@ function qsetView() {
 }
 
 // ---------- 렌더링 ----------
-const views = { material: materialView, comps: compsView, qset: qsetView, home: homeView, pick: pickView, ask: askView, review: reviewView, report: reportView, compare: compareView, records: recordsView };
+const views = { diag: diagView, material: materialView, comps: compsView, qset: qsetView, home: homeView, pick: pickView, ask: askView, review: reviewView, report: reportView, compare: compareView, records: recordsView };
 function render() {
   app.innerHTML = views[state.screen]();
   if (state.screen === 'ask') bindAsk();
@@ -1117,6 +1171,10 @@ app.addEventListener('click', async e => {
     toast('Gemini 키를 연결했어요. 실제 사용 가능 여부는 첫 요청 때 확인됩니다.');
     render();
   }
+  else if (act === 'diag') { readMaterial(); const md = document.getElementById('gemModel2'); if (md) gem.setModel(md.value); go('diag'); runDiag(); }
+  else if (act === 'diag-run') runDiag();
+  else if (act === 'diag-copy') copy(diagText(), '점검 결과를 복사했어요. 키는 들어 있지 않아요.');
+  else if (act === 'model-save') { readMaterial(); gem.setModel(document.getElementById('gemModel2').value); toast('모델 이름을 저장했어요.'); render(); }
   else if (act === 'key-clear') { readMaterial(); gem.setKey('', false); toast('키 연결을 해제했어요.'); render(); }
   else if (act === 'qset-text') copy(buildSetText(qset), '질문집을 글로 복사했어요.');
   else if (act === 'qset-pdf') { document.querySelectorAll('details.print-open').forEach(d => { d.open = true; }); toast('인쇄 창에서 "PDF로 저장"을 골라 주세요.'); setTimeout(() => window.print(), 300); }
