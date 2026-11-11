@@ -256,3 +256,10 @@ details summary { cursor: pointer; font-weight: 600; }
 .filelist li { display: grid; padding: 8px 12px; border-radius: 10px; background: var(--bg); font-size: 14px; }
 .filelist li span { color: var(--muted); }
 .filelist li.err span { color: var(--warn); }
+.filehelp { margin-top: 10px; }
+.filehelp summary { font-weight: 600; color: var(--accent); min-height: 36px; }
+.filehelp table { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 6px; }
+.filehelp th, .filehelp td { text-align: left; vertical-align: top; padding: 8px 6px; border-bottom: 1px solid var(--line); }
+.filehelp th { color: var(--muted); font-size: 13px; }
+.filehelp td:first-child { font-weight: 700; width: 34%; word-break: keep-all; }
+.filehelp ul { margin: 10px 0 0; }
