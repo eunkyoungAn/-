@@ -244,3 +244,15 @@ details summary { cursor: pointer; font-weight: 600; }
 .nums li.need { color: var(--warn); }
 .nums-fb p { margin: 8px 0 0; }
 .tag { display: inline-block; padding: 1px 8px; margin: 2px 2px 0 0; border-radius: 99px; background: var(--soft); color: var(--accent); font-weight: 700; font-size: 14px; }
+
+/* 파일 첨부 */
+.dropzone { display: grid; gap: 4px; margin-top: 10px; padding: 18px 14px; border: 2px dashed var(--accent); border-radius: 14px; background: var(--soft); text-align: center; cursor: pointer; }
+.dropzone b { color: var(--accent); font-size: 17px; }
+.dropzone.over { background: var(--focus); border-color: var(--focus-line); }
+.dropzone input, .attach input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.dropzone:focus-within, .attach:focus-within { outline: 3px solid var(--focus-line); outline-offset: 2px; }
+.attach { position: relative; margin-top: 8px; cursor: pointer; }
+.filelist { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 6px; }
+.filelist li { display: grid; padding: 8px 12px; border-radius: 10px; background: var(--bg); font-size: 14px; }
+.filelist li span { color: var(--muted); }
+.filelist li.err span { color: var(--warn); }
