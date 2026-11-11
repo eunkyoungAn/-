@@ -263,3 +263,13 @@ details summary { cursor: pointer; font-weight: 600; }
 .filehelp th { color: var(--muted); font-size: 13px; }
 .filehelp td:first-child { font-weight: 700; width: 34%; word-break: keep-all; }
 .filehelp ul { margin: 10px 0 0; }
+
+/* 연결 점검 */
+.diag ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.diag li { display: flex; gap: 10px; align-items: flex-start; }
+.diag p { margin: 2px 0 0; }
+.diag .fix { color: var(--accent); font-weight: 600; }
+.errtable { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 8px; }
+.errtable th, .errtable td { text-align: left; vertical-align: top; padding: 8px 6px; border-bottom: 1px solid var(--line); }
+.errtable td:first-child { font-weight: 700; white-space: nowrap; }
+#toast { white-space: normal; }
