@@ -819,8 +819,28 @@ function materialView() {
       <label class="dropzone" id="dropzone">
         <input type="file" id="fileTop" multiple accept="${files.ACCEPT}">
         <b>파일 첨부해서 자동으로 읽기</b>
-        <span class="muted small">자기소개서·경력기술서·포트폴리오·경험노트·채용공고 파일을 한 번에 골라도 돼요. 워드(DOCX), 한글(HWPX), PDF, TXT, 사진을 읽습니다.</span>
+        <span class="muted small">자기소개서·경력기술서·포트폴리오·경험노트·채용공고 파일을 한 번에 골라도 돼요. 한글(HWP·HWPX), 워드(DOC·DOCX), PDF, TXT, 사진을 읽습니다.</span>
       </label>
+      <details class="filehelp">
+        <summary>어떤 파일을 올릴 수 있나요?</summary>
+        <table>
+          <thead><tr><th>파일</th><th>읽는 방법</th></tr></thead>
+          <tbody>
+            <tr><td>한글 HWP·HWPX</td><td>휴대폰 안에서 바로 읽어요. 표 안의 글, 각주도 읽습니다.</td></tr>
+            <tr><td>워드 DOC·DOCX</td><td>휴대폰 안에서 바로 읽어요. 옛 워드(97~2003) 파일도 됩니다.</td></tr>
+            <tr><td>PDF</td><td>글자가 들어 있는 PDF는 휴대폰 안에서 읽어요. 스캔해서 만든 PDF는 사진처럼 처리해요.</td></tr>
+            <tr><td>TXT·메모</td><td>휴대폰 안에서 바로 읽어요.</td></tr>
+            <tr><td>사진(JPG·PNG)·스캔 PDF</td><td>휴대폰에서 글자를 직접 읽을 수 없어, 동의하면 내 Gemini로 보내 글자를 읽어요.</td></tr>
+          </tbody>
+        </table>
+        <ul class="plain small">
+          <li>휴대폰 안에서 읽는 파일은 어디에도 전송되지 않고, 읽은 글만 아래 칸에 들어갑니다.</li>
+          <li>암호가 걸린 파일은 읽을 수 없어요. 암호를 풀고 다시 저장해 주세요.</li>
+          <li>한글 "배포용 문서"는 앞부분 미리보기 글만 읽혀요. 전체가 필요하면 PDF로 저장해 올려 주세요.</li>
+          <li>파일 이름에 "공고", "경력", "포트폴리오", "경험"이 들어 있으면 알맞은 칸에 자동으로 넣고, 아니면 자기소개서 칸에 넣어요. 칸마다 있는 "파일 첨부"로 직접 고를 수도 있어요.</li>
+          <li>한 칸에 15,000자까지 들어가요. 한 파일은 15MB까지 올릴 수 있어요.</li>
+        </ul>
+      </details>
       ${m.files.length ? `<ul class="filelist">${m.files.map(f => `<li class="${f.error ? 'err' : ''}"><b>${esc(f.name)}</b><span>${f.error ? esc(f.error) : `${esc(f.slot)}에 ${f.chars.toLocaleString()}자 · ${f.ai ? 'Gemini로 읽음' : '휴대폰에서 읽음'}${f.cut ? ' · 길어서 일부만' : ''}`}</span></li>`).join('')}</ul><p class="muted small">읽어 온 내용은 아래 칸에 들어갔어요. 잘못 읽힌 부분이 있으면 고쳐 주세요.</p>` : ''}
       ${SLOTS.map(([k, label, hint]) => {
         const v = k === '채용공고' ? m.posting : m.docs[k];
@@ -829,7 +849,7 @@ function materialView() {
           <label class="btn ghost sm attach">파일 첨부<input type="file" data-slot="${k}" multiple accept="${files.ACCEPT}"></label>
         </details>`;
       }).join('')}
-      <p class="muted small">워드·한글·PDF·TXT 파일은 이 휴대폰 안에서 읽고 파일을 보내지 않아요. 사진·스캔본만 동의를 받은 뒤 Gemini로 보내 글자를 읽습니다. 질문을 만들 때는 칸에 들어간 글만 보내며, 보내기 전에 전화번호·이메일·주민번호를 자동으로 가립니다. 이 앱은 자료를 저장하지 않습니다.</p>
+      <p class="muted small">한글·워드·PDF·TXT 파일은 이 휴대폰 안에서 읽고 파일을 보내지 않아요. 사진·스캔본만 동의를 받은 뒤 Gemini로 보내 글자를 읽습니다. 질문을 만들 때는 칸에 들어간 글만 보내며, 보내기 전에 전화번호·이메일·주민번호를 자동으로 가립니다. 이 앱은 자료를 저장하지 않습니다.</p>
     </section>
     <button class="btn primary big" data-act="auto-set">예상 질문 바로 만들기</button>
     <button class="btn ghost wide" data-act="extract">검증할 역량 먼저 확인하고 만들기</button>
