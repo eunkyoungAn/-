@@ -279,19 +279,61 @@ pre.prompt {
 
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
+/* 파일 고르기: 투명한 파일 칸을 단추 위에 겹쳐, 손가락이 실제 파일 칸을 바로 누르게 함 (아이패드·갤럭시 공통) */
+.pick { position: relative; overflow: hidden; }
+.pick input[type="file"] { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; font-size: 100px; }
+.pick:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* 공식 자료 검색 */
+details.box { border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg); }
+details.box > summary { cursor: pointer; padding: 12px 14px; font-weight: 700; list-style: none; display: flex; justify-content: space-between; gap: 8px; align-items: center; min-height: 44px; }
+details.box > summary::-webkit-details-marker { display: none; }
+details.box > summary::after { content: "열기"; font-weight: 400; font-size: 12px; color: var(--accent); }
+details.box[open] > summary::after { content: "접기"; }
+.box-body { padding: 0 14px 14px; display: flex; flex-direction: column; gap: 12px; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.row > input[type="text"] { flex: 1 1 220px; width: auto; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { display: inline-flex; align-items: center; min-height: 36px; padding: 4px 12px; border: 1px solid var(--line-strong); border-radius: 999px; background: var(--bg); color: var(--fg); text-decoration: none; font-size: 13px; cursor: pointer; }
+.chip:hover { border-color: var(--accent); color: var(--accent); }
+.chip.site { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.src-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 12px; }
+.src-form .wide { grid-column: 1 / -1; }
+
+/* 실행 상태 */
+.status { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.result.has { color: var(--fg); white-space: pre-wrap; word-break: break-word; line-height: 1.7; max-height: 70vh; overflow: auto; }
+.verify { width: 100%; border-collapse: collapse; font-size: 13px; }
+.verify th, .verify td { border-bottom: 1px solid var(--line); padding: 8px; text-align: left; vertical-align: top; }
+.verify th { font-weight: 500; color: var(--muted); white-space: nowrap; }
+.ok { color: var(--ok); font-weight: 500; white-space: nowrap; }
+.bad { color: var(--danger); font-weight: 500; white-space: nowrap; }
+.tbl-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); }
+
+/* 터치 화면: 누르기 쉬운 크기, 입력 칸 16px(아이패드 확대 방지) */
+@media (pointer: coarse) {
+  .btn, .tab, .agent-btn { min-height: 44px; }
+  input[type="text"], select, textarea { font-size: 16px; }
+  textarea.data { font-size: 15px; }
+}
+
 /* 태블릿 이하 */
 @media (max-width: 900px) {
   .app { grid-template-columns: 220px minmax(0, 1fr); }
   .main { padding-left: 24px; padding-right: max(24px, env(safe-area-inset-right, 0px)); }
 }
-@media (max-width: 680px) {
+/* 세로로 든 태블릿(아이패드 768~834px, 갤럭시탭 약 800px)부터: 에이전트 목록을 위쪽 가로 줄로 */
+@media (max-width: 880px) {
   .app { grid-template-columns: minmax(0, 1fr); }
-  .side { border-right: 0; border-bottom: 1px solid var(--line); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
-  .agent-list { flex-direction: row; overflow-x: auto; padding-bottom: 4px; }
-  .agent-list li { flex: 0 0 200px; }
+  .side { border-right: 0; border-bottom: 1px solid var(--line); padding-block: 14px 10px; padding-right: max(16px, env(safe-area-inset-right, 0px)); gap: 10px; }
+  .agent-list { flex-direction: row; overflow-x: auto; padding-bottom: 6px; -webkit-overflow-scrolling: touch; scroll-snap-type: x proximity; }
+  .agent-list li { flex: 0 0 210px; scroll-snap-align: start; }
   .side-foot { display: none; }
+  .main { padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+}
+@media (max-width: 600px) {
   .main { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
-  .form-grid { grid-template-columns: minmax(0, 1fr); }
+  .form-grid, .src-form { grid-template-columns: minmax(0, 1fr); }
   .node { grid-template-columns: minmax(0, 1fr); gap: 4px; }
   .node-kind { flex-direction: row; gap: 8px; align-items: baseline; }
   .rules li { grid-template-columns: 24px minmax(0, 1fr); }
@@ -338,9 +380,9 @@ pre.prompt {
         <div class="section-title"><h3>자료</h3><span class="hint" id="dataNeed"></span></div>
         <div class="drop" id="dropZone">
           <p>xlsx, xls, csv, txt, md 파일을 여러 개 올릴 수 있습니다.<br>이름·연락처 같은 개인정보 열은 AI에 보내기 전에 자동으로 지웁니다.</p>
-          <label class="btn" for="fileInput">파일 고르기</label>
-          <input type="file" id="fileInput" class="sr" multiple accept=".xlsx,.xls,.csv,.txt,.md">
+          <span class="btn pick">파일 고르기<input type="file" id="fileInput" multiple aria-label="파일 고르기"></span>
         </div>
+        <p class="hint">파일 창이 열리지 않거나 파일이 흐리게 보여 고를 수 없으면, 엑셀에서 표를 복사해 아래 "본문 붙여넣기" 칸에 붙여넣어 주세요. 같은 방식으로 개인정보 열을 지웁니다.</p>
         <ul class="files" id="fileList" aria-label="올린 파일"></ul>
         <div class="field wide">
           <label for="pasteBox">본문 붙여넣기</label>
@@ -349,15 +391,46 @@ pre.prompt {
         </div>
       </div>
 
-      <div class="actions">
+      <details class="box" id="searchBox">
+        <summary>공식 자료 검색 <span class="hint" id="webCount"></span></summary>
+        <div class="box-body">
+          <p class="hint">공공기관 누리집에서만 찾도록 검색 주소를 만들어 드립니다. 새 창에서 원문을 열어 확인한 뒤, 자료명·발행기관·발행일·주소와 필요한 부분을 아래에 붙여넣어 근거로 추가합니다. 발행기관이나 발행일이 비어 있는 자료는 수치 근거로 쓰지 않습니다.</p>
+          <div class="row">
+            <input type="text" id="q" placeholder="검색어 예: 2025 청년 고용률 전라북도">
+            <button class="btn" id="suggestBtn" type="button">검색어 추천받기</button>
+          </div>
+          <div class="chips" id="suggestChips"></div>
+          <div class="chips" id="siteChips"></div>
+          <div class="src-form">
+            <div class="field"><label for="sTitle">자료명</label><input type="text" id="sTitle" placeholder="예: 2025년 하반기 지역별고용조사"></div>
+            <div class="field"><label for="sOrg">발행기관</label><input type="text" id="sOrg" placeholder="예: 통계청"></div>
+            <div class="field"><label for="sDate">발행일</label><input type="text" id="sDate" placeholder="예: 2026. 4. 22."></div>
+            <div class="field"><label for="sUrl">주소</label><input type="text" id="sUrl" placeholder="https://..."></div>
+            <div class="field wide"><label for="sBody">원문에서 복사한 부분</label><textarea id="sBody" placeholder="원문 문장이나 표를 그대로 붙여넣습니다. 고쳐 쓰지 않습니다."></textarea></div>
+          </div>
+          <div class="actions"><button class="btn" id="addSrcBtn" type="button">근거 자료로 추가</button><span class="hint" id="srcMsg"></span></div>
+        </div>
+      </details>
+
+      <div class="actions" id="runActions">
         <button class="btn primary" id="runBtn" type="button">실행</button>
+        <button class="btn" id="stopBtn" type="button" hidden>중지</button>
         <button class="btn" id="toPromptBtn" type="button">지시문 보기</button>
+        <span class="status" id="runStatus" aria-live="polite"></span>
       </div>
       <div id="runMsg" aria-live="polite"></div>
 
       <div class="section">
-        <div class="section-title"><h3>결과</h3></div>
+        <div class="section-title"><h3>결과</h3><span class="hint" id="resultMeta"></span></div>
         <div class="result" id="result">실행하면 결과가 여기에 표시됩니다. 마지막 확인은 담당자가 합니다.</div>
+        <div id="verifyBox"></div>
+        <div class="actions" id="saveActions" hidden>
+          <button class="btn" id="saveMdBtn" type="button">파일로 받기 (.md)</button>
+          <button class="btn" id="saveTxtBtn" type="button">파일로 받기 (.txt)</button>
+          <button class="btn" id="copyResultBtn" type="button">결과 복사</button>
+          <span class="hint">한글(hwpx) 파일은 다음 단계에서 추가합니다.</span>
+        </div>
+        <div id="saveMsg" aria-live="polite"></div>
       </div>
     </section>
 
@@ -512,7 +585,8 @@ const AGENTS = [
         `3. 이미 찾은 자료에서 질문별 근거를 찾음. 자료에 없는 수치는 쓰지 않음.`,
         `4. 조사 노트: 질문 | 답 | 근거(기관·자료명·발행일) | 빈칸.`,
         `5. 출처 확인표와 사람 확인 지점.`,
-        `- 기억에 의존한 수치·법령·통계는 쓰지 않고 [자료 필요]와 찾을 곳을 적음.`
+        `- 기억에 의존한 수치·법령·통계는 쓰지 않고 [자료 필요]와 찾을 곳(기관명, 검색어)을 적음.`,
+        `- "공식 자료"로 추가된 자료 중 발행기관·발행일이 있는 것만 근거로 씀.`
       ].join('\n');
     }
   },
@@ -690,15 +764,36 @@ function commonBlock() {
   HUMAN_CHECK.forEach(h => lines.push(`- ${h}`));
   return lines.join('\n');
 }
+/* 모든 근거 자료를 S1, S2 … 번호로 모음 (파일·시트, 붙여넣은 본문, 공식 자료) */
+function collectSources() {
+  const out = [];
+  FILES.forEach(f => f.parts.forEach(pt => out.push({ label: `파일 ${f.name}${pt.sheet ? ' / 시트 ' + pt.sheet : ''}`, text: pt.text, kind: 'file' })));
+  const pasted = cleanPasted().text;
+  if (pasted) out.push({ label: '붙여넣은 본문', text: pasted, kind: 'paste' });
+  WEB.forEach(w => out.push({ label: `공식 자료 ${w.title} | 발행기관 ${w.org || '[미기재]'} | 발행일 ${w.date || '[미기재]'} | 주소 ${w.url || '[미기재]'}${w.complete ? '' : ' | 출처 정보 부족: 수치 근거로 쓰지 않음'}`, text: w.body, kind: 'web' }));
+  out.forEach((s, i) => { s.id = 'S' + (i + 1); });
+  return out;
+}
+const FULL_LIMIT = 120000;   // 이보다 길면 앞부분만 넣고 나머지는 검색 도구로 찾게 함
 function dataBlock(agent) {
   const label = agent.dataLabel || '자료';
-  const parts = [];
-  FILES.forEach(f => f.parts.forEach(pt => parts.push(`## 파일: ${f.name}${pt.sheet ? ' / 시트: ' + pt.sheet : ''}\n${pt.text}`)));
-  const pasted = cleanPasted().text;
-  if (pasted) parts.push(`## 붙여넣은 본문\n${pasted}`);
-  if (!parts.length) return `# ${label}\n[${label} 없음]` + (agent.needData ? ' 자료가 없으면 분석하지 말고 필요한 자료 목록만 적음.' : '');
-  return `# ${label} (개인정보 열은 브라우저에서 지운 뒤임)\n<자료 시작>\n${parts.join('\n\n')}\n<자료 끝>`;
+  const src = collectSources();
+  if (!src.length) return `# ${label}\n[${label} 없음]` + (agent.needData ? ' 자료가 없으면 분석하지 말고 필요한 자료 목록만 적음.' : ' 근거가 필요한 내용은 모두 [자료 필요]로 남김.');
+  const total = src.reduce((n, s) => n + s.text.length, 0);
+  const per = total > FULL_LIMIT ? Math.floor(FULL_LIMIT / src.length) : Infinity;
+  const body = src.map(s => {
+    const cut = s.text.length > per;
+    return `## [${s.id}] ${s.label}\n${cut ? s.text.slice(0, per) + `\n…(이하 ${s.text.length - per}자 생략: search_sources 도구로 찾을 것)` : s.text}`;
+  }).join('\n\n');
+  return `# ${label} (개인정보 열은 브라우저에서 지운 뒤임)\n<자료 시작>\n${body}\n<자료 끝>`;
 }
+const CITE_RULES = [
+  '# 근거 표시 규칙 (화면에서 자동 대조함)',
+  '- 자료에서 가져온 사실·수치 문장 끝에 (근거: S번호, 시트·행 또는 문단) 을 붙임.',
+  '- 핵심 근거는 원문을 한 글자도 바꾸지 않고 「」 안에 짧게(80자 이내) 인용함. 「」 안에는 자료에 그대로 있는 글자만 씀.',
+  '- 계산한 수치는 「」로 인용하지 않고, 계산식과 쓰인 원문 수치를 함께 적음.',
+  '- 자료에 없는 내용은 [자료 필요]. 출처 정보가 부족한 공식 자료는 수치 근거로 쓰지 않음.'
+].join('\n');
 
 /* ===== 2단계: 자료 읽기와 개인정보 처리 (브라우저 안에서만) ===== */
 const PII_WORDS = ['이름', '성명', '연락처', '전화', '휴대폰', '주민', '생년월일', '주소', '이메일', '보호자', 'name', 'phone', 'tel', 'mobile', 'email'];
@@ -847,10 +942,10 @@ function updatePasteNote() {
     : '붙여넣은 표도 개인정보 열을 지우고, 전화번호·이메일·주민번호는 가린 뒤 보냅니다.';
   $('pasteNote').style.color = r.removed.length ? 'var(--danger)' : '';
 }
-function hasData() { return FILES.length > 0 || !!$('pasteBox').value.trim(); }
+function hasData() { return FILES.length > 0 || WEB.length > 0 || !!$('pasteBox').value.trim(); }
 function buildPrompt(agent) {
   const inp = readInputs();
-  return [commonBlock(), '', agent.task(inp), '', dataBlock(agent),
+  return [commonBlock(), '', agent.task(inp), '', CITE_RULES, '', dataBlock(agent),
     '', '# 출력 끝에 붙일 것', '- 수치 대조표: 문장 | 수치 | 근거 위치 | 일치', '- 사람 확인 지점 목록'
   ].join('\n');
 }
@@ -939,7 +1034,12 @@ $('agentList').addEventListener('click', e => { const b = e.target.closest('.age
 document.querySelector('.tabs').addEventListener('click', e => { const t = e.target.closest('.tab'); if (t) selectTab(t.id.replace('tab-', '')); });
 $('fields').addEventListener('input', readInputs);
 $('toPromptBtn').addEventListener('click', () => selectTab('prompt'));
-$('fileInput').addEventListener('change', async () => { await addFiles($('fileInput').files); $('fileInput').value = ''; });
+let picking = false;
+async function onPick() {
+  if (picking) return; picking = true;
+  try { await addFiles($('fileInput').files); } finally { $('fileInput').value = ''; picking = false; }
+}
+$('fileInput').addEventListener('change', onPick);
 $('fileList').addEventListener('click', e => {
   const b = e.target.closest('[data-del]'); if (!b) return;
   const i = FILES.findIndex(f => f.id === Number(b.dataset.del));
@@ -950,13 +1050,7 @@ $('pasteBox').addEventListener('input', updatePasteNote);
 ['dragenter', 'dragover'].forEach(t => $('dropZone').addEventListener(t, e => { e.preventDefault(); $('dropZone').classList.add('over'); }));
 ['dragleave', 'drop'].forEach(t => $('dropZone').addEventListener(t, () => $('dropZone').classList.remove('over')));
 $('dropZone').addEventListener('drop', e => { e.preventDefault(); addFiles(e.dataTransfer.files); });
-$('runBtn').addEventListener('click', () => {
-  const inp = readInputs();
-  const missing = current.fields.filter(f => f.required && !(inp[f.id] || '').trim()).map(f => f.label);
-  if (missing.length) { notice($('runMsg'), `필수 칸을 채워 주세요: ${missing.join(', ')}`, 'err'); return; }
-  if (current.needData && !hasData()) { notice($('runMsg'), `${current.dataLabel || '자료'}를 올리거나 붙여넣어 주세요.`, 'err'); return; }
-  notice($('runMsg'), 'AI 실행은 3단계에서 연결합니다. 지금은 "지시문 보기"에서 자료가 개인정보 없이 들어갔는지 확인해 주세요.', 'warn');
-});
+/* 실행 단추는 아래 3단계 코드에서 연결 */
 $('copyBtn').addEventListener('click', async () => {
   readInputs(); renderPrompt();
   const text = $('promptText').textContent;
@@ -968,11 +1062,247 @@ $('copyBtn').addEventListener('click', async () => {
   }
 });
 
+/* ===== 공식 자료 검색 (근거 확인용) ===== */
+const WEB = [];   // { title, org, date, url, body, complete }
+const SITES = [
+  ['공공기관 전체', 'go.kr'],
+  ['KOSIS 국가통계', 'kosis.kr'],
+  ['고용노동부', 'moel.go.kr'],
+  ['고용24', 'work24.go.kr'],
+  ['국가법령정보', 'law.go.kr'],
+  ['정책브리핑', 'korea.kr'],
+  ['공공데이터포털', 'data.go.kr'],
+  ['남원시', 'namwon.go.kr']
+];
+function renderSites() {
+  const q = $('q').value.trim();
+  $('siteChips').innerHTML = q
+    ? SITES.map(([n, d]) => `<a class="chip site" target="_blank" rel="noopener" href="https://www.google.com/search?q=${encodeURIComponent(q + ' site:' + d)}">${esc(n)}에서 찾기</a>`).join('')
+    : '<span class="hint">검색어를 적으면 기관별 검색 단추가 나옵니다.</span>';
+}
+function renderWeb() {
+  $('webCount').textContent = WEB.length ? `근거 ${WEB.length}건 추가됨` : '';
+  renderFiles();
+}
+$('q').addEventListener('input', renderSites);
+$('suggestChips').addEventListener('click', e => { const c = e.target.closest('[data-q]'); if (c) { $('q').value = c.dataset.q; renderSites(); } });
+$('addSrcBtn').addEventListener('click', () => {
+  const w = { title: $('sTitle').value.trim(), org: $('sOrg').value.trim(), date: $('sDate').value.trim(), url: $('sUrl').value.trim(), body: maskText($('sBody').value.trim()) };
+  if (!w.body) { $('srcMsg').textContent = '원문에서 복사한 부분을 붙여넣어 주세요.'; return; }
+  if (!w.title) w.title = '제목 미기재';
+  w.complete = !!(w.org && w.date);
+  w.id = ++fileSeq;
+  WEB.push(w);
+  ['sTitle', 'sOrg', 'sDate', 'sUrl', 'sBody'].forEach(id => { $(id).value = ''; });
+  $('srcMsg').textContent = w.complete ? '근거 자료로 추가했습니다.' : '추가했습니다. 발행기관이나 발행일이 비어 있어 수치 근거로는 쓰지 않습니다.';
+  renderWeb(); renderPrompt();
+});
+
+/* 파일 목록에 공식 자료도 함께 보여 줌 */
+const _renderFiles = renderFiles;
+renderFiles = function () {
+  _renderFiles();
+  $('fileList').insertAdjacentHTML('beforeend', WEB.map(w => `<li><span class="f-name">공식 자료: ${esc(w.title)}</span><button class="btn f-del" type="button" data-delweb="${w.id}">빼기</button><div class="f-meta">${esc(w.org || '발행기관 미기재')} · ${esc(w.date || '발행일 미기재')}${w.url ? ' · ' + esc(w.url) : ''}</div><div class="f-pii ${w.complete ? 'none' : ''}">${w.complete ? '출처 정보 갖춤' : '출처 정보 부족: 수치 근거로 쓰지 않음'}</div></li>`).join(''));
+};
+$('fileList').addEventListener('click', e => {
+  const b = e.target.closest('[data-delweb]'); if (!b) return;
+  const i = WEB.findIndex(w => w.id === Number(b.dataset.delweb));
+  if (i >= 0) WEB.splice(i, 1);
+  renderWeb(); renderPrompt();
+});
+
+/* ===== 3단계: AI 실행 (claude.ai의 sample 기능) ===== */
+let SAMPLE = null, DOWNLOADS = null, TOOLS_OK = false, CTL = null, TICK = null, LAST = null;
+const useCap = (name) => (window.claude && typeof window.claude.use === 'function') ? window.claude.use(name).catch(() => null) : Promise.resolve(null);
+
+useCap('sample').then(async s => {
+  SAMPLE = s;
+  if (!s) { setNoSample(); return; }
+  const lim = await s.limits().catch(() => null);
+  TOOLS_OK = !!(lim && lim.tools);
+});
+useCap('downloads').then(d => { DOWNLOADS = d; });
+
+function setNoSample() {
+  $('runBtn').textContent = '지시문 복사';
+  $('runBtn').dataset.mode = 'copy';
+  $('suggestBtn').hidden = true;
+  $('runStatus').textContent = '이 화면에서는 AI를 바로 부를 수 없습니다. 지시문을 복사해 Claude 대화창에 붙여넣어 쓰세요.';
+}
+
+/* 자료 안에서 찾기: AI가 쓰는 검색 도구 */
+function searchSources(query, sid) {
+  const src = collectSources().filter(s => !sid || s.id === sid);
+  const terms = String(query || '').toLowerCase().split(/\s+/).filter(Boolean);
+  if (!terms.length) return [];
+  const hits = [];
+  src.forEach(s => s.text.split(/\r?\n/).forEach((line, i) => {
+    const l = line.toLowerCase();
+    const score = terms.filter(t => l.includes(t)).length;
+    if (score) hits.push({ source: s.id, line: i + 1, score, text: line.slice(0, 300) });
+  }));
+  return hits.sort((a, b) => b.score - a.score).slice(0, 12).map(({ score, ...h }) => h);
+}
+const SEARCH_TOOL = {
+  name: 'search_sources',
+  description: '올린 자료(S1, S2 …) 안에서 낱말이 들어간 줄을 찾는다. 결과는 {source, line, text} 목록이며 최대 12개. 지시문에 생략된 부분이 있거나 근거 위치를 확인할 때 쓴다.',
+  inputSchema: { type: 'object', properties: { query: { type: 'string', description: '찾을 낱말들, 띄어쓰기로 구분' }, source: { type: 'string', description: '특정 자료만 찾을 때 S번호 (선택)' } }, required: ['query'] },
+  execute: (input) => {
+    const r = searchSources(String(input.query || ''), input.source ? String(input.source) : '');
+    $('runStatus').textContent = `자료에서 "${String(input.query || '')}" 찾는 중 (${r.length}건)`;
+    return r.length ? r : '찾은 줄 없음. 자료에 없으면 [자료 필요]로 적을 것.';
+  }
+};
+
+const ERR_TEXT = {
+  not_granted: '이 페이지가 Claude를 쓰도록 허용되지 않았습니다. 허용 창에서 허용하거나, "지시문 보기"에서 복사해 Claude 대화창에서 쓰세요.',
+  sampling_disabled: '이 계정이나 기관에서는 페이지 안 Claude 사용이 꺼져 있습니다. 지시문을 복사해 Claude 대화창에서 쓰세요.',
+  rate_limited: '요청이 많아 잠시 막혔습니다. 몇 분 뒤 다시 실행해 주세요. 자동으로 다시 시도하지 않습니다.',
+  session_expired: '로그인이 끝났습니다. claude.ai에 다시 로그인한 뒤 실행해 주세요.',
+  prompt_too_large: '자료가 너무 깁니다. 필요한 시트만 남기거나 파일을 나눠서 실행해 주세요.',
+  refused: 'Claude가 이 요청에 답하지 않았습니다. 입력 내용을 바꿔 다시 실행해 주세요.',
+  empty_completion: '결과가 비어 있습니다. 요청을 줄여 다시 실행해 주세요.',
+  tools_unavailable: '이 화면에서는 자료 검색 도구를 쓸 수 없습니다. 다시 실행하면 검색 도구 없이 진행합니다.'
+};
+const errText = (c) => ERR_TEXT[c] || (['not_declared', 'capability_disabled', 'capability_removed'].includes(c)
+  ? '이 화면에서는 AI 실행을 쓸 수 없습니다. 지시문을 복사해 Claude 대화창에서 쓰세요.'
+  : '연결이 잠시 끊겼습니다. 잠시 뒤 다시 실행해 주세요. 자동으로 다시 시도하지 않습니다.');
+
+function setRunning(on) {
+  $('runBtn').disabled = on;
+  $('stopBtn').hidden = !on;
+  if (TICK) { clearInterval(TICK); TICK = null; }
+  if (on) {
+    const t0 = Date.now();
+    const show = () => { if (!$('result').dataset.streaming) $('runStatus').textContent = `생각하는 중 · ${Math.round((Date.now() - t0) / 1000)}초 (첫 글자까지 1~2분 걸릴 수 있음)`; };
+    show(); TICK = setInterval(show, 1000);
+  }
+}
+
+async function run() {
+  if ($('runBtn').dataset.mode === 'copy') { selectTab('prompt'); $('copyBtn').click(); return; }
+  const inp = readInputs();
+  const missing = current.fields.filter(f => f.required && !(inp[f.id] || '').trim()).map(f => f.label);
+  if (missing.length) { notice($('runMsg'), `필수 칸을 채워 주세요: ${missing.join(', ')}`, 'err'); return; }
+  if (current.needData && !hasData()) { notice($('runMsg'), `${current.dataLabel || '자료'}를 올리거나 붙여넣어 주세요.`, 'err'); return; }
+  if (!SAMPLE) { notice($('runMsg'), 'AI 연결을 준비하는 중입니다. 몇 초 뒤 다시 눌러 주세요.', 'warn'); return; }
+  $('runMsg').innerHTML = '';
+  const prompt = buildPrompt(current);
+  const agent = current;
+  CTL = new AbortController();
+  const out = $('result');
+  out.className = 'result has'; out.textContent = ''; delete out.dataset.streaming;
+  $('verifyBox').innerHTML = ''; $('saveActions').hidden = true; $('saveMsg').innerHTML = ''; $('resultMeta').textContent = '';
+  setRunning(true);
+  const opts = { signal: CTL.signal, onText: ({ text }) => { out.dataset.streaming = '1'; out.textContent = text; $('runStatus').textContent = '작성 중'; } };
+  if (TOOLS_OK) opts.tools = [SEARCH_TOOL]; else opts.cache = false;
+  try {
+    const r = await SAMPLE(prompt, opts);
+    out.textContent = r.text;
+    finishRun(agent, r.text, r.truncated);
+  } catch (e) {
+    const code = e && e.code;
+    if (e && e.text && code !== 'refused') out.textContent = e.text; else out.textContent = '';
+    if (code === 'tools_unavailable') TOOLS_OK = false;
+    if (code !== 'cancelled') notice($('runMsg'), errText(code), 'err');
+    else notice($('runMsg'), '중지했습니다.' + (e && e.text ? ' 여기까지 쓴 내용은 남겨 두었습니다.' : ''), 'warn');
+    if (!out.textContent) { out.className = 'result'; out.textContent = '결과가 없습니다.'; }
+    else finishRun(agent, out.textContent, true);
+    if (['not_granted', 'sampling_disabled', 'not_declared', 'capability_disabled', 'capability_removed'].includes(code)) setNoSample();
+  } finally {
+    setRunning(false); CTL = null; delete out.dataset.streaming;
+    if ($('runBtn').dataset.mode !== 'copy') $('runStatus').textContent = '';
+  }
+}
+$('runBtn').addEventListener('click', run);
+$('stopBtn').addEventListener('click', () => { if (CTL) CTL.abort(); });
+
+/* ===== 근거 자동 대조: 「인용」이 자료에 실제로 있는지 확인 ===== */
+const norm = (t) => String(t).replace(/["'“”‘’]/g, '').replace(/\s+/g, '').toLowerCase();
+function verify(text) {
+  const src = collectSources();
+  const quotes = [...text.matchAll(/「([^」]{2,300})」/g)].map(m => m[1]);
+  const rows = quotes.map(q => {
+    const nq = norm(q);
+    const found = src.find(s => norm(s.text).includes(nq));
+    return { q, ok: !!found, where: found ? `${found.id} ${found.label.split(' | ')[0]}` : '' };
+  });
+  const cited = [...new Set([...text.matchAll(/S(\d+)/g)].map(m => 'S' + m[1]))];
+  const unknown = cited.filter(id => !src.some(s => s.id === id));
+  return { rows, unknown, need: (text.match(/\[자료 필요\]/g) || []).length, weak: src.filter(s => s.kind === 'web' && s.label.includes('출처 정보 부족')).map(s => s.id) };
+}
+function finishRun(agent, text, truncated) {
+  LAST = { agent, text, at: new Date() };
+  const v = verify(text);
+  const okN = v.rows.filter(r => r.ok).length, badN = v.rows.length - okN;
+  $('resultMeta').textContent = truncated ? '중간에 끊긴 결과입니다. 자료를 줄여 다시 실행해 주세요.' : '';
+  let html = `<div class="notice ${badN || v.unknown.length ? 'err' : ''}"><p>근거 대조: 인용 ${v.rows.length}개 중 ${okN}개 원문 확인${badN ? `, <strong>${badN}개 원문에 없음</strong>` : ''}${v.unknown.length ? `, 없는 자료 번호 ${v.unknown.join(', ')}` : ''}${v.need ? ` · [자료 필요] ${v.need}곳` : ''}. 원문에 없는 인용과 계산 수치는 담당자가 직접 확인합니다.</p></div>`;
+  if (v.rows.length) html += `<div class="tbl-wrap"><table class="verify"><thead><tr><th>판정</th><th>인용</th><th>찾은 자료</th></tr></thead><tbody>${v.rows.map(r => `<tr><td class="${r.ok ? 'ok' : 'bad'}">${r.ok ? '원문 확인' : '원문에 없음'}</td><td>${esc(r.q)}</td><td>${esc(r.where || '-')}</td></tr>`).join('')}</tbody></table></div>`;
+  $('verifyBox').innerHTML = html;
+  LAST.verify = v;
+  $('saveActions').hidden = false;
+  $('saveMdBtn').hidden = $('saveTxtBtn').hidden = !DOWNLOADS;
+}
+
+/* ===== 결과 파일로 받기 ===== */
+function resultFile() {
+  const d = LAST.at, p = (n) => String(n).padStart(2, '0');
+  const stamp = `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}`;
+  const src = collectSources();
+  const v = LAST.verify;
+  const body = [
+    `# ${LAST.agent.name}`, `${ORG} · ${d.getFullYear()}. ${d.getMonth() + 1}. ${d.getDate()}. 작성 · AI 초안, 담당자 확인 전`, '',
+    LAST.text, '', '---', '## 근거 대조 결과',
+    ...v.rows.map(r => `- ${r.ok ? '원문 확인' : '원문에 없음'}: 「${r.q}」 ${r.where}`),
+    '', '## 자료 목록', ...src.map(s => `- [${s.id}] ${s.label}`)
+  ].join('\n');
+  return { name: `${LAST.agent.id}_${stamp}`, body };
+}
+async function saveAs(ext) {
+  if (!LAST || !DOWNLOADS) return;
+  const f = resultFile();
+  try {
+    await DOWNLOADS.save({ filename: `${f.name}.${ext}`, data: f.body });
+    notice($('saveMsg'), `${f.name}.${ext} 파일을 저장했습니다.`);
+  } catch (e) {
+    const c = e && e.code;
+    notice($('saveMsg'), c === 'declined' ? '저장을 취소했습니다.' : c === 'rate_limited' ? '저장 창이 이미 열려 있습니다. 그 창을 닫은 뒤 다시 눌러 주세요.' : '이 화면에서는 파일 저장을 쓸 수 없습니다. "결과 복사"로 옮겨 주세요.', c === 'declined' ? 'warn' : 'err');
+  }
+}
+$('saveMdBtn').addEventListener('click', () => saveAs('md'));
+$('saveTxtBtn').addEventListener('click', () => saveAs('txt'));
+$('copyResultBtn').addEventListener('click', async () => {
+  if (!LAST) return;
+  try { await navigator.clipboard.writeText(resultFile().body); notice($('saveMsg'), '결과를 복사했습니다.'); }
+  catch (e) {
+    const r = document.createRange(); r.selectNodeContents($('result'));
+    const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+    notice($('saveMsg'), '자동 복사가 막혀 있습니다. 선택된 결과를 길게 눌러 복사해 주세요.', 'warn');
+  }
+});
+
+/* 검색어 추천 (짧은 요청, 빠른 모델) */
+$('suggestBtn').addEventListener('click', async () => {
+  if (!SAMPLE) { $('suggestChips').innerHTML = '<span class="hint">AI 연결을 준비하는 중입니다.</span>'; return; }
+  const inp = readInputs();
+  const topic = Object.values(inp).filter(Boolean).join(' / ') || $('q').value;
+  if (!topic.trim()) { $('suggestChips').innerHTML = '<span class="hint">먼저 입력 칸을 채워 주세요.</span>'; return; }
+  $('suggestBtn').disabled = true;
+  $('suggestChips').innerHTML = '<span class="hint">검색어를 만드는 중입니다.</span>';
+  try {
+    const list = await SAMPLE.json(`공공기관 누리집에서 공식 통계·정책 자료를 찾기 위한 한국어 검색어 5개를 만든다. 대상 기관: ${ORG}. 업무: ${current.name}. 입력: ${topic}. 수치나 사실은 쓰지 말고 검색어만. JSON 문자열 배열 하나로만 답함. 예: ["2025 청년 고용률 전북", "청년 일경험 지원사업 공고"]`, { modelTier: 'quick' });
+    const qs = (Array.isArray(list) ? list : []).map(String).filter(Boolean).slice(0, 6);
+    $('suggestChips').innerHTML = qs.length ? qs.map(q => `<button class="chip" type="button" data-q="${esc(q)}">${esc(q)}</button>`).join('') : '<span class="hint">추천 검색어가 없습니다.</span>';
+  } catch (e) {
+    $('suggestChips').innerHTML = `<span class="hint">${esc(errText(e && e.code))}</span>`;
+  } finally { $('suggestBtn').disabled = false; }
+});
+
 /* 시작 */
 if (CONFIG.appTitle) $('appTitle').textContent = CONFIG.appTitle;
 if (CONFIG.accent) document.documentElement.style.setProperty('--accent', CONFIG.accent);
 $('appOrg').textContent = `${ORG} · 반복 업무 6종`;
-renderRules();
+renderRules(); renderSites();
 const savedAgent = load('studio.agent');
 selectAgent(AGENTS.some(a => a.id === savedAgent) ? savedAgent : 'report');
 const savedTab = load('studio.tab');
