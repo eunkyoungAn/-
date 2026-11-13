@@ -60,6 +60,10 @@ notes: <수집 실패·미확인 사항>
   4) `slack_read_channel`(limit 1, detailed)로 방금 글의 `Message TS` 확인 → `slack_send_message`(thread_ts)로 TOP 5 링크·라벨·확인 출처
 - meta.md `status: sent`, `slack_thread` 기록 → 커밋·푸시 → PR 생성·main 병합(저장소 CLAUDE.md 규칙).
 - 업로드가 막히면(403) 이미지 없이 텍스트만 채널에 보내고 notes 에 사유를 적는다.
+- **무인(예약) 실행**에서는 파일 업로드 도구가 사람 승인을 기다리다 멈출 수 있다(11/10·11/12 발송 실패).
+  이때는 먼저 커밋·PR·main 병합을 끝내고, `slack_send_message` 한 번으로 채널에 텍스트 + 포스터 링크
+  (`https://github.com/eunkyoungAn/-/blob/main/ai-report/daily/YYYY-MM-DD/poster.png`)를 보낸 뒤 스레드에 TOP 5를 단다.
+- 전날 분이 미발송이면 그 meta.md 를 `status: not_sent` 로 두고, 오늘은 48시간으로 모아 합쳐 보낸다.
 
 ## 6. 주간 심층 리포트 (금요일)
 - 입력: 그 주 `ai-report/daily/*/report.md` + 신규 수집.
