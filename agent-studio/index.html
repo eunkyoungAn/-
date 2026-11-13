@@ -379,7 +379,7 @@ details.box[open] > summary::after { content: "접기"; }
       <div class="section">
         <div class="section-title"><h3>자료</h3><span class="hint" id="dataNeed"></span></div>
         <div class="drop" id="dropZone">
-          <p>xlsx, xls, csv, txt, md 파일을 여러 개 올릴 수 있습니다.<br>이름·연락처 같은 개인정보 열은 AI에 보내기 전에 자동으로 지웁니다.</p>
+          <p>xlsx, xls, csv, txt, md, pdf 파일을 여러 개 올릴 수 있습니다.<br>이름·연락처 같은 개인정보 열은 AI에 보내기 전에 자동으로 지웁니다.</p>
           <span class="btn pick">파일 고르기<input type="file" id="fileInput" multiple aria-label="파일 고르기"></span>
         </div>
         <p class="hint">파일 창이 열리지 않거나 파일이 흐리게 보여 고를 수 없으면, 엑셀에서 표를 복사해 아래 "본문 붙여넣기" 칸에 붙여넣어 주세요. 같은 방식으로 개인정보 열을 지웁니다.</p>
@@ -872,6 +872,45 @@ const xlsxReady = new Promise(resolve => {
   setTimeout(() => resolve(typeof XLSX !== 'undefined'), 20000);
 });
 
+/* PDF 읽기 도구(pdf.js)는 PDF를 처음 올릴 때만 불러온다. 작업자(worker) 파일도 같은 화면에서 불러 써서 외부 통신 없이 읽는다 */
+let pdfLibP = null;
+function loadScript(src) { return new Promise((ok, no) => { const t = document.createElement('script'); t.src = src; t.onload = ok; t.onerror = () => no(new Error('load')); document.head.appendChild(t); }); }
+function loadPdfLib() {
+  if (!pdfLibP) pdfLibP = (async () => {
+    const base = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
+    await loadScript(base + 'pdf.min.js');
+    await loadScript(base + 'pdf.worker.min.js');
+    if (!window.pdfjsLib) throw new Error('load');
+    return window.pdfjsLib;
+  })().catch(e => { pdfLibP = null; throw new Error('PDF 읽기 도구를 불러오지 못했습니다. 인터넷 연결을 확인하고 다시 올려 주세요.'); });
+  return pdfLibP;
+}
+async function readPdf(buf) {
+  const lib = await loadPdfLib();
+  let doc;
+  try { doc = await lib.getDocument({ data: new Uint8Array(buf), useWorkerFetch: false, isEvalSupported: false, disableFontFace: true, useSystemFonts: false }).promise; }
+  catch (e) { throw new Error(e && e.name === 'PasswordException' ? '암호가 걸린 PDF입니다. 암호를 푼 파일을 올려 주세요.' : 'PDF를 열지 못했습니다. 파일이 손상되지 않았는지 확인해 주세요.'); }
+  const out = []; let chars = 0, odd = 0;
+  for (let n = 1; n <= doc.numPages; n++) {
+    const page = await doc.getPage(n);
+    const tc = await page.getTextContent();
+    /* 같은 높이의 글자 조각을 한 줄로 모으고, 왼쪽부터 순서대로 잇는다 */
+    const rows = [];
+    tc.items.forEach(it => {
+      if (!it.str) return;
+      const iy = it.transform[5], ix = it.transform[4];
+      let row = rows.find(r => Math.abs(r.y - iy) <= 2);
+      if (!row) { row = { y: iy, parts: [] }; rows.push(row); }
+      row.parts.push([ix, it.str]);
+    });
+    const lines = rows.sort((a, b) => b.y - a.y).map(r => r.parts.sort((a, b) => a[0] - b[0]).map(x => x[1]).join(''));
+    const text = lines.map(l => l.replace(/\s+/g, ' ').trim()).filter(Boolean).join('\n');
+    chars += text.length; odd += (text.match(/[\uFFFD\u0000-\u0008\uE000-\uF8FF]/g) || []).length;
+    if (text) out.push(`[${n}쪽]\n${text}`);
+  }
+  return { text: out.join('\n\n'), pages: doc.numPages, weak: chars > 0 && odd / chars > 0.1 };
+}
+
 async function readFile(file) {
   const ext = (file.name.split('.').pop() || '').toLowerCase();
   const entry = { id: ++fileSeq, name: file.name, parts: [], error: '' };
@@ -896,8 +935,12 @@ async function readFile(file) {
       let text = await file.text();
       if (text.includes('\uFFFD')) text = new TextDecoder('euc-kr').decode(await file.arrayBuffer());
       entry.parts.push({ sheet: '', text: maskText(text.trim()), rows: null, cols: null, removed: [], plain: true });
+    } else if (ext === 'pdf') {
+      const r = await readPdf(await file.arrayBuffer());
+      if (!r.text.trim()) entry.error = '이 PDF에서 글자를 읽지 못했습니다. 스캔한 그림 PDF이거나 글꼴 정보가 없는 파일입니다. 필요한 부분을 복사해 "본문 붙여넣기" 칸에 붙여넣어 주세요.';
+      else entry.parts.push({ sheet: '', text: maskText(r.text), rows: null, cols: null, removed: [], plain: true, pages: r.pages, weak: r.weak });
     } else {
-      entry.error = 'xlsx, xls, csv, txt, md 파일만 올릴 수 있습니다.';
+      entry.error = 'xlsx, xls, csv, txt, md, pdf 파일만 올릴 수 있습니다.';
     }
   } catch (e) {
     entry.error = e && e.message ? e.message : '파일을 읽지 못했습니다.';
@@ -923,8 +966,9 @@ function renderFiles() {
   $('fileList').innerHTML = FILES.map(f => {
     const lines = f.parts.map(pt => {
       const where = pt.sheet ? `시트 "${esc(pt.sheet)}"` : (pt.plain ? '본문' : '표');
-      const meta = pt.plain ? `${where} · ${pt.text.length.toLocaleString()}자` : `${where} · 자료 ${pt.rows}행 · ${pt.cols}열`;
-      const pii = pt.plain ? '<div class="f-pii none">전화번호·이메일·주민번호 형식은 가렸습니다. 글 속 이름은 직접 확인해 주세요.</div>'
+      const meta = pt.plain ? `${where}${pt.pages ? ' · ' + pt.pages + '쪽' : ''} · ${pt.text.length.toLocaleString()}자` : `${where} · 자료 ${pt.rows}행 · ${pt.cols}열`;
+      const pii = pt.weak ? '<div class="f-pii">글자가 깨져 읽힌 부분이 많습니다. 프롬프트 탭에서 내용을 확인하고, 깨졌으면 원문을 복사해 붙여넣어 주세요.</div>'
+        : pt.plain ? '<div class="f-pii none">전화번호·이메일·주민번호 형식은 가렸습니다. 글 속 이름은 직접 확인해 주세요.</div>'
         : pt.removed.length ? `<div class="f-pii">지운 열: ${pt.removed.map(esc).join(', ')}</div>`
         : '<div class="f-pii none">개인정보 열 없음</div>';
       return `<div class="f-meta">${meta}</div>${pii}`;

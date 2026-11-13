@@ -72,7 +72,9 @@
 8. 개인정보: 이름·연락처는 AI에 넣지 않는다. 식별자는 ID로 바꿔서 분석한다.
 
 ## 5. 자료 올리기와 개인정보 처리
-- 받을 수 있는 파일: xlsx, xls, csv, txt, md. 여러 개를 올릴 수 있다.
+- 받을 수 있는 파일: xlsx, xls, csv, txt, md, pdf. 여러 개를 올릴 수 있다.
+- PDF는 브라우저에서 pdf.js로 글자만 읽는다(쪽 번호 표시). 스캔한 그림 PDF는 읽지 못하므로 붙여넣기를 안내한다.
+  - 불러오는 주소: https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js, pdf.worker.min.js
 - 엑셀은 브라우저에서 SheetJS로 읽어 시트별 CSV 텍스트로 바꾼다.
   - 불러오는 주소: https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js
 - 개인정보 열 자동 제거: 열 이름에 아래 단어가 들어 있으면 그 열을 AI에 보내기 전에 지운다.
