@@ -43,6 +43,7 @@ body {
   line-height: 1.6;
 }
 button, input, select, textarea { font: inherit; color: inherit; }
+button, label.btn { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 .app {
@@ -167,6 +168,16 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent); outline
   background: var(--panel);
 }
 .drop p { margin: 0; color: var(--muted); font-size: 13px; }
+.drop.over { border-color: var(--accent); background: var(--accent-soft); }
+.files { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: var(--radius); }
+.files:empty { display: none; }
+.files li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; padding: 10px 12px; align-items: start; }
+.files li + li { border-top: 1px solid var(--line); }
+.f-name { font-weight: 500; word-break: break-all; }
+.f-meta { font-size: 12px; color: var(--muted); grid-column: 1; }
+.f-pii { font-size: 12px; grid-column: 1; color: var(--danger); }
+.f-pii.none { color: var(--ok); }
+.f-del { grid-column: 2; grid-row: 1 / span 3; padding: 4px 10px; font-size: 12px; }
 
 .btn {
   display: inline-flex; align-items: center; gap: 6px;
@@ -325,14 +336,16 @@ pre.prompt {
 
       <div class="section">
         <div class="section-title"><h3>자료</h3><span class="hint" id="dataNeed"></span></div>
-        <div class="drop">
+        <div class="drop" id="dropZone">
           <p>xlsx, xls, csv, txt, md 파일을 여러 개 올릴 수 있습니다.<br>이름·연락처 같은 개인정보 열은 AI에 보내기 전에 자동으로 지웁니다.</p>
           <label class="btn" for="fileInput">파일 고르기</label>
           <input type="file" id="fileInput" class="sr" multiple accept=".xlsx,.xls,.csv,.txt,.md">
         </div>
+        <ul class="files" id="fileList" aria-label="올린 파일"></ul>
         <div class="field wide">
           <label for="pasteBox">본문 붙여넣기</label>
           <textarea id="pasteBox" class="data" placeholder="엑셀에서 복사한 표나 안내문 본문을 그대로 붙여넣어도 됩니다."></textarea>
+          <span class="hint" id="pasteNote">붙여넣은 표도 개인정보 열을 지우고, 전화번호·이메일·주민번호는 가린 뒤 보냅니다.</span>
         </div>
       </div>
 
@@ -373,6 +386,7 @@ pre.prompt {
   </main>
 </div>
 
+<script async id="xlsxLib" src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 /* ===== 0. 기관 설정 (CLAUDE.md 0번. 빈 항목은 기본값) ===== */
 const CONFIG = {
@@ -677,11 +691,163 @@ function commonBlock() {
   return lines.join('\n');
 }
 function dataBlock(agent) {
-  const pasted = (document.getElementById('pasteBox').value || '').trim();
   const label = agent.dataLabel || '자료';
-  if (!pasted) return `# ${label}\n[${label} 없음]` + (agent.needData ? ' 자료가 없으면 분석하지 말고 필요한 자료 목록만 적음.' : '');
-  return `# ${label}\n<자료 시작>\n${pasted}\n<자료 끝>`;
+  const parts = [];
+  FILES.forEach(f => f.parts.forEach(pt => parts.push(`## 파일: ${f.name}${pt.sheet ? ' / 시트: ' + pt.sheet : ''}\n${pt.text}`)));
+  const pasted = cleanPasted().text;
+  if (pasted) parts.push(`## 붙여넣은 본문\n${pasted}`);
+  if (!parts.length) return `# ${label}\n[${label} 없음]` + (agent.needData ? ' 자료가 없으면 분석하지 말고 필요한 자료 목록만 적음.' : '');
+  return `# ${label} (개인정보 열은 브라우저에서 지운 뒤임)\n<자료 시작>\n${parts.join('\n\n')}\n<자료 끝>`;
 }
+
+/* ===== 2단계: 자료 읽기와 개인정보 처리 (브라우저 안에서만) ===== */
+const PII_WORDS = ['이름', '성명', '연락처', '전화', '휴대폰', '주민', '생년월일', '주소', '이메일', '보호자', 'name', 'phone', 'tel', 'mobile', 'email'];
+const FILES = [];   // { id, name, parts:[{sheet, text, rows, cols, removed:[]}], error }
+let fileSeq = 0;
+
+function isPiiHeader(h) {
+  const k = String(h || '').toLowerCase().replace(/[\s\-_.·]+/g, '');   // E-mail, 휴대 폰 등도 잡음
+  return k && PII_WORDS.some(w => k.includes(w));
+}
+/* 칸 안의 전화번호·이메일·주민번호 가리기 */
+function maskText(t) {
+  return String(t)
+    .replace(/\b\d{6}\s?-\s?[1-4]\d{6}\b/g, '[주민번호]')
+    .replace(/[\w.+-]+@[\w-]+(\.[\w-]+)+/g, '[이메일]')
+    .replace(/\b01[016789][-.\s]?\d{3,4}[-.\s]?\d{4}\b/g, '[전화]')
+    .replace(/\b0\d{1,2}[-.)\s]\d{3,4}[-.\s]\d{4}\b/g, '[전화]');
+}
+/* 따옴표를 지키는 CSV 읽기 */
+function parseDelimited(text, sep) {
+  const rows = []; let row = [], cell = '', q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) {
+      if (c === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; }
+      else cell += c;
+    } else if (c === '"' && cell === '') q = true;
+    else if (c === sep) { row.push(cell); cell = ''; }
+    else if (c === '\n' || c === '\r') {
+      if (c === '\r' && text[i + 1] === '\n') i++;
+      row.push(cell); rows.push(row); row = []; cell = '';
+    } else cell += c;
+  }
+  if (cell !== '' || row.length) { row.push(cell); rows.push(row); }
+  return rows;
+}
+function toCsv(rows) {
+  return rows.map(r => r.map(v => {
+    const s = String(v == null ? '' : v);
+    return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  }).join(',')).join('\n');
+}
+/* 표(2차원 배열)에서 머리글 줄을 찾아 개인정보 열 제거 */
+function cleanTable(rows) {
+  rows = rows.filter(r => r.some(v => String(v == null ? '' : v).trim() !== ''));
+  const hi = rows.findIndex(r => r.filter(v => String(v == null ? '' : v).trim() !== '').length >= 2);
+  if (hi < 0) return { rows: rows.map(r => r.map(v => maskText(v == null ? '' : v))), removed: [], dataRows: rows.length, cols: rows[0] ? rows[0].length : 0 };
+  const header = rows[hi];
+  const width = Math.max(...rows.map(r => r.length));
+  const drop = new Set(); const removed = [];
+  for (let c = 0; c < width; c++) if (isPiiHeader(header[c])) { drop.add(c); removed.push(String(header[c]).trim()); }
+  const out = rows.map((r, i) => {
+    if (i < hi) return r.filter(v => String(v == null ? '' : v).trim() !== '').map(v => maskText(v));   // 표 위 제목 줄
+    const cells = [];
+    for (let c = 0; c < width; c++) if (!drop.has(c)) cells.push(maskText(r[c] == null ? '' : r[c]));
+    return cells;
+  });
+  return { rows: out, removed, dataRows: rows.length - hi - 1, cols: width - drop.size };
+}
+
+/* 엑셀 도구는 화면을 막지 않도록 따로 불러오고, 엑셀을 읽을 때만 기다린다 */
+const xlsxReady = new Promise(resolve => {
+  if (typeof XLSX !== 'undefined') return resolve(true);
+  const tag = document.getElementById('xlsxLib');
+  tag.addEventListener('load', () => resolve(true));
+  tag.addEventListener('error', () => resolve(false));
+  setTimeout(() => resolve(typeof XLSX !== 'undefined'), 20000);
+});
+
+async function readFile(file) {
+  const ext = (file.name.split('.').pop() || '').toLowerCase();
+  const entry = { id: ++fileSeq, name: file.name, parts: [], error: '' };
+  try {
+    if (ext === 'xlsx' || ext === 'xls') {
+      await xlsxReady;
+      if (typeof XLSX === 'undefined') throw new Error('엑셀 읽기 도구를 불러오지 못했습니다. 인터넷 연결을 확인하고 페이지를 새로 열어 주세요. 또는 엑셀에서 CSV로 저장해 올려 주세요.');
+      const wb = XLSX.read(await file.arrayBuffer(), { type: 'array', cellDates: true });
+      wb.SheetNames.forEach(sn => {
+        const aoa = XLSX.utils.sheet_to_json(wb.Sheets[sn], { header: 1, raw: false, defval: '', blankrows: false });
+        if (!aoa.length) return;
+        const t = cleanTable(aoa);
+        entry.parts.push({ sheet: sn, text: toCsv(t.rows), rows: t.dataRows, cols: t.cols, removed: t.removed });
+      });
+      if (!entry.parts.length) entry.error = '내용이 있는 시트가 없습니다.';
+    } else if (ext === 'csv') {
+      let text = await file.text();
+      if (text.includes('\uFFFD')) text = new TextDecoder('euc-kr').decode(await file.arrayBuffer());   // 한글 엑셀에서 저장한 CSV
+      const t = cleanTable(parseDelimited(text.replace(/^\uFEFF/, ''), ','));
+      entry.parts.push({ sheet: '', text: toCsv(t.rows), rows: t.dataRows, cols: t.cols, removed: t.removed });
+    } else if (ext === 'txt' || ext === 'md') {
+      let text = await file.text();
+      if (text.includes('\uFFFD')) text = new TextDecoder('euc-kr').decode(await file.arrayBuffer());
+      entry.parts.push({ sheet: '', text: maskText(text.trim()), rows: null, cols: null, removed: [], plain: true });
+    } else {
+      entry.error = 'xlsx, xls, csv, txt, md 파일만 올릴 수 있습니다.';
+    }
+  } catch (e) {
+    entry.error = e && e.message ? e.message : '파일을 읽지 못했습니다.';
+  }
+  return entry;
+}
+
+async function addFiles(list) {
+  const arr = Array.from(list || []);
+  if (!arr.length) return;
+  notice($('runMsg'), `파일 ${arr.length}개를 읽는 중입니다.`);
+  for (const f of arr) {
+    const e = await readFile(f);
+    if (e.error) notice($('runMsg'), `${f.name}: ${e.error}`, 'err');
+    else FILES.push(e);
+  }
+  renderFiles();
+  if (!$('runMsg').querySelector('.err')) $('runMsg').innerHTML = '';
+  renderPrompt();
+}
+
+function renderFiles() {
+  $('fileList').innerHTML = FILES.map(f => {
+    const lines = f.parts.map(pt => {
+      const where = pt.sheet ? `시트 "${esc(pt.sheet)}"` : (pt.plain ? '본문' : '표');
+      const meta = pt.plain ? `${where} · ${pt.text.length.toLocaleString()}자` : `${where} · 자료 ${pt.rows}행 · ${pt.cols}열`;
+      const pii = pt.plain ? '<div class="f-pii none">전화번호·이메일·주민번호 형식은 가렸습니다. 글 속 이름은 직접 확인해 주세요.</div>'
+        : pt.removed.length ? `<div class="f-pii">지운 열: ${pt.removed.map(esc).join(', ')}</div>`
+        : '<div class="f-pii none">개인정보 열 없음</div>';
+      return `<div class="f-meta">${meta}</div>${pii}`;
+    }).join('');
+    return `<li><span class="f-name">${esc(f.name)}</span><button class="btn f-del" type="button" data-del="${f.id}">빼기</button>${lines}</li>`;
+  }).join('');
+}
+
+/* 붙여넣은 본문: 탭으로 나뉜 표면 개인정보 열 제거, 아니면 번호류만 가림 */
+function cleanPasted() {
+  const raw = ($('pasteBox').value || '').trim();
+  if (!raw) return { text: '', removed: [] };
+  const first = raw.split(/\r?\n/)[0];
+  if (first.includes('\t')) {
+    const t = cleanTable(parseDelimited(raw, '\t'));
+    return { text: toCsv(t.rows), removed: t.removed };
+  }
+  return { text: maskText(raw), removed: [] };
+}
+function updatePasteNote() {
+  const r = cleanPasted();
+  $('pasteNote').textContent = r.removed.length
+    ? `붙여넣은 표에서 지울 열: ${r.removed.join(', ')}`
+    : '붙여넣은 표도 개인정보 열을 지우고, 전화번호·이메일·주민번호는 가린 뒤 보냅니다.';
+  $('pasteNote').style.color = r.removed.length ? 'var(--danger)' : '';
+}
+function hasData() { return FILES.length > 0 || !!$('pasteBox').value.trim(); }
 function buildPrompt(agent) {
   const inp = readInputs();
   return [commonBlock(), '', agent.task(inp), '', dataBlock(agent),
@@ -773,16 +939,23 @@ $('agentList').addEventListener('click', e => { const b = e.target.closest('.age
 document.querySelector('.tabs').addEventListener('click', e => { const t = e.target.closest('.tab'); if (t) selectTab(t.id.replace('tab-', '')); });
 $('fields').addEventListener('input', readInputs);
 $('toPromptBtn').addEventListener('click', () => selectTab('prompt'));
-$('fileInput').addEventListener('change', () => {
-  notice($('runMsg'), '파일 읽기와 개인정보 열 자동 제거는 2단계에서 연결합니다. 지금은 본문 붙여넣기를 써 주세요.', 'warn');
-  $('fileInput').value = '';
+$('fileInput').addEventListener('change', async () => { await addFiles($('fileInput').files); $('fileInput').value = ''; });
+$('fileList').addEventListener('click', e => {
+  const b = e.target.closest('[data-del]'); if (!b) return;
+  const i = FILES.findIndex(f => f.id === Number(b.dataset.del));
+  if (i >= 0) FILES.splice(i, 1);
+  renderFiles(); renderPrompt();
 });
+$('pasteBox').addEventListener('input', updatePasteNote);
+['dragenter', 'dragover'].forEach(t => $('dropZone').addEventListener(t, e => { e.preventDefault(); $('dropZone').classList.add('over'); }));
+['dragleave', 'drop'].forEach(t => $('dropZone').addEventListener(t, () => $('dropZone').classList.remove('over')));
+$('dropZone').addEventListener('drop', e => { e.preventDefault(); addFiles(e.dataTransfer.files); });
 $('runBtn').addEventListener('click', () => {
   const inp = readInputs();
   const missing = current.fields.filter(f => f.required && !(inp[f.id] || '').trim()).map(f => f.label);
   if (missing.length) { notice($('runMsg'), `필수 칸을 채워 주세요: ${missing.join(', ')}`, 'err'); return; }
-  if (current.needData && !$('pasteBox').value.trim()) { notice($('runMsg'), `${current.dataLabel || '자료'}를 올리거나 붙여넣어 주세요.`, 'err'); return; }
-  notice($('runMsg'), 'AI 실행은 3단계에서 연결합니다. 지금은 "지시문 보기"에서 지시문이 맞게 만들어지는지 확인해 주세요.', 'warn');
+  if (current.needData && !hasData()) { notice($('runMsg'), `${current.dataLabel || '자료'}를 올리거나 붙여넣어 주세요.`, 'err'); return; }
+  notice($('runMsg'), 'AI 실행은 3단계에서 연결합니다. 지금은 "지시문 보기"에서 자료가 개인정보 없이 들어갔는지 확인해 주세요.', 'warn');
 });
 $('copyBtn').addEventListener('click', async () => {
   readInputs(); renderPrompt();
