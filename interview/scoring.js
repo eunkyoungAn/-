@@ -1,13 +1,8 @@
 // 말하기 지표 계산과 AI 미연결 시 쓰는 간이 피드백.
 // 전달 점수는 AI 연결 여부와 관계없이 항상 여기서 계산한다(같은 기준으로 비교하기 위해).
 
-export const RUBRIC = [
-  { key: 'lead', label: '두괄식', looks: '첫 문장에 핵심 답이 있는가' },
-  { key: 'structure', label: '구조', looks: '상황-과제-행동-결과 흐름이 있는가' },
-  { key: 'specificity', label: '구체성', looks: '수치, 기간, 고유한 사례가 있는가' },
-  { key: 'jobfit', label: '직무 연결', looks: '경험을 지원 직무 역량과 잇는가' },
-  { key: 'delivery', label: '전달', looks: '길이, 말 속도, 군말' },
-];
+import { RUBRIC, totalScore, voiceScore } from './rubric.js';
+export { RUBRIC, totalScore, voiceScore };
 
 // 단독으로 쓰인 군말만 센다. "그"는 "그래서" 같은 단어 안에서는 세지 않는다.
 const FILLERS = ['음', '어', '으', '아', '그', '저', '뭐', '이제', '약간', '그니까', '그러니까', '막'];
@@ -77,71 +72,68 @@ function sentences(text) {
 }
 
 const TIPS = {
-  lead: {
-    fix: '첫 문장에 질문의 답을 바로 말해 보세요.',
-    example: '"제 강점은 [강점]입니다. [언제·어디서] [한 일]을 하며 이 강점을 키웠습니다."처럼 결론을 먼저 말하고 근거를 이어 보세요.',
-  },
-  structure: {
-    fix: '상황 → 맡은 일 → 내가 한 행동 → 결과 순서로 말해 보세요.',
-    example: '"[당시 상황]에서 저는 [맡은 일]을 맡았습니다. 그래서 [구체적인 행동]을 했고, 그 결과 [변화나 성과]가 있었습니다."',
-  },
-  specificity: {
-    fix: '숫자나 기간을 하나 이상 넣어 보세요.',
-    example: '"많은 고객을 응대했습니다" 대신 "하루 평균 [숫자]명의 고객을 [기간] 동안 응대했습니다"처럼 말해 보세요.',
+  specific: {
+    fix: '상황, 내가 직접 한 행동, 결과를 한 문장씩 넣어 보세요.',
+    example: '"[당시 상황]에서 저는 [맡은 일]을 맡았습니다. 제가 직접 [구체적인 행동]을 했고, 그 결과 [지표]가 [전]에서 [후]로 바뀌었습니다."',
+    probe: '어떤 문제가 있었고 본인이 직접 취한 행동은 무엇이었나요? 그 행동으로 어떤 변화가 있었나요?',
   },
   jobfit: {
-    fix: '마지막 문장을 지원 직무에서의 기여로 마무리해 보세요.',
-    example: '"이 경험으로 익힌 [역량]을 [지원 직무]의 [구체적인 업무]에서 바로 활용하겠습니다."',
+    fix: '이 경험이 지원 직무의 어떤 역량을 보여 주는지 한 문장으로 이어 보세요.',
+    example: '"이 경험으로 익힌 [역량]을 [지원 직무]의 [구체적인 업무]에서 이렇게 쓰겠습니다."',
+    probe: '그 경험에서 얻은 역량을 지원 직무의 어떤 업무에 쓸 수 있나요?',
   },
-  delivery: {
-    fix: '시간을 넉넉히 쓰고, 군말 대신 짧게 멈췄다가 말해 보세요.',
-    example: '말이 막힐 때 "음", "어" 대신 1초 멈추고 다음 문장을 시작하면 더 침착하게 들립니다.',
+  logic: {
+    fix: '첫 문장에서 질문의 답을 바로 말해 보세요.',
+    example: '"제 답은 [결론]입니다. 이유는 [근거 경험]입니다."처럼 결론을 먼저 말하고 근거를 이어 보세요.',
+    probe: '질문에 대한 답을 한 문장으로 먼저 말씀해 주시겠어요?',
   },
 };
 
-// AI를 연결하지 않았을 때 쓰는 규칙 기반 간이 평가. 내용 판단이 거칠다는 점을 화면에 밝힌다.
-export function localEvaluate({ answer, metrics, limitSec }) {
+// AI를 연결하지 않았을 때 쓰는 규칙 기반 간이 평가. 답변 속 표현을 세는 방식이라 내용 판단이 거칠다는 점을 화면에 밝힌다.
+export function localEvaluate({ answer }) {
   const text = answer || '';
   const sents = sentences(text);
   const first = sents[0] || '';
 
-  let lead = 3;
-  if (!first) lead = 1;
+  // 논리성과 질문 적합성: 첫 문장에서 답을 맺는가, 이유·순서를 잇는 말이 있는가
+  let logic = 3;
+  if (!first) logic = 1;
   else {
-    if (first.length <= 60) lead += 1;
-    if (/^(음|어|그|저기|일단|사실)(?=[\s,]|$)/.test(first)) lead -= 1;
-    if (/(입니다|습니다|때문|위해|라고 생각)/.test(first)) lead += 1;
-    if (first.length > 110) lead -= 1;
+    if (first.length <= 60 && /(입니다|습니다|때문|위해|라고 생각)/.test(first)) logic += 1;
+    if (/(왜냐하면|때문에|그래서|따라서|먼저|첫째|그 결과|이를 위해)/.test(text)) logic += 1;
+    if (/^(음|어|그|저기|일단|사실)(?=[\s,]|$)/.test(first) || first.length > 110) logic -= 1;
+    if (sents.length < 2) logic -= 1;
   }
+  logic = clamp(logic);
 
-  const starHits = [
-    /(당시|때|상황|시절|에서 일|근무하며|하면서)/,
-    /(맡|담당|목표|과제|역할|해야 했)/,
-    /(했습니다|진행|시도|제안|만들|정리|개선|해결)/,
-    /(결과|덕분|그래서|이후|늘었|줄었|받았|배웠|달성)/,
-  ].filter(re => re.test(text)).length;
-  const structure = clamp(1 + starHits);
+  // 답변의 구체성: 상황, 본인 역할, 행동, 결과 신호와 숫자
+  const star = {
+    상황: /(당시|때|상황|시절|에서 일|근무하며|하면서)/.test(text),
+    '본인 역할': /(제가|저는|맡|담당|역할)/.test(text),
+    행동: /(했습니다|했고|했으며|하여|해서|진행|시도|제안|만들|정리|개선|해결|분석|검토|작성|설계|운영)/.test(text),
+    결과: /(결과|덕분|이후|늘었|줄었|받았|달성|향상|단축)/.test(text),
+  };
+  const starHits = Object.values(star).filter(Boolean).length;
+  const nums = numberHints(text);
+  const abstractOnly = /(책임감|소통|성실|열정|노력|꼼꼼)/.test(text) && starHits <= 1;
+  let specific = 1 + starHits * 0.75 + (nums.numbers_found.length ? 1 : 0);
+  if (abstractOnly) specific = Math.min(specific, 2);
+  specific = clamp(specific);
 
-  const numHits = (text.match(/\d+|(?:한|두|세|네|다섯|여섯|일곱|여덟|아홉|열)\s?(?:명|개|번|달|해|가지|시간|주|곳|건)|(?:개월|년간|퍼센트|%)/g) || []).length;
-  const specificity = clamp(numHits === 0 ? 2 : numHits === 1 ? 3 : numHits <= 3 ? 4 : 5);
-
+  // 직무역량 근거
   const jobHits = (text.match(/(직무|업무|회사|기여|입사|지원|현장|고객|역량|활용|도움이 되)/g) || []).length;
   const lastHasJob = /(기여|활용|도움|하겠습니다|싶습니다)/.test(sents[sents.length - 1] || '');
   const jobfit = clamp(1 + Math.min(3, jobHits) + (lastHasJob ? 1 : 0));
 
-  const delivery = deliveryScore(metrics, limitSec);
-
-  const scores = { lead, structure, specificity, jobfit, delivery: delivery.score };
+  const scores = { specific, jobfit, logic };
+  const missing = Object.entries(star).filter(([, v]) => !v).map(([k]) => k);
   const reasons = {
-    lead: lead >= 4 ? '첫 문장에서 답이 드러납니다' : '첫 문장만으로는 답이 잘 보이지 않습니다',
-    structure: `흐름 요소 4개 중 ${starHits}개가 보입니다`,
-    specificity: numHits ? `숫자·기간 표현이 ${numHits}번 나옵니다` : '숫자나 기간 표현이 없습니다',
-    jobfit: lastHasJob ? '직무 기여로 마무리합니다' : '직무와 잇는 문장이 약합니다',
-    delivery: delivery.reason,
+    specific: abstractOnly ? '특성은 말했지만 실제 행동과 성과를 확인하기 어렵습니다'
+      : `상황·본인 역할·행동·결과 중 ${starHits}가지가 보이고, 숫자 표현은 ${nums.numbers_found.length ? nums.numbers_found.length + '개' : '없습니다'}${missing.length ? ` (빠진 것: ${missing.join(', ')})` : ''}`,
+    jobfit: lastHasJob ? '경험을 직무에서의 기여로 잇습니다' : '경험이 지원 직무의 어떤 역량을 보여 주는지 드러나지 않습니다',
+    logic: logic >= 4 ? '첫 문장에서 답이 드러나고 흐름이 이어집니다' : '첫 문장만으로는 질문의 답이 잘 보이지 않습니다',
   };
-
-  // 글로 답한 경우 전달은 평가하지 않으므로 잘한 점·고칠 점 후보에서 뺀다.
-  const order = RUBRIC.map(r => r.key).filter(k => !(metrics.typed && k === 'delivery'));
+  const order = ['specific', 'jobfit', 'logic'];
   const best = order.reduce((a, b) => (scores[b] > scores[a] ? b : a), order[0]);
   const worst = order.reduce((a, b) => (scores[b] < scores[a] ? b : a), order[0]);
   const label = key => RUBRIC.find(r => r.key === key).label;
@@ -150,12 +142,13 @@ export function localEvaluate({ answer, metrics, limitSec }) {
     source: 'local',
     scores,
     reasons,
-    strength: `${label(best)} 항목이 가장 좋습니다. ${reasons[best]}.`,
-    improvement: `${label(worst)} 항목을 먼저 보완해 보세요. ${reasons[worst]}.`,
+    strength: scores[best] >= 4 ? `${label(best)}: ${reasons[best]}.` : '끝까지 답을 마친 점이 좋습니다. 아직 4점 이상인 항목은 없으니 아래 고칠 점부터 하나씩 채워 보세요.',
+    improvement: `${label(worst)}: ${reasons[worst]}.`,
     next_fix: TIPS[worst].fix,
     rewrite_example: TIPS[worst].example,
+    probe: scores[worst] <= 3 ? TIPS[worst].probe : '',
     comparison: '',
-    ...numberHints(text),
+    ...nums,
   };
 }
 
