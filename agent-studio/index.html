@@ -432,11 +432,12 @@ details.box[open] > summary::after { content: "접기"; }
         <div class="result" id="result">실행하면 결과가 여기에 표시됩니다. 마지막 확인은 담당자가 합니다.</div>
         <div id="verifyBox"></div>
         <div class="actions" id="saveActions" hidden>
-          <button class="btn primary" id="saveHwpxBtn" type="button">한글 파일 받기 (hwpx)</button>
+          <button class="btn primary" id="saveDocxBtn" type="button">한 장 보고서 받기 (Word)</button>
+          <button class="btn primary" id="saveHwpxBtn" type="button">한 장 보고서 받기 (한글)</button>
           <button class="btn" id="saveMdBtn" type="button">파일로 받기 (.md)</button>
           <button class="btn" id="saveTxtBtn" type="button">파일로 받기 (.txt)</button>
           <button class="btn" id="copyResultBtn" type="button">결과 복사</button>
-          <span class="hint">한글 파일은 zip 하나로 묶여 저장됩니다. 압축을 풀어 한글에서 엽니다.</span>
+          <span class="hint">Word는 바로 저장됩니다. 한글은 zip 하나로 묶여 저장되니 압축을 풀어 1번 파일을 엽니다. 처음 누를 때 보고서 양식으로 정리하느라 1~2분 걸릴 수 있습니다.</span>
         </div>
         <div id="saveMsg" aria-live="polite"></div>
       </div>
@@ -1251,7 +1252,7 @@ function finishRun(agent, text, truncated) {
   $('verifyBox').innerHTML = html;
   LAST.verify = v;
   $('saveActions').hidden = false;
-  $('saveHwpxBtn').hidden = $('saveMdBtn').hidden = $('saveTxtBtn').hidden = !DOWNLOADS;
+  $('saveDocxBtn').hidden = $('saveHwpxBtn').hidden = $('saveMdBtn').hidden = $('saveTxtBtn').hidden = !DOWNLOADS;
 }
 
 /* ===== 결과 파일로 받기 ===== */
@@ -1406,56 +1407,107 @@ function newNumbers(d, sourceText) {
   const nums = (JSON.stringify(d).match(/\d[\d,]*\.?\d*/g) || []).map(n => n.replace(/,/g, '').replace(/\.$/, ''));
   return [...new Set(nums.filter(n => n.length > 1 && !have.has(n)))];
 }
-const REPORT_JSON_PROMPT = (title, text) => [
-  '아래 "분석 결과"를 보고서 양식에 맞게 다시 정리한다.',
+const REPORT_JSON_PROMPT = (title, text, fixedLabels) => [
+  '아래 "분석 결과"를 한 장 보고서 양식(개요 / 본문 5항목 / 결론 / 참고문헌)에 맞게 다시 정리한다.',
   '규칙:',
   '- 분석 결과에 있는 내용과 수치만 쓴다. 새 수치, 새 사실, 새 출처를 만들지 않는다. 수치는 표기 그대로 옮긴다.',
   '- 개조식 업무보고 문체(~함, ~임). 이모지와 마크다운 기호를 쓰지 않는다. 「」와 (근거: …) 표시는 뺀다.',
   '- text는 각 70자 이내 한 문장, details는 각 60자 이내.',
+  fixedLabels ? '- body의 label은 실행계획, 분석1, 분석2, 분석3, 해결방안 순서를 그대로 쓴다.' : '- body는 3~5항목. label은 내용에 맞는 2~6자 낱말(예: 현황, 요구사항, 판정, 근거, 조치)로 바꿔 쓴다.',
+  '- 한 쪽에 들어가도록 짧게 쓴다. 분석 결과가 "담당자 확인 필요"이면 그 사유를 결론에 적는다.',
   '- JSON 객체 하나만 답한다. 형식:',
   '{"title":"보고서 제목","overview":["1~2문장"],"body":[{"label":"실행계획","text":"…","details":["3~4개"]},{"label":"분석1","text":"…","details":[]},{"label":"분석2","text":"…","details":[]},{"label":"분석3","text":"…","details":[]},{"label":"해결방안","text":"…","details":[]}],"conclusion":"한 문장","conclusionDetails":["2~4개"],"refs":["분석 결과에 나온 자료명만"]}',
   '', `보고서 제목: ${title}`, '', '<분석 결과>', text, '</분석 결과>'
 ].join('\n');
 
+/* 보고서 양식 내용 얻기: 모든 에이전트 공통. 실행 결과를 한 번 더 정리(JSON) */
+async function getReportJson(title) {
+  if (LAST.reportJson) return LAST.reportJson;
+  if (!SAMPLE) throw { code: 'no_sample' };
+  const t0 = Date.now();
+  const tick = setInterval(() => notice($('saveMsg'), `한 장 보고서 양식으로 정리하는 중 · ${Math.round((Date.now() - t0) / 1000)}초 (1~2분 걸릴 수 있음)`), 1000);
+  let d;
+  try { d = await SAMPLE.json(REPORT_JSON_PROMPT(title, LAST.text, LAST.agent.id === 'report')); } finally { clearInterval(tick); }
+  if (!d || typeof d !== 'object' || !Array.isArray(d.body) || !d.body.length) throw { code: 'invalid_json' };
+  LAST.reportJson = d;
+  return d;
+}
+function reportTitle() {
+  const inp = inputsByAgent[LAST.agent.id] || {};
+  return (inp.title || inp.topic || inp.biz || inp.purpose || '').trim() || LAST.agent.name;
+}
+const numberNote = (d, title) => {
+  const extra = newNumbers(d, LAST.text + ' ' + title);
+  return extra.length ? ` 주의: 실행 결과에 없는 수치가 보고서에 있습니다(${extra.slice(0, 8).join(', ')}). 담당자가 확인해 주세요.` : ' 보고서의 수치는 모두 실행 결과에 있는 수치입니다.';
+};
+function saveError(e, what) {
+  const c = e && e.code;
+  notice($('saveMsg'),
+    c === 'declined' ? '저장을 취소했습니다.'
+    : c === 'invalid_json' ? '보고서 양식으로 정리하지 못했습니다. 한 번 더 눌러 주세요.'
+    : c === 'no_sample' ? '이 화면에서는 AI를 부를 수 없어 보고서 파일을 만들 수 없습니다.'
+    : c === 'rejected_extension' || c === 'extension_not_enabled' ? `이 화면에서는 ${what} 형식 저장이 막혀 있습니다. 다른 형식 단추를 써 주세요.`
+    : ERR_TEXT[c] || `${what} 파일을 만들지 못했습니다. 잠시 뒤 다시 눌러 주세요.`, c === 'declined' ? 'warn' : 'err');
+}
+
+/* 한글: 한 장 보고서 + (보고서 에이전트는 3장 이내) + 결과 전체를 zip 하나로 */
 async function saveHwpx() {
   if (!LAST || !DOWNLOADS) return;
   const btn = $('saveHwpxBtn'); btn.disabled = true;
-  const f = resultFile();
-  const inp = inputsByAgent[LAST.agent.id] || {};
-  const title = (inp.title || inp.topic || inp.biz || '').trim() || LAST.agent.name;
-  const fullParas = mdToParas(f.body.replace(/^# .+\n/, ''));
-  const entries = []; let note = '';
+  const f = resultFile(), title = reportTitle();
   try {
+    const d = await getReportJson(title);
+    const entries = [{ name: '1_한장보고서.hwpx', data: makeHwpx(d.title || title, reportParas(d, false)) }];
+    let cutNote = '';
     if (LAST.agent.id === 'report') {
-      if (!SAMPLE) throw { code: 'no_sample' };
-      const t0 = Date.now();
-      const tick = setInterval(() => notice($('saveMsg'), `보고서 양식으로 정리하는 중 · ${Math.round((Date.now() - t0) / 1000)}초`), 1000);
-      let d;
-      try { d = LAST.reportJson || await SAMPLE.json(REPORT_JSON_PROMPT(title, LAST.text)); } finally { clearInterval(tick); }
-      if (!d || typeof d !== 'object' || !Array.isArray(d.body)) throw { code: 'invalid_json' };
-      LAST.reportJson = d;
-      const extra = newNumbers(d, LAST.text + ' ' + title);
       const fit = fitThreePages(d);
-      entries.push({ name: '1_한장보고서.hwpx', data: makeHwpx(d.title || title, reportParas(d, false)) });
       entries.push({ name: '2_3장이내보고서.hwpx', data: makeHwpx(d.title || title, reportParas(fit.data, true)) });
-      entries.push({ name: '3_분석결과전체.hwpx', data: makeHwpx(title + ' 분석 결과', fullParas) });
-      note = (fit.cut ? ` 3쪽을 넘지 않도록 세부 항목 ${fit.cut}개를 줄였습니다.` : '') + (extra.length ? ` 주의: 분석 결과에 없는 수치가 보고서에 있습니다(${extra.slice(0, 8).join(', ')}). 담당자가 확인해 주세요.` : ' 보고서의 수치는 모두 분석 결과에 있는 수치입니다.');
-    } else {
-      entries.push({ name: `${LAST.agent.id}_결과.hwpx`, data: makeHwpx(title, fullParas) });
+      if (fit.cut) cutNote = ` 3쪽을 넘지 않도록 세부 항목 ${fit.cut}개를 줄였습니다.`;
     }
-    const zip = zipStore(entries);
-    await DOWNLOADS.save({ filename: `${f.name}_hwpx.zip`, data: new Blob([zip]) });
-    notice($('saveMsg'), `${f.name}_hwpx.zip 을 저장했습니다. 압축을 풀면 한글 파일 ${entries.length}개가 있습니다.${note}`, note.includes('주의') ? 'warn' : '');
-  } catch (e) {
-    const c = e && e.code;
-    notice($('saveMsg'),
-      c === 'declined' ? '저장을 취소했습니다.'
-      : c === 'invalid_json' ? '보고서 양식으로 정리하지 못했습니다. 한 번 더 눌러 주세요.'
-      : c === 'no_sample' ? '이 화면에서는 AI를 부를 수 없어 보고서 파일을 만들 수 없습니다.'
-      : ERR_TEXT[c] || '한글 파일을 만들지 못했습니다. 잠시 뒤 다시 눌러 주세요.', c === 'declined' ? 'warn' : 'err');
-  } finally { btn.disabled = false; }
+    entries.push({ name: `${entries.length + 1}_결과전체.hwpx`, data: makeHwpx(title + ' 결과 전체', mdToParas(f.body.replace(/^# .+\n/, ''))) });
+    const note = cutNote + numberNote(d, title);
+    await DOWNLOADS.save({ filename: `${f.name}_hwpx.zip`, data: new Blob([zipStore(entries)]) });
+    notice($('saveMsg'), `${f.name}_hwpx.zip 을 저장했습니다. 압축을 풀면 한글 파일 ${entries.length}개가 있고, 1번이 한 장 보고서입니다.${note}`, note.includes('주의') ? 'warn' : '');
+  } catch (e) { saveError(e, '한글'); } finally { btn.disabled = false; }
 }
 $('saveHwpxBtn').addEventListener('click', saveHwpx);
+
+/* ===== Word(docx) 한 장 보고서: 양식과 같은 순서·모양, zip 없이 바로 저장 ===== */
+const wEsc = (t) => hwpText(t);
+function wPara(kind, text) {
+  // 크기(반 포인트), 왼쪽 들여쓰기(twip), 글머리
+  const S = { h: [30, 0, '□ ', true], l2: [26, 400, '❍ ', false], l3: [24, 800, '- ', false], item: [26, 400, '❍ ', false], plain: [20, 0, '', false] }[kind];
+  if (kind === 'empty') return '<w:p><w:pPr><w:spacing w:after="0" w:line="200" w:lineRule="exact"/></w:pPr></w:p>';
+  const [sz, ind, mark, bold] = S;
+  const hang = mark ? 300 : 0;
+  return `<w:p><w:pPr><w:spacing w:before="${kind === 'h' ? 60 : 0}" w:after="0" w:line="${kind === 'h' ? 384 : 400}" w:lineRule="auto"/><w:ind w:left="${ind + hang}" w:hanging="${hang}"/></w:pPr><w:r><w:rPr>${bold ? '<w:b/>' : ''}<w:sz w:val="${sz}"/><w:szCs w:val="${sz}"/></w:rPr><w:t xml:space="preserve">${mark}${wEsc(text)}</w:t></w:r></w:p>`;
+}
+function makeDocx(title, paras) {
+  const border = '<w:top w:val="single" w:sz="12" w:space="0" w:color="000000"/><w:left w:val="single" w:sz="12" w:space="0" w:color="000000"/><w:bottom w:val="single" w:sz="12" w:space="0" w:color="000000"/><w:right w:val="single" w:sz="12" w:space="0" w:color="000000"/>';
+  const titleTbl = `<w:tbl><w:tblPr><w:tblW w:w="5000" w:type="pct"/><w:tblBorders>${border}</w:tblBorders></w:tblPr><w:tr><w:trPr><w:trHeight w:val="760"/></w:trPr><w:tc><w:tcPr><w:tcW w:w="5000" w:type="pct"/><w:shd w:val="clear" w:color="auto" w:fill="E7EEF8"/><w:vAlign w:val="center"/></w:tcPr><w:p><w:pPr><w:jc w:val="center"/><w:spacing w:before="80" w:after="80"/></w:pPr><w:r><w:rPr><w:rFonts w:ascii="HY헤드라인M" w:hAnsi="HY헤드라인M" w:eastAsia="HY헤드라인M"/><w:b/><w:sz w:val="40"/><w:szCs w:val="40"/></w:rPr><w:t xml:space="preserve">${wEsc(title)}</w:t></w:r></w:p></w:tc></w:tr></w:tbl>`;
+  const doc = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>${titleTbl}${wPara('empty')}${paras.map(([k, t]) => wPara(k, t)).join('')}<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134" w:header="0" w:footer="0" w:gutter="0"/></w:sectPr></w:body></w:document>`;
+  const styles = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="맑은 고딕" w:hAnsi="맑은 고딕" w:eastAsia="맑은 고딕" w:cs="맑은 고딕"/><w:sz w:val="20"/><w:szCs w:val="20"/><w:lang w:val="en-US" w:eastAsia="ko-KR"/></w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:after="0"/><w:jc w:val="left"/></w:pPr></w:pPrDefault></w:docDefaults><w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/></w:style></w:styles>';
+  const u = (s) => utf8.encode(s);
+  return zipStore([
+    { name: '[Content_Types].xml', data: u('<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/></Types>') },
+    { name: '_rels/.rels', data: u('<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>') },
+    { name: 'word/document.xml', data: u(doc) },
+    { name: 'word/_rels/document.xml.rels', data: u('<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>') },
+    { name: 'word/styles.xml', data: u(styles) }
+  ]);
+}
+async function saveDocx() {
+  if (!LAST || !DOWNLOADS) return;
+  const btn = $('saveDocxBtn'); btn.disabled = true;
+  const f = resultFile(), title = reportTitle();
+  try {
+    const d = await getReportJson(title);
+    const note = numberNote(d, title);
+    await DOWNLOADS.save({ filename: `${f.name}_한장보고서.docx`, data: new Blob([makeDocx(d.title || title, reportParas(d, false))]) });
+    notice($('saveMsg'), `${f.name}_한장보고서.docx 를 저장했습니다.${note}`, note.includes('주의') ? 'warn' : '');
+  } catch (e) { saveError(e, 'Word'); } finally { btn.disabled = false; }
+}
+$('saveDocxBtn').addEventListener('click', saveDocx);
 
 $('copyBundleBtn').addEventListener('click', async () => {
   const src = collectSources();
