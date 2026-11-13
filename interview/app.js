@@ -6,7 +6,7 @@
 import { QUESTIONS, CATEGORIES, findQuestion } from './questions.js';
 import { RUBRIC, measure, speedLabel, localEvaluate, totalScore, voiceScore } from './scoring.js';
 import { BASIS, REFS, NOTICE } from './rubric.js';
-import { buildText, buildSetText, saveImage, fileName } from './save.js';
+import { buildText, buildSetText, fileName } from './save.js';
 import * as gem from './gemini.js';
 import * as files from './files.js';
 import { canRecord, openCamera, stopStream, startRecorder, startAudioAnalysis, startGaze, loadGazeModel, scoreNonverbal, saveVideo } from './video.js';
@@ -765,16 +765,13 @@ function savePanel() {
   const n = state.log.length;
   return `<section class="card save no-print">
     <h3>피드백 리포트 받기</h3>
-    <p class="muted small">화면을 닫으면 기록이 사라져요. 오늘 연습한 질문 ${n}개의 종합 평가, 항목별 점수, 질문별 피드백, 평가 기준과 근거가 담깁니다.</p>
-    <div class="savebtns">
-      <button class="btn primary" data-act="save-mail">이메일로 리포트 받기</button>
-      <button class="btn ghost" data-act="save-html">리포트 파일로 내려받기</button>
-      <button class="btn ghost" data-act="save-pdf">PDF로 저장(인쇄)</button>
-      <button class="btn ghost" data-act="save-image">이미지로 저장</button>
-      <button class="btn ghost" data-act="save-text">글로 복사</button>
+    <p class="muted small">화면을 닫으면 기록이 사라져요. 오늘 연습한 질문 ${n}개의 종합 평가, 항목별 점수, 질문별 피드백, 평가 기준과 근거가 PDF 한 파일에 담깁니다.</p>
+    <button class="btn primary big" data-act="save-pdf">PDF로 내려받기</button>
+    <p class="muted small">버튼을 누르면 PDF 파일이 휴대폰(다운로드 폴더)에 바로 저장돼요. 영상은 들어가지 않습니다.</p>
+    <div class="mailrow">
+      <label class="field">이메일로도 받기<input id="mailTo" type="email" inputmode="email" autocomplete="email" placeholder="name@example.com" value="${esc(email)}"></label>
+      <button class="btn ghost" data-act="save-mail">이메일로 보내기</button>
     </div>
-    <p class="muted small">리포트 파일은 인터넷 없이도 열리는 한 장짜리 문서(HTML)예요. 휴대폰의 다운로드 폴더에 저장되고, 열어서 인쇄하거나 강사에게 보낼 수 있습니다.</p>
-    <label class="field">받을 이메일<input id="mailTo" type="email" inputmode="email" autocomplete="email" placeholder="name@example.com" value="${esc(email)}"></label>
     ${state.screen !== 'records' ? '<button class="linkbtn" data-act="records">피드백 리포트 미리 보기</button>' : ''}
   </section>`;
 }
@@ -853,46 +850,36 @@ function recordsView() {
   </main>`;
 }
 
-// 리포트를 혼자서도 열리는 HTML 파일 하나로 만든다(스타일 포함, 영상·버튼 제외).
-async function downloadReport() {
-  let css = '';
-  try { css = await (await fetch('style.css')).text(); } catch { /* 스타일 없이도 읽을 수 있다 */ }
-  const holder = document.createElement('div');
-  holder.innerHTML = reportBody();
-  holder.querySelectorAll('.no-print, video, button').forEach(n => n.remove());
-  holder.querySelectorAll('details').forEach(n => { n.open = true; });
-  const html = `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>면접 피드백 리포트</title><style>${css}\nbody{padding:8px 0 40px}.wrap{max-width:820px}</style></head><body><main class="wrap records">${holder.innerHTML}</main></body></html>`;
-  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = fileName('html').replace('interview-', 'interview-report-');
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 10000);
+let pdfBusy = false;
+async function downloadPdf() {
+  if (pdfBusy) return;
+  pdfBusy = true;
+  toast('PDF를 만드는 중이에요. 잠시만 기다려 주세요...');
+  try {
+    const { buildPdf } = await import('./pdf.js');
+    const blob = await buildPdf(reportBody(), (i, n) => { document.getElementById('toast').textContent = `PDF를 만드는 중이에요... ${Math.round((i / n) * 100)}%`; });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName('pdf').replace('interview-', 'interview-report-');
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 30000);
+    state.saved = true;
+    toast('PDF를 내려받았어요. 다운로드 폴더(파일 앱)에서 확인해 주세요.');
+  } catch (err) {
+    // 기기에서 PDF를 만들지 못하면 인쇄 창의 "PDF로 저장"으로 대신한다.
+    toast('PDF를 바로 만들지 못해 인쇄 창을 열어요. "PDF로 저장"을 골라 주세요.');
+    if (state.screen !== 'records') go('records');
+    setTimeout(() => window.print(), 400);
+  } finally {
+    pdfBusy = false;
+  }
 }
 
 async function doSave(act) {
   if (!state.log.length) { toast('먼저 질문 하나를 연습해 주세요.'); return; }
-  if (act === 'save-mail') {
-    await sendReportMail();
-  } else if (act === 'save-html') {
-    await downloadReport();
-    state.saved = true;
-    toast('리포트 파일을 내려받았어요. 다운로드 폴더에서 열어 보세요.');
-  } else if (act === 'save-text') {
-    await copy(buildText(state.log), '피드백을 글로 복사했어요. 메모장이나 카카오톡에 붙여 넣어 주세요.');
-    state.saved = true;
-  } else if (act === 'save-image') {
-    try {
-      const how = await saveImage(state.log);
-      if (how !== 'cancelled') { state.saved = true; toast(how === 'shared' ? '저장할 곳을 골라 주세요.' : '이미지를 내려받았어요.'); }
-    } catch (err) { toast(err.message || '이미지 저장에 실패했어요.'); }
-  } else if (act === 'save-pdf') {
-    if (state.screen !== 'records') go('records');
-    state.saved = true;
-    toast('인쇄 창에서 "PDF로 저장"을 골라 주세요.');
-    setTimeout(() => window.print(), 300);
-  }
+  if (act === 'save-mail') await sendReportMail();
+  else if (act === 'save-pdf') await downloadPdf();
 }
 
 window.addEventListener('beforeunload', e => {
@@ -970,7 +957,7 @@ function guideView() {
         <li><b>꼬리질문</b>(AI 키 연결 시): 부족한 근거를 묻는 질문에 한 번 더 답합니다.</li>
         <li><b>피드백</b>: 총점, 항목별 점수, 다음에 고칠 한 가지, 바꿔 말하기 예시를 봅니다.</li>
         <li><b>다시 답하기</b>: 한 가지를 고쳐 같은 질문에 다시 답하고 전후를 비교합니다.</li>
-        <li><b>리포트 받기</b>: 이메일, 파일, PDF, 이미지로 피드백 리포트를 받습니다.</li>
+        <li><b>리포트 받기</b>: 피드백 리포트를 PDF 파일로 내려받습니다. 이메일로도 받을 수 있어요.</li>
       </ol>
     </section>
     <section class="card">
@@ -1015,9 +1002,9 @@ function guideView() {
     <section class="card">
       <h2>피드백 리포트 받기</h2>
       <ul class="plain">
-        <li><b>이메일로 리포트 받기</b>: 처음에 쓴 주소로 리포트 글을 보냅니다. 바로 발송되지 않고 메일 앱이 열리면, 내용이 채워진 메일의 "보내기"를 눌러 주세요.</li>
-        <li><b>리포트 파일로 내려받기</b>: 인터넷 없이도 열리는 문서 파일로 저장됩니다.</li>
-        <li><b>PDF·이미지·글 복사</b>도 됩니다. 영상은 피드백 화면의 "이 영상 내 휴대폰에 저장"으로 따로 저장해요.</li>
+        <li><b>PDF로 내려받기</b>: 버튼을 누르면 피드백 리포트가 PDF 파일로 휴대폰에 바로 저장됩니다.</li>
+        <li><b>이메일로 보내기</b>: 처음에 쓴 주소로 리포트 글을 보냅니다. 바로 발송되지 않고 메일 앱이 열리면, 내용이 채워진 메일의 "보내기"를 눌러 주세요.</li>
+        <li>영상은 피드백 화면의 "이 영상 내 휴대폰에 저장"으로 따로 저장해요.</li>
         <li>화면을 닫으면 기록이 사라지니, 끝내기 전에 꼭 받아 두세요.</li>
       </ul>
     </section>
@@ -1483,7 +1470,7 @@ app.addEventListener('click', async e => {
     saveCustom();
     render();
   }
-  else if (['save-image', 'save-pdf', 'save-text', 'save-html', 'save-mail'].includes(act)) doSave(act);
+  else if (['save-pdf', 'save-mail'].includes(act)) doSave(act);
   else if (act === 'guide') { saveEmailField(true); go('guide'); }
   else if (act === 'save-settings' || act === 'share-link') {
     settings.relay = document.getElementById('relay').value.trim();
