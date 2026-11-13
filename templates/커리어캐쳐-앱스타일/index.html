@@ -1,0 +1,509 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>커리어캐쳐 앱 스타일</title>
+<style>
+/* 커리어캐쳐 앱 스타일 — 복사해서 <style> 안이나 별도 css 파일로 쓰세요.
+   기본: 흰 바탕 · 큰 굵은 제목 · 둥근 카드 · 포인트 색 하나(파랑).
+   다른 톤: <html data-tone="warm"> 이면 조직도·지시판의 웜 그린 톤.
+   밝기: 시스템 설정을 따르고, <html data-theme="light|dark">로 고정할 수 있음. */
+
+:root {
+  /* 색 */
+  --cc-bg: #FFFFFF;          /* 페이지 바탕 */
+  --cc-surface: #F2F4F7;     /* 카드 바탕 */
+  --cc-elevated: #FFFFFF;    /* 떠 있는 카드(그림자) */
+  --cc-ink: #191F28;         /* 본문 글자 */
+  --cc-sub: #4E5968;         /* 보조 글자 */
+  --cc-muted: #8B95A1;       /* 흐린 글자·화살표 */
+  --cc-line: #E5E8EB;        /* 선 */
+  --cc-accent: #3D5AFE;      /* 포인트(버튼·강조) */
+  --cc-on-accent: #FFFFFF;
+  --cc-accent-soft: #E8EDFF; /* 포인트 연한 바탕(칩·팁) */
+  --cc-success: #12B886;  --cc-success-soft: #E6F8F1;
+  --cc-warn: #E08A00;     --cc-warn-soft: #FFF4DB;
+  --cc-danger: #F04452;   --cc-danger-soft: #FFE9E9;
+  /* 글꼴 */
+  --cc-font: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", system-ui, sans-serif;
+  /* 크기 */
+  --cc-radius: 16px; --cc-radius-sm: 10px; --cc-pill: 999px;
+  --cc-shadow: 0 4px 16px rgba(27, 43, 75, .10);
+  --cc-gap: 16px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --cc-bg: #17191C; --cc-surface: #22252A; --cc-elevated: #2A2E34;
+    --cc-ink: #ECEEF1; --cc-sub: #B0B8C1; --cc-muted: #8B95A1; --cc-line: #353A41;
+    --cc-accent: #7B8FFF; --cc-on-accent: #0E1220; --cc-accent-soft: #232C52;
+    --cc-success: #3DD6A3; --cc-success-soft: #173A30;
+    --cc-warn: #FFB547; --cc-warn-soft: #3D2E12;
+    --cc-danger: #FF7A85; --cc-danger-soft: #3F1E22;
+    --cc-shadow: 0 4px 16px rgba(0, 0, 0, .35);
+  }
+}
+:root[data-theme="dark"] {
+  --cc-bg: #17191C; --cc-surface: #22252A; --cc-elevated: #2A2E34;
+  --cc-ink: #ECEEF1; --cc-sub: #B0B8C1; --cc-muted: #8B95A1; --cc-line: #353A41;
+  --cc-accent: #7B8FFF; --cc-on-accent: #0E1220; --cc-accent-soft: #232C52;
+  --cc-success: #3DD6A3; --cc-success-soft: #173A30;
+  --cc-warn: #FFB547; --cc-warn-soft: #3D2E12;
+  --cc-danger: #FF7A85; --cc-danger-soft: #3F1E22;
+  --cc-shadow: 0 4px 16px rgba(0, 0, 0, .35);
+}
+/* 웜 그린 톤 (조직도·지시판 페이지와 같은 색) */
+:root[data-tone="warm"] {
+  --cc-bg: #F6F5F1; --cc-surface: #FFFFFF; --cc-elevated: #FFFFFF;
+  --cc-ink: #1D1C1A; --cc-sub: #6B6862; --cc-muted: #8F8B83; --cc-line: #D9D5CC;
+  --cc-accent: #2F5D50; --cc-on-accent: #FFFFFF; --cc-accent-soft: #E3ECE8;
+  --cc-warn: #8A4B12; --cc-warn-soft: #F6EAD9;
+}
+
+/* 기본 */
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: var(--cc-bg); color: var(--cc-ink); font-family: var(--cc-font); line-height: 1.55; -webkit-font-smoothing: antialiased; }
+.cc-page { max-width: 1120px; margin: 0 auto; padding: 40px 16px 64px; }
+
+/* 글자 */
+.cc-display { font-size: clamp(32px, 6vw, 48px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.2; margin: 0; }
+.cc-h1 { font-size: clamp(24px, 4vw, 32px); font-weight: 800; letter-spacing: -0.02em; margin: 0 0 8px; }
+.cc-h2 { font-size: 20px; font-weight: 700; margin: 0 0 6px; }
+.cc-body { font-size: 16px; margin: 0; }
+.cc-sub { color: var(--cc-sub); font-size: 15px; margin: 0; }
+.cc-caption { color: var(--cc-muted); font-size: 13px; }
+
+/* 칩(작은 라벨) */
+.cc-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: var(--cc-pill); background: var(--cc-accent-soft); color: var(--cc-accent); font-size: 13px; font-weight: 700; white-space: nowrap; }
+.cc-pill.is-solid { background: var(--cc-accent); color: var(--cc-on-accent); }
+.cc-pill.is-gray { background: var(--cc-surface); color: var(--cc-sub); }
+.cc-pill.is-success { background: var(--cc-success-soft); color: var(--cc-success); }
+.cc-pill.is-warn { background: var(--cc-warn-soft); color: var(--cc-warn); }
+.cc-pill.is-danger { background: var(--cc-danger-soft); color: var(--cc-danger); }
+
+/* 카드 */
+.cc-card { background: var(--cc-surface); border-radius: var(--cc-radius); padding: 24px; }
+.cc-card.is-elevated { background: var(--cc-elevated); box-shadow: var(--cc-shadow); border: 1px solid var(--cc-line); }
+.cc-card.is-accent { background: var(--cc-accent); color: var(--cc-on-accent); }
+.cc-card.is-tip { background: var(--cc-accent-soft); color: var(--cc-accent); font-weight: 700; }
+.cc-grid { display: grid; gap: var(--cc-gap); grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+
+/* 숫자 원, 아이콘 원 */
+.cc-num { width: 36px; height: 36px; border-radius: 50%; display: inline-grid; place-items: center; background: var(--cc-accent); color: var(--cc-on-accent); font-weight: 800; flex: none; }
+.cc-icon { width: 48px; height: 48px; border-radius: 50%; display: inline-grid; place-items: center; background: var(--cc-accent-soft); color: var(--cc-accent); flex: none; }
+.cc-icon svg { width: 24px; height: 24px; }
+
+/* 단계 목록 */
+.cc-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.cc-steps li { display: flex; align-items: center; gap: 14px; background: var(--cc-surface); border-radius: var(--cc-radius); padding: 16px 20px; }
+.cc-steps .cc-step-title { font-weight: 700; font-size: 17px; }
+.cc-steps .cc-step-desc { color: var(--cc-sub); font-size: 14px; }
+.cc-steps .cc-pill { margin-left: auto; }
+
+/* 화면 경로 (설정 › 기능 › ...) */
+.cc-path { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.cc-path span { padding: 6px 14px; border-radius: var(--cc-pill); background: var(--cc-surface); font-weight: 700; font-size: 14px; }
+.cc-path span:last-child { background: var(--cc-accent); color: var(--cc-on-accent); }
+.cc-path i { font-style: normal; color: var(--cc-muted); }
+
+/* 버튼 */
+.cc-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 20px; border: 0; border-radius: 12px; background: var(--cc-accent); color: var(--cc-on-accent); font: inherit; font-weight: 700; cursor: pointer; }
+.cc-btn.is-ghost { background: var(--cc-surface); color: var(--cc-ink); }
+.cc-btn:focus-visible, .cc-path span:focus-visible { outline: 3px solid var(--cc-accent); outline-offset: 2px; }
+
+/* 큰 숫자 */
+.cc-stat { font-size: 44px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; }
+.cc-stat-label { color: var(--cc-sub); font-size: 14px; }
+
+/* 채팅 화면 */
+.cc-chat { background: var(--cc-elevated); border: 1px solid var(--cc-line); border-radius: 24px; box-shadow: var(--cc-shadow); padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+.cc-chat-title { font-size: 13px; font-weight: 700; color: var(--cc-sub); margin-bottom: 4px; }
+.cc-bubble { max-width: 82%; padding: 10px 14px; border-radius: 16px; font-size: 15px; background: var(--cc-surface); align-self: flex-start; white-space: pre-line; }
+.cc-bubble.is-me { background: var(--cc-accent); color: var(--cc-on-accent); align-self: flex-end; }
+
+/* 체크리스트 */
+.cc-check { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.cc-check li { display: flex; gap: 12px; align-items: center; background: var(--cc-surface); border-radius: 12px; padding: 14px 18px; font-size: 16px; }
+.cc-check li::before { content: ""; width: 20px; height: 20px; border: 2px solid var(--cc-muted); border-radius: 6px; flex: none; }
+.cc-check li.is-done::before { background: var(--cc-accent); border-color: var(--cc-accent); }
+
+/* 표 */
+.cc-table-wrap { overflow-x: auto; border-radius: var(--cc-radius); border: 1px solid var(--cc-line); }
+.cc-table { width: 100%; border-collapse: collapse; font-size: 15px; min-width: 520px; }
+.cc-table th { background: var(--cc-surface); color: var(--cc-sub); text-align: left; font-weight: 700; padding: 12px 14px; }
+.cc-table td { padding: 12px 14px; border-top: 1px solid var(--cc-line); }
+
+/* 섹션 표지 (파란 바탕) */
+.cc-section { background: var(--cc-accent); color: var(--cc-on-accent); border-radius: 24px; padding: 40px 32px; display: flex; justify-content: space-between; align-items: center; gap: 16px; overflow: hidden; }
+.cc-section .cc-section-num { font-size: clamp(64px, 14vw, 140px); font-weight: 800; line-height: 1; opacity: .35; }
+
+/* 상단 바 */
+.cc-topbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 32px; }
+
+
+.sg-block{margin-top:40px}
+.sg-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.sg-preview{border:1px dashed var(--cc-line);border-radius:var(--cc-radius);padding:24px;background:var(--cc-bg)}
+.sg-code{margin-top:10px;background:var(--cc-surface);border-radius:var(--cc-radius-sm);padding:14px 16px;font:13px/1.5 ui-monospace,Menlo,Consolas,monospace;overflow:auto;max-height:220px;white-space:pre;color:var(--cc-sub)}
+.sg-swatches{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
+.sg-sw{border-radius:var(--cc-radius-sm);overflow:hidden;border:1px solid var(--cc-line);background:var(--cc-elevated)}
+.sg-sw i{display:block;height:56px}
+.sg-sw div{padding:8px 10px;font-size:13px}
+.sg-sw code{color:var(--cc-sub);font-size:12px}
+.sg-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--cc-ink);color:var(--cc-bg);padding:10px 18px;border-radius:999px;font-weight:700;opacity:0;transition:opacity .2s;pointer-events:none}
+.sg-toast.show{opacity:1}
+.sg-rules{columns:2 280px;gap:24px;padding-left:18px;margin:0}
+.sg-rules li{margin-bottom:8px;break-inside:avoid}
+
+</style>
+</head>
+<body>
+<main class="cc-page">
+<div class="cc-topbar"><span class="cc-pill">커리어캐쳐 디자인 양식</span>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="cc-btn is-ghost" type="button" id="tone">웜 그린 톤 보기</button><button class="cc-btn is-ghost" type="button" id="theme">밝게/어둡게</button></div></div>
+<h1 class="cc-display">커리어캐쳐 앱 스타일</h1>
+<p class="cc-sub" style="margin-top:12px;max-width:640px">강의 교안과 AI비서 페이지에서 쓴 디자인을 그대로 복사해 쓰는 양식입니다. 아래 순서대로 <b>① 전체 CSS</b>를 한 번 붙여 넣고, <b>② 필요한 조각의 HTML</b>을 가져다 쓰세요.</p>
+
+<section class="sg-block">
+<div class="sg-head"><div><h2 class="cc-h2">① 전체 CSS</h2><p class="cc-sub">페이지 &lt;style&gt; 안에 한 번 붙여 넣기. 파일로는 <code>tokens.css</code></p></div>
+<button class="cc-btn" type="button" data-copy="css">전체 CSS 복사</button></div>
+<pre class="sg-code" id="css">/* 커리어캐쳐 앱 스타일 — 복사해서 &lt;style&gt; 안이나 별도 css 파일로 쓰세요.
+   기본: 흰 바탕 · 큰 굵은 제목 · 둥근 카드 · 포인트 색 하나(파랑).
+   다른 톤: &lt;html data-tone="warm"&gt; 이면 조직도·지시판의 웜 그린 톤.
+   밝기: 시스템 설정을 따르고, &lt;html data-theme="light|dark"&gt;로 고정할 수 있음. */
+
+:root {
+  /* 색 */
+  --cc-bg: #FFFFFF;          /* 페이지 바탕 */
+  --cc-surface: #F2F4F7;     /* 카드 바탕 */
+  --cc-elevated: #FFFFFF;    /* 떠 있는 카드(그림자) */
+  --cc-ink: #191F28;         /* 본문 글자 */
+  --cc-sub: #4E5968;         /* 보조 글자 */
+  --cc-muted: #8B95A1;       /* 흐린 글자·화살표 */
+  --cc-line: #E5E8EB;        /* 선 */
+  --cc-accent: #3D5AFE;      /* 포인트(버튼·강조) */
+  --cc-on-accent: #FFFFFF;
+  --cc-accent-soft: #E8EDFF; /* 포인트 연한 바탕(칩·팁) */
+  --cc-success: #12B886;  --cc-success-soft: #E6F8F1;
+  --cc-warn: #E08A00;     --cc-warn-soft: #FFF4DB;
+  --cc-danger: #F04452;   --cc-danger-soft: #FFE9E9;
+  /* 글꼴 */
+  --cc-font: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", system-ui, sans-serif;
+  /* 크기 */
+  --cc-radius: 16px; --cc-radius-sm: 10px; --cc-pill: 999px;
+  --cc-shadow: 0 4px 16px rgba(27, 43, 75, .10);
+  --cc-gap: 16px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --cc-bg: #17191C; --cc-surface: #22252A; --cc-elevated: #2A2E34;
+    --cc-ink: #ECEEF1; --cc-sub: #B0B8C1; --cc-muted: #8B95A1; --cc-line: #353A41;
+    --cc-accent: #7B8FFF; --cc-on-accent: #0E1220; --cc-accent-soft: #232C52;
+    --cc-success: #3DD6A3; --cc-success-soft: #173A30;
+    --cc-warn: #FFB547; --cc-warn-soft: #3D2E12;
+    --cc-danger: #FF7A85; --cc-danger-soft: #3F1E22;
+    --cc-shadow: 0 4px 16px rgba(0, 0, 0, .35);
+  }
+}
+:root[data-theme="dark"] {
+  --cc-bg: #17191C; --cc-surface: #22252A; --cc-elevated: #2A2E34;
+  --cc-ink: #ECEEF1; --cc-sub: #B0B8C1; --cc-muted: #8B95A1; --cc-line: #353A41;
+  --cc-accent: #7B8FFF; --cc-on-accent: #0E1220; --cc-accent-soft: #232C52;
+  --cc-success: #3DD6A3; --cc-success-soft: #173A30;
+  --cc-warn: #FFB547; --cc-warn-soft: #3D2E12;
+  --cc-danger: #FF7A85; --cc-danger-soft: #3F1E22;
+  --cc-shadow: 0 4px 16px rgba(0, 0, 0, .35);
+}
+/* 웜 그린 톤 (조직도·지시판 페이지와 같은 색) */
+:root[data-tone="warm"] {
+  --cc-bg: #F6F5F1; --cc-surface: #FFFFFF; --cc-elevated: #FFFFFF;
+  --cc-ink: #1D1C1A; --cc-sub: #6B6862; --cc-muted: #8F8B83; --cc-line: #D9D5CC;
+  --cc-accent: #2F5D50; --cc-on-accent: #FFFFFF; --cc-accent-soft: #E3ECE8;
+  --cc-warn: #8A4B12; --cc-warn-soft: #F6EAD9;
+}
+
+/* 기본 */
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: var(--cc-bg); color: var(--cc-ink); font-family: var(--cc-font); line-height: 1.55; -webkit-font-smoothing: antialiased; }
+.cc-page { max-width: 1120px; margin: 0 auto; padding: 40px 16px 64px; }
+
+/* 글자 */
+.cc-display { font-size: clamp(32px, 6vw, 48px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.2; margin: 0; }
+.cc-h1 { font-size: clamp(24px, 4vw, 32px); font-weight: 800; letter-spacing: -0.02em; margin: 0 0 8px; }
+.cc-h2 { font-size: 20px; font-weight: 700; margin: 0 0 6px; }
+.cc-body { font-size: 16px; margin: 0; }
+.cc-sub { color: var(--cc-sub); font-size: 15px; margin: 0; }
+.cc-caption { color: var(--cc-muted); font-size: 13px; }
+
+/* 칩(작은 라벨) */
+.cc-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: var(--cc-pill); background: var(--cc-accent-soft); color: var(--cc-accent); font-size: 13px; font-weight: 700; white-space: nowrap; }
+.cc-pill.is-solid { background: var(--cc-accent); color: var(--cc-on-accent); }
+.cc-pill.is-gray { background: var(--cc-surface); color: var(--cc-sub); }
+.cc-pill.is-success { background: var(--cc-success-soft); color: var(--cc-success); }
+.cc-pill.is-warn { background: var(--cc-warn-soft); color: var(--cc-warn); }
+.cc-pill.is-danger { background: var(--cc-danger-soft); color: var(--cc-danger); }
+
+/* 카드 */
+.cc-card { background: var(--cc-surface); border-radius: var(--cc-radius); padding: 24px; }
+.cc-card.is-elevated { background: var(--cc-elevated); box-shadow: var(--cc-shadow); border: 1px solid var(--cc-line); }
+.cc-card.is-accent { background: var(--cc-accent); color: var(--cc-on-accent); }
+.cc-card.is-tip { background: var(--cc-accent-soft); color: var(--cc-accent); font-weight: 700; }
+.cc-grid { display: grid; gap: var(--cc-gap); grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+
+/* 숫자 원, 아이콘 원 */
+.cc-num { width: 36px; height: 36px; border-radius: 50%; display: inline-grid; place-items: center; background: var(--cc-accent); color: var(--cc-on-accent); font-weight: 800; flex: none; }
+.cc-icon { width: 48px; height: 48px; border-radius: 50%; display: inline-grid; place-items: center; background: var(--cc-accent-soft); color: var(--cc-accent); flex: none; }
+.cc-icon svg { width: 24px; height: 24px; }
+
+/* 단계 목록 */
+.cc-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.cc-steps li { display: flex; align-items: center; gap: 14px; background: var(--cc-surface); border-radius: var(--cc-radius); padding: 16px 20px; }
+.cc-steps .cc-step-title { font-weight: 700; font-size: 17px; }
+.cc-steps .cc-step-desc { color: var(--cc-sub); font-size: 14px; }
+.cc-steps .cc-pill { margin-left: auto; }
+
+/* 화면 경로 (설정 › 기능 › ...) */
+.cc-path { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.cc-path span { padding: 6px 14px; border-radius: var(--cc-pill); background: var(--cc-surface); font-weight: 700; font-size: 14px; }
+.cc-path span:last-child { background: var(--cc-accent); color: var(--cc-on-accent); }
+.cc-path i { font-style: normal; color: var(--cc-muted); }
+
+/* 버튼 */
+.cc-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 20px; border: 0; border-radius: 12px; background: var(--cc-accent); color: var(--cc-on-accent); font: inherit; font-weight: 700; cursor: pointer; }
+.cc-btn.is-ghost { background: var(--cc-surface); color: var(--cc-ink); }
+.cc-btn:focus-visible, .cc-path span:focus-visible { outline: 3px solid var(--cc-accent); outline-offset: 2px; }
+
+/* 큰 숫자 */
+.cc-stat { font-size: 44px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; }
+.cc-stat-label { color: var(--cc-sub); font-size: 14px; }
+
+/* 채팅 화면 */
+.cc-chat { background: var(--cc-elevated); border: 1px solid var(--cc-line); border-radius: 24px; box-shadow: var(--cc-shadow); padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+.cc-chat-title { font-size: 13px; font-weight: 700; color: var(--cc-sub); margin-bottom: 4px; }
+.cc-bubble { max-width: 82%; padding: 10px 14px; border-radius: 16px; font-size: 15px; background: var(--cc-surface); align-self: flex-start; white-space: pre-line; }
+.cc-bubble.is-me { background: var(--cc-accent); color: var(--cc-on-accent); align-self: flex-end; }
+
+/* 체크리스트 */
+.cc-check { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.cc-check li { display: flex; gap: 12px; align-items: center; background: var(--cc-surface); border-radius: 12px; padding: 14px 18px; font-size: 16px; }
+.cc-check li::before { content: ""; width: 20px; height: 20px; border: 2px solid var(--cc-muted); border-radius: 6px; flex: none; }
+.cc-check li.is-done::before { background: var(--cc-accent); border-color: var(--cc-accent); }
+
+/* 표 */
+.cc-table-wrap { overflow-x: auto; border-radius: var(--cc-radius); border: 1px solid var(--cc-line); }
+.cc-table { width: 100%; border-collapse: collapse; font-size: 15px; min-width: 520px; }
+.cc-table th { background: var(--cc-surface); color: var(--cc-sub); text-align: left; font-weight: 700; padding: 12px 14px; }
+.cc-table td { padding: 12px 14px; border-top: 1px solid var(--cc-line); }
+
+/* 섹션 표지 (파란 바탕) */
+.cc-section { background: var(--cc-accent); color: var(--cc-on-accent); border-radius: 24px; padding: 40px 32px; display: flex; justify-content: space-between; align-items: center; gap: 16px; overflow: hidden; }
+.cc-section .cc-section-num { font-size: clamp(64px, 14vw, 140px); font-weight: 800; line-height: 1; opacity: .35; }
+
+/* 상단 바 */
+.cc-topbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 32px; }
+</pre></section>
+
+<section class="sg-block"><h2 class="cc-h2">디자인 규칙 10가지</h2><ol class="sg-rules"><li>흰 바탕, 포인트 색은 파랑 하나만 (초록·노랑·빨강은 상태 표시용)</li><li>제목은 크고 굵게(32~48), 본문은 15~16</li><li>카드는 모서리 16px, 테두리 대신 연회색 바탕</li><li>강조선·옆 줄무늬 장식 쓰지 않기</li><li>한 화면 = 메시지 하나, 글자는 짧게</li><li>본문은 왼쪽 정렬, 가운데 정렬은 짧은 제목만</li><li>상태는 색과 글자를 함께 (색만으로 구분하지 않기)</li><li>캐릭터·이모지 없이 아이콘 원과 큰 숫자로 시각화</li><li>특정 회사 로고·고유 색·화면은 쓰지 않기</li><li>간격은 8의 배수 (8·16·24·40)</li></ol></section>
+<section class="sg-block"><h2 class="cc-h2">색</h2><p class="cc-sub" style="margin-bottom:12px">어두운 화면에서는 자동으로 어두운 색으로 바뀝니다.</p><div class="sg-swatches"><div class="sg-sw"><i style="background:var(--cc-accent)"></i><div><b>포인트</b><br><code>--cc-accent</code><br><code>#3D5AFE</code></div></div><div class="sg-sw"><i style="background:var(--cc-accent-soft)"></i><div><b>포인트 연한</b><br><code>--cc-accent-soft</code><br><code>#E8EDFF</code></div></div><div class="sg-sw"><i style="background:var(--cc-ink)"></i><div><b>글자</b><br><code>--cc-ink</code><br><code>#191F28</code></div></div><div class="sg-sw"><i style="background:var(--cc-sub)"></i><div><b>보조 글자</b><br><code>--cc-sub</code><br><code>#4E5968</code></div></div><div class="sg-sw"><i style="background:var(--cc-surface)"></i><div><b>카드 바탕</b><br><code>--cc-surface</code><br><code>#F2F4F7</code></div></div><div class="sg-sw"><i style="background:var(--cc-line)"></i><div><b>선</b><br><code>--cc-line</code><br><code>#E5E8EB</code></div></div><div class="sg-sw"><i style="background:var(--cc-success)"></i><div><b>완료</b><br><code>--cc-success</code><br><code>#12B886</code></div></div><div class="sg-sw"><i style="background:var(--cc-warn)"></i><div><b>주의·추정</b><br><code>--cc-warn</code><br><code>#E08A00</code></div></div><div class="sg-sw"><i style="background:var(--cc-danger)"></i><div><b>위험·지남</b><br><code>--cc-danger</code><br><code>#F04452</code></div></div></div></section>
+<h2 class="cc-h1" style="margin-top:56px">② 조각(컴포넌트)</h2>
+<section class="sg-block" aria-labelledby="s0">
+<div class="sg-head"><div><h2 class="cc-h2" id="s0">표지</h2><p class="cc-sub">큰 제목 + 칩 + 부제. 페이지·슬라이드 첫 화면</p></div>
+<button class="cc-btn is-ghost" type="button" data-copy="c0">HTML 복사</button></div>
+<div class="sg-preview"><header>
+  <span class="cc-pill">AI 에이전트 실무</span>
+  <h1 class="cc-display" style="margin-top:12px">나만의 업무 정리<br>비서 만들기</h1>
+  <p class="cc-sub" style="margin-top:12px">claude.ai에서 코딩 없이 만드는 에이전트</p>
+</header></div>
+<pre class="sg-code" id="c0">&lt;header&gt;
+  &lt;span class="cc-pill"&gt;AI 에이전트 실무&lt;/span&gt;
+  &lt;h1 class="cc-display" style="margin-top:12px"&gt;나만의 업무 정리&lt;br&gt;비서 만들기&lt;/h1&gt;
+  &lt;p class="cc-sub" style="margin-top:12px"&gt;claude.ai에서 코딩 없이 만드는 에이전트&lt;/p&gt;
+&lt;/header&gt;</pre></section><section class="sg-block" aria-labelledby="s1">
+<div class="sg-head"><div><h2 class="cc-h2" id="s1">칩</h2><p class="cc-sub">상태·분류 라벨. 색만으로 뜻을 전하지 않도록 글자를 꼭 넣기</p></div>
+<button class="cc-btn is-ghost" type="button" data-copy="c1">HTML 복사</button></div>
+<div class="sg-preview"><div style="display:flex;gap:8px;flex-wrap:wrap">
+  <span class="cc-pill">기본</span>
+  <span class="cc-pill is-solid">선택됨</span>
+  <span class="cc-pill is-gray">미정</span>
+  <span class="cc-pill is-success">완료</span>
+  <span class="cc-pill is-warn">추정</span>
+  <span class="cc-pill is-danger">기한 지남</span>
+</div></div>
+<pre class="sg-code" id="c1">&lt;div style="display:flex;gap:8px;flex-wrap:wrap"&gt;
+  &lt;span class="cc-pill"&gt;기본&lt;/span&gt;
+  &lt;span class="cc-pill is-solid"&gt;선택됨&lt;/span&gt;
+  &lt;span class="cc-pill is-gray"&gt;미정&lt;/span&gt;
+  &lt;span class="cc-pill is-success"&gt;완료&lt;/span&gt;
+  &lt;span class="cc-pill is-warn"&gt;추정&lt;/span&gt;
+  &lt;span class="cc-pill is-danger"&gt;기한 지남&lt;/span&gt;
+&lt;/div&gt;</pre></section><section class="sg-block" aria-labelledby="s2">
+<div class="sg-head"><div><h2 class="cc-h2" id="s2">카드 3개</h2><p class="cc-sub">개념·규칙·기능을 나란히. 아이콘 원 + 작은 라벨 + 큰 글자 + 설명</p></div>
+<button class="cc-btn is-ghost" type="button" data-copy="c2">HTML 복사</button></div>
+<div class="sg-preview"><div class="cc-grid">
+  <div class="cc-card">
+    <span class="cc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+    <p class="cc-caption" style="margin:14px 0 2px;color:var(--cc-accent);font-weight:700">Project</p>
+    <h3 class="cc-h1" style="font-size:26px">작업용 방</h3>
+    <p class="cc-sub">맥락이 늘 깔려 있는 곳</p>
+  </div>
+  <div class="cc-card">
+    <span class="cc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+    <p class="cc-caption" style="margin:14px 0 2px;color:var(--cc-accent);font-weight:700">Skill</p>
+    <h3 class="cc-h1" style="font-size:26px">작업 매뉴얼</h3>
+    <p class="cc-sub">정해진 방식으로 일하게</p>
+  </div>
+  <div class="cc-card">
+    <span class="cc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+    <p class="cc-caption" style="margin:14px 0 2px;color:var(--cc-accent);font-weight:700">Quality</p>
+    <h3 class="cc-h1" style="font-size:26px">인간의 몫</h3>
+    <p class="cc-sub">검증은 사람이 한다</p>
+  </div>
+</div></div>
+<pre class="sg-code" id="c2">&lt;div class="cc-grid"&gt;
+  &lt;div class="cc-card"&gt;
+    &lt;span class="cc-icon"&gt;&lt;svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"&gt;&lt;path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/&gt;&lt;/svg&gt;&lt;/span&gt;
+    &lt;p class="cc-caption" style="margin:14px 0 2px;color:var(--cc-accent);font-weight:700"&gt;Project&lt;/p&gt;
+    &lt;h3 class="cc-h1" style="font-size:26px"&gt;작업용 방&lt;/h3&gt;
+    &lt;p class="cc-sub"&gt;맥락이 늘 깔려 있는 곳&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div class="cc-card"&gt;
+    &lt;span class="cc-icon"&gt;&lt;svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"&gt;&lt;path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/&gt;&lt;/svg&gt;&lt;/span&gt;
+    &lt;p class="cc-caption" style="margin:14px 0 2px;color:var(--cc-accent);font-weight:700"&gt;Skill&lt;/p&gt;
+    &lt;h3 class="cc-h1" style="font-size:26px"&gt;작업 매뉴얼&lt;/h3&gt;
+    &lt;p class="cc-sub"&gt;정해진 방식으로 일하게&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div class="cc-card"&gt;
+    &lt;span class="cc-icon"&gt;&lt;svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"&gt;&lt;path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/&gt;&lt;/svg&gt;&lt;/span&gt;
+    &lt;p class="cc-caption" style="margin:14px 0 2px;color:var(--cc-accent);font-weight:700"&gt;Quality&lt;/p&gt;
+    &lt;h3 class="cc-h1" style="font-size:26px"&gt;인간의 몫&lt;/h3&gt;
+    &lt;p class="cc-sub"&gt;검증은 사람이 한다&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre></section><section class="sg-block" aria-labelledby="s3">
+<div class="sg-head"><div><h2 class="cc-h2" id="s3">단계 목록</h2><p class="cc-sub">순서가 있는 과정. 오른쪽 칩에 실습 번호·시간</p></div>
+<button class="cc-btn is-ghost" type="button" data-copy="c3">HTML 복사</button></div>
+<div class="sg-preview"><ol class="cc-steps">
+  <li><span class="cc-num">1</span><div><div class="cc-step-title">할 일 후보 뽑기</div><div class="cc-step-desc">대화에서 근거와 함께</div></div><span class="cc-pill">실습 1</span></li>
+  <li><span class="cc-num">2</span><div><div class="cc-step-title">승인한 것만 업무 목록</div><div class="cc-step-desc">내가 고르고 고친 것만</div></div><span class="cc-pill">실습 2</span></li>
+  <li><span class="cc-num">3</span><div><div class="cc-step-title">주간 보고</div><div class="cc-step-desc">목록에 있는 것만으로</div></div><span class="cc-pill">실습 3</span></li>
+</ol></div>
+<pre class="sg-code" id="c3">&lt;ol class="cc-steps"&gt;
+  &lt;li&gt;&lt;span class="cc-num"&gt;1&lt;/span&gt;&lt;div&gt;&lt;div class="cc-step-title"&gt;할 일 후보 뽑기&lt;/div&gt;&lt;div class="cc-step-desc"&gt;대화에서 근거와 함께&lt;/div&gt;&lt;/div&gt;&lt;span class="cc-pill"&gt;실습 1&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;span class="cc-num"&gt;2&lt;/span&gt;&lt;div&gt;&lt;div class="cc-step-title"&gt;승인한 것만 업무 목록&lt;/div&gt;&lt;div class="cc-step-desc"&gt;내가 고르고 고친 것만&lt;/div&gt;&lt;/div&gt;&lt;span class="cc-pill"&gt;실습 2&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;span class="cc-num"&gt;3&lt;/span&gt;&lt;div&gt;&lt;div class="cc-step-title"&gt;주간 보고&lt;/div&gt;&lt;div class="cc-step-desc"&gt;목록에 있는 것만으로&lt;/div&gt;&lt;/div&gt;&lt;span class="cc-pill"&gt;실습 3&lt;/span&gt;&lt;/li&gt;
+&lt;/ol&gt;</pre></section><section class="sg-block" aria-labelledby="s4">
+<div class="sg-head"><div><h2 class="cc-h2" id="s4">화면 경로</h2><p class="cc-sub">따라 하기 안내. 마지막 칸이 파랗게 강조됨</p></div>
+<button class="cc-btn is-ghost" type="button" data-copy="c4">HTML 복사</button></div>
+<div class="sg-preview"><div class="cc-path">
+  <span>설정</span><i>›</i><span>기능</span><i>›</i><span>코드 실행 및 파일 생성</span>
+</div></div>
+<pre class="sg-code" id="c4">&lt;div class="cc-path"&gt;
+  &lt;span&gt;설정&lt;/span&gt;&lt;i&gt;›&lt;/i&gt;&lt;span&gt;기능&lt;/span&gt;&lt;i&gt;›&lt;/i&gt;&lt;span&gt;코드 실행 및 파일 생성&lt;/span&gt;
+&lt;/div&gt;</pre></section><section class="sg-block" aria-labelledby="s5">
+<div class="sg-head"><div><h2 class="cc-h2" id="s5">채팅 화면</h2><p class="cc-sub">AI와 주고받는 예시. 내 말은 파란 말풍선</p></div>
+<button class="cc-btn is-ghost" type="button" data-copy="c5">HTML 복사</button></div>
+<div class="sg-preview"><div class="cc-chat" style="max-width:420px">
+  <div class="cc-chat-title">업무 정리 비서</div>
+  <div class="cc-bubble is-me">세 파일 할 일 뽑아줘</div>
+  <div class="cc-bubble">① 요약
+② 결정 사항
+③ 할 일 후보 표</div>
+  <div class="cc-bubble">승인할 번호와 고칠 내용을 알려 주세요.</div>
+</div></div>
+<pre class="sg-code" id="c5">&lt;div class="cc-chat" style="max-width:420px"&gt;
+  &lt;div class="cc-chat-title"&gt;업무 정리 비서&lt;/div&gt;
+  &lt;div class="cc-bubble is-me"&gt;세 파일 할 일 뽑아줘&lt;/div&gt;
+  &lt;div class="cc-bubble"&gt;① 요약
+② 결정 사항
+③ 할 일 후보 표&lt;/div&gt;
+  &lt;div class="cc-bubble"&gt;승인할 번호와 고칠 내용을 알려 주세요.&lt;/div&gt;
+&lt;/div&gt;</pre></section><section class="sg-block" aria-labelledby="s6">
+<div class="sg-head"><div><h2 class="cc-h2" id="s6">큰 숫자 + 강조 카드</h2><p class="cc-sub">결과물·성과를 한눈에</p></div>
+<button class="cc-btn is-ghost" type="button" data-copy="c6">HTML 복사</button></div>
+<div class="sg-preview"><div class="cc-grid">
+  <div class="cc-card"><div class="cc-stat">85.0%</div><div class="cc-stat-label">수료율 (204/240명)</div></div>
+  <div class="cc-card"><div class="cc-stat">44.6%</div><div class="cc-stat-label">취업·창업률 (수료자 기준)</div></div>
+  <div class="cc-card is-accent"><div class="cc-stat">60분</div><div style="opacity:.9">실습 결과물 3종</div></div>
+</div></div>
+<pre class="sg-code" id="c6">&lt;div class="cc-grid"&gt;
+  &lt;div class="cc-card"&gt;&lt;div class="cc-stat"&gt;85.0%&lt;/div&gt;&lt;div class="cc-stat-label"&gt;수료율 (204/240명)&lt;/div&gt;&lt;/div&gt;
+  &lt;div class="cc-card"&gt;&lt;div class="cc-stat"&gt;44.6%&lt;/div&gt;&lt;div class="cc-stat-label"&gt;취업·창업률 (수료자 기준)&lt;/div&gt;&lt;/div&gt;
+  &lt;div class="cc-card is-accent"&gt;&lt;div class="cc-stat"&gt;60분&lt;/div&gt;&lt;div style="opacity:.9"&gt;실습 결과물 3종&lt;/div&gt;&lt;/div&gt;
+&lt;/div&gt;</pre></section><section class="sg-block" aria-labelledby="s7">
+<div class="sg-head"><div><h2 class="cc-h2" id="s7">체크리스트</h2><p class="cc-sub">점검표. 끝난 항목은 is-done</p></div>
+<button class="cc-btn is-ghost" type="button" data-copy="c7">HTML 복사</button></div>
+<div class="sg-preview"><ul class="cc-check">
+  <li class="is-done">할 일마다 근거 원문이 붙었나</li>
+  <li>'~면 좋겠네요'가 할 일로 들어가지 않았나</li>
+  <li>추정 기한에 확인 질문이 붙었나</li>
+</ul></div>
+<pre class="sg-code" id="c7">&lt;ul class="cc-check"&gt;
+  &lt;li class="is-done"&gt;할 일마다 근거 원문이 붙었나&lt;/li&gt;
+  &lt;li&gt;'~면 좋겠네요'가 할 일로 들어가지 않았나&lt;/li&gt;
+  &lt;li&gt;추정 기한에 확인 질문이 붙었나&lt;/li&gt;
+&lt;/ul&gt;</pre></section><section class="sg-block" aria-labelledby="s8">
+<div class="sg-head"><div><h2 class="cc-h2" id="s8">표</h2><p class="cc-sub">좁은 화면에서는 가로로 밀어서 봄</p></div>
+<button class="cc-btn is-ghost" type="button" data-copy="c8">HTML 복사</button></div>
+<div class="sg-preview"><div class="cc-table-wrap">
+  <table class="cc-table">
+    <thead><tr><th>할 일</th><th>담당</th><th>기한</th><th>상태</th></tr></thead>
+    <tbody>
+      <tr><td>3회차 교안 보내기</td><td>나</td><td>11/10</td><td><span class="cc-pill is-gray">할 일</span></td></tr>
+      <tr><td>운영일지 제출</td><td>나</td><td>11/6</td><td><span class="cc-pill is-danger">기한 지남</span></td></tr>
+    </tbody>
+  </table>
+</div></div>
+<pre class="sg-code" id="c8">&lt;div class="cc-table-wrap"&gt;
+  &lt;table class="cc-table"&gt;
+    &lt;thead&gt;&lt;tr&gt;&lt;th&gt;할 일&lt;/th&gt;&lt;th&gt;담당&lt;/th&gt;&lt;th&gt;기한&lt;/th&gt;&lt;th&gt;상태&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;
+    &lt;tbody&gt;
+      &lt;tr&gt;&lt;td&gt;3회차 교안 보내기&lt;/td&gt;&lt;td&gt;나&lt;/td&gt;&lt;td&gt;11/10&lt;/td&gt;&lt;td&gt;&lt;span class="cc-pill is-gray"&gt;할 일&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+      &lt;tr&gt;&lt;td&gt;운영일지 제출&lt;/td&gt;&lt;td&gt;나&lt;/td&gt;&lt;td&gt;11/6&lt;/td&gt;&lt;td&gt;&lt;span class="cc-pill is-danger"&gt;기한 지남&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+    &lt;/tbody&gt;
+  &lt;/table&gt;
+&lt;/div&gt;</pre></section><section class="sg-block" aria-labelledby="s9">
+<div class="sg-head"><div><h2 class="cc-h2" id="s9">팁 상자와 버튼</h2><p class="cc-sub">한 줄 안내와 행동 버튼</p></div>
+<button class="cc-btn is-ghost" type="button" data-copy="c9">HTML 복사</button></div>
+<div class="sg-preview"><div class="cc-card is-tip">2회차 수강자는 이미 켜져 있을 수 있음</div>
+<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+  <button class="cc-btn" type="button">업로드</button>
+  <button class="cc-btn is-ghost" type="button">나중에</button>
+</div></div>
+<pre class="sg-code" id="c9">&lt;div class="cc-card is-tip"&gt;2회차 수강자는 이미 켜져 있을 수 있음&lt;/div&gt;
+&lt;div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap"&gt;
+  &lt;button class="cc-btn" type="button"&gt;업로드&lt;/button&gt;
+  &lt;button class="cc-btn is-ghost" type="button"&gt;나중에&lt;/button&gt;
+&lt;/div&gt;</pre></section><section class="sg-block" aria-labelledby="s10">
+<div class="sg-head"><div><h2 class="cc-h2" id="s10">섹션 표지</h2><p class="cc-sub">큰 덩어리를 나눌 때. 오른쪽 큰 숫자</p></div>
+<button class="cc-btn is-ghost" type="button" data-copy="c10">HTML 복사</button></div>
+<div class="sg-preview"><section class="cc-section">
+  <div><p style="margin:0;font-weight:700">PART 1</p><h2 class="cc-h1" style="color:inherit;margin-top:6px">비서 구축</h2><p style="margin:0;opacity:.9">기능 설정 · 스킬 등록 · 프로젝트 생성</p></div>
+  <div class="cc-section-num" aria-hidden="true">01</div>
+</section></div>
+<pre class="sg-code" id="c10">&lt;section class="cc-section"&gt;
+  &lt;div&gt;&lt;p style="margin:0;font-weight:700"&gt;PART 1&lt;/p&gt;&lt;h2 class="cc-h1" style="color:inherit;margin-top:6px"&gt;비서 구축&lt;/h2&gt;&lt;p style="margin:0;opacity:.9"&gt;기능 설정 · 스킬 등록 · 프로젝트 생성&lt;/p&gt;&lt;/div&gt;
+  &lt;div class="cc-section-num" aria-hidden="true"&gt;01&lt;/div&gt;
+&lt;/section&gt;</pre></section>
+<p class="cc-caption" style="margin-top:48px">원본: templates/커리어캐쳐-앱스타일 · 수정 후 _build/build.py로 다시 만듭니다.</p>
+</main>
+<div class="sg-toast" id="toast" role="status" aria-live="polite">복사했어요</div>
+<script>
+const toast = document.getElementById("toast");
+document.querySelectorAll("[data-copy]").forEach(b => b.addEventListener("click", async () => {
+  const text = document.getElementById(b.dataset.copy).textContent;
+  try { await navigator.clipboard.writeText(text); toast.textContent = "복사했어요"; }
+  catch (e) { const r = document.createRange(); r.selectNodeContents(document.getElementById(b.dataset.copy)); const s = getSelection(); s.removeAllRanges(); s.addRange(r); toast.textContent = "선택했어요. Ctrl+C로 복사하세요"; }
+  toast.classList.add("show"); setTimeout(() => toast.classList.remove("show"), 1600);
+}));
+const root = document.documentElement;
+document.getElementById("theme").addEventListener("click", () => {
+  const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  root.dataset.theme = dark ? "light" : "dark";
+});
+document.getElementById("tone").addEventListener("click", e => {
+  const warm = root.dataset.tone === "warm";
+  if (warm) delete root.dataset.tone; else root.dataset.tone = "warm";
+  e.target.textContent = warm ? "웜 그린 톤 보기" : "기본 파랑 톤 보기";
+});
+</script>
+</body>
+</html>
