@@ -273,3 +273,25 @@ details summary { cursor: pointer; font-weight: 600; }
 .errtable th, .errtable td { text-align: left; vertical-align: top; padding: 8px 6px; border-bottom: 1px solid var(--line); }
 .errtable td:first-child { font-weight: 700; white-space: nowrap; }
 #toast { white-space: normal; }
+
+/* 평가 기준 적용: 총점, 항목 묶음, 기준표, 리포트 */
+.total { display: grid; gap: 6px; padding: 18px; border-radius: 16px; background: var(--accent); color: var(--accent-fg); }
+.total .eyebrow, .total .muted { color: inherit; opacity: .85; }
+.total p { margin: 0; }
+.tnum2 { font-size: 46px; font-weight: 800; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.tnum2 small { font-size: 20px; margin-left: 2px; }
+.tnum2 .diff { font-size: 18px; margin-left: 10px; color: inherit; }
+.scores li.grp { display: block; font-size: 13px; font-weight: 700; color: var(--muted); border-top: 1px solid var(--line); padding-top: 10px; }
+.scores li.grp:first-child { border-top: 0; padding-top: 0; }
+.rubric { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
+.rubric th, .rubric td { text-align: left; vertical-align: top; padding: 8px 6px; border-bottom: 1px solid var(--line); }
+.rubric th { color: var(--muted); }
+.rubric td:first-child { width: 24%; }
+.rubric td:last-child { white-space: nowrap; }
+.refs { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 6px; }
+.refs a { color: var(--accent); }
+.tasks { margin: 0; padding-left: 22px; display: grid; gap: 6px; }
+.savebtns .btn { min-height: 48px; }
+@media (max-width: 480px) { .rubric { font-size: 12px; } .rubric th:nth-child(4), .rubric td:nth-child(4) { display: none; } }
+@media print { .total { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+.num { width: auto; min-width: 14px; white-space: nowrap; }
