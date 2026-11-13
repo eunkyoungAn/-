@@ -3,6 +3,8 @@
 //          ③ 답변을 듣고 꼬리질문 1개 고르기 ④ 질문별 평가 기준으로 답변 평가
 // 키는 기본적으로 메모리에만 두고, 참여자가 고르면 이 기기 브라우저에 저장한다.
 
+import { RUBRIC } from './rubric.js';
+
 const API_ROOT = 'https://generativelanguage.googleapis.com/v1beta';
 export const DEFAULT_MODEL = 'gemini-3.1-flash-lite';
 const FALLBACK_MODELS = ['gemini-3.1-flash-lite', 'gemini-2.5-flash-lite', 'gemini-2.5-flash'];
@@ -338,14 +340,15 @@ ${q.must_evidence ? `이 질문에서 반드시 확인할 근거: ${q.must_evide
 // ④ 평가
 export async function evaluateAnswer({ q, answer, follow, previous }) {
   const schema = S.obj({
-    scores: S.obj({ lead: S.int15, structure: S.int15, specificity: S.int15, jobfit: S.int15 }, ['lead', 'structure', 'specificity', 'jobfit']),
-    reasons: S.obj({ lead: S.str, structure: S.str, specificity: S.str, jobfit: S.str }, ['lead', 'structure', 'specificity', 'jobfit']),
+    scores: S.obj({ specific: S.int15, jobfit: S.int15, logic: S.int15 }, ['specific', 'jobfit', 'logic']),
+    reasons: S.obj({ specific: S.str, jobfit: S.str, logic: S.str }, ['specific', 'jobfit', 'logic']),
+    probe: S.str,
     criteria_results: S.arr(S.obj({
       criterion: S.str, level: { type: 'STRING', enum: ['충족', '부분', '미흡'] }, comment: S.str,
     }, ['criterion', 'level', 'comment'])),
     strength: S.str, improvement: S.str, next_fix: S.str, rewrite_example: S.str, comparison: S.str,
     numbers_found: S.strs, numbers_to_add: S.strs,
-  }, ['scores', 'reasons', 'criteria_results', 'strength', 'improvement', 'next_fix', 'rewrite_example', 'comparison', 'numbers_found', 'numbers_to_add']);
+  }, ['scores', 'reasons', 'probe', 'criteria_results', 'strength', 'improvement', 'next_fix', 'rewrite_example', 'comparison', 'numbers_found', 'numbers_to_add']);
   const criteria = q.criteria && q.criteria.length ? q.criteria : ['질문에 대한 답을 먼저 말하는가?', '본인이 직접 한 행동이 드러나는가?', '결과나 배운 점을 구체적으로 말하는가?'];
   const prompt = `면접 질문: ${q.text}
 ${q.intent ? `질문 의도: ${q.intent}\n` : ''}평가 기준: ${criteria.join(' / ')}
@@ -354,11 +357,14 @@ ${follow ? `꼬리질문: ${follow.text}\n<answer>${follow.answer}</answer>\n` :
 답변은 음성 인식으로 받아 적은 글입니다. 맞춤법, 띄어쓰기, 받아쓰기 오류, 군말은 평가하지 않습니다.
 할 일:
 - criteria_results: 위 평가 기준 각각에 대해 level(충족/부분/미흡)과 근거 comment(답변 속 표현을 짧게 인용, 40자 안팎). 꼬리질문 답변도 함께 고려합니다.
-- scores(1~5)와 reasons(각 25자 안팎): lead=첫 문장에 핵심 답이 있는가, structure=상황-과제-행동-결과 흐름, specificity=수치·기간·고유 사례, jobfit=지원 직무 역량과의 연결.
+- scores(1~5)와 reasons(각 40자 안팎, 답변 속 표현을 근거로): 아래 행동기준 평정척도로 매깁니다. 2점과 4점은 사이 수준입니다.
+${RUBRIC.filter(r => r.anchors).map(r => `  · ${r.key}(${r.label}): ${r.looks}. 5점=${r.anchors[5]} / 3점=${r.anchors[3]} / 1점=${r.anchors[1]}. 주의: ${r.caution}`).join('\n')}
+- probe: 답변이 추상적이어서 실제 행동이나 성과를 확인하기 어려우면, 그것을 확인하는 추천 꼬리질문 1개(예: "어떤 문제가 있었고 본인이 직접 취한 행동은 무엇이었나요?"). 충분히 구체적이면 빈 문자열.
+- 평가 금지 사항: 말투, 억양, 방언, 말더듬, 군말, 답변 길이, 나이·성별·외모·경력 공백을 근거로 점수를 낮추지 않습니다. 성격이나 태도를 추정하지 않고 답변에 드러난 행동과 근거만 봅니다. "AI면접에서 감점된다" 같은 단정을 쓰지 않습니다.
 - strength, improvement: 각 한두 문장, 답변 속 표현을 인용해 근거를 댑니다.
 - numbers_found: 답변(꼬리질문 답변 포함)에 실제로 나온 숫자·정량 표현을 그대로 짧게(없으면 빈 배열).
 - numbers_to_add: 이 답변을 성과 중심으로 만들려면 덧붙일 숫자 2~3개를 "무엇을 어떻게": 예 "저장 수: 바꾸기 전과 후 비교(예: 120→180)" 처럼. 지어낸 값은 넣지 않습니다.
-- specificity 점수는 정량 성과 기준으로 엄격하게: 결과 숫자·전후 비교가 없으면 2점 이하, 숫자 1개면 3점, 결과 숫자와 본인 기여가 함께 있으면 4~5점.
+- specific 점수는 정량 성과도 함께 봅니다: 결과 숫자·전후 비교가 없으면 2점 이하, 숫자 1개면 3점, 결과 숫자와 본인 기여가 함께 있으면 4~5점.
 - next_fix: 다음 답변에서 바로 실천할 행동 하나, 한 문장(40자 안팎). 결과 숫자가 없으면 숫자로 결과 말하기를 우선합니다.
 - rewrite_example: 참여자 답변을 바탕으로 2~3문장으로 고쳐 쓴 예시. 반드시 "제가 [행동]해서 [지표]가 [전]에서 [후]로" 같은 정량 결과 문장을 넣고, 말하지 않은 값은 [ ] 빈칸.
 

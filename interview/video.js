@@ -130,7 +130,10 @@ function summarizeAudio(frames, stepMs) {
     const mean = st.reduce((a, b) => a + b, 0) / st.length;
     pitchVar = Math.sqrt(st.reduce((a, b) => a + (b - mean) ** 2, 0) / st.length);
   }
+  const speechRms = frames.filter((f, i) => speech[i]).map(f => f.rms).sort((a, b) => a - b);
   return {
+    level: speechRms.length ? speechRms[Math.floor(speechRms.length / 2)] : 0,
+    noise: floor,
     speechSec: Math.round(speech.filter(Boolean).length * stepMs / 1000),
     pauseSec: Math.round(pauseFrames * stepMs / 1000),
     longPauses,
@@ -160,118 +163,157 @@ export function loadGazeModel() {
   return landmarkerPromise;
 }
 
-const EYE_AWAY = ['eyeLookOutLeft', 'eyeLookOutRight', 'eyeLookInLeft', 'eyeLookInRight', 'eyeLookUpLeft', 'eyeLookUpRight', 'eyeLookDownLeft', 'eyeLookDownRight'];
+const EYE_SIDE = ['eyeLookOutLeft', 'eyeLookOutRight', 'eyeLookInLeft', 'eyeLookInRight'];
+const EYE_VERT = ['eyeLookUpLeft', 'eyeLookUpRight', 'eyeLookDownLeft', 'eyeLookDownRight'];
 
-// 한 프레임 판단: 얼굴이 카메라 쪽을 향하고(고개 25도 이내) 눈동자가 크게 벗어나지 않으면 '응시'.
+// 한 프레임 판단. 좌우(수평) 이탈과 위아래(수직) 이탈을 나눈다.
+// 근거: 영상면접에서 수평 이탈은 인상에 부정적이지만 수직 이탈은 유의한 영향이 없었다(Basch & Melchers, 2025).
 function judgeFrame(res) {
-  if (!res || !res.faceLandmarks || !res.faceLandmarks.length) return 'noface';
+  if (!res || !res.faceLandmarks || !res.faceLandmarks.length) return { dir: 'noface' };
+  const nose = res.faceLandmarks[0][1] || res.faceLandmarks[0][0];
+  const out = { dir: 'look', x: nose.x, y: nose.y };
   const m = res.facialTransformationMatrixes && res.facialTransformationMatrixes[0];
   if (m && m.data) {
-    const r22 = Math.abs(m.data[10]);
-    const angle = Math.acos(Math.min(1, r22)) * 180 / Math.PI;
-    if (angle > 25) return 'away';
+    // 얼굴이 향하는 방향(z축): 좌우 성분 data[8], 상하 성분 data[9]. 0.42 = sin(25도)
+    if (Math.abs(m.data[8]) > 0.42) { out.dir = 'side'; return out; }
+    if (Math.abs(m.data[9]) > 0.42) out.dir = 'vert';
   }
   const bs = res.faceBlendshapes && res.faceBlendshapes[0];
   if (bs && bs.categories) {
     const score = name => (bs.categories.find(c => c.categoryName === name) || {}).score || 0;
-    if (EYE_AWAY.some(n => score(n) > 0.6)) return 'away';
+    if (EYE_SIDE.some(n => score(n) > 0.6)) out.dir = 'side';
+    else if (out.dir === 'look' && EYE_VERT.some(n => score(n) > 0.6)) out.dir = 'vert';
   }
-  return 'look';
+  return out;
 }
 
 export function startGaze(videoEl) {
   const frames = [];
+  const luma = [];
   let timer = null;
   let stopped = false;
   let failed = false;
+  let n = 0;
+  const cv = document.createElement('canvas');
+  cv.width = 32; cv.height = 32;
+  const cx = cv.getContext('2d', { willReadFrequently: true });
   loadGazeModel().then(lm => {
     if (stopped) return;
     timer = setInterval(() => {
       if (videoEl.readyState < 2) return;
       try { frames.push(judgeFrame(lm.detectForVideo(videoEl, performance.now()))); } catch { /* 한 프레임 실패는 무시 */ }
+      if (n++ % 10 === 0 && cx) { // 2초마다 화면 밝기
+        try {
+          cx.drawImage(videoEl, 0, 0, 32, 32);
+          const d = cx.getImageData(0, 0, 32, 32).data;
+          let sum = 0;
+          for (let k = 0; k < d.length; k += 4) sum += 0.299 * d[k] + 0.587 * d[k + 1] + 0.114 * d[k + 2];
+          luma.push(sum / (d.length / 4));
+        } catch { /* 무시 */ }
+      }
     }, 200);
   }).catch(() => { failed = true; });
   return {
     stop() {
       stopped = true;
       clearInterval(timer);
-      return failed || frames.length < 5 ? null : summarizeGaze(frames, 200);
+      return failed || frames.length < 5 ? null : summarizeGaze(frames, 200, luma);
     },
   };
 }
 
-function summarizeGaze(frames, stepMs) {
+function summarizeGaze(frames, stepMs, luma = []) {
   const n = frames.length;
-  const look = frames.filter(f => f === 'look').length;
-  const noface = frames.filter(f => f === 'noface').length;
-  // 1초 이상 이어진 이탈만 '시선 이탈'로 센다(잠깐 눈 깜빡임·생각하는 시선은 제외).
-  let away = 0;
+  const count = d => frames.filter(f => f.dir === d).length;
+  const noface = count('noface');
+  const seen = Math.max(1, n - noface);
+  // 1초 넘게 이어진 좌우 이탈 횟수(잠깐 눈 깜빡임·생각하는 시선은 제외)
+  let sideRuns = 0;
   let run = 0;
   for (const f of frames) {
-    if (f !== 'look') run++; else { if (run * stepMs >= 1000) away++; run = 0; }
+    if (f.dir === 'side') run++; else { if (run * stepMs >= 1000) sideRuns++; run = 0; }
   }
-  if (run * stepMs >= 1000) away++;
+  if (run * stepMs >= 1000) sideRuns++;
+  // 움직임: 코 위치가 프레임 사이에 화면 너비의 3% 넘게 움직인 비율
+  let moves = 0;
+  let pairs = 0;
+  for (let i = 1; i < n; i++) {
+    const a = frames[i - 1];
+    const b = frames[i];
+    if (a.x == null || b.x == null) continue;
+    pairs++;
+    if (Math.hypot(b.x - a.x, b.y - a.y) > 0.03) moves++;
+  }
+  // 화면에서 벗어난 횟수(얼굴이 보이다가 1초 넘게 사라짐)
+  let exits = 0;
+  run = 0;
+  let hadFace = false;
+  for (const f of frames) {
+    if (f.dir === 'noface') { run++; } else { if (hadFace && run * stepMs >= 1000) exits++; run = 0; hadFace = true; }
+  }
   return {
-    lookRatio: Math.round((look / n) * 100),
+    lookRatio: Math.round((count('look') / seen) * 100),
+    sideRatio: Math.round((count('side') / seen) * 100),
+    vertRatio: Math.round((count('vert') / seen) * 100),
+    sideRuns,
     noFaceRatio: Math.round((noface / n) * 100),
-    awayCount: away,
+    moveRatio: pairs ? Math.round((moves / pairs) * 100) : null,
+    exits,
+    brightness: luma.length ? Math.round(luma.reduce((a, b) => a + b, 0) / luma.length) : null,
   };
 }
 
 // ---------- 점수 ----------
 const clamp = v => Math.max(1, Math.min(5, Math.round(v)));
 
-export function scoreNonverbal({ gaze, audio, metrics, durationSec }) {
-  const out = { scores: {}, reasons: {}, tips: [] };
+// 비언어적 전달력(시선·움직임)과 영상 환경. 표정은 측정하지도 점수에 넣지도 않는다.
+// 행동을 성격·정직성·역량으로 해석하지 않고, 영상에서 전달을 방해하는지만 본다.
+export function scoreNonverbal({ gaze, audio }) {
+  const out = { nonverbal: { score: null, reason: '' }, env: { score: null, reason: '' }, observed: [], tips: [] };
 
-  if (gaze && gaze.noFaceRatio > 70) {
-    out.scores.gaze = null;
-    out.reasons.gaze = `얼굴이 화면에 거의 보이지 않아(${gaze.noFaceRatio}%) 시선을 측정하지 못했습니다`;
-    out.tips.push('휴대폰을 눈높이에 세워 얼굴이 화면 가운데 오게 해 보세요.');
-  } else if (gaze) {
-    const r = gaze.lookRatio;
-    out.scores.gaze = r >= 80 ? 5 : r >= 65 ? 4 : r >= 50 ? 3 : r >= 30 ? 2 : 1;
-    out.reasons.gaze = `카메라를 본 시간 ${r}%, 1초 넘게 시선이 벗어난 횟수 ${gaze.awayCount}번`;
-    if (gaze.noFaceRatio > 30) { out.reasons.gaze += ` (얼굴이 화면에 안 보인 시간 ${gaze.noFaceRatio}%)`; out.tips.push('휴대폰을 눈높이에 세워 얼굴이 화면 가운데 오게 해 보세요.'); }
-    if (out.scores.gaze <= 3) out.tips.push('화면 속 내 얼굴 대신 카메라 렌즈를 본다고 생각하고 말해 보세요.');
-  } else {
-    out.scores.gaze = null;
-    out.reasons.gaze = '이 기기에서는 시선을 측정하지 못했습니다';
-  }
-
-  if (audio && audio.pitchVar != null) {
-    const v = audio.pitchVar;
-    out.scores.tone = v < 1.2 ? 2 : v < 1.8 ? 3 : v < 2.5 ? 4 : v <= 6 ? 5 : 4;
-    out.reasons.tone = v < 1.8 ? `억양 변화가 작은 편입니다(${v}반음)` : v > 6 ? `억양 변화가 큰 편입니다(${v}반음)` : `억양에 적당한 변화가 있습니다(${v}반음)`;
-    if (v < 1.8) out.tips.push('강조하고 싶은 낱말(숫자, 결과)에서 목소리를 살짝 올려 보세요.');
-  } else {
-    out.scores.tone = null;
-    out.reasons.tone = '목소리가 충분히 잡히지 않아 억양을 측정하지 못했습니다';
-  }
-
-  let tempo = 5;
-  const notes = [];
-  if (metrics && !metrics.typed && metrics.syllables > 30) {
-    if (metrics.perMin < 170 || metrics.perMin > 460) { tempo -= 2; notes.push(metrics.perMin < 170 ? '많이 느림' : '많이 빠름'); }
-    else if (metrics.perMin < 200 || metrics.perMin > 420) { tempo -= 1; notes.push(metrics.perMin < 200 ? '조금 느림' : '조금 빠름'); }
-    notes.unshift(`분당 ${metrics.perMin}음절`);
+  // 영상 환경
+  let env = 5;
+  const envNotes = [];
+  if (gaze) {
+    if (gaze.noFaceRatio > 30) { env -= 2; envNotes.push(`얼굴이 화면에 안 보인 시간 ${gaze.noFaceRatio}%`); }
+    else if (gaze.noFaceRatio > 10) { env -= 1; envNotes.push(`얼굴이 화면에 안 보인 시간 ${gaze.noFaceRatio}%`); }
+    if (gaze.noFaceRatio > 10) out.tips.push('휴대폰을 눈높이에 세워 얼굴이 화면 가운데 오게 해 보세요.');
+    if (gaze.brightness != null && gaze.brightness < 55) { env -= 1; envNotes.push('화면이 어두움'); out.tips.push('창이나 조명을 마주 보고 앉으면 얼굴이 밝게 나옵니다.'); }
+    else if (gaze.brightness != null) envNotes.push('밝기 적당');
   }
   if (audio) {
-    const perMin = audio.longPauses / Math.max(durationSec / 60, 0.5);
-    if (perMin > 3) { tempo -= 2; } else if (perMin > 1.5) { tempo -= 1; }
-    notes.push(`2.5초 넘는 멈춤 ${audio.longPauses}번`);
-    if (audio.longPauses >= 2) out.tips.push('말이 막히면 길게 멈추기보다 "다시 말씀드리면"처럼 짧게 이어 보세요.');
+    if (!audio.speechSec) { env -= 2; envNotes.push('목소리가 거의 녹음되지 않음'); out.tips.push('마이크 권한과 마이크를 가리는 케이스·손을 확인해 주세요.'); }
+    else if (audio.level < 0.02) { env -= 1; envNotes.push('녹음된 목소리가 작음'); out.tips.push('목소리가 작게 녹음됐어요. 휴대폰을 조금 가까이 두거나 조용한 곳에서 녹음해 보세요. 마이크 설정이나 주변 소음 때문일 수 있습니다.'); }
+    else envNotes.push('음성 녹음 양호');
+    if (audio.noise > 0.03) { env -= 1; envNotes.push('주변 소음이 큼'); }
   }
-  out.scores.tempo = notes.length ? clamp(tempo) : null;
-  out.reasons.tempo = notes.length ? notes.join(', ') : '말 빠르기를 측정하지 못했습니다';
+  if (gaze || audio) { out.env.score = clamp(env); out.env.reason = envNotes.join(', '); }
+  else out.env.reason = '영상 환경을 측정하지 못했습니다';
+
+  // 비언어적 전달력
+  if (!gaze) { out.nonverbal.reason = '이 기기에서는 시선·움직임을 측정하지 못했습니다'; return out; }
+  if (gaze.noFaceRatio > 70) {
+    out.nonverbal.reason = '얼굴이 화면에 거의 보이지 않아 시선·움직임을 측정하지 못했습니다(영상 환경 문제로 보고 감점하지 않습니다)';
+    return out;
+  }
+  const side = gaze.sideRatio;
+  let nv = side < 10 ? 5 : side < 20 ? 4 : side < 35 ? 3 : side < 50 ? 2 : 1;
+  const notes = [`정면 ${gaze.lookRatio}%, 좌우 이탈 ${side}%(1초 넘게 ${gaze.sideRuns}번), 위아래 ${gaze.vertRatio}%`];
+  out.observed.push(`시선: 카메라 쪽 ${gaze.lookRatio}%, 좌우 ${side}%, 위아래 ${gaze.vertRatio}%`);
+  if (side >= 20) out.tips.push('답변 중 시선이 화면 옆쪽으로 자주 이동합니다. 영상면접에서 전달력이 떨어질 수 있으니 카메라 위치와 시선 처리를 점검해 보세요. 메모나 다른 화면을 옆에 두었다면 카메라 가까이로 옮겨 보세요.');
+  if (gaze.vertRatio >= 30) out.tips.push('위아래로 향한 시선은 감점하지 않았어요. 화면 속 질문을 읽거나 생각할 때 자연스러운 움직임입니다.');
+  if (gaze.moveRatio != null) {
+    out.observed.push(`움직임: 큰 움직임 비율 ${gaze.moveRatio}%, 화면 밖으로 나간 횟수 ${gaze.exits}번`);
+    if (gaze.moveRatio > 25 || gaze.exits >= 2) {
+      nv -= 1;
+      notes.push('반복적인 움직임이 시청을 방해할 수 있음');
+      out.tips.push('답변 중 반복적인 움직임이 시선을 분산시킬 수 있습니다. 움직임을 억지로 참기보다, 내용을 강조하는 동작과 무의식적인 반복 동작을 구분해 연습해 보세요.');
+    }
+  }
+  out.nonverbal.score = clamp(nv);
+  out.nonverbal.reason = notes.join(', ');
   return out;
 }
-
-export const NV_ITEMS = [
-  { key: 'gaze', label: '시선', looks: '카메라를 바라본 시간 비율과 1초 넘는 시선 이탈 횟수' },
-  { key: 'tone', label: '억양', looks: '말하는 동안 목소리 높낮이가 얼마나 변하는지(목소리 높이 자체는 보지 않음)' },
-  { key: 'tempo', label: '템포', looks: '말 빠르기(분당 음절)와 2.5초 넘는 멈춤 횟수' },
-];
 
 // ---------- 저장 ----------
 export async function saveVideo(video, name) {

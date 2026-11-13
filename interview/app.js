@@ -4,11 +4,12 @@
 // 영상 모드(선택): 카메라로 녹화하고 시선·억양·템포를 휴대폰 안에서만 분석한다. 영상은 참여자가 직접 저장한다.
 
 import { QUESTIONS, CATEGORIES, findQuestion } from './questions.js';
-import { RUBRIC, measure, speedLabel, deliveryScore, localEvaluate } from './scoring.js';
+import { RUBRIC, measure, speedLabel, localEvaluate, totalScore, voiceScore } from './scoring.js';
+import { BASIS, REFS, NOTICE } from './rubric.js';
 import { buildText, buildSetText, saveImage, fileName } from './save.js';
 import * as gem from './gemini.js';
 import * as files from './files.js';
-import { canRecord, openCamera, stopStream, startRecorder, startAudioAnalysis, startGaze, loadGazeModel, scoreNonverbal, NV_ITEMS, saveVideo } from './video.js';
+import { canRecord, openCamera, stopStream, startRecorder, startAudioAnalysis, startGaze, loadGazeModel, scoreNonverbal, saveVideo } from './video.js';
 
 const PREP_SEC = 30;
 const FOLLOW_PREP_SEC = 10;
@@ -87,7 +88,7 @@ function toast(msg) {
 }
 function header(step) {
   const showLog = state.log.length && !['ask', 'loading', 'records'].includes(state.screen);
-  return `<header class="top no-print"><button class="brand" data-act="home" aria-label="처음으로">커리어캐쳐 <b>면접 리허설</b></button>${showLog ? `<button class="btn ghost sm" data-act="records">연습 기록 ${state.log.length}</button>` : step ? `<span class="step">${esc(step)}</span>` : ''}</header>`;
+  return `<header class="top no-print"><button class="brand" data-act="home" aria-label="처음으로">커리어캐쳐 <b>면접 리허설</b></button>${showLog ? `<button class="btn ghost sm" data-act="records">리포트 ${state.log.length}</button>` : step ? `<span class="step">${esc(step)}</span>` : ''}</header>`;
 }
 function inAppBrowser() {
   const ua = navigator.userAgent;
@@ -486,16 +487,37 @@ async function finalize(main, follow) {
     }
   }
   if (!result) result = localEvaluate({ answer, metrics, limitSec: settings.limit });
-  // 전달 점수는 항상 같은 기준으로 계산한다. 글로 쓴 답변은 전달을 평가하지 않는다.
-  if (d.typed) { result.scores.delivery = null; result.reasons.delivery = '글로 답해 전달은 평가하지 않습니다'; }
-  else { const dv = deliveryScore(metrics, settings.limit); result.scores.delivery = dv.score; result.reasons.delivery = dv.reason; }
-
+  // 옛 형식(중계 서버) 결과를 새 기준 항목으로 옮긴다.
+  if (result.scores.lead != null) {
+    const o = result.scores;
+    const or = result.reasons || {};
+    result.scores = { specific: Math.round((o.structure + o.specificity) / 2), jobfit: o.jobfit, logic: o.lead };
+    result.reasons = { specific: [or.structure, or.specificity].filter(Boolean).join(', '), jobfit: or.jobfit, logic: or.lead };
+  }
+  // 전달 항목은 AI 연결 여부와 관계없이 같은 규칙으로 계산한다.
+  const voice = voiceScore(metrics, d.audio);
+  result.scores.voice = voice.score;
+  result.reasons.voice = voice.reason;
   const attempt = { answer, metrics, result };
   if (follow) attempt.follow = follow;
+  const tips = [...voice.tips];
   if (d.video || d.audio || d.gaze) {
-    attempt.nv = scoreNonverbal({ gaze: d.gaze, audio: d.audio, metrics, durationSec: d.durationSec });
+    const nv = scoreNonverbal({ gaze: d.gaze, audio: d.audio });
+    result.scores.nonverbal = nv.nonverbal.score;
+    result.reasons.nonverbal = nv.nonverbal.reason;
+    result.scores.env = nv.env.score;
+    result.reasons.env = nv.env.reason;
+    tips.push(...nv.tips);
+    attempt.nv = { observed: nv.observed, tips };
     if (d.video && d.video.blob.size) attempt.video = { ...d.video, url: URL.createObjectURL(d.video.blob) };
+  } else {
+    result.scores.nonverbal = null;
+    result.reasons.nonverbal = '영상 녹화를 켜면 측정합니다';
+    result.scores.env = null;
+    result.reasons.env = '영상 녹화를 켜면 측정합니다';
+    if (tips.length) attempt.nv = { observed: [], tips };
   }
+  result.total = totalScore(result.scores);
   state.attempts.push(attempt);
   if (state.attempts.length === 1) state.log.push({ question: state.question, attempts: state.attempts });
   state.saved = false;
@@ -534,15 +556,27 @@ async function remoteEvaluate({ answer, metrics, prev }) {
 
 // ---------- 화면: 피드백 ----------
 function scoreBars(scores, reasons, prevScores, items = RUBRIC) {
+  let group = '';
   return `<ul class="scores">${items.map(r => {
     const v = scores[r.key];
     const p = prevScores ? prevScores[r.key] : null;
-    const diff = v != null && p != null ? v - p : null;
-    return `<li>
-      <div class="sl"><b>${r.label}</b><span class="muted">${esc(reasons[r.key] || r.looks)}</span></div>
+    const diff = v != null && p != null ? Math.round((v - p) * 10) / 10 : null;
+    const head = r.group && r.group !== group ? `<li class="grp">${r.group === '내용' ? '답변 내용 (주요 평가)' : '전달력 (코칭 지표)'}</li>` : '';
+    group = r.group || group;
+    return `${head}<li>
+      <div class="sl"><b>${r.label}${r.weight ? ` <small class="muted">${r.weight}%</small>` : ''}</b><span class="muted">${esc(reasons[r.key] || r.looks)}</span></div>
       <div class="sv">${v == null ? '<span class="muted">-</span>' : `<span class="bar" style="--v:${v}"><i></i></span><span class="num">${v}</span>`}${diff ? `<span class="diff ${diff > 0 ? 'up' : 'down'}">${diff > 0 ? '+' : ''}${diff}</span>` : ''}</div>
     </li>`;
   }).join('')}</ul>`;
+}
+
+function totalCard(t, prevT) {
+  if (!t || t.total == null) return '';
+  const diff = prevT && prevT.total != null ? Math.round((t.total - prevT.total) * 10) / 10 : null;
+  return `<section class="total">
+    <div><p class="eyebrow">총점</p><p class="tnum2">${t.total.toFixed(1)}<small>점</small>${diff ? `<span class="diff ${diff > 0 ? 'up' : 'down'}">${diff > 0 ? '+' : ''}${diff}</span>` : ''}</p><p class="muted small">100점 만점</p></div>
+    <p class="muted small">${t.missing.length ? `${t.missing.join(', ')}은(는) 측정하지 않아 나머지 항목(가중치 합 ${t.measuredWeight}%)으로 환산했습니다.` : '여섯 항목을 가중치대로 합산했습니다.'} 연습용 참고치입니다.</p>
+  </section>`;
 }
 
 function metricsRow(m) {
@@ -562,6 +596,7 @@ function feedbackBody(a) {
       <h3>잘한 점</h3><p>${esc(r.strength)}</p>
       <h3>고칠 점</h3><p>${esc(r.improvement)}</p>
       <h3>이렇게 바꿔 말해 보세요</h3><blockquote>${esc(r.rewrite_example)}</blockquote>
+      ${r.probe && !a.follow ? `<h3>추천 꼬리질문</h3><p>${esc(r.probe)}</p><p class="muted small">면접관이라면 이렇게 더 물을 수 있어요. 이 질문에 답할 내용을 다음 답변에 미리 넣어 보세요.</p>` : ''}
       <p class="muted small">[ ] 표시는 본인의 실제 경험으로 채워 주세요. 하지 않은 일을 지어내지 않도록 비워 두었습니다.</p>
     </section>`;
 }
@@ -604,7 +639,7 @@ function followSection(a) {
 }
 
 function disclaimer(a) {
-  return `<p class="disclaimer">${a.result.source === 'ai' ? 'AI 피드백' : '자동 피드백(답변 속 표현을 정해진 규칙으로 살펴본 결과로, 내용의 깊이까지는 판단하지 못할 수 있습니다)'}입니다. 점수는 연습용 참고치이며 합격을 예측하지 않습니다. 전달 점수는 받아 적은 글과 시간으로 계산합니다. 음성 인식은 "음, 어" 같은 군말을 빠뜨리기도 합니다.</p>`;
+  return `<p class="disclaimer">${a.result.source === 'ai' ? 'AI 피드백' : '자동 피드백(답변 속 표현을 정해진 규칙으로 살펴본 결과로, 내용의 깊이까지는 판단하지 못할 수 있습니다)'}입니다. ${NOTICE} 음성 인식은 "음, 어" 같은 군말을 빠뜨리기도 합니다.</p>`;
 }
 
 function reportView() {
@@ -612,11 +647,12 @@ function reportView() {
   return `${header('피드백')}
   <main class="wrap">
     <p class="qsmall">${esc(state.question.text)}</p>
+    ${totalCard(a.result.total)}
     ${feedbackBody(a)}
+    <section class="card"><h3>항목별 점수 <small class="muted">각 5점, 괄호는 가중치</small></h3>${scoreBars(a.result.scores, a.result.reasons)}</section>
     ${criteriaSection(a)}
     ${numbersSection(a)}
     ${followSection(a)}
-    <section class="card"><h3>항목별 점수 <small class="muted">각 5점</small></h3>${scoreBars(a.result.scores, a.result.reasons)}</section>
     <section class="card"><h3>말하기 지표</h3>${metricsRow(a.metrics)}</section>
     ${nvSection(a)}
     ${scoreGuide(a)}
@@ -631,8 +667,8 @@ function reportView() {
 function compareView() {
   const first = state.attempts[0];
   const last = state.attempts[state.attempts.length - 1];
-  const sum = s => Object.values(s).filter(v => v != null).reduce((x, y) => x + y, 0);
-  const delta = sum(last.result.scores) - sum(first.result.scores);
+  const tot = a => (a.result.total && a.result.total.total != null ? a.result.total.total : 0);
+  const delta = Math.round((tot(last) - tot(first)) * 10) / 10;
   return `${header('전후 비교')}
   <main class="wrap">
     <p class="qsmall">${esc(state.question.text)}</p>
@@ -640,6 +676,7 @@ function compareView() {
       <h1>${delta > 0 ? `처음보다 ${delta}점 올랐어요.` : delta === 0 ? '점수는 같지만, 달라진 문장을 확인해 보세요.' : '이번엔 점수가 내려갔어요. 괜찮습니다.'}</h1>
       ${last.result.comparison ? `<p>${esc(last.result.comparison)}</p>` : ''}
     </section>
+    ${totalCard(last.result.total, first.result.total)}
     <section class="card"><h3>항목별 변화 <small class="muted">${state.attempts.length > 2 ? '첫 답변 대비' : ''}</small></h3>${scoreBars(last.result.scores, last.result.reasons, first.result.scores)}</section>
     <section class="compare">
       <div class="card"><h3>처음 답변</h3>${metricsRow(first.metrics)}<p class="answer">${esc(first.answer)}</p></div>
@@ -649,7 +686,7 @@ function compareView() {
     ${criteriaSection(last)}
     ${numbersSection(last)}
     ${followSection(last)}
-    ${nvSection(last, first)}
+    ${nvSection(last)}
     ${scoreGuide(last)}
     <button class="btn primary big" data-act="pick">다른 질문 연습하기</button>
     <button class="btn ghost wide" data-act="retry">같은 질문 한 번 더</button>
@@ -658,49 +695,57 @@ function compareView() {
   </main>`;
 }
 
-// 참여자가 점수의 근거를 직접 볼 수 있게 계산 방식을 그대로 보여 준다.
+// 참여자가 점수의 근거를 직접 볼 수 있게 평가 기준과 근거 자료를 보여 준다.
 function scoreGuide(a) {
-  const ai = a.result.source === 'ai';
-  return `<details class="card guide">
-    <summary>점수는 어떻게 매기나요?</summary>
-    <p class="muted small">커리어캐쳐 강의에서 가르치는 다섯 가지 기준으로 봅니다. 각 1~5점입니다.</p>
-    ${ai ? `<p>내용 네 항목(두괄식, 구조, 구체성, 직무 연결)은 AI가 아래 기준표를 보고 매기고, 점수마다 이유를 함께 적습니다. 전달은 아래 규칙으로 계산합니다.</p>` : `<p>내용 네 항목은 답변에 나온 <b>표현</b>을 정해진 규칙으로 세어 계산합니다. 말한 내용이 좋은지 나쁜지를 이해해서 매기는 점수가 아니므로, 방향을 잡는 참고로만 봐 주세요.</p>`}
-    <dl class="rules">
-      <dt>두괄식</dt><dd>${ai ? '첫 문장만 들어도 답을 알 수 있으면 5점.' : '3점에서 시작. 첫 문장이 짧고(60자 이하) "~입니다", "~때문에"처럼 답을 맺으면 올라가고, "음", "그"로 시작하거나 첫 문장이 길면(110자 넘음) 내려갑니다.'}</dd>
-      <dt>구조</dt><dd>${ai ? '상황-맡은 일-행동-결과가 순서대로 드러나면 5점.' : '상황(당시, 근무하며), 맡은 일(맡아, 담당, 목표), 행동(진행, 제안, 개선), 결과(그 결과, 줄었, 받았) 네 가지 신호 표현 중 몇 가지가 나오는지 셉니다. 하나도 없으면 1점, 넷 다 있으면 5점.'}</dd>
-      <dt>구체성</dt><dd>${ai ? '숫자나 결과가 1개 이상 있으면 5점에 가깝습니다.' : '숫자, 기간, 횟수 표현(3년, 200건, 두 번, 50%)을 셉니다. 없으면 2점, 1개 3점, 2~3개 4점, 4개 이상 5점.'}</dd>
-      <dt>직무 연결</dt><dd>${ai ? '경험을 지원 직무의 역량과 잇고, 직무 기여로 마무리하면 5점.' : '직무, 업무, 역량, 기여, 활용 같은 표현이 나올수록(최대 3개) 올라가고, 마지막 문장이 "활용하겠습니다", "기여하고 싶습니다"처럼 끝나면 1점 더합니다.'}</dd>
-      <dt>전달</dt><dd>5점에서 깎습니다. 답변 시간이 제한 시간의 60%보다 짧으면 1~2점, 말 속도가 분당 200음절보다 느리거나 420음절보다 빠르면 1~2점, "음, 어, 그" 같은 군말이 1분에 4번 넘으면 1~2점. 글로 답하면 평가하지 않습니다.</dd>
-    </dl>
-    ${a.nv ? `<h3 class="guide-h">영상 분석(휴대폰 안에서 측정)</h3>
-    <dl class="rules">
-      <dt>시선</dt><dd>0.2초마다 얼굴 방향과 눈동자 방향을 보고, 카메라 쪽을 향한 시간 비율을 잽니다. 80% 이상 5점, 65% 이상 4점, 50% 이상 3점, 30% 이상 2점. 1초 넘게 벗어난 횟수도 함께 보여 줍니다.</dd>
-      <dt>억양</dt><dd>말하는 동안 목소리 높낮이가 얼마나 오르내리는지를 반음 단위로 잽니다. 변화가 너무 작으면(1.8반음 미만) 단조롭게 들릴 수 있어 점수가 낮고, 2.5~6반음이면 5점입니다. 목소리가 높은지 낮은지는 보지 않습니다.</dd>
-      <dt>템포</dt><dd>5점에서 깎습니다. 말 빠르기가 분당 200음절보다 느리거나 420음절보다 빠르면 1~2점, 2.5초 넘는 멈춤이 1분에 1.5번 넘으면 1점, 3번 넘으면 2점.</dd>
-    </dl>` : ''}
-    <p class="muted small">점수는 연습 방향을 잡기 위한 참고치이며 합격 가능성과는 관계가 없습니다. 외모, 표정, 목소리 높이, 나이, 경력 공백 여부는 점수에 들어가지 않습니다.</p>
+  const ai = a && a.result.source === 'ai';
+  const refRow = k => { const r = REFS[k]; return `<li><b>[${r.grade}]</b> ${esc(r.cite)} <span class="muted">${esc(r.use)}</span> <a href="${r.url}" target="_blank" rel="noopener noreferrer" class="no-print">원문</a></li>`; };
+  return `<details class="card guide print-open">
+    <summary>평가 기준과 근거</summary>
+    <p class="small">답변 내용의 구체성과 직무역량 입증을 주요 평가항목으로 두고, 목소리·시선·움직임은 전달력을 고치기 위한 코칭 지표로 따로 봅니다. 각 항목 1~5점에 가중치를 곱해 100점 만점으로 계산합니다.</p>
+    <table class="rubric"><thead><tr><th>항목(가중치)</th><th>보는 것</th><th>주의점</th><th>근거</th></tr></thead><tbody>
+      ${RUBRIC.map(r => `<tr><td><b>${r.label}</b><br>${r.weight}%</td><td>${esc(r.looks)}${r.anchors ? `<br><span class="muted">5점: ${esc(r.anchors[5])}<br>3점: ${esc(r.anchors[3])}<br>1점: ${esc(r.anchors[1])}</span>` : ''}</td><td>${esc(r.caution)}</td><td>${r.basis}</td></tr>`).join('')}
+    </tbody></table>
+    <h3 class="guide-h">점수를 매기는 방법</h3>
+    <ul class="plain small">
+      <li><b>답변 내용 3항목</b>: ${ai ? 'AI(Gemini)가 위 5점·3점·1점 기준을 보고 매기고 이유를 적습니다.' : '답변에 나온 표현을 정해진 규칙으로 세어 계산합니다(AI 미연결). 내용의 깊이까지는 판단하지 못하므로 방향을 잡는 참고로 봐 주세요. Gemini 키를 연결하면 기준표에 따라 평가합니다.'}</li>
+      <li><b>음성 전달력</b>: 5점에서 깎습니다. 말 속도가 분당 200음절보다 느리거나 420음절보다 빠르면 1~2점, 2.5초 넘는 침묵이 잦으면 1~2점, "음, 어"가 1분에 8번을 넘으면 1점, 억양 변화가 거의 없어 강조가 안 되면 1점. 목소리 높낮이, 답변 길이는 보지 않습니다.</li>
+      <li><b>비언어적 전달력</b>(영상 녹화 시): 좌우로 벗어난 시선의 비율로 매깁니다(10% 미만 5점, 20% 미만 4점, 35% 미만 3점, 50% 미만 2점). 위아래 시선은 감점하지 않습니다. 반복적인 큰 움직임이나 화면 이탈이 잦으면 1점. 표정은 측정하지 않습니다.</li>
+      <li><b>영상 환경</b>(영상 녹화 시): 5점에서 깎습니다. 얼굴이 화면에 안 보인 시간, 어두운 화면, 작게 녹음된 목소리, 큰 주변 소음.</li>
+    </ul>
+    <h3 class="guide-h">하지 않는 판단</h3>
+    <ul class="plain small">
+      <li>시선 이탈을 거짓말이나 부정행위로 해석하지 않습니다.</li>
+      <li>낮은 목소리, 억양, 방언, 말더듬을 역량 부족으로 보지 않습니다.</li>
+      <li>웃는 횟수나 움직임으로 성격, 태도, 불안을 판단하지 않습니다.</li>
+      <li>"AI면접 점수가 떨어진다"고 단정하지 않습니다. AI면접 시스템마다 평가방식이 다르고, 표정·몸짓·목소리 톤을 채점하지 않는다고 밝힌 운영사도 있습니다.</li>
+    </ul>
+    <h3 class="guide-h">근거 자료</h3>
+    <p class="muted small">근거 등급 A: ${BASIS.A} / B: ${BASIS.B} / C: ${BASIS.C}</p>
+    <ul class="refs small">${Object.keys(REFS).map(refRow).join('')}</ul>
+    <p class="muted small">${NOTICE}</p>
   </details>`;
 }
 
 function videoBlock(a, qi, ai) {
   if (!a.video) return '';
-  return `<div class="vid">
+  return `<div class="vid no-print">
     <video src="${a.video.url}" controls playsinline preload="metadata"></video>
     <button class="btn ghost wide no-print" data-act="save-video" data-q="${qi}" data-a="${ai}">이 영상 내 휴대폰에 저장</button>
   </div>`;
 }
 
-// 영상 모드 분석 결과. prev가 있으면 변화량을 함께 보여 준다.
-function nvSection(a, prev) {
-  if (!a.nv) return '';
+// 전달력 코칭: 관찰한 내용과 고칠 점. 점수는 항목별 점수표에 들어 있다.
+function nvSection(a) {
+  if (!a.nv && !a.video) return '';
   const qi = state.log.findIndex(x => x.attempts.includes(a));
   const ai = qi >= 0 ? state.log[qi].attempts.indexOf(a) : -1;
+  const nv = a.nv || { observed: [], tips: [] };
   return `<section class="card nv">
-    <h3>영상 분석 <small class="muted">시선·억양·템포, 각 5점</small></h3>
-    ${scoreBars(a.nv.scores, a.nv.reasons, prev && prev.nv ? prev.nv.scores : null, NV_ITEMS)}
-    ${a.nv.tips.length ? `<ul class="tips">${a.nv.tips.map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}
+    <h3>전달력 코칭 <small class="muted">목소리·시선·움직임</small></h3>
+    ${nv.observed.length ? `<ul class="plain small">${nv.observed.map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}
+    ${nv.tips.length ? `<ul class="tips">${nv.tips.map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : '<p class="small">전달을 방해하는 요소는 보이지 않았어요.</p>'}
     ${videoBlock(a, qi, ai)}
-    <p class="muted small">영상과 분석은 이 휴대폰 안에서만 처리됐어요. 저장하지 않으면 화면을 닫을 때 사라집니다.</p>
+    <p class="muted small">전달력 지표는 영상에서 내용이 잘 전달되는지를 보는 코칭용 관찰입니다. 성격이나 역량을 뜻하지 않습니다.${a.video ? ' 영상과 분석은 이 휴대폰 안에서만 처리됐어요.' : ''}</p>
   </section>`;
 }
 
@@ -708,57 +753,118 @@ function nvSection(a, prev) {
 function savePanel() {
   const n = state.log.length;
   return `<section class="card save no-print">
-    <h3>피드백 저장하기</h3>
-    <p class="muted small">화면을 닫으면 기록이 사라져요. 오늘 연습한 질문 ${n}개의 피드백이 모두 담깁니다.</p>
+    <h3>피드백 리포트 받기</h3>
+    <p class="muted small">화면을 닫으면 기록이 사라져요. 오늘 연습한 질문 ${n}개의 종합 평가, 항목별 점수, 질문별 피드백, 평가 기준과 근거가 담깁니다.</p>
     <div class="savebtns">
-      <button class="btn primary" data-act="save-image">이미지로 저장</button>
-      <button class="btn ghost" data-act="save-pdf">PDF로 저장</button>
+      <button class="btn primary" data-act="save-html">리포트 파일로 내려받기</button>
+      <button class="btn ghost" data-act="save-pdf">PDF로 저장(인쇄)</button>
+      <button class="btn ghost" data-act="save-image">이미지로 저장</button>
       <button class="btn ghost" data-act="save-text">글로 복사</button>
     </div>
-    <p class="muted small">이미지는 휴대폰 사진첩에 저장하거나 카카오톡 "나에게 보내기"로 보낼 수 있어요. 글로 복사하면 메모장이나 카카오톡에 붙여 넣을 수 있습니다.</p>
-    ${state.screen !== 'records' ? '<button class="linkbtn" data-act="records">오늘 연습 기록 한눈에 보기</button>' : ''}
+    <p class="muted small">리포트 파일은 인터넷 없이도 열리는 한 장짜리 문서(HTML)예요. 휴대폰의 다운로드 폴더에 저장되고, 열어서 인쇄하거나 강사에게 보낼 수 있습니다.</p>
+    ${state.screen !== 'records' ? '<button class="linkbtn" data-act="records">피드백 리포트 미리 보기</button>' : ''}
   </section>`;
 }
 
-function recordsView() {
-  if (!state.log.length) return `${header('연습 기록')}<main class="wrap"><p class="muted">아직 연습한 질문이 없어요.</p><button class="btn primary big" data-act="pick">질문 고르기</button></main>`;
+// 질문별 마지막 답변을 모아 항목별 평균과 가중 총점을 낸다.
+function overall(log) {
+  const avg = {};
+  for (const r of RUBRIC) {
+    const vals = log.map(x => x.attempts[x.attempts.length - 1].result.scores[r.key]).filter(v => v != null);
+    avg[r.key] = vals.length ? Math.round((vals.reduce((a, b) => a + b, 0) / vals.length) * 10) / 10 : null;
+  }
+  const measured = RUBRIC.filter(r => avg[r.key] != null);
+  const content = measured.filter(r => r.group === '내용');
+  const pick = (list, fn) => (list.length ? list.reduce((a, b) => (fn(avg[b.key], avg[a.key]) ? b : a)) : null);
+  return {
+    avg,
+    total: totalScore(avg),
+    best: pick(measured, (x, y) => x > y),
+    worst: pick(content.length ? content : measured, (x, y) => x < y),
+    tasks: [...new Set(log.map(x => x.attempts[x.attempts.length - 1].result.next_fix).filter(Boolean))].slice(0, 5),
+    ai: log.some(x => x.attempts[x.attempts.length - 1].result.source === 'ai'),
+  };
+}
+
+function reportBody() {
   const d = new Date();
-  return `${header('연습 기록')}
-  <main class="wrap records">
-    <section class="hero small">
-      <p class="eyebrow print-only">커리어캐쳐 면접 리허설</p>
-      <h1>면접 연습 기록 <small class="muted">${d.getFullYear()}.${d.getMonth() + 1}.${d.getDate()}</small></h1>
-      <p>오늘 ${state.log.length}개 질문을 연습했어요.</p>
+  const o = overall(state.log);
+  const avgReasons = Object.fromEntries(RUBRIC.map(r => [r.key, o.avg[r.key] == null ? '측정하지 않음' : `질문 ${state.log.length}개 평균 · ${r.looks}`]));
+  return `<section class="hero small">
+      <p class="eyebrow">커리어캐쳐 면접 리허설</p>
+      <h1>면접 피드백 리포트 <small class="muted">${d.getFullYear()}.${d.getMonth() + 1}.${d.getDate()}</small></h1>
+      <p>연습한 질문 ${state.log.length}개 · ${o.ai ? 'AI(Gemini) 평가' : '자동 평가(AI 미연결, 표현 규칙 기반)'}${qset ? ` · 지원 직무: ${esc(qset.job)}` : ''}</p>
     </section>
-    ${savePanel()}
+    ${totalCard(o.total)}
+    <section class="card">
+      <h3>항목별 평균 <small class="muted">각 5점</small></h3>
+      ${scoreBars(o.avg, avgReasons)}
+      ${o.best ? `<p class="small"><b>가장 잘한 항목</b> ${o.best.label}(${o.avg[o.best.key]}점)</p>` : ''}
+      ${o.worst ? `<p class="small"><b>먼저 보완할 항목</b> ${o.worst.label}(${o.avg[o.worst.key]}점): ${esc(o.worst.looks)}</p>` : ''}
+    </section>
+    ${o.tasks.length ? `<section class="card"><h3>다음 연습 과제</h3><ol class="tasks">${o.tasks.map(t => `<li>${esc(t)}</li>`).join('')}</ol></section>` : ''}
     ${state.log.map((item, i) => {
       const first = item.attempts[0];
       const last = item.attempts[item.attempts.length - 1];
+      const r = last.result;
       return `<article class="card rec">
-        <p class="eyebrow">질문 ${i + 1} · 답변 ${item.attempts.length}번</p>
+        <p class="eyebrow">질문 ${i + 1} · 답변 ${item.attempts.length}번${r.total && r.total.total != null ? ` · ${r.total.total.toFixed(1)}점` : ''}</p>
         <h2>${esc(item.question.text)}</h2>
-        <div class="nextfix"><p class="eyebrow">다음에 고칠 한 가지</p><p class="big">${esc(last.result.next_fix)}</p></div>
-        ${scoreBars(last.result.scores, last.result.reasons, item.attempts.length > 1 ? first.result.scores : null)}
+        <div class="nextfix"><p class="eyebrow">다음에 고칠 한 가지</p><p class="big">${esc(r.next_fix)}</p></div>
+        ${scoreBars(r.scores, r.reasons, item.attempts.length > 1 ? first.result.scores : null)}
         <div class="fb">
-          <h3>잘한 점</h3><p>${esc(last.result.strength)}</p>
-          <h3>고칠 점</h3><p>${esc(last.result.improvement)}</p>
-          <h3>이렇게 바꿔 말해 보세요</h3><blockquote>${esc(last.result.rewrite_example)}</blockquote>
+          <h3>잘한 점</h3><p>${esc(r.strength)}</p>
+          <h3>고칠 점</h3><p>${esc(r.improvement)}</p>
+          <h3>이렇게 바꿔 말해 보세요</h3><blockquote>${esc(r.rewrite_example)}</blockquote>
+          ${r.probe ? `<h3>추천 꼬리질문</h3><p>${esc(r.probe)}</p>` : ''}
+          ${r.numbers_to_add && r.numbers_to_add.length ? `<h3>숫자로 보완하기</h3><ul class="critlist">${r.numbers_to_add.map(n => `<li>${esc(n)}</li>`).join('')}</ul>` : ''}
           <h3>마지막 답변</h3><p class="answer">${esc(last.answer)}</p>
         </div>
-        ${last.result.criteria_results && last.result.criteria_results.length ? `<div class="nv-rec"><h3>이 질문의 핵심</h3><ul class="critlist">${last.result.criteria_results.map(c => `<li><b>${esc(c.level)}</b> ${esc(c.criterion)} <span class="muted">${esc(c.comment)}</span></li>`).join('')}</ul></div>` : ''}
+        ${r.criteria_results && r.criteria_results.length ? `<div class="nv-rec"><h3>이 질문의 핵심</h3><ul class="critlist">${r.criteria_results.map(c => `<li><b>${esc(c.level)}</b> ${esc(c.criterion)} <span class="muted">${esc(c.comment)}</span></li>`).join('')}</ul></div>` : ''}
         ${last.follow ? `<div class="nv-rec"><h3>꼬리질문</h3><p><b>${esc(last.follow.text)}</b></p><p class="answer">${esc(last.follow.answer)}</p></div>` : ''}
-        ${last.nv ? `<div class="nv-rec"><h3>영상 분석</h3>${scoreBars(last.nv.scores, last.nv.reasons, item.attempts.length > 1 && first.nv ? first.nv.scores : null, NV_ITEMS)}</div>` : ''}
+        ${last.nv && (last.nv.tips.length || last.nv.observed.length) ? `<div class="nv-rec"><h3>전달력 코칭</h3><ul class="critlist">${[...last.nv.observed, ...last.nv.tips].map(t => `<li>${esc(t)}</li>`).join('')}</ul></div>` : ''}
         ${item.attempts.some(x => x.video) ? `<div class="vids no-print"><h3>녹화한 영상</h3>${item.attempts.map((x, ai) => x.video ? `<p class="muted small">${ai + 1}번째 답변</p>${videoBlock(x, i, ai)}` : '').join('')}</div>` : ''}
       </article>`;
     }).join('')}
+    ${scoreGuide(state.log[0].attempts[0])}
+    <p class="disclaimer">[ ] 표시는 본인의 실제 경험으로 채워 주세요. 점수는 연습용 참고치이며 합격을 예측하지 않습니다. eunkyoungan.github.io/-/interview</p>`;
+}
+
+function recordsView() {
+  if (!state.log.length) return `${header('피드백 리포트')}<main class="wrap"><p class="muted">아직 연습한 질문이 없어요.</p><button class="btn primary big" data-act="pick">질문 고르기</button></main>`;
+  return `${header('피드백 리포트')}
+  <main class="wrap records">
+    ${savePanel()}
+    <div id="report">${reportBody()}</div>
     <button class="btn primary big no-print" data-act="pick">다른 질문 연습하기</button>
-    <p class="disclaimer">점수는 연습용 참고치이며 합격을 예측하지 않습니다. [ ] 표시는 본인의 실제 경험으로 채워 주세요. eunkyoungan.github.io/-/interview</p>
   </main>`;
+}
+
+// 리포트를 혼자서도 열리는 HTML 파일 하나로 만든다(스타일 포함, 영상·버튼 제외).
+async function downloadReport() {
+  let css = '';
+  try { css = await (await fetch('style.css')).text(); } catch { /* 스타일 없이도 읽을 수 있다 */ }
+  const holder = document.createElement('div');
+  holder.innerHTML = reportBody();
+  holder.querySelectorAll('.no-print, video, button').forEach(n => n.remove());
+  holder.querySelectorAll('details').forEach(n => { n.open = true; });
+  const html = `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>면접 피드백 리포트</title><style>${css}\nbody{padding:8px 0 40px}.wrap{max-width:820px}</style></head><body><main class="wrap records">${holder.innerHTML}</main></body></html>`;
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName('html').replace('interview-', 'interview-report-');
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
 }
 
 async function doSave(act) {
   if (!state.log.length) { toast('먼저 질문 하나를 연습해 주세요.'); return; }
-  if (act === 'save-text') {
+  if (act === 'save-html') {
+    await downloadReport();
+    state.saved = true;
+    toast('리포트 파일을 내려받았어요. 다운로드 폴더에서 열어 보세요.');
+  } else if (act === 'save-text') {
     await copy(buildText(state.log), '피드백을 글로 복사했어요. 메모장이나 카카오톡에 붙여 넣어 주세요.');
     state.saved = true;
   } else if (act === 'save-image') {
@@ -1205,7 +1311,7 @@ app.addEventListener('click', async e => {
     saveCustom();
     render();
   }
-  else if (act === 'save-image' || act === 'save-pdf' || act === 'save-text') doSave(act);
+  else if (['save-image', 'save-pdf', 'save-text', 'save-html'].includes(act)) doSave(act);
   else if (act === 'save-settings' || act === 'share-link') {
     settings.relay = document.getElementById('relay').value.trim();
     settings.code = document.getElementById('code').value.trim();

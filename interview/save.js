@@ -1,6 +1,6 @@
 // 연습 기록 저장: 이미지(PNG), 글(복사), PDF(인쇄). 모두 이 기기 안에서 만들고 어디에도 보내지 않는다.
-import { RUBRIC } from './scoring.js';
-import { NV_ITEMS } from './video.js';
+import { RUBRIC, totalScore } from './scoring.js';
+import { NOTICE } from './rubric.js';
 
 const SITE = 'eunkyoungan.github.io/-/interview';
 
@@ -18,25 +18,35 @@ function scoreLine(first, last) {
   }).join(' · ');
 }
 
-function nvLine(first, last) {
-  if (!last.nv) return '';
-  return '영상 분석(5점) ' + NV_ITEMS.map(r => {
-    const b = last.nv.scores[r.key];
-    const a = first.nv && first !== last ? first.nv.scores[r.key] : null;
-    return b == null ? `${r.label} -` : a == null ? `${r.label} ${b}` : `${r.label} ${a}→${b}`;
-  }).join(' · ');
+const totalOf = a => (a.result.total && a.result.total.total != null ? a.result.total.total.toFixed(1) + '점' : '-');
+
+// 질문별 마지막 답변의 항목별 평균과 가중 총점
+function overallLine(log) {
+  const avg = {};
+  for (const r of RUBRIC) {
+    const vals = log.map(x => x.attempts[x.attempts.length - 1].result.scores[r.key]).filter(v => v != null);
+    avg[r.key] = vals.length ? Math.round((vals.reduce((a, b) => a + b, 0) / vals.length) * 10) / 10 : null;
+  }
+  const t = totalScore(avg);
+  return {
+    total: t.total == null ? '-' : t.total.toFixed(1),
+    note: t.missing.length ? `${t.missing.join(', ')} 미측정, 나머지 항목으로 환산` : '여섯 항목 가중 합산',
+    items: RUBRIC.map(r => `${r.label}(${r.weight}%) ${avg[r.key] == null ? '-' : avg[r.key]}`).join(' · '),
+  };
 }
 
 // ---------- 글 ----------
 export function buildText(log) {
-  const lines = [`[커리어캐쳐 면접 리허설] 연습 기록 ${today()}`, ''];
+  const o = overallLine(log);
+  const lines = [`[커리어캐쳐 면접 리허설] 면접 피드백 리포트 ${today()}`, `총점 ${o.total}점 / 100점 (${o.note})`, `항목별 평균(5점): ${o.items}`, ''];
   log.forEach((item, i) => {
     const first = item.attempts[0];
     const last = item.attempts[item.attempts.length - 1];
     const r = last.result;
     lines.push(`${i + 1}. ${item.question.text}`);
-    lines.push(`답변 ${item.attempts.length}번 · 점수(5점) ${scoreLine(first, last)}`);
-    if (last.nv) lines.push(nvLine(first, last) + ' / ' + NV_ITEMS.map(r => last.nv.reasons[r.key]).join(' / '));
+    lines.push(`답변 ${item.attempts.length}번 · ${totalOf(last)} · 점수(5점) ${scoreLine(first, last)}`);
+    if (last.nv && last.nv.tips.length) lines.push('전달력 코칭: ' + last.nv.tips.join(' '));
+    if (r.probe) lines.push(`추천 꼬리질문: ${r.probe}`);
     if (r.criteria_results && r.criteria_results.length) lines.push('이 질문의 핵심: ' + r.criteria_results.map(c => `[${c.level}] ${c.criterion}`).join(' / '));
     if (last.follow) lines.push(`꼬리질문: ${last.follow.text} / 내 답변: ${last.follow.answer}`);
     if (r.numbers_to_add && r.numbers_to_add.length) lines.push(`숫자로 보완하기: ${r.numbers_to_add.join(' / ')}`);
@@ -47,7 +57,7 @@ export function buildText(log) {
     lines.push(`마지막 답변: ${last.answer}`);
     lines.push('');
   });
-  lines.push('점수는 연습용 참고치이며 합격을 예측하지 않습니다.');
+  lines.push(NOTICE);
   lines.push(SITE);
   return lines.join('\n');
 }
@@ -114,8 +124,11 @@ function layout(ctx, log, draw) {
 
   if (draw) { ctx.fillStyle = C.accent; ctx.fillRect(0, 0, W, 14); }
   text('커리어캐쳐 면접 리허설', { size: 30, weight: 700, color: C.accent });
-  text(`면접 연습 기록 · ${today()}`, { size: 52, weight: 800 });
-  text(`오늘 ${log.length}개 질문을 연습했어요.`, { size: 28, color: C.muted });
+  const o = overallLine(log);
+  text(`면접 피드백 리포트 · ${today()}`, { size: 50, weight: 800 });
+  text(`총점 ${o.total}점 / 100점`, { size: 44, weight: 800, color: C.accent });
+  text(`질문 ${log.length}개 · ${o.note}`, { size: 26, color: C.muted });
+  text(o.items, { size: 26, color: C.fg });
   y += 24;
 
   log.forEach((item, i) => {
@@ -129,9 +142,8 @@ function layout(ctx, log, draw) {
       y += 28;
       text(`질문 ${i + 1}`, { size: 24, weight: 700, color: C.accent, ...inner });
       text(item.question.text, { size: 34, weight: 700, ...inner });
-      text(`답변 ${item.attempts.length}번 · ${scoreLine(first, last)}`, { size: 25, color: C.muted, ...inner });
-      if (last.nv) text(nvLine(first, last), { size: 25, color: C.muted, ...inner });
-      if (last.nv && last.nv.tips.length) text('영상 팁: ' + last.nv.tips.join(' '), { size: 25, color: C.fg, ...inner });
+      text(`답변 ${item.attempts.length}번 · ${totalOf(last)} · ${scoreLine(first, last)}`, { size: 25, color: C.muted, ...inner });
+      if (last.nv && last.nv.tips.length) text('전달력 코칭: ' + last.nv.tips.join(' '), { size: 25, color: C.fg, ...inner });
       y += 14;
       text('다음에 고칠 한 가지', { size: 24, weight: 700, color: C.muted, ...inner });
       text(r.next_fix, { size: 32, weight: 700, ...inner });
@@ -195,7 +207,7 @@ export async function saveImage(log) {
   const file = new File([blob], fileName('png'), { type: 'image/png' });
   const touch = matchMedia('(pointer: coarse)').matches;
   if (touch && navigator.canShare && navigator.canShare({ files: [file] })) {
-    try { await navigator.share({ files: [file], title: '면접 연습 기록' }); return 'shared'; }
+    try { await navigator.share({ files: [file], title: '면접 피드백 리포트' }); return 'shared'; }
     catch (e) { if (e.name === 'AbortError') return 'cancelled'; }
   }
   const url = URL.createObjectURL(blob);
