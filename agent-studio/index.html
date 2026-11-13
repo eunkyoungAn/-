@@ -376,9 +376,10 @@ pre.prompt {
 <script>
 /* ===== 0. 기관 설정 (CLAUDE.md 0번. 빈 항목은 기본값) ===== */
 const CONFIG = {
-  orgName: '',            // 기관명
-  role: '',               // 내 역할
-  readers: '',            // 결과물을 받아 보는 사람
+  orgName: '남원청년고용센터', // 기관명
+  role: '교육운영담당',     // 내 역할
+  readers: '남원청년고용센터 센터장', // 결과물을 받아 보는 사람
+  repeatTasks: ['결과보고서', '교육 참여자 데이터 정리'], // 가장 시간이 많이 드는 반복 업무
   orgRules: [],           // 우리 기관 문서 규칙
   bannedWords: [],        // 쓰지 않는 표현
   humanCheck: [],         // 사람이 반드시 확인해야 하는 일
@@ -387,6 +388,7 @@ const CONFIG = {
 };
 const ORG = CONFIG.orgName || '우리 기관';
 const READERS = CONFIG.readers || '기관장, 팀장';
+const ROLE = CONFIG.role || '실무 담당';
 const HUMAN_CHECK = CONFIG.humanCheck.length ? CONFIG.humanCheck : ['외부로 나가는 수치', '환불·민원 답변', '개인정보가 들어간 자료'];
 
 /* ===== 공통 지침 8가지 ===== */
@@ -424,7 +426,7 @@ const AGENTS = [
     id: 'report', abbr: 'RPT', name: '데이터 분석 → 한 장 보고서', type: '워크플로우', needData: true,
     desc: '실적 엑셀을 읽어 지표를 계산하고, 주목할 결과 3개와 한 장 보고서 초안, 수치 대조표를 만듭니다.',
     fields: [
-      { id: 'title', label: '보고서 제목', required: true, ph: '예: 2026년 10월 직업교육 운영 실적' },
+      { id: 'title', label: '보고서 제목', required: true, ph: '예: 2026년 ○○ 교육 결과보고서' },
       { id: 'org', label: '기관명', def: ORG },
       { id: 'period', label: '대상 기간', ph: '예: 2026. 10. 1. ~ 2026. 10. 31.' },
       { id: 'reader', label: '독자', def: READERS },
@@ -623,7 +625,7 @@ const AGENTS = [
     id: 'data', abbr: 'DAT', name: '참여자 · 고객 데이터 관리', type: '워크플로우', needData: true,
     desc: '참여자 명단의 개인정보 열을 지우고 ID로 바꾼 뒤, 결측·중복을 점검하고 선별 기준에 맞는 대상을 정리합니다.',
     fields: [
-      { id: 'purpose', label: '관리 목적', ph: '예: 사후관리 대상 선별, 명단 정리' },
+      { id: 'purpose', label: '관리 목적', ph: '예: 교육 참여자 데이터 정리, 사후관리 대상 선별' },
       { id: 'criteria', label: '선별 기준', wide: true, area: true, ph: '예: 수료 후 6개월 이내, 미취업, 상담 희망' },
       { id: 'idmode', label: '식별자 처리 방식', select: ['순번 ID로 바꾸기 (P001, P002 …)', '기존 ID 열 그대로 쓰기', '식별자 없이 집계만'] }
     ],
@@ -661,7 +663,7 @@ const AGENTS = [
 
 /* ===== 지시문 만들기 ===== */
 function commonBlock() {
-  const lines = ['# 공통 지침 (반드시 지킴)'];
+  const lines = [`# 작성자: ${ORG} ${ROLE}`, '', '# 공통 지침 (반드시 지킴)'];
   RULES.forEach(([k, t], i) => lines.push(`${i + 1}. ${k}: ${t}`));
   lines.push('', '# 우리 기관 규칙');
   if (CONFIG.orgRules.length || CONFIG.bannedWords.length) {
