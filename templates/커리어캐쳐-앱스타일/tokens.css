@@ -1,0 +1,134 @@
+/* 커리어캐쳐 앱 스타일 — 복사해서 <style> 안이나 별도 css 파일로 쓰세요.
+   기본: 흰 바탕 · 큰 굵은 제목 · 둥근 카드 · 포인트 색 하나(파랑).
+   다른 톤: <html data-tone="warm"> 이면 조직도·지시판의 웜 그린 톤.
+   밝기: 시스템 설정을 따르고, <html data-theme="light|dark">로 고정할 수 있음. */
+
+:root {
+  /* 색 */
+  --cc-bg: #FFFFFF;          /* 페이지 바탕 */
+  --cc-surface: #F2F4F7;     /* 카드 바탕 */
+  --cc-elevated: #FFFFFF;    /* 떠 있는 카드(그림자) */
+  --cc-ink: #191F28;         /* 본문 글자 */
+  --cc-sub: #4E5968;         /* 보조 글자 */
+  --cc-muted: #8B95A1;       /* 흐린 글자·화살표 */
+  --cc-line: #E5E8EB;        /* 선 */
+  --cc-accent: #3D5AFE;      /* 포인트(버튼·강조) */
+  --cc-on-accent: #FFFFFF;
+  --cc-accent-soft: #E8EDFF; /* 포인트 연한 바탕(칩·팁) */
+  --cc-success: #12B886;  --cc-success-soft: #E6F8F1;
+  --cc-warn: #E08A00;     --cc-warn-soft: #FFF4DB;
+  --cc-danger: #F04452;   --cc-danger-soft: #FFE9E9;
+  /* 글꼴 */
+  --cc-font: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", system-ui, sans-serif;
+  /* 크기 */
+  --cc-radius: 16px; --cc-radius-sm: 10px; --cc-pill: 999px;
+  --cc-shadow: 0 4px 16px rgba(27, 43, 75, .10);
+  --cc-gap: 16px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --cc-bg: #17191C; --cc-surface: #22252A; --cc-elevated: #2A2E34;
+    --cc-ink: #ECEEF1; --cc-sub: #B0B8C1; --cc-muted: #8B95A1; --cc-line: #353A41;
+    --cc-accent: #7B8FFF; --cc-on-accent: #0E1220; --cc-accent-soft: #232C52;
+    --cc-success: #3DD6A3; --cc-success-soft: #173A30;
+    --cc-warn: #FFB547; --cc-warn-soft: #3D2E12;
+    --cc-danger: #FF7A85; --cc-danger-soft: #3F1E22;
+    --cc-shadow: 0 4px 16px rgba(0, 0, 0, .35);
+  }
+}
+:root[data-theme="dark"] {
+  --cc-bg: #17191C; --cc-surface: #22252A; --cc-elevated: #2A2E34;
+  --cc-ink: #ECEEF1; --cc-sub: #B0B8C1; --cc-muted: #8B95A1; --cc-line: #353A41;
+  --cc-accent: #7B8FFF; --cc-on-accent: #0E1220; --cc-accent-soft: #232C52;
+  --cc-success: #3DD6A3; --cc-success-soft: #173A30;
+  --cc-warn: #FFB547; --cc-warn-soft: #3D2E12;
+  --cc-danger: #FF7A85; --cc-danger-soft: #3F1E22;
+  --cc-shadow: 0 4px 16px rgba(0, 0, 0, .35);
+}
+/* 웜 그린 톤 (조직도·지시판 페이지와 같은 색) */
+:root[data-tone="warm"] {
+  --cc-bg: #F6F5F1; --cc-surface: #FFFFFF; --cc-elevated: #FFFFFF;
+  --cc-ink: #1D1C1A; --cc-sub: #6B6862; --cc-muted: #8F8B83; --cc-line: #D9D5CC;
+  --cc-accent: #2F5D50; --cc-on-accent: #FFFFFF; --cc-accent-soft: #E3ECE8;
+  --cc-warn: #8A4B12; --cc-warn-soft: #F6EAD9;
+}
+
+/* 기본 */
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: var(--cc-bg); color: var(--cc-ink); font-family: var(--cc-font); line-height: 1.55; -webkit-font-smoothing: antialiased; }
+.cc-page { max-width: 1120px; margin: 0 auto; padding: 40px 16px 64px; }
+
+/* 글자 */
+.cc-display { font-size: clamp(32px, 6vw, 48px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.2; margin: 0; }
+.cc-h1 { font-size: clamp(24px, 4vw, 32px); font-weight: 800; letter-spacing: -0.02em; margin: 0 0 8px; }
+.cc-h2 { font-size: 20px; font-weight: 700; margin: 0 0 6px; }
+.cc-body { font-size: 16px; margin: 0; }
+.cc-sub { color: var(--cc-sub); font-size: 15px; margin: 0; }
+.cc-caption { color: var(--cc-muted); font-size: 13px; }
+
+/* 칩(작은 라벨) */
+.cc-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: var(--cc-pill); background: var(--cc-accent-soft); color: var(--cc-accent); font-size: 13px; font-weight: 700; white-space: nowrap; }
+.cc-pill.is-solid { background: var(--cc-accent); color: var(--cc-on-accent); }
+.cc-pill.is-gray { background: var(--cc-surface); color: var(--cc-sub); }
+.cc-pill.is-success { background: var(--cc-success-soft); color: var(--cc-success); }
+.cc-pill.is-warn { background: var(--cc-warn-soft); color: var(--cc-warn); }
+.cc-pill.is-danger { background: var(--cc-danger-soft); color: var(--cc-danger); }
+
+/* 카드 */
+.cc-card { background: var(--cc-surface); border-radius: var(--cc-radius); padding: 24px; }
+.cc-card.is-elevated { background: var(--cc-elevated); box-shadow: var(--cc-shadow); border: 1px solid var(--cc-line); }
+.cc-card.is-accent { background: var(--cc-accent); color: var(--cc-on-accent); }
+.cc-card.is-tip { background: var(--cc-accent-soft); color: var(--cc-accent); font-weight: 700; }
+.cc-grid { display: grid; gap: var(--cc-gap); grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+
+/* 숫자 원, 아이콘 원 */
+.cc-num { width: 36px; height: 36px; border-radius: 50%; display: inline-grid; place-items: center; background: var(--cc-accent); color: var(--cc-on-accent); font-weight: 800; flex: none; }
+.cc-icon { width: 48px; height: 48px; border-radius: 50%; display: inline-grid; place-items: center; background: var(--cc-accent-soft); color: var(--cc-accent); flex: none; }
+.cc-icon svg { width: 24px; height: 24px; }
+
+/* 단계 목록 */
+.cc-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.cc-steps li { display: flex; align-items: center; gap: 14px; background: var(--cc-surface); border-radius: var(--cc-radius); padding: 16px 20px; }
+.cc-steps .cc-step-title { font-weight: 700; font-size: 17px; }
+.cc-steps .cc-step-desc { color: var(--cc-sub); font-size: 14px; }
+.cc-steps .cc-pill { margin-left: auto; }
+
+/* 화면 경로 (설정 › 기능 › ...) */
+.cc-path { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.cc-path span { padding: 6px 14px; border-radius: var(--cc-pill); background: var(--cc-surface); font-weight: 700; font-size: 14px; }
+.cc-path span:last-child { background: var(--cc-accent); color: var(--cc-on-accent); }
+.cc-path i { font-style: normal; color: var(--cc-muted); }
+
+/* 버튼 */
+.cc-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 20px; border: 0; border-radius: 12px; background: var(--cc-accent); color: var(--cc-on-accent); font: inherit; font-weight: 700; cursor: pointer; }
+.cc-btn.is-ghost { background: var(--cc-surface); color: var(--cc-ink); }
+.cc-btn:focus-visible, .cc-path span:focus-visible { outline: 3px solid var(--cc-accent); outline-offset: 2px; }
+
+/* 큰 숫자 */
+.cc-stat { font-size: 44px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; }
+.cc-stat-label { color: var(--cc-sub); font-size: 14px; }
+
+/* 채팅 화면 */
+.cc-chat { background: var(--cc-elevated); border: 1px solid var(--cc-line); border-radius: 24px; box-shadow: var(--cc-shadow); padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+.cc-chat-title { font-size: 13px; font-weight: 700; color: var(--cc-sub); margin-bottom: 4px; }
+.cc-bubble { max-width: 82%; padding: 10px 14px; border-radius: 16px; font-size: 15px; background: var(--cc-surface); align-self: flex-start; white-space: pre-line; }
+.cc-bubble.is-me { background: var(--cc-accent); color: var(--cc-on-accent); align-self: flex-end; }
+
+/* 체크리스트 */
+.cc-check { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.cc-check li { display: flex; gap: 12px; align-items: center; background: var(--cc-surface); border-radius: 12px; padding: 14px 18px; font-size: 16px; }
+.cc-check li::before { content: ""; width: 20px; height: 20px; border: 2px solid var(--cc-muted); border-radius: 6px; flex: none; }
+.cc-check li.is-done::before { background: var(--cc-accent); border-color: var(--cc-accent); }
+
+/* 표 */
+.cc-table-wrap { overflow-x: auto; border-radius: var(--cc-radius); border: 1px solid var(--cc-line); }
+.cc-table { width: 100%; border-collapse: collapse; font-size: 15px; min-width: 520px; }
+.cc-table th { background: var(--cc-surface); color: var(--cc-sub); text-align: left; font-weight: 700; padding: 12px 14px; }
+.cc-table td { padding: 12px 14px; border-top: 1px solid var(--cc-line); }
+
+/* 섹션 표지 (파란 바탕) */
+.cc-section { background: var(--cc-accent); color: var(--cc-on-accent); border-radius: 24px; padding: 40px 32px; display: flex; justify-content: space-between; align-items: center; gap: 16px; overflow: hidden; }
+.cc-section .cc-section-num { font-size: clamp(64px, 14vw, 140px); font-weight: 800; line-height: 1; opacity: .35; }
+
+/* 상단 바 */
+.cc-topbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 32px; }
