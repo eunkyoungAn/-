@@ -1,0 +1,326 @@
+<title>한 장 보고서 작성기</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Nanum+Gothic:wght@400;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<style>
+/* 레이아웃: 왼쪽 작업대(입력·양식 조건) + 오른쪽 A4 미리보기. 좁은 화면(태블릿 세로·폰)에서는 위아래로 쌓인다. */
+:root{
+  --bg:#eef0f4; --panel:#ffffff; --ink:#1c2230; --muted:#5d6577; --line:#d5d9e2;
+  --accent:#1e3a8a; --accent-ink:#ffffff; --accent-soft:#e3e8f6; --warn:#a14a00;
+  --paper:#ffffff; --paper-ink:#111111; --title-box:#e7e9ef; --title-line:#9a9fab;
+  --f-ui:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --f-title:"Do Hyeon","Malgun Gothic",sans-serif;
+  --f-doc:"Nanum Gothic","Malgun Gothic","Apple SD Gothic Neo",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141821; --panel:#1d2330; --ink:#e7eaf1; --muted:#a3abbd; --line:#323a4b;
+  --accent:#8fa8ff; --accent-ink:#0d1430; --accent-soft:#26304a; --warn:#ffb36b; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141821; --panel:#1d2330; --ink:#e7eaf1; --muted:#a3abbd; --line:#323a4b;
+  --accent:#8fa8ff; --accent-ink:#0d1430; --accent-soft:#26304a; --warn:#ffb36b; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-ui);font-size:15px;line-height:1.55;word-break:keep-all;overflow-wrap:anywhere}
+.wrap{max-width:1320px;margin:0 auto;padding-block:20px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:8px 16px;margin-bottom:16px}
+header.top h1{margin:0;font-family:var(--f-title);font-weight:400;font-size:30px;letter-spacing:-.01em}
+header.top p{margin:2px 0 0;color:var(--muted);font-size:14px}
+.grid{display:grid;grid-template-columns:minmax(0,420px) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:980px){.grid{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.panel h2{margin:0;font-size:13px;letter-spacing:.06em;color:var(--muted);font-weight:700}
+label{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:500}
+input[type=text],textarea,select{width:100%;font:inherit;font-size:15px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+textarea{resize:vertical;min-height:90px}
+input:focus-visible,textarea:focus-visible,select:focus-visible,button:focus-visible,[contenteditable]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.row{display:flex;flex-wrap:wrap;gap:8px}
+button{font:inherit;font-size:15px;font-weight:700;border-radius:8px;padding:11px 14px;min-height:44px;cursor:pointer;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);flex:1 1 100%}
+button:disabled{opacity:.55;cursor:default}
+.hint{font-size:12.5px;color:var(--muted);margin:0}
+.status{font-size:13.5px;color:var(--muted);min-height:1.4em;margin:0}
+.status.err{color:var(--warn)}
+details{border-top:1px solid var(--line);padding-top:12px}
+summary{cursor:pointer;font-weight:700;font-size:14px}
+.rules{margin:10px 0 0;padding-left:18px;font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:3px}
+.labels{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:6px;margin-top:6px}
+.labels input{padding:7px 9px;font-size:14px}
+.file-pill{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
+
+/* A4 미리보기 */
+.stage{min-width:0;display:flex;flex-direction:column;gap:10px}
+.stage-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
+.stage-bar .row button{flex:0 0 auto}
+.badge{font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--accent-soft);color:var(--accent)}
+.paper-scroll{overflow-x:auto}
+.paper{background:var(--paper);color:var(--paper-ink);width:100%;max-width:794px;aspect-ratio:210/297;margin:0 auto;box-shadow:0 1px 3px rgba(0,0,0,.18),0 8px 28px rgba(20,30,60,.12);
+  padding:5.2% 7% 4%;font-family:var(--f-doc);font-size:clamp(9px,1.55vw,14.5px);line-height:1.6;position:relative;overflow:hidden;container-type:inline-size}
+@container (min-width:1px){.paper-inner{font-size:1.86cqw}}
+.paper-inner{display:flex;flex-direction:column;gap:2.2em;height:100%}
+.d-title{border:1px solid var(--title-line);background:var(--title-box);text-align:center;padding:.5em 1em .55em}
+.d-title .t{font-family:var(--f-title);font-size:1.75em;line-height:1.3;display:block}
+.d-title .s{font-size:.95em;color:#555;display:block;margin-top:.15em}
+.d-title .s:empty{display:none}
+.sec h3{margin:0 0 .35em;font-size:1.32em;font-weight:800;display:flex;gap:.45em}
+.sec ul{list-style:none;margin:0;padding:0 0 0 .7em;display:flex;flex-direction:column;gap:.2em}
+.sec li{display:flex;gap:.45em;align-items:baseline}
+.sec li::before{content:"\274D";font-size:.95em;flex:none}
+.sec li.sub{padding-left:1.4em}
+.sec li.sub::before{content:"-";width:.7em}
+.lab{font-weight:800;flex:none}
+.credit{margin-top:auto;text-align:right;font-size:.82em;color:#666}
+[contenteditable]{border-radius:3px;min-width:2em}
+[contenteditable]:hover{background:rgba(30,58,138,.06)}
+[contenteditable]:empty::after{content:attr(data-ph);color:#9aa0ab}
+.overflow-warn{color:var(--warn);font-size:13px;font-weight:700}
+@media (prefers-reduced-motion:no-preference){.paper{transition:box-shadow .2s}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>한 장 보고서 작성기</h1>
+      <p>주제와 자료를 넣고 버튼 한 번이면 개요 · 본문 · 결론 · 참고문헌 양식에 맞춰 채워집니다. 미리보기 글자를 눌러 바로 고칠 수 있어요.</p>
+    </div>
+    <span class="badge" id="modeBadge">예시 내용 표시 중</span>
+  </header>
+
+  <div class="grid">
+    <section class="panel" aria-label="입력">
+      <h2>1. 무엇을 쓸까요</h2>
+      <label for="topic">보고서 주제
+        <input type="text" id="topic" placeholder="예: 청년 구직자 AI 면접 대비 프로그램 운영 계획">
+      </label>
+      <label for="material">참고 자료 (붙여넣기)
+        <textarea id="material" rows="7" placeholder="통계, 기사 본문, 회의 메모, 사업 개요 등을 붙여넣으세요. 숫자와 고유명사는 그대로 옮겨 씁니다."></textarea>
+      </label>
+      <div class="row" style="align-items:center">
+        <label for="fileIn" style="flex-direction:row;align-items:center;gap:8px;font-weight:500">
+          <input type="file" id="fileIn" accept=".txt,.md,.csv" multiple style="max-width:100%">
+        </label>
+        <span class="file-pill" id="fileNote"></span>
+      </div>
+      <label for="author">작성자 표기 (오른쪽 아래)
+        <input type="text" id="author" placeholder="예: 홍길동 | 소속">
+      </label>
+
+      <details id="formDetails">
+        <summary>2. 양식 조건</summary>
+        <ul class="rules">
+          <li>제목: 회색 박스 안, 굵은 헤드라인 글씨, 가운데 정렬</li>
+          <li>□ 개요: ○ 1개, 1~2줄 이내로 문서 전체 요약</li>
+          <li>□ 본문: ○ 5개, [라벨] + 개조식 1~2줄</li>
+          <li>□ 결론: ○ 방향 제시 1개 + - 세부 내용 정확히 2개</li>
+          <li>□ 참고문헌: 논문명 / 기사 / 사이트</li>
+          <li>개조식(명사형 종결), 이모지 금지, 반드시 한 페이지</li>
+        </ul>
+        <p class="hint" style="margin-top:10px">본문 라벨 (순서대로)</p>
+        <div class="row" style="margin-top:4px">
+          <select id="preset" aria-label="본문 라벨 묶음">
+            <option value="plan">기본: 실행계획 · 분석1~3 · 해결방안</option>
+            <option value="issue">현황형: 현황 · 문제점 · 원인 · 개선방안 · 기대효과</option>
+            <option value="biz">사업형: 추진배경 · 사업내용 · 추진일정 · 예산 · 기대효과</option>
+          </select>
+        </div>
+        <div class="labels" id="labels"></div>
+        <label for="extraRules" style="margin-top:12px">추가 양식 조건 (자유롭게)
+          <textarea id="extraRules" rows="3" placeholder="예: 제출처는 시청 일자리정책과 / 수치는 2025년 기준만 / 결론은 예산 요청으로 마무리"></textarea>
+        </label>
+        <p class="hint">여기 적은 조건은 이 기기에 저장되고, 작성할 때마다 함께 적용됩니다.</p>
+      </details>
+
+      <button class="primary" id="genBtn" type="button">양식대로 작성하기</button>
+      <p class="status" id="status" role="status"></p>
+    </section>
+
+    <section class="stage" aria-label="미리보기">
+      <div class="stage-bar">
+        <span class="hint" id="fitNote">A4 한 장 미리보기</span>
+        <div class="row">
+          <button type="button" id="docxBtn">워드(.docx) 저장</button>
+          <button type="button" id="copyBtn">본문 복사</button>
+          <button type="button" id="ccBtn">Claude Code용 지시문 복사</button>
+          <button type="button" id="resetBtn">새로 쓰기</button>
+        </div>
+      </div>
+      <div class="paper-scroll">
+        <article class="paper" id="paper"><div class="paper-inner" id="paperInner"></div></article>
+      </div>
+      <p class="status" id="outStatus" role="status"></p>
+      <textarea id="copyFallback" hidden readonly rows="6" aria-label="복사할 내용"></textarea>
+    </section>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
+<script>
+(function(){
+const PRESETS={
+  plan:["실행계획","분석1","분석2","분석3","해결방안"],
+  issue:["현황","문제점","원인","개선방안","기대효과"],
+  biz:["추진배경","사업내용","추진일정","예산","기대효과"]
+};
+const EXAMPLE={
+  example:true,
+  title:"청년 구직자 AI 면접 대비 프로그램 운영 계획",
+  subtitle:"(예시 내용입니다. 주제를 넣고 작성하기를 누르면 바뀝니다)",
+  overview:"AI 면접 도입 확대에 맞춰 청년 구직자 대상 4주 실습형 대비 과정을 운영하고, 개인별 답변 피드백으로 면접 통과율 향상 도모",
+  body:[
+    {label:"실행계획",text:"1주 AI 면접 구조 이해 → 2~3주 모의면접·녹화 피드백 → 4주 실전 리허설 및 개인 보완"},
+    {label:"분석1",text:"참여자 다수가 화면 응시·답변 시간 배분 등 비언어 요소에 대한 경험 부족"},
+    {label:"분석2",text:"경험 정리 없이 즉답형 질문에 대응해 답변 구조(결론-근거-사례) 미흡"},
+    {label:"분석3",text:"기관별 AI 면접 방식 차이에 대한 정보가 흩어져 있어 준비 방향 혼선"},
+    {label:"해결방안",text:"경험노트 작성 → STAR 답변 정리 → 녹화 피드백 3회 반복의 표준 과정 운영"}
+  ],
+  conclusion:{summary:"실습 중심 반복 훈련으로 AI 면접 대응력 강화 및 지역 청년 취업 연계",details:["단기: 1기 운영 후 만족도·자기효능감 사전·사후 비교","중장기: 기관 협력으로 상시 과정화 및 강사용 매뉴얼 보급"]},
+  references:["(예시) 참고한 보고서명 / 기사 / 사이트를 적습니다"]
+};
+const $=id=>document.getElementById(id);
+const store={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+
+let report=store.get("opr.report")||structuredClone(EXAMPLE);
+let labels=store.get("opr.labels")||PRESETS.plan.slice();
+$("extraRules").value=store.get("opr.rules")||"";
+$("author").value=store.get("opr.author")||"";
+$("topic").value=store.get("opr.topic")||"";
+$("material").value=store.get("opr.material")||"";
+if(store.get("opr.rules")) $("formDetails").open=true;
+
+function renderLabels(){
+  const box=$("labels");box.textContent="";
+  labels.forEach((l,i)=>{const inp=document.createElement("input");inp.type="text";inp.id="lab"+i;inp.value=l;inp.setAttribute("aria-label","본문 라벨 "+(i+1));
+    inp.addEventListener("input",()=>{labels[i]=inp.value.trim()||("항목"+(i+1));store.set("opr.labels",labels)});box.append(inp)});
+}
+$("preset").addEventListener("change",e=>{labels=PRESETS[e.target.value].slice();store.set("opr.labels",labels);renderLabels()});
+["extraRules","author","topic","material"].forEach(id=>$(id).addEventListener("input",()=>{store.set("opr."+(id==="extraRules"?"rules":id),$(id).value);if(id==="author")render()}));
+
+function ed(tag,cls,val,path,ph){const el=document.createElement(tag);if(cls)el.className=cls;el.contentEditable="true";el.spellcheck=false;el.dataset.path=path;el.dataset.ph=ph||"";el.textContent=val||"";return el}
+function li(sub){const l=document.createElement("li");if(sub)l.className="sub";return l}
+function sec(name){const s=document.createElement("section");s.className="sec";const h=document.createElement("h3");h.innerHTML="<span>&#9633;</span>";const n=document.createElement("span");n.textContent=name;h.append(n);s.append(h);const ul=document.createElement("ul");s.append(ul);return [s,ul]}
+
+function render(){
+  const P=$("paperInner");P.textContent="";
+  const t=document.createElement("div");t.className="d-title";
+  t.append(ed("span","t",report.title,"title","제목"),ed("span","s",report.subtitle,"subtitle",""));P.append(t);
+  let [s,ul]=sec("개요");let l=li();l.append(ed("span","",report.overview,"overview","1~2줄 요약"));ul.append(l);P.append(s);
+  [s,ul]=sec("본문");report.body.forEach((b,i)=>{const l=li();const br=document.createElement("span");br.className="lab";
+    br.append("[",ed("span","",b.label,"body."+i+".label","라벨"),"]");l.append(br,ed("span","",b.text,"body."+i+".text","내용"));ul.append(l)});P.append(s);
+  [s,ul]=sec("결론");l=li();l.append(ed("span","",report.conclusion.summary,"conclusion.summary","방향 제시"));ul.append(l);
+  report.conclusion.details.forEach((d,i)=>{const l=li(true);l.append(ed("span","",d,"conclusion.details."+i,"세부 내용"));ul.append(l)});P.append(s);
+  [s,ul]=sec("참고문헌");report.references.forEach((r,i)=>{const l=li();l.append(ed("span","",r,"references."+i,"출처"));ul.append(l)});P.append(s);
+  const c=document.createElement("div");c.className="credit";c.textContent=$("author").value.trim();P.append(c);
+  $("modeBadge").textContent=report.example?"예시 내용 표시 중":"작성된 보고서";
+  checkFit();
+}
+function setPath(path,val){const k=path.split(".");let o=report;for(let i=0;i<k.length-1;i++)o=o[k[i]];o[k[k.length-1]]=val}
+$("paperInner").addEventListener("input",e=>{const p=e.target.closest("[data-path]");if(!p)return;setPath(p.dataset.path,p.textContent);store.set("opr.report",report);checkFit()});
+$("paperInner").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault()}});
+$("paperInner").addEventListener("paste",e=>{const p=e.target.closest("[contenteditable]");if(!p)return;e.preventDefault();const t=(e.clipboardData||window.clipboardData).getData("text").replace(/\s+/g," ");document.execCommand("insertText",false,t)});
+function checkFit(){const P=$("paperInner");const over=P.scrollHeight>P.clientHeight+2;$("fitNote").innerHTML=over?'<span class="overflow-warn">한 장을 넘습니다. 문장을 줄여 주세요</span>':"A4 한 장 미리보기 · 글자를 눌러 수정";}
+window.addEventListener("resize",checkFit);
+
+$("fileIn").addEventListener("change",async e=>{const fs=[...e.target.files];if(!fs.length)return;let add="";for(const f of fs){add+="\n\n["+f.name+"]\n"+(await f.text())}
+  $("material").value=($("material").value+add).trim();store.set("opr.material",$("material").value);$("fileNote").textContent=fs.length+"개 파일을 자료에 넣었어요";});
+
+function buildPrompt(){
+  const topic=$("topic").value.trim(),mat=$("material").value.trim(),extra=$("extraRules").value.trim();
+  return `당신은 공공기관 제출용 "한 장 보고서" 작성자입니다. 아래 주제와 자료로 보고서를 작성하세요.
+
+[양식 규칙]
+- 제목: 주제를 반영한 보고서 제목 1개(30자 안팎). 부제는 필요할 때만, 없으면 빈 문자열.
+- 개요: 문서 전체를 한 페이지로 요약하는 1~2줄(90자 이내).
+- 본문: 정확히 5개 항목, 순서와 라벨 고정: ${labels.map(l=>"["+l+"]").join(" → ")}. 각 항목 개조식 1~2줄(70자 이내).
+- 결론: 방향 제시 요약 1줄 + 세부 내용 정확히 2개(단기/중장기 또는 시사점/기대효과).
+- 참고문헌: 사용자 자료에 나온 출처만 1~3개. 자료에 출처가 없으면 "(출처 입력 필요)" 1개만.
+- 문체: 개조식(명사형·구 종결, "~함/~임/~ 도모"), 공식적·간결. 이모지 금지.
+- 정확성: 자료의 수치·고유명사는 그대로 옮기고, 자료에 없는 통계나 사실은 지어내지 않음.
+- 개인정보(실명·학교·연락처)는 쓰지 않음.
+- 전체 분량은 반드시 A4 한 페이지 이내.
+${extra?"\n[추가 양식 조건 - 반드시 지킬 것]\n"+extra+"\n":""}
+[주제]
+${topic||"(주제 미입력: 자료에서 주제를 정하세요)"}
+
+[자료]
+${mat||"(자료 없음: 일반적으로 알려진 내용으로만 쓰고, 구체 수치는 넣지 마세요)"}
+
+다음 JSON 하나만 답하세요:
+{"title":"","subtitle":"","overview":"","body":[{"label":"${labels[0]}","text":""}, ...5개],"conclusion":{"summary":"","details":["",""]},"references":[""]}`;
+}
+
+let busy=false,ctl=null;
+$("genBtn").addEventListener("click",async()=>{
+  if(busy){ctl&&ctl.abort();return}
+  if(!$("topic").value.trim()&&!$("material").value.trim()){setStatus("주제나 자료를 하나 이상 넣어 주세요.",true);$("topic").focus();return}
+  const sample=window.claude?await window.claude.use("sample"):null;
+  if(!sample){setStatus("이 화면에서는 자동 작성을 쓸 수 없어요. 'Claude Code용 지시문 복사'로 Claude에게 맡겨 주세요.",true);return}
+  busy=true;ctl=new AbortController();$("genBtn").textContent="작성 중… (누르면 중단)";setStatus("양식에 맞춰 작성하고 있어요. 보통 20~60초 걸립니다.");
+  try{
+    const r=await sample.json(buildPrompt(),{signal:ctl.signal,cache:false});
+    report=normalize(r);store.set("opr.report",report);render();
+    setStatus("완성했어요. 미리보기에서 글자를 눌러 다듬고 워드로 저장하세요.");
+    $("paper").scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"});
+  }catch(e){
+    const m={cancelled:"작성을 멈췄어요.",not_granted:"Claude 사용을 허용하지 않아 작성하지 못했어요. 다시 누르면 허용 창이 뜹니다.",rate_limited:"요청이 많아요. 잠시 뒤 다시 눌러 주세요.",prompt_too_large:"자료가 너무 길어요. 핵심 부분만 남겨 주세요."};
+    setStatus(m[e&&e.code]||"작성하지 못했어요. 다시 눌러 주세요."+(e&&e.message?" ("+e.message+")":""),true);
+  }finally{busy=false;$("genBtn").textContent="양식대로 작성하기"}
+});
+function normalize(r){
+  const s=v=>typeof v==="string"?v.trim():"";
+  const body=labels.map((l,i)=>{const b=(r.body||[])[i]||{};return{label:s(b.label)||l,text:s(b.text)}});
+  const d=(r.conclusion&&r.conclusion.details)||[];
+  const refs=(Array.isArray(r.references)?r.references:[r.references]).map(s).filter(Boolean);
+  return{title:s(r.title)||$("topic").value.trim(),subtitle:s(r.subtitle),overview:s(r.overview),body,
+    conclusion:{summary:s(r.conclusion&&r.conclusion.summary),details:[s(d[0]),s(d[1])]},references:refs.length?refs:["(출처 입력 필요)"]};
+}
+function setStatus(t,err){$("status").textContent=t;$("status").className="status"+(err?" err":"")}
+function outStatus(t,err){$("outStatus").textContent=t;$("outStatus").className="status"+(err?" err":"")}
+
+function plainText(){
+  const r=report,L=[];L.push(r.title);if(r.subtitle)L.push(r.subtitle);L.push("","□ 개요"," ○ "+r.overview,"","□ 본문");
+  r.body.forEach(b=>L.push(" ○ ["+b.label+"] "+b.text));L.push("","□ 결론"," ○ "+r.conclusion.summary);r.conclusion.details.forEach(d=>L.push("   - "+d));
+  L.push("","□ 참고문헌");r.references.forEach(x=>L.push(" ○ "+x));const a=$("author").value.trim();if(a)L.push("",a);return L.join("\n");
+}
+async function copy(text,ok){
+  try{await navigator.clipboard.writeText(text);outStatus(ok);$("copyFallback").hidden=true}
+  catch(e){const f=$("copyFallback");f.value=text;f.hidden=false;f.focus();f.select();outStatus("자동 복사가 막혀 있어요. 아래 칸이 선택되어 있으니 복사해 주세요.",true)}
+}
+$("copyBtn").addEventListener("click",()=>copy(plainText(),"복사했어요. 한글·워드 양식에 바로 붙여넣으세요."));
+$("ccBtn").addEventListener("click",()=>copy(
+`/one-page-report-hwpx 아래 내용을 한 장 보고서 hwpx 양식에 그대로 넣어 파일로 만들어줘. 워드가 필요하면 /one-page-report-docx 로도 만들어줘.
+${$("extraRules").value.trim()?"추가 양식 조건: "+$("extraRules").value.trim()+"\n":""}
+${plainText()}`,"복사했어요. Claude Code(앱·웹 어디서든)에 붙여넣으면 hwpx 파일로 만들어 줍니다."));
+$("resetBtn").addEventListener("click",()=>{report=structuredClone(EXAMPLE);store.set("opr.report",null);["topic","material"].forEach(id=>{$(id).value="";store.set("opr."+id,"")});$("fileNote").textContent="";render();setStatus("");outStatus("새로 쓸 준비가 됐어요.");$("topic").focus()});
+
+async function buildDocx(){
+  const D=window.docx;if(!D)throw{code:"nolib"};
+  const {Document,Packer,Paragraph,TextRun,Table,TableRow,TableCell,WidthType,ShadingType,AlignmentType,BorderStyle}=D;
+  const F="맑은 고딕";const run=(t,o={})=>new TextRun({text:t,font:F,size:o.size||22,bold:!!o.bold,color:o.color});
+  const border={style:BorderStyle.SINGLE,size:6,color:"9A9FAB"};
+  const titleCells=[new Paragraph({alignment:AlignmentType.CENTER,spacing:{before:80,after:report.subtitle?0:80},children:[run(report.title,{size:40,bold:true})]})];
+  if(report.subtitle)titleCells.push(new Paragraph({alignment:AlignmentType.CENTER,spacing:{after:80},children:[run(report.subtitle,{size:20,color:"555555"})]}));
+  const title=new Table({width:{size:9638,type:WidthType.DXA},columnWidths:[9638],rows:[new TableRow({children:[new TableCell({width:{size:9638,type:WidthType.DXA},
+    shading:{type:ShadingType.CLEAR,fill:"E7E9EF",color:"auto"},borders:{top:border,bottom:border,left:border,right:border},children:titleCells})]})]});
+  const H=t=>new Paragraph({spacing:{before:360,after:100},children:[run("□ "+t,{size:28,bold:true})]});
+  const B=(kids)=>new Paragraph({indent:{left:400,hanging:320},spacing:{after:60,line:300},children:[run("❍ "),...kids]});
+  const S=t=>new Paragraph({indent:{left:820,hanging:220},spacing:{after:40,line:300},children:[run("- "+t)]});
+  const kids=[title,H("개요"),B([run(report.overview)]),H("본문"),
+    ...report.body.map(b=>B([run("["+b.label+"] ",{bold:true}),run(b.text)])),
+    H("결론"),B([run(report.conclusion.summary)]),...report.conclusion.details.filter(Boolean).map(S),
+    H("참고문헌"),...report.references.map(r=>B([run(r)]))];
+  const a=$("author").value.trim();if(a)kids.push(new Paragraph({alignment:AlignmentType.RIGHT,spacing:{before:480},children:[run(a,{size:18,color:"666666"})]}));
+  const doc=new Document({styles:{default:{document:{run:{font:F,size:22}}}},sections:[{properties:{page:{size:{width:11906,height:16838},margin:{top:850,bottom:850,left:1134,right:1134}}},children:kids}]});
+  return Packer.toBlob(doc);
+}
+$("docxBtn").addEventListener("click",async()=>{
+  const dl=window.claude?await window.claude.use("downloads"):null;
+  if(!dl){outStatus("이 화면에서는 파일 저장을 쓸 수 없어요. '본문 복사' 또는 'Claude Code용 지시문 복사'를 써 주세요.",true);return}
+  try{const blob=await buildDocx();const name=(report.title||"한장보고서").replace(/[\\/:*?"<>|]/g,"").slice(0,60)+".docx";
+    await dl.save({filename:name,data:blob});outStatus("워드 파일을 저장했어요.")}
+  catch(e){const m={declined:"저장을 취소했어요.",rate_limited:"저장 창이 이미 열려 있어요. 잠시 뒤 다시 눌러 주세요.",nolib:"워드 변환 도구를 불러오지 못했어요. 새로고침 후 다시 눌러 주세요."};outStatus(m[e&&e.code]||"저장하지 못했어요. 다시 눌러 주세요.",true)}
+});
+
+renderLabels();
+const pi=Object.entries(PRESETS).find(([k,v])=>v.join()===labels.join());if(pi)$("preset").value=pi[0];
+render();
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(checkFit);
+})();
+</script>
