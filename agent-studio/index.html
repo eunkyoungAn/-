@@ -4,7 +4,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* 레이아웃: 왼쪽 사이드바(에이전트 6종) + 오른쪽 작업 영역(머리글, 탭 4개). 흰 바탕, 얇은 회색 선, 파란 강조 한 가지. */
+/* 레이아웃: 왼쪽 사이드바(에이전트 5종) + 오른쪽 작업 영역(머리글, 탭 4개). 흰 바탕, 얇은 회색 선, 파란 강조 한 가지. */
 :root {
   --bg: #FFFFFF;
   --panel: #F7F8FA;
@@ -371,7 +371,7 @@ input[type="date"] { border: 1px solid var(--line-strong); border-radius: var(--
   <aside class="side" aria-label="에이전트 목록">
     <div class="brand">
       <h1 id="appTitle">업무 에이전트 스튜디오</h1>
-      <p id="appOrg">우리 기관 · 반복 업무 6종</p>
+      <p id="appOrg">우리 기관 · 반복 업무 5종</p>
     </div>
     <button class="agent-btn today-btn" type="button" id="todayBtn" aria-current="false">
       <span class="abbr" aria-hidden="true">TODO</span>
@@ -462,10 +462,11 @@ input[type="date"] { border: 1px solid var(--line-strong); border-radius: var(--
         <div class="actions" id="saveActions" hidden>
           <button class="btn primary" id="saveDocxBtn" type="button">한 장 보고서 받기 (Word)</button>
           <button class="btn primary" id="saveHwpxBtn" type="button">한 장 보고서 받기 (한글)</button>
+          <button class="btn primary" id="saveFreeBtn" type="button">자유양식 보고서 받기 (Word)</button>
           <button class="btn" id="saveMdBtn" type="button">파일로 받기 (.md)</button>
           <button class="btn" id="saveTxtBtn" type="button">파일로 받기 (.txt)</button>
           <button class="btn" id="copyResultBtn" type="button">결과 복사</button>
-          <span class="hint">Word는 바로 저장됩니다. 한글은 zip 하나로 묶여 저장되니 압축을 풀어 1번 파일을 엽니다. 처음 누를 때 보고서 양식으로 정리하느라 1~2분 걸릴 수 있습니다.</span>
+          <span class="hint">자유양식은 핵심 요약 상자, 핵심 수치, 강조 표시가 들어간 읽기 쉬운 보고서입니다. Word는 바로 저장됩니다. 한글은 zip 하나로 묶여 저장되니 압축을 풀어 1번 파일을 엽니다. 처음 누를 때 보고서 양식으로 정리하느라 1~2분 걸릴 수 있습니다.</span>
         </div>
         <div id="saveMsg" aria-live="polite"></div>
       </div>
@@ -585,7 +586,7 @@ const END = (d) => ({ kind: 'end', name: '종료', where: '화면', desc: d });
 /* 입력값 꺼내기 */
 const v = (inp, k, fb) => (inp[k] && inp[k].trim()) ? inp[k].trim() : (fb === undefined ? '[미기재]' : fb);
 
-/* ===== 에이전트 6종 ===== */
+/* ===== 에이전트 5종 ===== */
 const AGENTS = [
   {
     id: 'report', abbr: 'RPT', name: '데이터 분석 → 한 장 보고서', type: '워크플로우', needData: true,
@@ -624,47 +625,6 @@ const AGENTS = [
         `4. 한 장 보고서: 제목 / 개요 / 본문(실행계획, 분석1~3, 해결방안) / 결론(+세부 2개) / 참고문헌.`,
         `5. 수치 대조표: 보고서에 나온 모든 수치를 표로 대조함.`,
         `6. 사람 확인 지점: 담당자가 확인할 항목을 목록으로 적음.`
-      ].join('\n');
-    }
-  },
-  {
-    id: 'research', abbr: 'RSC', name: '데이터 리서치 · 자료 조사', type: '챗플로우', needData: false,
-    desc: '조사 주제를 구체화하고 조사 계획과 출처 확인표를 만듭니다. 출처가 없는 수치는 [자료 필요]로 남깁니다.',
-    fields: [
-      { id: 'topic', label: '조사 주제', required: true, ph: '예: 경력단절여성 재취업 지원 정책 현황' },
-      { id: 'use', label: '쓰임새', ph: '예: 사업계획서 추진 배경' },
-      { id: 'year', label: '대상 연도', ph: '예: 2024~2026' },
-      { id: 'found', label: '이미 찾은 자료', wide: true, area: true, ph: '자료명, 발행기관, 발행일, 주소를 한 줄씩 적습니다.' }
-    ],
-    nodes: [
-      START('조사 주제와 쓰임새를 받는다.'),
-      { kind: 'llm', name: '질문 구체화', where: 'AI', desc: '주제를 답할 수 있는 조사 질문 3~5개로 나눈다.' },
-      { kind: 'llm', name: '조사 계획', where: 'AI', desc: '질문별로 찾아볼 기관·통계·자료 유형을 정한다.' },
-      { kind: 'kb', name: '이미 찾은 자료 대조', where: 'AI', desc: '사용자가 준 자료에서 질문별 근거를 찾는다.' },
-      { kind: 'branch', name: '출처가 확인되는가', where: 'AI', desc: '기관·자료명·발행일이 모두 있는지 본다.', branch: '있음 → 조사 노트에 사용 / 없음 → [자료 필요]로 남기고 찾을 곳을 적음' },
-      { kind: 'llm', name: '조사 노트', where: 'AI', desc: '질문별 답, 근거, 빈칸을 정리한다.' },
-      HUMAN_NODE('담당자가 원문 링크를 열어 수치와 발행일을 직접 확인한다.'),
-      END('조사 노트와 출처 확인표를 보인다.')
-    ],
-    task(inp) {
-      return [
-        `# 역할`,
-        `${ORG}의 자료 조사 담당. 확인된 출처만 쓰고, 모르는 것은 빈칸으로 남긴다.`,
-        ``,
-        `# 입력`,
-        `- 조사 주제: ${v(inp, 'topic')}`,
-        `- 쓰임새: ${v(inp, 'use')}`,
-        `- 대상 연도: ${v(inp, 'year')}`,
-        `- 이미 찾은 자료: ${v(inp, 'found', '없음')}`,
-        ``,
-        `# 처리 순서`,
-        `1. 조사 질문 3~5개로 나눔.`,
-        `2. 질문별 조사 계획: 찾아볼 기관, 통계명, 검색어.`,
-        `3. 이미 찾은 자료에서 질문별 근거를 찾음. 자료에 없는 수치는 쓰지 않음.`,
-        `4. 조사 노트: 질문 | 답 | 근거(기관·자료명·발행일) | 빈칸.`,
-        `5. 출처 확인표와 사람 확인 지점.`,
-        `- 기억에 의존한 수치·법령·통계는 쓰지 않고 [자료 필요]와 찾을 곳(기관명, 검색어)을 적음.`,
-        `- "공식 자료"로 추가된 자료 중 발행기관·발행일이 있는 것만 근거로 씀.`
       ].join('\n');
     }
   },
@@ -1326,7 +1286,7 @@ async function run() {
   out.className = 'result has'; out.textContent = ''; delete out.dataset.streaming;
   $('verifyBox').innerHTML = ''; $('saveActions').hidden = true; $('saveMsg').innerHTML = ''; $('resultMeta').textContent = '';
   setRunning(true);
-  const runId = logRunStart(agent, inp.title || inp.topic || inp.biz || inp.purpose || '');
+  const runId = logRunStart(agent, inp.title || inp.biz || inp.purpose || '');
   const opts = { signal: CTL.signal, onText: ({ text }) => { out.dataset.streaming = '1'; out.textContent = text; $('runStatus').textContent = '작성 중'; } };
   if (TOOLS_OK) opts.tools = [SEARCH_TOOL]; else opts.cache = false;
   try {
@@ -1392,7 +1352,7 @@ function finishRun(agent, text, truncated) {
   $('verifyBox').innerHTML = html;
   LAST.verify = v;
   $('saveActions').hidden = false;
-  $('saveDocxBtn').hidden = $('saveHwpxBtn').hidden = $('saveMdBtn').hidden = $('saveTxtBtn').hidden = !DOWNLOADS;
+  $('saveDocxBtn').hidden = $('saveFreeBtn').hidden = $('saveHwpxBtn').hidden = $('saveMdBtn').hidden = $('saveTxtBtn').hidden = !DOWNLOADS;
 }
 
 /* ===== 결과 파일로 받기 ===== */
@@ -1614,7 +1574,7 @@ async function getReportJson(title) {
 }
 function reportTitle() {
   const inp = inputsByAgent[LAST.agent.id] || {};
-  return (inp.title || inp.topic || inp.biz || inp.purpose || '').trim() || LAST.agent.name;
+  return (inp.title || inp.biz || inp.purpose || '').trim() || LAST.agent.name;
 }
 const numberNote = (d, title) => {
   const extra = newNumbers(d, LAST.text + ' ' + title);
@@ -1668,7 +1628,10 @@ function makeDocx(title, paras) {
   W_TIGHT = countLines(paras) > 26;
   const border = '<w:top w:val="single" w:sz="12" w:space="0" w:color="000000"/><w:left w:val="single" w:sz="12" w:space="0" w:color="000000"/><w:bottom w:val="single" w:sz="12" w:space="0" w:color="000000"/><w:right w:val="single" w:sz="12" w:space="0" w:color="000000"/>';
   const titleTbl = `<w:tbl><w:tblPr><w:tblW w:w="5000" w:type="pct"/><w:tblBorders>${border}</w:tblBorders></w:tblPr><w:tr><w:trPr><w:trHeight w:val="760"/></w:trPr><w:tc><w:tcPr><w:tcW w:w="5000" w:type="pct"/><w:shd w:val="clear" w:color="auto" w:fill="E7EEF8"/><w:vAlign w:val="center"/></w:tcPr><w:p><w:pPr><w:jc w:val="center"/><w:spacing w:before="80" w:after="80"/></w:pPr><w:r><w:rPr><w:rFonts w:ascii="HY헤드라인M" w:hAnsi="HY헤드라인M" w:eastAsia="HY헤드라인M"/><w:b/><w:sz w:val="40"/><w:szCs w:val="40"/></w:rPr><w:t xml:space="preserve">${wEsc(title)}</w:t></w:r></w:p></w:tc></w:tr></w:tbl>`;
-  const doc = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>${titleTbl}${wPara('empty')}${paras.map(([k, t]) => wPara(k, t)).join('')}<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134" w:header="0" w:footer="0" w:gutter="0"/></w:sectPr></w:body></w:document>`;
+  return docxPackage(`${titleTbl}${wPara('empty')}${paras.map(([k, t]) => wPara(k, t)).join('')}`);
+}
+function docxPackage(bodyXml) {
+  const doc = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>${bodyXml}<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134" w:header="0" w:footer="0" w:gutter="0"/></w:sectPr></w:body></w:document>`;
   const styles = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="맑은 고딕" w:hAnsi="맑은 고딕" w:eastAsia="맑은 고딕" w:cs="맑은 고딕"/><w:sz w:val="20"/><w:szCs w:val="20"/><w:lang w:val="en-US" w:eastAsia="ko-KR"/></w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:after="0"/><w:jc w:val="left"/></w:pPr></w:pPrDefault></w:docDefaults><w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/></w:style></w:styles>';
   const u = (s) => utf8.encode(s);
   return zipStore([
@@ -1691,6 +1654,92 @@ async function saveDocx() {
   } catch (e) { saveError(e, 'Word'); } finally { btn.disabled = false; }
 }
 $('saveDocxBtn').addEventListener('click', saveDocx);
+
+/* ===== 자유양식 보고서 (Word): 핵심 요약 상자, 핵심 수치, 강조 표시, 확인 필요 상자 ===== */
+const FREE_JSON_PROMPT = (title, text) => [
+  '아래 "실행 결과"를 읽기 쉬운 자유양식 보고서로 다시 정리한다. 바쁜 결재권자가 강조된 곳만 읽어도 핵심을 알 수 있어야 한다.',
+  '규칙:',
+  '- 실행 결과에 있는 내용과 수치만 쓴다. 새 수치, 새 사실, 새 출처를 만들지 않는다. 수치는 표기 그대로 옮긴다.',
+  '- 개조식 업무보고 문체(~함, ~임). 이모지를 쓰지 않는다. 「」와 (근거: …) 표시는 뺀다.',
+  '- 강조: 문장에서 가장 중요한 낱말이나 수치만 **이렇게** 감싼다. 한 문장에 한 곳, 전체의 3분의 1 이하 문장에만 쓴다.',
+  '- summary: 결론부터 2~3문장. keyFigures: 실행 결과에 있는 핵심 수치 0~3개(value는 수치와 단위, label은 12자 이내 설명). 수치가 없으면 빈 배열.',
+  '- sections: 2~4개. heading은 내용에 맞는 짧은 제목, points는 각 2~4개(각 80자 이내).',
+  '- table: 나란히 비교할 수치나 판정이 3줄 이상 있으면 넣고(6열, 10행 이내), 없으면 null.',
+  '- cautions: 담당자가 직접 확인해야 할 지점 1~4개. [확인 필요], [자료 필요], 원문에 없는 인용이 있으면 반드시 넣는다.',
+  '- JSON 객체 하나만 답한다. 형식:',
+  '{"title":"보고서 제목","summary":["…"],"keyFigures":[{"value":"90%","label":"엑셀 과정 수료율"}],"sections":[{"heading":"…","points":["… **강조** …"]}],"table":null 또는 {"headers":["구분","…"],"rows":[["…","…"]]},"cautions":["…"],"refs":["실행 결과에 나온 자료명만"]}',
+  '', `보고서 제목: ${title}`, '', '<실행 결과>', text, '</실행 결과>'
+].join('\n');
+
+/* **강조** 를 굵은 파란 글자 + 연한 바탕으로 */
+function wRuns(text, sz, opt) {
+  const o = opt || {};
+  return String(text).split(/(\*\*[^*]+\*\*)/).filter(Boolean).map(part => {
+    const em = /^\*\*[^*]+\*\*$/.test(part);
+    const t = hwpText(em ? part.slice(2, -2) : part.replace(/\*\*/g, ''));
+    if (!t) return '';
+    return `<w:r><w:rPr>${em || o.bold ? '<w:b/>' : ''}${em ? '<w:color w:val="1C64F2"/><w:shd w:val="clear" w:color="auto" w:fill="EBF2FE"/>' : o.color ? `<w:color w:val="${o.color}"/>` : ''}<w:sz w:val="${sz}"/><w:szCs w:val="${sz}"/></w:rPr><w:t xml:space="preserve">${part.startsWith(' ') && !em ? ' ' : ''}${t}${part.endsWith(' ') && !em ? ' ' : ''}</w:t></w:r>`;
+  }).join('');
+}
+const wP = (runs, pPr) => `<w:p><w:pPr>${pPr || ''}</w:pPr>${runs}</w:p>`;
+const wGap = (h) => `<w:p><w:pPr><w:spacing w:after="0" w:line="${h || 160}" w:lineRule="exact"/></w:pPr></w:p>`;
+function wBox(fill, edge, inner) {
+  return `<w:tbl><w:tblPr><w:tblW w:w="5000" w:type="pct"/><w:tblBorders><w:left w:val="single" w:sz="36" w:space="0" w:color="${edge}"/></w:tblBorders><w:tblCellMar><w:top w:w="100" w:type="dxa"/><w:left w:w="200" w:type="dxa"/><w:bottom w:w="100" w:type="dxa"/><w:right w:w="160" w:type="dxa"/></w:tblCellMar></w:tblPr><w:tr><w:tc><w:tcPr><w:tcW w:w="5000" w:type="pct"/><w:shd w:val="clear" w:color="auto" w:fill="${fill}"/></w:tcPr>${inner}</w:tc></w:tr></w:tbl>`;
+}
+function makeFreeDocx(d, title) {
+  const arr = (x) => Array.isArray(x) ? x.map(String).filter(s => s.trim()) : (x ? [String(x)] : []);
+  const sp = '<w:spacing w:before="0" w:after="60" w:line="340" w:lineRule="auto"/>';
+  let body = '';
+  // 제목과 작성 정보
+  body += wP(wRuns(d.title || title, 40, { bold: true }), '<w:spacing w:after="40"/>');
+  const now = new Date();
+  body += wP(wRuns(`${ORG} ${ROLE} · ${now.getFullYear()}. ${now.getMonth() + 1}. ${now.getDate()}. · AI 초안, 담당자 확인 전`, 18, { color: '5C6573' }), '<w:pBdr><w:bottom w:val="single" w:sz="12" w:space="6" w:color="1C64F2"/></w:pBdr><w:spacing w:after="160"/>');
+  // 핵심 요약 상자
+  const sum = arr(d.summary).slice(0, 3);
+  if (sum.length) body += wBox('EBF2FE', '1C64F2', wP(wRuns('핵심 요약', 22, { bold: true, color: '1C64F2' }), '<w:spacing w:after="40"/>') + sum.map(t => wP(wRuns(t, 24), sp)).join('')) + wGap();
+  // 핵심 수치
+  const figs = (Array.isArray(d.keyFigures) ? d.keyFigures : []).filter(f => f && String(f.value || '').trim()).slice(0, 3);
+  if (figs.length) {
+    const b = (n) => `<w:${n} w:val="single" w:sz="6" w:space="0" w:color="CDD2DA"/>`;
+    body += `<w:tbl><w:tblPr><w:tblW w:w="5000" w:type="pct"/><w:tblBorders>${['top', 'left', 'bottom', 'right', 'insideV'].map(b).join('')}</w:tblBorders><w:tblCellMar><w:top w:w="120" w:type="dxa"/><w:bottom w:w="120" w:type="dxa"/></w:tblCellMar></w:tblPr><w:tr>${figs.map(f => `<w:tc><w:tcPr><w:tcW w:w="${Math.floor(5000 / figs.length)}" w:type="pct"/></w:tcPr>${wP(wRuns(f.value, 44, { bold: true, color: '1C64F2' }), '<w:jc w:val="center"/><w:spacing w:after="0"/>')}${wP(wRuns(f.label || '', 20, { color: '5C6573' }), '<w:jc w:val="center"/><w:spacing w:after="0"/>')}</w:tc>`).join('')}</w:tr></w:tbl>` + wGap();
+  }
+  // 본문 묶음
+  (Array.isArray(d.sections) ? d.sections : []).slice(0, 5).forEach(s => {
+    if (!s) return;
+    body += wP(wRuns(s.heading || '', 28, { bold: true }), '<w:keepNext/><w:pBdr><w:left w:val="single" w:sz="36" w:space="8" w:color="1C64F2"/></w:pBdr><w:spacing w:before="200" w:after="100"/>');
+    arr(s.points).slice(0, 5).forEach(t => { body += wP(`<w:r><w:rPr><w:sz w:val="22"/></w:rPr><w:t xml:space="preserve">· </w:t></w:r>` + wRuns(t, 22), '<w:spacing w:after="60" w:line="340" w:lineRule="auto"/><w:ind w:left="360" w:hanging="200"/>'); });
+  });
+  // 표
+  const tb = d.table && typeof d.table === 'object' ? cleanTableData(d.table.headers, Array.isArray(d.table.rows) ? d.table.rows : [], 6, 10) : null;
+  if (tb) body += wGap() + wTable(tb);
+  // 확인 필요 상자
+  const ca = arr(d.cautions).slice(0, 5);
+  if (ca.length) body += wGap() + wBox('FEF6E7', 'B45309', wP(wRuns('담당자 확인 필요', 22, { bold: true, color: 'B45309' }), '<w:spacing w:after="40"/>') + ca.map(t => wP(`<w:r><w:rPr><w:sz w:val="22"/></w:rPr><w:t xml:space="preserve">· </w:t></w:r>` + wRuns(t, 22), '<w:spacing w:after="40" w:line="320" w:lineRule="auto"/><w:ind w:left="200" w:hanging="200"/>')).join(''));
+  // 근거 자료
+  const refs = arr(d.refs);
+  if (refs.length) body += wGap() + wP(wRuns('근거 자료', 20, { bold: true, color: '5C6573' }), '<w:spacing w:before="120" w:after="40"/>') + refs.map(t => wP(wRuns('· ' + t, 18, { color: '5C6573' }), '<w:spacing w:after="20"/>')).join('');
+  return docxPackage(body);
+}
+async function saveFree() {
+  if (!LAST || !DOWNLOADS) return;
+  const btn = $('saveFreeBtn'); btn.disabled = true;
+  const f = resultFile(), title = reportTitle();
+  try {
+    let d = LAST.freeJson;
+    if (!d) {
+      if (!SAMPLE) throw { code: 'no_sample' };
+      const t0 = Date.now();
+      const tick = setInterval(() => notice($('saveMsg'), `자유양식 보고서로 정리하는 중 · ${Math.round((Date.now() - t0) / 1000)}초 (1~2분 걸릴 수 있음)`), 1000);
+      try { d = await SAMPLE.json(FREE_JSON_PROMPT(title, LAST.text)); } finally { clearInterval(tick); }
+      if (!d || typeof d !== 'object' || !Array.isArray(d.sections) || !d.sections.length) throw { code: 'invalid_json' };
+      LAST.freeJson = d;
+    }
+    const note = numberNote(d, title);
+    await saveFile({ filename: `${f.name}_자유양식보고서.docx`, data: new Blob([makeFreeDocx(d, title)]) });
+    notice($('saveMsg'), `${f.name}_자유양식보고서.docx 를 저장했습니다.${note}`, note.includes('주의') ? 'warn' : '');
+  } catch (e) { saveError(e, 'Word'); } finally { btn.disabled = false; }
+}
+$('saveFreeBtn').addEventListener('click', saveFree);
 
 $('copyBundleBtn').addEventListener('click', async () => {
   const src = collectSources();
@@ -1916,7 +1965,7 @@ storeInit();
 /* 시작 */
 if (CONFIG.appTitle) $('appTitle').textContent = CONFIG.appTitle;
 if (CONFIG.accent) document.documentElement.style.setProperty('--accent', CONFIG.accent);
-$('appOrg').textContent = `${ORG} · 반복 업무 6종`;
+$('appOrg').textContent = `${ORG} · 반복 업무 5종`;
 renderRules(); renderSites();
 const savedAgent = load('studio.agent');
 selectAgent(AGENTS.some(a => a.id === savedAgent) ? savedAgent : 'report');
