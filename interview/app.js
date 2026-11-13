@@ -34,6 +34,11 @@ const settings = {
 };
 const assigned = (params.get('q') || '').split(',').map(findQuestion).filter(Boolean);
 
+// 리포트를 받을 이메일(선택). 이 기기 브라우저에만 기억하고, 보내기를 누를 때만 쓴다.
+const EMAIL_RE = /^[^\s@,;<>]+@[^\s@,;<>]+\.[^\s@,;<>]+$/;
+let email = store.get('email') || '';
+const KEY_URL = 'https://aistudio.google.com/apikey';
+
 // 참여자가 직접 추가한 질문. 이 기기의 브라우저에만 저장되고 어디에도 보내지 않는다.
 const CUSTOM_TIP = '첫 문장에 답을 먼저 말하고, 경험 하나를 근거로 들어 보세요.';
 let custom = [];
@@ -166,6 +171,12 @@ function homeView() {
     </section>
     ${inApp ? `<div class="notice warn"><b>${esc(inApp)} 안에서 열려 있어요.</b> 이 화면에서는 마이크가 막힐 수 있습니다. ${inApp === '카카오톡' ? `아래 버튼을 눌러 Chrome이나 Safari에서 열어 주세요.<a class="btn primary sm" href="${KAKAO_EXTERNAL}">다른 브라우저로 열기</a>` : '오른쪽 위 메뉴에서 <b>다른 브라우저로 열기</b>(Chrome, Safari 등)를 눌러 주세요.'}<button class="btn ghost sm" data-act="copy-link">주소 복사</button></div>` : ''}
     ${!SR ? `<div class="notice">이 브라우저는 음성 인식을 지원하지 않아 <b>글로 답하기</b>로 진행합니다. 말로 연습하려면 Chrome(안드로이드·PC) 또는 Safari(아이폰)에서 열어 주세요.</div>` : ''}
+    <button class="btn ghost wide" data-act="guide">처음이신가요? 이용 방법 보기</button>
+    <section class="card form">
+      <h2>피드백 리포트 받을 이메일 <small class="muted">선택</small></h2>
+      <label class="field">이메일 주소<input id="email" type="email" inputmode="email" autocomplete="email" placeholder="name@example.com" value="${esc(email)}"></label>
+      <p class="muted small">연습을 마치고 "이메일로 리포트 받기"를 누르면 이 주소로 피드백 리포트를 보내 드려요. 주소는 이 휴대폰에만 기억하고, 보내기를 누를 때만 사용합니다. 비워 두고 시작해도 됩니다.</p>
+    </section>
     <section class="card">
       <h2>시작 전에 확인해 주세요</h2>
       <ul class="plain">
@@ -756,12 +767,14 @@ function savePanel() {
     <h3>피드백 리포트 받기</h3>
     <p class="muted small">화면을 닫으면 기록이 사라져요. 오늘 연습한 질문 ${n}개의 종합 평가, 항목별 점수, 질문별 피드백, 평가 기준과 근거가 담깁니다.</p>
     <div class="savebtns">
-      <button class="btn primary" data-act="save-html">리포트 파일로 내려받기</button>
+      <button class="btn primary" data-act="save-mail">이메일로 리포트 받기</button>
+      <button class="btn ghost" data-act="save-html">리포트 파일로 내려받기</button>
       <button class="btn ghost" data-act="save-pdf">PDF로 저장(인쇄)</button>
       <button class="btn ghost" data-act="save-image">이미지로 저장</button>
       <button class="btn ghost" data-act="save-text">글로 복사</button>
     </div>
     <p class="muted small">리포트 파일은 인터넷 없이도 열리는 한 장짜리 문서(HTML)예요. 휴대폰의 다운로드 폴더에 저장되고, 열어서 인쇄하거나 강사에게 보낼 수 있습니다.</p>
+    <label class="field">받을 이메일<input id="mailTo" type="email" inputmode="email" autocomplete="email" placeholder="name@example.com" value="${esc(email)}"></label>
     ${state.screen !== 'records' ? '<button class="linkbtn" data-act="records">피드백 리포트 미리 보기</button>' : ''}
   </section>`;
 }
@@ -860,7 +873,9 @@ async function downloadReport() {
 
 async function doSave(act) {
   if (!state.log.length) { toast('먼저 질문 하나를 연습해 주세요.'); return; }
-  if (act === 'save-html') {
+  if (act === 'save-mail') {
+    await sendReportMail();
+  } else if (act === 'save-html') {
     await downloadReport();
     state.saved = true;
     toast('리포트 파일을 내려받았어요. 다운로드 폴더에서 열어 보세요.');
@@ -884,6 +899,141 @@ window.addEventListener('beforeunload', e => {
   if (state.log.length && !state.saved) { e.preventDefault(); e.returnValue = ''; }
 });
 
+// ---------- 이메일로 리포트 보내기 ----------
+function saveEmailField(silent) {
+  const el = document.getElementById('email');
+  if (!el) return true;
+  const v = el.value.trim();
+  if (v && !EMAIL_RE.test(v)) { if (!silent) { toast('이메일 주소를 확인해 주세요. 비워 두고 시작해도 됩니다.'); el.focus(); } return false; }
+  email = v;
+  store.set('email', email);
+  return true;
+}
+
+// 메일 발송 주소: 저장소 루트의 mail-config.json (기존 커리어캐쳐 메일 발송 웹앱과 같이 쓴다)
+async function mailEndpoint() {
+  try {
+    const res = await fetch('../mail-config.json', { cache: 'no-store' });
+    if (!res.ok) return '';
+    const url = String((await res.json()).mailEndpoint || '').trim();
+    return /^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(url) ? url : '';
+  } catch { return ''; }
+}
+
+async function sendReportMail() {
+  const el = document.getElementById('mailTo');
+  const to = (el ? el.value : email).trim();
+  if (!EMAIL_RE.test(to)) { toast('받을 이메일 주소를 써 주세요.'); if (el) el.focus(); return; }
+  email = to;
+  store.set('email', email);
+  const subject = `면접 피드백 리포트 ${new Date().toLocaleDateString('ko-KR')}`;
+  const body = buildText(state.log);
+  const endpoint = await mailEndpoint();
+  if (endpoint) {
+    if (!confirm(`${to} 주소로 피드백 리포트를 보낼까요?\n리포트 글(질문, 내 답변, 피드백)이 커리어캐쳐 메일 발송 서비스(Google)를 거쳐 전송됩니다. 영상은 보내지 않아요.`)) return;
+    toast('리포트를 보내는 중이에요...');
+    try {
+      const res = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ to, subject, body: body.slice(0, 58000) }) });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error || '메일 발송에 실패했어요.');
+      state.saved = true;
+      toast(`${to}(으)로 리포트를 보냈어요. 안 보이면 스팸함도 확인해 주세요.`);
+      return;
+    } catch (err) {
+      toast(`${err.message || '메일 서버에 연결하지 못했어요.'} 대신 내 메일 앱으로 보낼 수 있게 열어 드려요.`);
+    }
+  }
+  // 발송 서비스가 설정되지 않았거나 실패하면, 참여자 휴대폰의 메일 앱을 리포트가 채워진 상태로 연다.
+  // 메일 앱 주소 길이 제한 때문에 길면 요약만 넣고 전체는 복사해 둔다.
+  const short = body.length > 1500 ? body.slice(0, 1500) + '\n\n(내용이 길어 일부만 넣었어요. 전체 리포트는 복사되어 있으니 여기에 붙여 넣어 주세요.)' : body;
+  try { await navigator.clipboard.writeText(body); } catch { /* 복사 실패는 무시 */ }
+  state.saved = true;
+  location.href = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent('[커리어캐쳐] ' + subject)}&body=${encodeURIComponent(short)}`;
+  toast('메일 앱이 열리면 "보내기"를 눌러 주세요. 전체 리포트는 복사해 두었어요.');
+}
+
+// ---------- 화면: 이용 방법(설명서) ----------
+function guideView() {
+  return `${header('이용 방법')}
+  <main class="wrap guidepage">
+    <section class="hero small">
+      <h1>면접 리허설 이용 방법</h1>
+      <p>질문을 듣고 답한 뒤, 평가 기준에 따른 피드백을 받고 다시 답해 보는 연습 도구예요. 회원가입 없이 무료로 씁니다.</p>
+    </section>
+    <section class="card">
+      <h2>한눈에 보는 순서</h2>
+      <ol class="steps">
+        <li><b>준비</b>: 이메일(선택)을 쓰고, 답변 시간(60초·90초)과 답변 방식(목소리만·영상 녹화)을 고릅니다.</li>
+        <li><b>질문 고르기</b>: 공통 질문 20개, 내가 추가한 질문, 내 자료로 만든 예상 질문 중에서 고릅니다.</li>
+        <li><b>답하기</b>: 질문을 소리로 듣고 30초 준비한 뒤 말로 답합니다. 말한 내용이 글자로 나타나요.</li>
+        <li><b>답변 확인</b>: 잘못 받아 적힌 낱말만 고칩니다.</li>
+        <li><b>꼬리질문</b>(AI 키 연결 시): 부족한 근거를 묻는 질문에 한 번 더 답합니다.</li>
+        <li><b>피드백</b>: 총점, 항목별 점수, 다음에 고칠 한 가지, 바꿔 말하기 예시를 봅니다.</li>
+        <li><b>다시 답하기</b>: 한 가지를 고쳐 같은 질문에 다시 답하고 전후를 비교합니다.</li>
+        <li><b>리포트 받기</b>: 이메일, 파일, PDF, 이미지로 피드백 리포트를 받습니다.</li>
+      </ol>
+    </section>
+    <section class="card">
+      <h2>시작 전 준비</h2>
+      <ul class="plain">
+        <li><b>브라우저</b>: 아이폰은 Safari, 안드로이드와 PC는 Chrome에서 열어 주세요. 카카오톡 안에서는 마이크가 막힐 수 있어요.</li>
+        <li><b>마이크·카메라</b>: 처음 답할 때 "허용"을 눌러 주세요. 막혔다면 주소창 옆 자물쇠 아이콘에서 다시 허용할 수 있어요.</li>
+        <li><b>장소</b>: 조용한 곳에서, 영상 녹화를 켠다면 휴대폰을 눈높이에 세워 주세요.</li>
+        <li>말하기가 어려우면 <b>글로 답하기</b>를 켜고 연습할 수 있어요.</li>
+      </ul>
+    </section>
+    <section class="card">
+      <h2>세 가지 연습 방법</h2>
+      <table class="errtable"><thead><tr><th>방법</th><th>필요한 것</th><th>되는 것</th></tr></thead><tbody>
+        <tr><td>기본 연습</td><td>없음</td><td>공통 질문·내 질문으로 연습, 자동 피드백(답변 속 표현을 규칙으로 확인), 리포트</td></tr>
+        <tr><td>AI 연습</td><td>내 Gemini API 키</td><td>답변을 읽고 하는 꼬리질문, 평가 기준표에 따른 AI 피드백</td></tr>
+        <tr><td>내 자료 연습</td><td>내 Gemini API 키 + 자기소개서 등</td><td>내 자료로 예상 질문과 핵심 답변 스크립트 만들기</td></tr>
+      </tbody></table>
+      <p class="small">Gemini API 키는 무료로 3분이면 받을 수 있어요.</p>
+      <a class="btn ghost wide" href="${KEY_URL}" target="_blank" rel="noopener noreferrer">Gemini API 키 받으러 가기</a>
+      <p class="muted small">받는 순서는 첫 화면의 "AI 피드백·꼬리질문 (내 Gemini 키)" → "키 받는 방법"에 있어요.</p>
+    </section>
+    <section class="card">
+      <h2>내 자료로 예상 질문 만들기</h2>
+      <ol class="steps">
+        <li>질문 고르기 화면 맨 위 <b>자료 넣고 질문 만들기</b>를 누릅니다.</li>
+        <li>지원 직무를 쓰고, 자기소개서·경력기술서·포트폴리오·경험노트 파일을 첨부하거나 붙여 넣습니다. 한글(HWP·HWPX), 워드, PDF, 사진을 읽어요.</li>
+        <li><b>예상 질문 바로 만들기</b>를 누르면 1분 안팎에 "나의 예상 질문집"이 만들어집니다.</li>
+        <li>질문마다 의도, 평가 기준, 준비할 숫자, 키워드, 핵심 답변 스크립트가 있어요. 스크립트는 외우지 말고 키워드만 떠올리며 내 말로 답해 보세요.</li>
+      </ol>
+    </section>
+    <section class="card">
+      <h2>피드백 읽는 법</h2>
+      <ul class="plain">
+        <li><b>다음에 고칠 한 가지</b>가 가장 중요합니다. 점수보다 이것 하나를 다음 답변에 반영해 보세요.</li>
+        <li><b>총점</b>은 6개 항목을 가중치로 합친 100점 만점 점수예요. 답변 내용(구체성, 직무역량 근거, 논리성)이 70%, 전달력(목소리, 시선·움직임, 영상 환경)이 30%입니다.</li>
+        <li>영상 녹화를 켜지 않으면 시선·움직임과 영상 환경은 측정하지 않고, 나머지 항목으로 환산합니다.</li>
+        <li><b>전달력</b>은 내용이 잘 전달되는지를 보는 코칭 지표예요. 낮은 목소리, 방언, 말더듬, 위아래 시선은 감점하지 않고, 성격이나 능력으로 해석하지 않습니다.</li>
+        <li>점수는 연습용 참고치이며 합격을 예측하지 않습니다. 자세한 기준과 근거 자료는 피드백 화면의 "평가 기준과 근거"에 있어요.</li>
+      </ul>
+    </section>
+    <section class="card">
+      <h2>피드백 리포트 받기</h2>
+      <ul class="plain">
+        <li><b>이메일로 리포트 받기</b>: 처음에 쓴 주소로 리포트 글을 보냅니다. 바로 발송되지 않고 메일 앱이 열리면, 내용이 채워진 메일의 "보내기"를 눌러 주세요.</li>
+        <li><b>리포트 파일로 내려받기</b>: 인터넷 없이도 열리는 문서 파일로 저장됩니다.</li>
+        <li><b>PDF·이미지·글 복사</b>도 됩니다. 영상은 피드백 화면의 "이 영상 내 휴대폰에 저장"으로 따로 저장해요.</li>
+        <li>화면을 닫으면 기록이 사라지니, 끝내기 전에 꼭 받아 두세요.</li>
+      </ul>
+    </section>
+    <section class="card">
+      <h2>자주 묻는 질문</h2>
+      <dl class="rules">
+        <dt>내 답변과 영상은 어디에 저장되나요?</dt><dd>어디에도 저장되지 않아요. 영상과 분석은 휴대폰 안에서만 처리되고, 화면을 닫으면 사라집니다. AI 키를 연결한 경우에만 질문과 답변 글이 Google Gemini로 전송됩니다.</dd>
+        <dt>말했는데 글자가 안 나와요.</dt><dd>마이크 권한을 확인하고 Chrome이나 Safari에서 다시 열어 주세요. 그래도 안 되면 글로 답하기로 연습할 수 있어요.</dd>
+        <dt>AI 오류가 나요.</dt><dd>첫 화면의 Gemini 키 카드에서 "연결 점검"을 누르면 원인과 해결 방법이 나옵니다.</dd>
+        <dt>점수가 실제 AI면접 점수와 같나요?</dt><dd>아니요. 연습을 위한 자체 평가도구이고, AI면접 시스템마다 평가방식이 다릅니다.</dd>
+      </dl>
+    </section>
+    <button class="btn primary big" data-act="home">연습 시작하러 가기</button>
+  </main>`;
+}
+
 // ---------- Gemini 키 ----------
 function keyPanel() {
   if (hasGemini()) {
@@ -896,7 +1046,26 @@ function keyPanel() {
     </div>`;
   }
   return `<div class="keybox">
-    <p class="muted small">Gemini API 키를 넣으면 AI가 답변을 읽고 꼬리질문을 하고, 질문별 기준으로 피드백합니다. 내 자료로 예상 질문을 만들 때도 필요해요. 키는 Google AI Studio(aistudio.google.com)의 "Get API key"에서 만들 수 있어요.</p>
+    <p class="muted small">Gemini API 키를 넣으면 AI가 답변을 읽고 꼬리질문을 하고, 질문별 기준으로 피드백합니다. 내 자료로 예상 질문을 만들 때도 필요해요. 키가 없어도 기본 연습과 자동 피드백은 됩니다.</p>
+    <a class="btn ghost wide" href="${KEY_URL}" target="_blank" rel="noopener noreferrer">Gemini API 키 받으러 가기 (Google AI Studio)</a>
+    <details class="filehelp keyhelp">
+      <summary>키 받는 방법 (3분, 무료)</summary>
+      <ol class="steps">
+        <li>위 버튼을 눌러 <b>Google AI Studio</b>를 엽니다. 새 창으로 열려요.</li>
+        <li><b>Google 계정으로 로그인</b>합니다. 처음이면 이용 약관에 동의합니다.</li>
+        <li><b>"API 키 만들기"(Create API key)</b>를 누릅니다. 프로젝트를 고르라고 하면 기본으로 제안되는 것을 그대로 선택하세요.</li>
+        <li>만들어진 키(<b>AIza</b>로 시작하는 긴 글자) 옆의 <b>복사</b> 버튼을 누릅니다.</li>
+        <li>이 화면으로 돌아와 아래 <b>Gemini API 키</b> 칸에 붙여 넣고 <b>키 연결</b>을 누릅니다.</li>
+        <li>연결한 뒤 <b>연결 점검</b>을 누르면 키가 잘 되는지 확인할 수 있어요.</li>
+      </ol>
+      <ul class="plain small">
+        <li>무료 등급으로 충분합니다. 카드 등록 없이 만들 수 있고, 하루·분당 사용량 한도가 있어요.</li>
+        <li>키는 비밀번호처럼 다뤄 주세요. 다른 사람에게 보내거나 단톡방에 올리지 마세요.</li>
+        <li>키는 이 휴대폰 안에서만 쓰이고 커리어캐쳐 서버로 보내지 않습니다. "이 휴대폰에 키 기억하기"를 켜지 않으면 화면을 닫을 때 지워져요.</li>
+        <li>무료 키로 보낸 내용은 Google 서비스 개선에 쓰일 수 있어요. 실명·연락처는 빼고 넣어 주세요(전화번호·이메일은 자동으로 가립니다).</li>
+        <li>키의 "애플리케이션 제한"은 "없음"으로 두세요. 웹사이트 제한을 걸면 이 앱에서 쓸 수 없습니다.</li>
+      </ul>
+    </details>
     <label class="field">Gemini API 키<input id="gemKey" type="password" autocomplete="off" placeholder="AIza로 시작하는 키"></label>
     <label class="check"><input type="checkbox" id="gemRemember"> 이 휴대폰에 키 기억하기</label>
     <details><summary class="muted small">모델 바꾸기</summary><label class="field">모델 이름<input id="gemModel" type="text" value="${esc(gem.getModel())}"></label></details>
@@ -1215,7 +1384,7 @@ function qsetView() {
 }
 
 // ---------- 렌더링 ----------
-const views = { diag: diagView, material: materialView, comps: compsView, qset: qsetView, home: homeView, pick: pickView, ask: askView, review: reviewView, report: reportView, compare: compareView, records: recordsView };
+const views = { guide: guideView, diag: diagView, material: materialView, comps: compsView, qset: qsetView, home: homeView, pick: pickView, ask: askView, review: reviewView, report: reportView, compare: compareView, records: recordsView };
 function render() {
   app.innerHTML = views[state.screen]();
   if (state.screen === 'ask') bindAsk();
@@ -1228,6 +1397,8 @@ app.addEventListener('drop', e => { const z = e.target.closest && e.target.close
 
 app.addEventListener('change', e => {
   if (e.target.id === 'consent') state.consent = e.target.checked;
+  if (e.target.id === 'email') saveEmailField(true);
+  if (e.target.id === 'mailTo' && EMAIL_RE.test(e.target.value.trim())) { email = e.target.value.trim(); store.set('email', email); }
   if (e.target.id === 'textmode') settings.textMode = e.target.checked;
   if (e.target.type === 'file' && e.target.files && e.target.files.length) { const fl = [...e.target.files]; e.target.value = ''; handleFiles(fl, e.target.dataset.slot || null); return; }
   if (e.target.dataset && e.target.dataset.comp != null && state.comps) { state.comps[Number(e.target.dataset.comp)].on = e.target.checked; e.target.closest('.comp').classList.toggle('off', !e.target.checked); }
@@ -1240,6 +1411,7 @@ app.addEventListener('click', async e => {
   if (act === 'home') { if (state.screen !== 'loading') go('home'); }
   else if (act === 'limit') { settings.limit = Number(el.dataset.v); store.set('limit', String(settings.limit)); render(); }
   else if (act === 'start') {
+    if (!saveEmailField()) return;
     if (!state.consent) { toast('시작 전 확인 항목에 체크해 주세요.'); document.getElementById('consent').focus(); return; }
     go('pick');
   }
@@ -1311,7 +1483,8 @@ app.addEventListener('click', async e => {
     saveCustom();
     render();
   }
-  else if (['save-image', 'save-pdf', 'save-text', 'save-html'].includes(act)) doSave(act);
+  else if (['save-image', 'save-pdf', 'save-text', 'save-html', 'save-mail'].includes(act)) doSave(act);
+  else if (act === 'guide') { saveEmailField(true); go('guide'); }
   else if (act === 'save-settings' || act === 'share-link') {
     settings.relay = document.getElementById('relay').value.trim();
     settings.code = document.getElementById('code').value.trim();
