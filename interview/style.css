@@ -295,3 +295,14 @@ details summary { cursor: pointer; font-weight: 600; }
 @media (max-width: 480px) { .rubric { font-size: 12px; } .rubric th:nth-child(4), .rubric td:nth-child(4) { display: none; } }
 @media print { .total { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
 .num { width: auto; min-width: 14px; white-space: nowrap; }
+
+/* 설명서, 키 안내 */
+.steps { margin: 8px 0 0; padding-left: 22px; display: grid; gap: 8px; font-size: 16px; }
+.keyhelp ul { margin-top: 10px; }
+.keybox > a.btn { margin-top: 10px; text-decoration: none; }
+.guidepage .card h2 { margin-bottom: 8px; }
+.guidepage a.btn { text-decoration: none; margin-top: 6px; }
+.guidepage .errtable td:first-child { white-space: normal; }
+a.btn { color: inherit; text-decoration: none; }
+a.btn.primary { color: var(--accent-fg); }
+.settings label.check { display: flex; flex-direction: row; align-items: center; gap: 10px; }
