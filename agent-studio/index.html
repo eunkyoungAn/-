@@ -315,10 +315,29 @@ details.box[open] > summary::after { content: "접기"; }
 .bad { color: var(--danger); font-weight: 500; white-space: nowrap; }
 .tbl-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); }
 
+/* 오늘 일정 · 할 일 */
+.today-btn { margin-bottom: 2px; border-color: var(--line); background: var(--bg); }
+.todo { list-style: none; margin: 0; padding: 0; border: 1px solid var(--line); border-radius: var(--radius); }
+.todo li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; padding: 10px 12px; align-items: center; }
+.todo li + li { border-top: 1px solid var(--line); }
+.todo label { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; min-width: 0; }
+.todo input[type="checkbox"] { width: 20px; height: 20px; margin: 2px 0 0; flex: none; accent-color: var(--accent); }
+.todo-t { font-weight: 500; word-break: break-word; }
+.todo-s { grid-column: 1; font-size: 12px; color: var(--muted); padding-left: 30px; word-break: break-word; }
+.todo-s a { color: var(--accent); }
+.todo li.done .todo-t { text-decoration: line-through; color: var(--muted); font-weight: 400; }
+.todo .f-del { grid-column: 2; grid-row: 1 / span 2; }
+.todo-empty { color: var(--muted); font-size: 13px; }
+.todo.runs li { grid-template-columns: auto minmax(0, 1fr); }
+.todo.runs .todo-s { grid-column: 2; padding-left: 0; }
+.pill { font-size: 12px; font-weight: 500; padding: 1px 8px; border-radius: 999px; border: 1px solid currentColor; white-space: nowrap; }
+.p-ok { color: var(--ok); } .p-run { color: var(--accent); } .p-bad { color: var(--danger); }
+input[type="date"] { border: 1px solid var(--line-strong); border-radius: var(--radius); padding: 8px 10px; background: var(--bg); }
+
 /* 터치 화면: 누르기 쉬운 크기, 입력 칸 16px(아이패드 확대 방지) */
 @media (pointer: coarse) {
   .btn, .tab, .agent-btn { min-height: 44px; }
-  input[type="text"], select, textarea { font-size: 16px; }
+  input[type="text"], input[type="date"], select, textarea { font-size: 16px; }
   textarea.data { font-size: 15px; }
 }
 
@@ -354,12 +373,16 @@ details.box[open] > summary::after { content: "접기"; }
       <h1 id="appTitle">업무 에이전트 스튜디오</h1>
       <p id="appOrg">우리 기관 · 반복 업무 6종</p>
     </div>
+    <button class="agent-btn today-btn" type="button" id="todayBtn" aria-current="false">
+      <span class="abbr" aria-hidden="true">TODO</span>
+      <span><span class="agent-name">오늘 일정 · 할 일</span><span class="agent-type" id="todayBadge">오늘 남은 일 확인</span></span>
+    </button>
     <ul class="agent-list" id="agentList"></ul>
     <div class="side-foot">자료는 이 브라우저 안에서만 처리합니다. 서버나 저장소로 올리지 않습니다.</div>
   </aside>
 
   <main class="main">
-    <header class="head">
+    <header class="head" id="agentHead">
       <div class="head-row">
         <h2 id="agentTitle"></h2>
         <span class="tag" id="agentTag"></span>
@@ -469,6 +492,47 @@ details.box[open] > summary::after { content: "접기"; }
       <p class="hint">모든 에이전트의 지시문 맨 앞에 붙는 규칙입니다.</p>
       <ol class="rules" id="rules"></ol>
       <p class="lock">사람 확인 단계, 개인정보 열 자동 제거, 수치 대조표는 요청이 있어도 빼지 않습니다. 잘못된 수치와 개인정보가 밖으로 나가는 것을 막는 장치이기 때문입니다.</p>
+    </section>
+    <!-- 오늘 일정 · 할 일 -->
+    <section class="panel" id="panel-today" hidden>
+      <header class="head">
+        <div class="head-row"><h2>오늘 일정 · 할 일</h2><span class="tag" id="todayDate"></span></div>
+        <p>구글 캘린더 일정과 직접 적은 할 일을 오늘과 이번 주로 나눠 보여 줍니다. 끝낸 일은 체크하고, 오늘 실행한 자동화의 진행 상황도 함께 확인합니다.</p>
+      </header>
+      <div id="todayAlert" aria-live="polite"></div>
+      <div class="actions">
+        <button class="btn primary" id="calBtn" type="button">구글 캘린더 가져오기</button>
+        <span class="status" id="calStatus">처음 누르면 캘린더 읽기를 허용할지 묻습니다. 일정은 읽기만 하고 바꾸지 않습니다.</span>
+      </div>
+      <div class="section" id="lateBox" hidden>
+        <div class="section-title"><h3>기한 지난 일</h3></div>
+        <ul class="todo" id="listLate"></ul>
+      </div>
+      <div class="section">
+        <div class="section-title"><h3>오늘 할 일</h3><span class="hint" id="cntToday"></span></div>
+        <ul class="todo" id="listToday"></ul>
+      </div>
+      <div class="section">
+        <div class="section-title"><h3>이번 주 할 일</h3><span class="hint" id="cntWeek"></span></div>
+        <ul class="todo" id="listWeek"></ul>
+      </div>
+      <div class="section">
+        <div class="section-title"><h3>할 일 직접 적기</h3><span class="hint" id="todayStore"></span></div>
+        <div class="row">
+          <input type="text" id="taskText" placeholder="예: 10월 결과보고서 센터장 보고" aria-label="할 일">
+          <input type="date" id="taskDue" aria-label="기한">
+          <button class="btn" id="taskAdd" type="button">추가</button>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-title"><h3>오늘 자동화 진행 상황</h3><span class="hint" id="runSum"></span></div>
+        <ul class="todo runs" id="runList"></ul>
+        <div class="actions">
+          <button class="btn" id="runCopy" type="button">진행 상황 복사</button>
+          <button class="btn" id="runSave" type="button">파일로 받기 (.txt)</button>
+          <span class="hint" id="runMsg2"></span>
+        </div>
+      </div>
     </section>
   </main>
 </div>
@@ -1074,6 +1138,7 @@ function renderRules() {
 }
 
 function selectAgent(id) {
+  if (TODAY_MODE) showToday(false);
   readInputs();
   current = AGENTS.find(a => a.id === id) || AGENTS[0];
   store('studio.agent', current.id);
@@ -1261,12 +1326,15 @@ async function run() {
   out.className = 'result has'; out.textContent = ''; delete out.dataset.streaming;
   $('verifyBox').innerHTML = ''; $('saveActions').hidden = true; $('saveMsg').innerHTML = ''; $('resultMeta').textContent = '';
   setRunning(true);
+  const runId = logRunStart(agent, inp.title || inp.topic || inp.biz || inp.purpose || '');
   const opts = { signal: CTL.signal, onText: ({ text }) => { out.dataset.streaming = '1'; out.textContent = text; $('runStatus').textContent = '작성 중'; } };
   if (TOOLS_OK) opts.tools = [SEARCH_TOOL]; else opts.cache = false;
   try {
     const r = await SAMPLE(prompt, opts);
     out.textContent = r.text; showRendered(out, r.text);
     finishRun(agent, r.text, r.truncated);
+    const v = LAST.verify;
+    logRunEnd(runId, { status: '완료', quoteOk: v.rows.filter(x => x.ok).length, quoteBad: v.rows.filter(x => !x.ok).length, need: v.need, note: r.truncated ? '중간에 끊김' : '' });
   } catch (e) {
     const code = e && e.code;
     if (e && e.text && code !== 'refused') out.textContent = e.text; else out.textContent = '';
@@ -1275,6 +1343,7 @@ async function run() {
     else notice($('runMsg'), '중지했습니다.' + (e && e.text ? ' 여기까지 쓴 내용은 남겨 두었습니다.' : ''), 'warn');
     if (!out.textContent) { out.className = 'result'; out.textContent = '결과가 없습니다.'; }
     else { const kept = out.textContent; showRendered(out, kept); finishRun(agent, kept, true); }
+    logRunEnd(runId, { status: code === 'cancelled' ? '중지' : '오류', note: code === 'cancelled' ? '담당자가 중지함' : errText(code).split('.')[0] });
     if (['not_granted', 'sampling_disabled', 'not_declared', 'capability_disabled', 'capability_removed'].includes(code)) setNoSample();
   } finally {
     setRunning(false); CTL = null; delete out.dataset.streaming;
@@ -1344,7 +1413,7 @@ async function saveAs(ext) {
   if (!LAST || !DOWNLOADS) return;
   const f = resultFile();
   try {
-    await DOWNLOADS.save({ filename: `${f.name}.${ext}`, data: f.body });
+    await saveFile({ filename: `${f.name}.${ext}`, data: f.body });
     notice($('saveMsg'), `${f.name}.${ext} 파일을 저장했습니다.`);
   } catch (e) {
     const c = e && e.code;
@@ -1577,7 +1646,7 @@ async function saveHwpx() {
     }
     entries.push({ name: `${entries.length + 1}_결과전체.hwpx`, data: makeHwpx(title + ' 결과 전체', mdToParas(f.body.replace(/^# .+\n/, ''))) });
     const note = cutNote + numberNote(d, title);
-    await DOWNLOADS.save({ filename: `${f.name}_hwpx.zip`, data: new Blob([zipStore(entries)]) });
+    await saveFile({ filename: `${f.name}_hwpx.zip`, data: new Blob([zipStore(entries)]) });
     notice($('saveMsg'), `${f.name}_hwpx.zip 을 저장했습니다. 압축을 풀면 한글 파일 ${entries.length}개가 있고, 1번이 한 장 보고서입니다.${note}`, note.includes('주의') ? 'warn' : '');
   } catch (e) { saveError(e, '한글'); } finally { btn.disabled = false; }
 }
@@ -1617,7 +1686,7 @@ async function saveDocx() {
   try {
     const d = await getReportJson(title);
     const note = numberNote(d, title);
-    await DOWNLOADS.save({ filename: `${f.name}_한장보고서.docx`, data: new Blob([makeDocx(d.title || title, reportParas(d, false))]) });
+    await saveFile({ filename: `${f.name}_한장보고서.docx`, data: new Blob([makeDocx(d.title || title, reportParas(d, false))]) });
     notice($('saveMsg'), `${f.name}_한장보고서.docx 를 저장했습니다.${note}`, note.includes('주의') ? 'warn' : '');
   } catch (e) { saveError(e, 'Word'); } finally { btn.disabled = false; }
 }
@@ -1648,6 +1717,202 @@ $('suggestBtn').addEventListener('click', async () => {
   } finally { $('suggestBtn').disabled = false; }
 });
 
+/* ===== 오늘 일정 · 할 일 · 자동화 진행 상황 ===== */
+const pad2 = (n) => String(n).padStart(2, '0');
+const dayKey = (d) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+const localIso = (d) => `${dayKey(d)}T${pad2(d.getHours())}:${pad2(d.getMinutes())}:00`;
+const WEEKDAY = ['일', '월', '화', '수', '목', '금', '토'];
+const dayLabel = (k) => { const d = new Date(k + 'T00:00:00'); return `${d.getMonth() + 1}. ${d.getDate()}. (${WEEKDAY[d.getDay()]})`; };
+function weekRange() {
+  const now = new Date(); const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const toMon = (8 - start.getDay()) % 7 || 7;           // 다음 월요일 0시까지를 이번 주로 봄
+  const end = new Date(start); end.setDate(start.getDate() + toMon);
+  return { start, end, today: dayKey(start), last: dayKey(new Date(end.getTime() - 86400000)) };
+}
+
+/* 저장: 로그인한 사람만 보는 개인 칸(db)에 두고, 없으면 이 브라우저에만 둔다 */
+const STORE = { col: null, items: {}, ready: false, where: '' };
+const withTimeout = (p, ms) => Promise.race([p, new Promise((_, no) => setTimeout(() => no(new Error('timeout')), ms))]);
+async function storeInit() {
+  try {
+    const [db, user] = await Promise.all([useCap('db'), useCap('user')]);
+    const uid = user ? await user.id().catch(() => null) : null;
+    if (db && uid) {
+      const col = db.collection('data/users/' + uid);
+      const snap = await withTimeout(col.get(), 10000);
+      snap.docs.forEach(d => { STORE.items[d.id] = d.data() || {}; });
+      STORE.col = col; STORE.where = '내 계정에 저장됩니다. 다른 기기에서 열어도 이어집니다.';
+    }
+  } catch (e) { STORE.col = null; }
+  if (!STORE.col) {
+    try { STORE.items = JSON.parse(load('studio.todo') || '{}') || {}; } catch (e) { STORE.items = {}; }
+    STORE.where = '이 기기의 브라우저에만 저장됩니다.';
+  }
+  const old = dayKey(new Date(Date.now() - 21 * 86400000));   // 3주 지난 기록은 정리
+  Object.keys(STORE.items).forEach(id => { const it = STORE.items[id]; if ((it.day || it.due || '9999') < old) storeDel(id); });
+  STORE.ready = true; renderToday();
+}
+function storeSet(id, data) {
+  STORE.items[id] = data;
+  if (STORE.col) STORE.col.doc(id).set(data).catch(() => { $('todayStore').textContent = '저장하지 못했습니다. 연결을 확인해 주세요.'; });
+  else store('studio.todo', JSON.stringify(STORE.items));
+}
+function storeDel(id) {
+  delete STORE.items[id];
+  if (STORE.col) STORE.col.doc(id).delete().catch(() => {});
+  else store('studio.todo', JSON.stringify(STORE.items));
+}
+const safeId = (s) => String(s).replace(/[^A-Za-z0-9_-]/g, '_').slice(0, 120);
+
+/* 구글 캘린더 */
+let EVENTS = null, MCP = null, CAL_BUSY = false;
+const CAL_ERR = {
+  needs_reauth: '구글 캘린더 연결이 끊겼습니다. claude.ai 설정 > 커넥터에서 Google Calendar를 다시 연결해 주세요.',
+  server_not_connected: '구글 캘린더가 연결되어 있지 않습니다. claude.ai 설정 > 커넥터에서 Google Calendar를 추가해 주세요.',
+  selection_required: '구글 캘린더 계정이 여러 개입니다. 뜨는 창에서 쓸 계정을 고른 뒤 다시 눌러 주세요.',
+  not_in_manifest: '이 페이지의 캘린더 사용을 허용하지 않으셨습니다. 허용하려면 아티팩트의 권한 메뉴에서 Google Calendar를 켜 주세요.',
+  approval_required: '캘린더를 읽으려면 허용이 필요합니다. 다시 누르고 허용 창에서 허용해 주세요.',
+  blocked_by_policy: '기관 정책으로 이 페이지에서 캘린더를 쓸 수 없습니다.',
+  server_unavailable: '구글 캘린더가 잠시 응답하지 않습니다. 조금 뒤 다시 눌러 주세요.',
+  tool_error: '구글 캘린더에서 일정을 가져오지 못했습니다. 조금 뒤 다시 눌러 주세요.'
+};
+async function loadCalendar() {
+  if (CAL_BUSY) return; CAL_BUSY = true;
+  $('calBtn').disabled = true; $('calStatus').textContent = '캘린더를 가져오는 중입니다.';
+  try {
+    if (!MCP) MCP = await useCap('mcp');
+    if (!MCP) { $('calStatus').textContent = '이 화면에서는 캘린더를 연결할 수 없습니다. claude.ai에 로그인한 브라우저에서 열어 주세요. 할 일은 직접 적어 쓸 수 있습니다.'; return; }
+    const w = weekRange();
+    const res = await MCP.callTool('Google Calendar', 'list_events', { startTime: localIso(w.start), endTime: localIso(w.end), orderBy: 'startTime', pageSize: 100 });
+    const p = res && res.payload;
+    const list = p && Array.isArray(p.events) ? p.events : [];
+    EVENTS = list.filter(e => e && e.status !== 'cancelled').map(e => {
+      const s = e.start || {}, en = e.end || {};
+      const allDay = !!s.date;
+      const sd = allDay ? s.date : dayKey(new Date(s.dateTime));
+      let ed = allDay ? dayKey(new Date(new Date(en.date + 'T00:00:00').getTime() - 86400000)) : dayKey(new Date(en.dateTime || s.dateTime));
+      if (ed < sd) ed = sd;
+      const t = allDay ? '종일' : (() => { const d = new Date(s.dateTime); return `${pad2(d.getHours())}:${pad2(d.getMinutes())}`; })();
+      return { id: 'chk_' + safeId(e.id || (e.summary + sd)), title: String(e.summary || '(제목 없음)'), sd, ed, time: t, link: typeof e.htmlLink === 'string' && e.htmlLink.startsWith('https://') ? e.htmlLink : '' };
+    });
+    store('studio.cal', '1');
+    const now = new Date();
+    $('calStatus').textContent = `${pad2(now.getHours())}:${pad2(now.getMinutes())}에 가져옴 · 일정 ${EVENTS.length}건${p && p.nextPageToken ? ' (100건까지만 표시)' : ''}`;
+  } catch (e) {
+    const c = e && e.code;
+    $('calStatus').textContent = CAL_ERR[c] || '캘린더를 가져오지 못했습니다. 조금 뒤 다시 눌러 주세요.';
+    if (c === 'not_in_manifest' || c === 'server_not_connected' || c === 'needs_reauth') store('studio.cal', '');
+  } finally { CAL_BUSY = false; $('calBtn').disabled = false; $('calBtn').textContent = '캘린더 새로 가져오기'; renderToday(); }
+}
+
+/* 오늘·이번 주 목록 만들기 */
+function todayLists() {
+  const w = weekRange(); const today = [], week = [], late = [];
+  (EVENTS || []).forEach(ev => {
+    const it = { id: ev.id, title: ev.title, sub: ev.time + (ev.sd !== ev.ed ? ` · ${dayLabel(ev.sd)} ~ ${dayLabel(ev.ed)}` : ''), link: ev.link, src: '캘린더', day: ev.sd, done: !!(STORE.items[ev.id] && STORE.items[ev.id].done) };
+    if (ev.sd <= w.today && ev.ed >= w.today) today.push(it);
+    else if (ev.sd > w.today) { it.sub = `${dayLabel(ev.sd)} ${it.sub}`; week.push(it); }
+  });
+  Object.entries(STORE.items).forEach(([id, t]) => {
+    if (t.kind !== 'task') return;
+    const it = { id, title: t.title, sub: '', src: '직접 적음', day: t.due, done: !!t.done, manual: true };
+    if (t.due === w.today) today.push(it);
+    else if (t.due > w.today && t.due <= w.last) { it.sub = dayLabel(t.due); week.push(it); }
+    else if (t.due < w.today && !t.done) { it.sub = `${dayLabel(t.due)}까지였음`; late.push(it); }
+  });
+  week.sort((a, b) => a.day < b.day ? -1 : a.day > b.day ? 1 : 0);
+  return { today, week, late, w };
+}
+function todoHtml(list, empty) {
+  if (!list.length) return `<li class="todo-empty">${empty}</li>`;
+  return list.map(it => `<li class="${it.done ? 'done' : ''}"><label><input type="checkbox" data-chk="${esc(it.id)}" data-day="${esc(it.day)}"${it.done ? ' checked' : ''}><span class="todo-t">${esc(it.title)}</span></label><span class="todo-s">${esc(it.sub)}${it.sub ? ' · ' : ''}${it.src}${it.link ? ` · <a href="${esc(it.link)}" target="_blank" rel="noopener">캘린더에서 열기</a>` : ''}</span>${it.manual ? `<button class="btn f-del" type="button" data-deltask="${esc(it.id)}">지우기</button>` : ''}</li>`).join('');
+}
+function todayRuns() {
+  const k = dayKey(new Date());
+  return Object.entries(STORE.items).filter(([, r]) => r.kind === 'run' && r.day === k).map(([id, r]) => ({ id, ...r })).sort((a, b) => a.start < b.start ? -1 : 1);
+}
+function runSummary() {
+  const runs = todayRuns(); const d = new Date();
+  const n = (s) => runs.filter(r => r.status === s).length;
+  const bad = runs.reduce((x, r) => x + (r.quoteBad || 0), 0), files = runs.reduce((x, r) => x + ((r.files || []).length), 0);
+  const head = `${d.getFullYear()}. ${d.getMonth() + 1}. ${d.getDate()}. 자동화 진행 상황 (${ORG})`;
+  const line = runs.length ? `실행 ${runs.length}건: 완료 ${n('완료')}건, 진행 중 ${n('진행 중')}건, 중지 ${n('중지')}건, 오류 ${n('오류')}건 · 원문에 없는 인용 ${bad}개 · 저장한 파일 ${files}개` : '오늘 실행한 자동화가 없습니다.';
+  const text = [head, line, '', ...runs.map(r => `- ${r.start.slice(11, 16)} ${r.name}${r.title ? ' / ' + r.title : ''}: ${r.status}${r.status === '완료' ? ` (인용 ${r.quoteOk || 0}개 확인${r.quoteBad ? `, ${r.quoteBad}개 원문에 없음` : ''}${r.need ? `, 자료 필요 ${r.need}곳` : ''})` : r.note ? ` (${r.note})` : ''}${(r.files || []).length ? ` · 저장: ${r.files.join(', ')}` : ''}`), '', '담당자 확인 전 AI 초안 기준임.'].join('\n');
+  return { runs, line, text };
+}
+function renderToday() {
+  const L = todayLists(); const d = new Date();
+  $('todayDate').textContent = `${d.getFullYear()}. ${d.getMonth() + 1}. ${d.getDate()}. (${WEEKDAY[d.getDay()]})`;
+  const left = L.today.filter(i => !i.done).length, wleft = L.week.filter(i => !i.done).length;
+  $('listToday').innerHTML = todoHtml(L.today, EVENTS ? '오늘 할 일이 없습니다.' : '캘린더를 가져오거나 할 일을 직접 적어 주세요.');
+  $('listWeek').innerHTML = todoHtml(L.week, '이번 주 남은 일정이 없습니다.');
+  $('listLate').innerHTML = todoHtml(L.late, ''); $('lateBox').hidden = !L.late.length;
+  $('cntToday').textContent = `${L.today.length}건 중 ${L.today.length - left}건 완료`;
+  $('cntWeek').textContent = `${dayLabel(L.w.last)}까지 · ${L.week.length}건 중 ${L.week.length - wleft}건 완료`;
+  const S = runSummary();
+  const running = S.runs.filter(r => r.status === '진행 중').length;
+  $('todayAlert').innerHTML = `<div class="notice ${L.late.length ? 'warn' : ''}"><p><strong>오늘 남은 일 ${left}건</strong> · 이번 주 남은 일 ${wleft}건${L.late.length ? ` · 기한 지난 일 ${L.late.length}건` : ''}${EVENTS ? '' : ' · 캘린더 일정은 아직 가져오지 않음'}</p><p style="margin-top:4px">자동화: ${esc(S.line)}</p></div>`;
+  $('todayBadge').textContent = `오늘 남은 일 ${left}건${running ? ` · 실행 중 ${running}건` : ''}`;
+  $('runSum').textContent = S.line;
+  $('runList').innerHTML = S.runs.length ? S.runs.map(r => `<li><span class="pill ${r.status === '완료' ? 'p-ok' : r.status === '진행 중' ? 'p-run' : 'p-bad'}">${esc(r.status)}</span><span class="todo-t">${esc(r.start.slice(11, 16))} ${esc(r.name)}${r.title ? ' / ' + esc(r.title) : ''}</span><span class="todo-s">${r.status === '완료' ? `인용 ${r.quoteOk || 0}개 확인${r.quoteBad ? `, ${r.quoteBad}개 원문에 없음` : ''}` : esc(r.note || '')}${(r.files || []).length ? ` · 저장 ${esc(r.files.join(', '))}` : ''}</span></li>`).join('') : '<li class="todo-empty">오늘 실행한 자동화가 없습니다. 에이전트를 실행하면 여기에 기록됩니다.</li>';
+  $('todayStore').textContent = STORE.ready ? STORE.where : '저장 칸을 준비하는 중입니다.';
+}
+
+/* 화면 전환 */
+let TODAY_MODE = false;
+function showToday(on) {
+  TODAY_MODE = on;
+  $('agentHead').hidden = on; document.querySelector('.tabs').hidden = on;
+  ['run', 'flow', 'prompt', 'rules'].forEach(t => { $('panel-' + t).hidden = on || $('tab-' + t).getAttribute('aria-selected') !== 'true'; });
+  $('panel-today').hidden = !on;
+  $('todayBtn').setAttribute('aria-current', on);
+  if (on) { document.querySelectorAll('#agentList .agent-btn').forEach(b => b.setAttribute('aria-current', 'false')); renderToday(); if (!EVENTS && load('studio.cal') === '1') loadCalendar(); }
+  store('studio.view', on ? 'today' : 'agent');
+}
+$('todayBtn').addEventListener('click', () => showToday(true));
+$('calBtn').addEventListener('click', loadCalendar);
+$('panel-today').addEventListener('change', e => {
+  const c = e.target.closest('[data-chk]'); if (!c) return;
+  const id = c.dataset.chk, cur = STORE.items[id];
+  if (cur && cur.kind === 'task') storeSet(id, { ...cur, done: c.checked });
+  else if (c.checked) storeSet(id, { kind: 'chk', done: true, day: c.dataset.day });
+  else storeDel(id);
+  renderToday();
+});
+$('panel-today').addEventListener('click', e => { const b = e.target.closest('[data-deltask]'); if (b) { storeDel(b.dataset.deltask); renderToday(); } });
+function addTask() {
+  const t = $('taskText').value.trim(); if (!t) return;
+  storeSet('task_' + Date.now().toString(36), { kind: 'task', title: t.slice(0, 200), due: $('taskDue').value || dayKey(new Date()), done: false });
+  $('taskText').value = ''; renderToday();
+}
+$('taskAdd').addEventListener('click', addTask);
+$('taskText').addEventListener('keydown', e => { if (e.key === 'Enter') addTask(); });
+$('runCopy').addEventListener('click', async () => {
+  try { await navigator.clipboard.writeText(runSummary().text); $('runMsg2').textContent = '진행 상황을 복사했습니다. 메신저나 메일에 붙여넣어 전달하세요.'; }
+  catch (e) { $('runMsg2').textContent = '자동 복사가 막혀 있습니다. "파일로 받기"를 써 주세요.'; }
+});
+$('runSave').addEventListener('click', async () => {
+  if (!DOWNLOADS) { $('runMsg2').textContent = '이 화면에서는 파일 저장을 쓸 수 없습니다. "진행 상황 복사"를 써 주세요.'; return; }
+  try { await DOWNLOADS.save({ filename: `자동화_진행상황_${dayKey(new Date())}.txt`, data: runSummary().text }); $('runMsg2').textContent = '저장했습니다.'; }
+  catch (e) { $('runMsg2').textContent = e && e.code === 'declined' ? '저장을 취소했습니다.' : '저장하지 못했습니다.'; }
+});
+
+/* 자동화 실행 기록 */
+let RUN_ID = null;
+function logRunStart(agent, title) {
+  const d = new Date(); RUN_ID = 'run_' + d.getTime().toString(36);
+  storeSet(RUN_ID, { kind: 'run', day: dayKey(d), start: localIso(d), agent: agent.id, name: agent.name, title: String(title || '').slice(0, 80), status: '진행 중', files: [] });
+  renderToday(); return RUN_ID;
+}
+function logRunEnd(id, patch) { const r = STORE.items[id]; if (!r) return; storeSet(id, { ...r, ...patch }); renderToday(); }
+async function saveFile(req) {
+  const res = await DOWNLOADS.save(req);
+  if (RUN_ID && STORE.items[RUN_ID]) { const r = STORE.items[RUN_ID]; storeSet(RUN_ID, { ...r, files: [...(r.files || []), req.filename].slice(-10) }); renderToday(); }
+  return res;
+}
+$('taskDue').value = dayKey(new Date());
+storeInit();
+
 /* 시작 */
 if (CONFIG.appTitle) $('appTitle').textContent = CONFIG.appTitle;
 if (CONFIG.accent) document.documentElement.style.setProperty('--accent', CONFIG.accent);
@@ -1657,4 +1922,5 @@ const savedAgent = load('studio.agent');
 selectAgent(AGENTS.some(a => a.id === savedAgent) ? savedAgent : 'report');
 const savedTab = load('studio.tab');
 selectTab(['run', 'flow', 'prompt', 'rules'].includes(savedTab) ? savedTab : 'run');
+if (load('studio.view') === 'today') showToday(true);
 </script>
