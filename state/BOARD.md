@@ -29,6 +29,9 @@
 - 페이지: https://claude.ai/artifact/NLAFgaNSvS5H3ZoxmUf8Dk (대표가 여기서 지시하면 `tasks`에 쌓이고 대장이 확인해 처리)
 - 처리 규칙: `ai-assistant/대장-업무규칙.md`의 "지시판 처리"
 
+## 도구
+- 한 장 보고서 작성기: https://claude.ai/artifact/G295puyQkL9qLvm9XfP7WA (원본 `site/one-page-report/index.html`). 양식 조건은 대표가 보내면 반영 예정
+
 ## 정기 루틴
 - 블로그 슬랙 자동 확인: 매시간, 슬랙과 지시판을 함께 확인, 새 것이 없으면 조용히 종료
 - 마지막 확인 위치: `state/slack_last_ts`
