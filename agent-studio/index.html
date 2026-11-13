@@ -1,0 +1,805 @@
+<title>업무 에이전트 스튜디오</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* 레이아웃: 왼쪽 사이드바(에이전트 6종) + 오른쪽 작업 영역(머리글, 탭 4개). 흰 바탕, 얇은 회색 선, 파란 강조 한 가지. */
+:root {
+  --bg: #FFFFFF;
+  --panel: #F7F8FA;
+  --line: #E3E6EB;
+  --line-strong: #CDD2DA;
+  --fg: #1A1F29;
+  --muted: #5C6573;
+  --accent: #1C64F2;
+  --accent-soft: #EBF2FE;
+  --accent-ink: #FFFFFF;
+  --warn: #B45309;
+  --warn-soft: #FEF6E7;
+  --danger: #B42318;
+  --danger-soft: #FDEDEC;
+  --ok: #067647;
+  /* 노드 종류 색 */
+  --n-start: #6B7280;
+  --n-llm: #1C64F2;
+  --n-code: #0F766E;
+  --n-kb: #7C3AED;
+  --n-branch: #B45309;
+  --n-human: #B42318;
+  --n-end: #374151;
+  --font-body: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+  --radius: 6px;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.6;
+}
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.app {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  min-height: 100%;
+}
+
+/* 사이드바 */
+.side {
+  border-right: 1px solid var(--line);
+  background: var(--panel);
+  padding-block: 20px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.brand { display: flex; flex-direction: column; gap: 2px; padding: 0 4px; }
+.brand h1 { font-size: 16px; font-weight: 700; margin: 0; letter-spacing: -0.01em; }
+.brand p { margin: 0; font-size: 12px; color: var(--muted); }
+.agent-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.agent-btn {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  padding: 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+.agent-btn:hover { background: var(--bg); border-color: var(--line); }
+.agent-btn[aria-current="true"] { background: var(--bg); border-color: var(--accent); }
+.abbr {
+  width: 36px; height: 36px;
+  display: grid; place-items: center;
+  border-radius: var(--radius);
+  border: 1px solid var(--line-strong);
+  background: var(--bg);
+  font-family: var(--font-mono);
+  font-size: 11px; font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+.agent-btn[aria-current="true"] .abbr { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.agent-name { display: block; font-weight: 500; font-size: 13px; line-height: 1.35; }
+.agent-type { display: block; font-size: 12px; color: var(--muted); }
+.side-foot { margin-top: auto; font-size: 12px; color: var(--muted); padding: 0 4px; }
+
+/* 본문 */
+.main {
+  min-width: 0;
+  padding-block: 24px 48px;
+  padding-left: 32px;
+  padding-right: max(32px, env(safe-area-inset-right, 0px));
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.head { display: flex; flex-direction: column; gap: 6px; }
+.head-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.head h2 { font-size: 20px; margin: 0; font-weight: 700; letter-spacing: -0.01em; text-wrap: balance; }
+.tag {
+  display: inline-block;
+  font-size: 12px; font-weight: 500;
+  padding: 1px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+.head p { margin: 0; color: var(--muted); max-width: 68ch; }
+
+.tabs { display: flex; gap: 0; border-bottom: 1px solid var(--line); overflow-x: auto; }
+.tab {
+  padding: 10px 16px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  background: transparent;
+  cursor: pointer;
+  color: var(--muted);
+  font-weight: 500;
+  white-space: nowrap;
+}
+.tab:hover { color: var(--fg); }
+.tab[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
+
+.panel { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+
+/* 실행 탭 */
+.form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 16px; }
+.field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.field.wide { grid-column: 1 / -1; }
+.field label { font-size: 13px; font-weight: 500; }
+.req { color: var(--danger); font-weight: 500; margin-left: 2px; }
+.hint { font-size: 12px; color: var(--muted); }
+input[type="text"], select, textarea {
+  width: 100%;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  background: var(--bg);
+}
+textarea { resize: vertical; min-height: 72px; }
+textarea.data { min-height: 140px; font-family: var(--font-mono); font-size: 12.5px; }
+input:focus, select:focus, textarea:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px var(--accent-soft); }
+
+.section { display: flex; flex-direction: column; gap: 10px; }
+.section-title { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.section-title h3 { margin: 0; font-size: 14px; font-weight: 700; }
+.drop {
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius);
+  padding: 16px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  background: var(--panel);
+}
+.drop p { margin: 0; color: var(--muted); font-size: 13px; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line-strong);
+  background: var(--bg);
+  cursor: pointer;
+  font-weight: 500;
+}
+.btn:hover { border-color: var(--fg); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.primary:hover { filter: brightness(0.94); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+.notice {
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  background: var(--accent-soft);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  font-size: 13px;
+}
+.notice.warn { border-left-color: var(--warn); background: var(--warn-soft); }
+.notice.err { border-left-color: var(--danger); background: var(--danger-soft); }
+.notice p { margin: 0; }
+
+.result {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  min-height: 120px;
+  padding: 16px;
+  color: var(--muted);
+  background: var(--bg);
+}
+
+/* 노드 흐름 */
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+.flow { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; max-width: 640px; }
+.node {
+  position: relative;
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--nc);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  background: var(--bg);
+}
+.flow li + li { margin-top: 22px; }
+.flow li + li::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -22px;
+  height: 22px;
+  border-left: 1px solid var(--line-strong);
+}
+.flow li + li::after {
+  content: "";
+  position: absolute;
+  left: calc(50% - 4px);
+  top: -7px;
+  border: 4px solid transparent;
+  border-top-color: var(--line-strong);
+}
+.node-kind { font-size: 12px; font-weight: 700; color: var(--nc); display: flex; flex-direction: column; gap: 2px; }
+.node-kind small { font-weight: 400; color: var(--muted); font-size: 11px; }
+.node-body strong { display: block; font-weight: 500; }
+.node-body p { margin: 2px 0 0; font-size: 13px; color: var(--muted); }
+.node-branch { margin-top: 6px; font-size: 12px; color: var(--fg); background: var(--panel); border-radius: 4px; padding: 6px 8px; }
+
+/* 지시문 */
+pre.prompt {
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  padding: 16px;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 560px;
+  overflow: auto;
+}
+
+/* 공통 지침 */
+.rules { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; border-top: 1px solid var(--line); max-width: 760px; }
+.rules li { display: grid; grid-template-columns: 28px 72px minmax(0, 1fr); gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.rules .no { font-family: var(--font-mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+.rules .key { font-weight: 700; }
+.lock { font-size: 12px; color: var(--muted); }
+
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* 태블릿 이하 */
+@media (max-width: 900px) {
+  .app { grid-template-columns: 220px minmax(0, 1fr); }
+  .main { padding-left: 24px; padding-right: max(24px, env(safe-area-inset-right, 0px)); }
+}
+@media (max-width: 680px) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+  .side { border-right: 0; border-bottom: 1px solid var(--line); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .agent-list { flex-direction: row; overflow-x: auto; padding-bottom: 4px; }
+  .agent-list li { flex: 0 0 200px; }
+  .side-foot { display: none; }
+  .main { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .form-grid { grid-template-columns: minmax(0, 1fr); }
+  .node { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .node-kind { flex-direction: row; gap: 8px; align-items: baseline; }
+  .rules li { grid-template-columns: 24px minmax(0, 1fr); }
+  .rules .key { grid-column: 2; }
+  .rules .txt { grid-column: 2; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="app">
+  <aside class="side" aria-label="에이전트 목록">
+    <div class="brand">
+      <h1 id="appTitle">업무 에이전트 스튜디오</h1>
+      <p id="appOrg">우리 기관 · 반복 업무 6종</p>
+    </div>
+    <ul class="agent-list" id="agentList"></ul>
+    <div class="side-foot">자료는 이 브라우저 안에서만 처리합니다. 서버나 저장소로 올리지 않습니다.</div>
+  </aside>
+
+  <main class="main">
+    <header class="head">
+      <div class="head-row">
+        <h2 id="agentTitle"></h2>
+        <span class="tag" id="agentTag"></span>
+      </div>
+      <p id="agentDesc"></p>
+    </header>
+
+    <div class="tabs" role="tablist" aria-label="보기 선택">
+      <button class="tab" role="tab" id="tab-run" aria-controls="panel-run" aria-selected="true">실행</button>
+      <button class="tab" role="tab" id="tab-flow" aria-controls="panel-flow" aria-selected="false">노드 흐름</button>
+      <button class="tab" role="tab" id="tab-prompt" aria-controls="panel-prompt" aria-selected="false">프롬프트</button>
+      <button class="tab" role="tab" id="tab-rules" aria-controls="panel-rules" aria-selected="false">공통 지침</button>
+    </div>
+
+    <!-- 실행 -->
+    <section class="panel" id="panel-run" role="tabpanel" aria-labelledby="tab-run">
+      <div class="section">
+        <div class="section-title"><h3>입력</h3><span class="hint"><span class="req">*</span> 표시는 반드시 채웁니다.</span></div>
+        <div class="form-grid" id="fields"></div>
+      </div>
+
+      <div class="section">
+        <div class="section-title"><h3>자료</h3><span class="hint" id="dataNeed"></span></div>
+        <div class="drop">
+          <p>xlsx, xls, csv, txt, md 파일을 여러 개 올릴 수 있습니다.<br>이름·연락처 같은 개인정보 열은 AI에 보내기 전에 자동으로 지웁니다.</p>
+          <label class="btn" for="fileInput">파일 고르기</label>
+          <input type="file" id="fileInput" class="sr" multiple accept=".xlsx,.xls,.csv,.txt,.md">
+        </div>
+        <div class="field wide">
+          <label for="pasteBox">본문 붙여넣기</label>
+          <textarea id="pasteBox" class="data" placeholder="엑셀에서 복사한 표나 안내문 본문을 그대로 붙여넣어도 됩니다."></textarea>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn primary" id="runBtn" type="button">실행</button>
+        <button class="btn" id="toPromptBtn" type="button">지시문 보기</button>
+      </div>
+      <div id="runMsg" aria-live="polite"></div>
+
+      <div class="section">
+        <div class="section-title"><h3>결과</h3></div>
+        <div class="result" id="result">실행하면 결과가 여기에 표시됩니다. 마지막 확인은 담당자가 합니다.</div>
+      </div>
+    </section>
+
+    <!-- 노드 흐름 -->
+    <section class="panel" id="panel-flow" role="tabpanel" aria-labelledby="tab-flow" hidden>
+      <div class="legend" id="legend"></div>
+      <ol class="flow" id="flow"></ol>
+    </section>
+
+    <!-- 프롬프트 -->
+    <section class="panel" id="panel-prompt" role="tabpanel" aria-labelledby="tab-prompt" hidden>
+      <div class="section-title">
+        <span class="hint">실행 탭에 적은 내용과 자료가 바로 반영됩니다. 개인정보 열은 지운 뒤의 자료입니다.</span>
+        <button class="btn" id="copyBtn" type="button">지시문 복사</button>
+      </div>
+      <div id="copyMsg" aria-live="polite"></div>
+      <pre class="prompt" id="promptText"></pre>
+    </section>
+
+    <!-- 공통 지침 -->
+    <section class="panel" id="panel-rules" role="tabpanel" aria-labelledby="tab-rules" hidden>
+      <p class="hint">모든 에이전트의 지시문 맨 앞에 붙는 규칙입니다.</p>
+      <ol class="rules" id="rules"></ol>
+      <p class="lock">사람 확인 단계, 개인정보 열 자동 제거, 수치 대조표는 요청이 있어도 빼지 않습니다. 잘못된 수치와 개인정보가 밖으로 나가는 것을 막는 장치이기 때문입니다.</p>
+    </section>
+  </main>
+</div>
+
+<script>
+/* ===== 0. 기관 설정 (CLAUDE.md 0번. 빈 항목은 기본값) ===== */
+const CONFIG = {
+  orgName: '',            // 기관명
+  role: '',               // 내 역할
+  readers: '',            // 결과물을 받아 보는 사람
+  orgRules: [],           // 우리 기관 문서 규칙
+  bannedWords: [],        // 쓰지 않는 표현
+  humanCheck: [],         // 사람이 반드시 확인해야 하는 일
+  appTitle: '',           // 화면 이름
+  accent: ''              // 강조색
+};
+const ORG = CONFIG.orgName || '우리 기관';
+const READERS = CONFIG.readers || '기관장, 팀장';
+const HUMAN_CHECK = CONFIG.humanCheck.length ? CONFIG.humanCheck : ['외부로 나가는 수치', '환불·민원 답변', '개인정보가 들어간 자료'];
+
+/* ===== 공통 지침 8가지 ===== */
+const RULES = [
+  ['근거', '제공된 자료만 쓴다. 없는 수치와 출처는 만들지 않는다. 외부 수치는 기관·자료명·발행일이 있을 때만 쓰고 없으면 [자료 필요].'],
+  ['분모', '모든 비율에 계산 기준(분모)을 함께 적는다. 분모가 30 미만이면 "해석 주의".'],
+  ['인과', '상관을 원인으로 단정하지 않는다. 원인 추정은 [확인 필요].'],
+  ['구분', '사실·분석·제안을 구분한다. 가정은 [가정], 제안 문장 앞에는 (제안).'],
+  ['문체', '개조식 업무보고(~함, ~임). 핵심 결론을 앞에 둔다. 이모지를 쓰지 않는다.'],
+  ['검수', '결과물 끝에 수치 대조표(문장 | 수치 | 근거 위치 | 일치)를 붙인다.'],
+  ['사람', '마지막 확인은 사람이 한다. 확인할 지점을 결과물에 명시한다.'],
+  ['개인정보', '이름·연락처는 AI에 넣지 않는다. 식별자는 ID로 바꿔서 분석한다.']
+];
+
+/* ===== 노드 종류 ===== */
+const NODE_KINDS = {
+  start:  { label: '시작',      color: 'var(--n-start)' },
+  llm:    { label: 'LLM',       color: 'var(--n-llm)' },
+  code:   { label: '코드',      color: 'var(--n-code)' },
+  kb:     { label: '지식 검색', color: 'var(--n-kb)' },
+  branch: { label: '조건 분기', color: 'var(--n-branch)' },
+  human:  { label: '사람 확인', color: 'var(--n-human)' },
+  end:    { label: '종료',      color: 'var(--n-end)' }
+};
+const HUMAN_NODE = (what) => ({ kind: 'human', name: '사람 확인', where: '담당자', desc: what });
+const START = (d) => ({ kind: 'start', name: '시작', where: '화면', desc: d });
+const END = (d) => ({ kind: 'end', name: '종료', where: '화면', desc: d });
+
+/* 입력값 꺼내기 */
+const v = (inp, k, fb) => (inp[k] && inp[k].trim()) ? inp[k].trim() : (fb === undefined ? '[미기재]' : fb);
+
+/* ===== 에이전트 6종 ===== */
+const AGENTS = [
+  {
+    id: 'report', abbr: 'RPT', name: '데이터 분석 → 한 장 보고서', type: '워크플로우', needData: true,
+    desc: '실적 엑셀을 읽어 지표를 계산하고, 주목할 결과 3개와 한 장 보고서 초안, 수치 대조표를 만듭니다.',
+    fields: [
+      { id: 'title', label: '보고서 제목', required: true, ph: '예: 2026년 10월 직업교육 운영 실적' },
+      { id: 'org', label: '기관명', def: ORG },
+      { id: 'period', label: '대상 기간', ph: '예: 2026. 10. 1. ~ 2026. 10. 31.' },
+      { id: 'reader', label: '독자', def: READERS },
+      { id: 'focus', label: '특별히 보고 싶은 것', wide: true, area: true, ph: '예: 과정별 수료율 차이, 전월 대비 변화' }
+    ],
+    nodes: [
+      START('보고서 제목과 자료를 받는다.'),
+      { kind: 'llm', name: '자료 파악', where: 'AI', desc: '시트·열·행 수와 기간을 확인하고, 분석에 쓸 열을 고른다.' },
+      { kind: 'code', name: '지표 계산', where: 'AI(계산 과정 표시)', desc: '합계·비율·증감을 계산한다. 모든 비율에 분모를 함께 적는다.' },
+      { kind: 'llm', name: '주목할 결과 3개', where: 'AI', desc: '독자가 알아야 할 결과 3개를 근거 수치와 함께 고른다.' },
+      { kind: 'llm', name: '한 장 보고서', where: 'AI', desc: '개요 / 본문(실행계획·분석1~3·해결방안) / 결론 순서로 쓴다.' },
+      { kind: 'code', name: '수치 대조표', where: 'AI(대조표 형식)', desc: '보고서의 모든 수치를 문장 | 수치 | 근거 위치 | 일치 표로 정리한다.' },
+      HUMAN_NODE('담당자가 대조표의 "불일치·확인 필요" 행과 외부로 나가는 수치를 확인한다.'),
+      END('결과를 화면에 보이고 파일로 받을 수 있게 한다.')
+    ],
+    task(inp) {
+      return [
+        `# 역할`,
+        `${v(inp, 'org', ORG)}의 운영 실적을 분석해 ${v(inp, 'reader', READERS)}에게 올리는 한 장 보고서를 쓰는 실무자.`,
+        ``,
+        `# 입력`,
+        `- 보고서 제목: ${v(inp, 'title')}`,
+        `- 대상 기간: ${v(inp, 'period')}`,
+        `- 특별히 보고 싶은 것: ${v(inp, 'focus', '없음')}`,
+        ``,
+        `# 처리 순서`,
+        `1. 자료 파악: 시트별 열 이름, 행 수, 기간을 표로 정리함. 분석에 쓸 열을 밝힘.`,
+        `2. 지표 계산: 합계·비율·증감을 계산하고 계산식을 한 줄씩 보임. 비율에는 분모를 적음.`,
+        `3. 주목할 결과 3개: 근거 수치와 함께 고름. 원인 추정은 [확인 필요].`,
+        `4. 한 장 보고서: 제목 / 개요 / 본문(실행계획, 분석1~3, 해결방안) / 결론(+세부 2개) / 참고문헌.`,
+        `5. 수치 대조표: 보고서에 나온 모든 수치를 표로 대조함.`,
+        `6. 사람 확인 지점: 담당자가 확인할 항목을 목록으로 적음.`
+      ].join('\n');
+    }
+  },
+  {
+    id: 'research', abbr: 'RSC', name: '데이터 리서치 · 자료 조사', type: '챗플로우', needData: false,
+    desc: '조사 주제를 구체화하고 조사 계획과 출처 확인표를 만듭니다. 출처가 없는 수치는 [자료 필요]로 남깁니다.',
+    fields: [
+      { id: 'topic', label: '조사 주제', required: true, ph: '예: 경력단절여성 재취업 지원 정책 현황' },
+      { id: 'use', label: '쓰임새', ph: '예: 사업계획서 추진 배경' },
+      { id: 'year', label: '대상 연도', ph: '예: 2024~2026' },
+      { id: 'found', label: '이미 찾은 자료', wide: true, area: true, ph: '자료명, 발행기관, 발행일, 주소를 한 줄씩 적습니다.' }
+    ],
+    nodes: [
+      START('조사 주제와 쓰임새를 받는다.'),
+      { kind: 'llm', name: '질문 구체화', where: 'AI', desc: '주제를 답할 수 있는 조사 질문 3~5개로 나눈다.' },
+      { kind: 'llm', name: '조사 계획', where: 'AI', desc: '질문별로 찾아볼 기관·통계·자료 유형을 정한다.' },
+      { kind: 'kb', name: '이미 찾은 자료 대조', where: 'AI', desc: '사용자가 준 자료에서 질문별 근거를 찾는다.' },
+      { kind: 'branch', name: '출처가 확인되는가', where: 'AI', desc: '기관·자료명·발행일이 모두 있는지 본다.', branch: '있음 → 조사 노트에 사용 / 없음 → [자료 필요]로 남기고 찾을 곳을 적음' },
+      { kind: 'llm', name: '조사 노트', where: 'AI', desc: '질문별 답, 근거, 빈칸을 정리한다.' },
+      HUMAN_NODE('담당자가 원문 링크를 열어 수치와 발행일을 직접 확인한다.'),
+      END('조사 노트와 출처 확인표를 보인다.')
+    ],
+    task(inp) {
+      return [
+        `# 역할`,
+        `${ORG}의 자료 조사 담당. 확인된 출처만 쓰고, 모르는 것은 빈칸으로 남긴다.`,
+        ``,
+        `# 입력`,
+        `- 조사 주제: ${v(inp, 'topic')}`,
+        `- 쓰임새: ${v(inp, 'use')}`,
+        `- 대상 연도: ${v(inp, 'year')}`,
+        `- 이미 찾은 자료: ${v(inp, 'found', '없음')}`,
+        ``,
+        `# 처리 순서`,
+        `1. 조사 질문 3~5개로 나눔.`,
+        `2. 질문별 조사 계획: 찾아볼 기관, 통계명, 검색어.`,
+        `3. 이미 찾은 자료에서 질문별 근거를 찾음. 자료에 없는 수치는 쓰지 않음.`,
+        `4. 조사 노트: 질문 | 답 | 근거(기관·자료명·발행일) | 빈칸.`,
+        `5. 출처 확인표와 사람 확인 지점.`,
+        `- 기억에 의존한 수치·법령·통계는 쓰지 않고 [자료 필요]와 찾을 곳을 적음.`
+      ].join('\n');
+    }
+  },
+  {
+    id: 'plan', abbr: 'PLN', name: '고객 데이터 → 신규 서비스 기획', type: '워크플로우', needData: true,
+    desc: '참여자 데이터에서 특성과 채워지지 않은 수요를 찾아 신규 서비스안 3개와 기획안을 만듭니다.',
+    fields: [
+      { id: 'org', label: '기관명', def: ORG },
+      { id: 'target', label: '대상 고객', ph: '예: 40~50대 재취업 준비 여성' },
+      { id: 'format', label: '산출 형식', select: ['한 장 기획안', '사업계획서 초안', '내부 검토 메모'] },
+      { id: 'limits', label: '제약 조건', wide: true, area: true, ph: '예: 예산 1,000만 원 이내, 강사 2명, 3개월 안에 시작' }
+    ],
+    nodes: [
+      START('기획 조건과 참여자 자료를 받는다.'),
+      { kind: 'code', name: '개인정보 열 제거', where: '브라우저', desc: '이름·연락처 등 개인정보 열을 AI에 보내기 전에 지운다.' },
+      { kind: 'code', name: '참여자 특성 요약', where: 'AI(계산 과정 표시)', desc: '연령대·과정·수료 여부 등의 분포를 분모와 함께 정리한다.' },
+      { kind: 'llm', name: '채워지지 않은 수요', where: 'AI', desc: '자료에서 보이는 빈틈을 사실과 추정으로 나눠 적는다.' },
+      { kind: 'llm', name: '서비스안 3개', where: 'AI', desc: '대상·내용·필요 자원·기대 효과를 안별로 적는다.' },
+      { kind: 'branch', name: '제약 조건 충족', where: 'AI', desc: '안마다 예산·인력·기간 조건을 점검한다.', branch: '충족 → 기획안 후보 / 미충족 → 조정안 제시 또는 제외 사유 기록' },
+      { kind: 'llm', name: '기획안', where: 'AI', desc: '선택한 형식으로 기획안 초안을 쓴다.' },
+      { kind: 'code', name: '수치 대조표', where: 'AI(대조표 형식)', desc: '기획안의 수치를 자료와 대조한다.' },
+      HUMAN_NODE('담당자가 대상 고객 정의, 예산 수치, 제외한 안의 사유를 확인한다.'),
+      END('기획안과 대조표를 보인다.')
+    ],
+    task(inp) {
+      return [
+        `# 역할`,
+        `${v(inp, 'org', ORG)}의 신규 서비스 기획 담당.`,
+        ``,
+        `# 입력`,
+        `- 대상 고객: ${v(inp, 'target')}`,
+        `- 산출 형식: ${v(inp, 'format', '한 장 기획안')}`,
+        `- 제약 조건: ${v(inp, 'limits', '없음')}`,
+        ``,
+        `# 처리 순서`,
+        `1. 참여자 특성 요약: 분포를 표로, 비율에 분모를 적음.`,
+        `2. 채워지지 않은 수요: [사실]과 [가정]을 나눠 적음.`,
+        `3. 서비스안 3개: 대상 | 내용 | 필요 자원 | 기대 효과 | 제약 조건 충족 여부.`,
+        `4. 조건을 넘는 안은 조정안 또는 제외 사유를 적음.`,
+        `5. 선택한 산출 형식으로 기획안 작성. 제안 문장 앞에 (제안).`,
+        `6. 수치 대조표와 사람 확인 지점.`
+      ].join('\n');
+    }
+  },
+  {
+    id: 'rfp', abbr: 'RFP', name: 'RFP · 제안요청서 분석', type: '워크플로우', needData: true,
+    desc: '제안요청서에서 요구사항·평가 기준·제출 조건을 뽑고, 우리 기관 강점과 맞춰 부족한 항목을 표시합니다.',
+    fields: [
+      { id: 'biz', label: '사업명', ph: '예: 2027년 중장년 디지털 역량 강화 사업' },
+      { id: 'strength', label: '우리 기관 강점·실적', wide: true, area: true, ph: '예: 최근 3년 직업교육 12개 과정 운영, 수료생 취업 연계 협약 5곳' },
+      { id: 'check', label: '특히 확인하고 싶은 것', wide: true, area: true, ph: '예: 참여 자격, 인력 요건, 제출 서류 목록' }
+    ],
+    nodes: [
+      START('제안요청서 본문과 우리 기관 정보를 받는다.'),
+      { kind: 'llm', name: '문서 구조 파악', where: 'AI', desc: '목차, 사업 기간, 예산, 제출 기한을 찾는다.' },
+      { kind: 'llm', name: '요구사항 추출', where: 'AI', desc: '필수·선택 요구사항을 원문 위치와 함께 표로 뽑는다.' },
+      { kind: 'llm', name: '평가 기준 정리', where: 'AI', desc: '평가 항목과 배점을 표로 정리한다. 배점 합계를 확인한다.' },
+      { kind: 'llm', name: '강점 대응', where: 'AI', desc: '요구사항마다 우리 기관 실적 중 맞는 것을 붙인다.' },
+      { kind: 'branch', name: '대응 근거가 있는가', where: 'AI', desc: '요구사항별로 대응할 실적이 있는지 본다.', branch: '있음 → 대응 / 없음 → "부족" 표시와 보완 방법' },
+      { kind: 'llm', name: '분석표', where: 'AI', desc: '요구사항 | 원문 위치 | 배점 | 우리 대응 | 판정 표를 만든다.' },
+      HUMAN_NODE('담당자가 참여 자격·제출 기한·필수 서류를 원문과 대조한다.'),
+      END('분석표와 확인 목록을 보인다.')
+    ],
+    task(inp) {
+      return [
+        `# 역할`,
+        `${ORG}의 제안서 준비 담당. 제안요청서 원문에 있는 내용만 근거로 쓴다.`,
+        ``,
+        `# 입력`,
+        `- 사업명: ${v(inp, 'biz')}`,
+        `- 우리 기관 강점·실적: ${v(inp, 'strength')}`,
+        `- 특히 확인하고 싶은 것: ${v(inp, 'check', '없음')}`,
+        ``,
+        `# 처리 순서`,
+        `1. 사업 개요: 기간, 예산, 제출 기한, 참여 자격(원문 위치 표시).`,
+        `2. 요구사항 표: 번호 | 요구사항 | 필수/선택 | 원문 위치.`,
+        `3. 평가 기준 표: 항목 | 배점. 배점 합계를 적음.`,
+        `4. 강점 대응 표: 요구사항 | 우리 대응 | 판정(충분/보완/부족).`,
+        `5. 부족 항목의 보완 방법은 (제안)으로 적음.`,
+        `6. 제출 서류 목록과 사람 확인 지점.`
+      ].join('\n');
+    }
+  },
+  {
+    id: 'inquiry', abbr: 'INQ', name: '참여자 문의 응대', type: '에이전트', needData: true, dataLabel: '안내자료',
+    desc: '안내자료에서 근거를 찾아 문의 답변 초안을 씁니다. 근거가 없거나 민감한 문의는 담당자 확인으로 넘깁니다.',
+    fields: [
+      { id: 'q', label: '문의 내용', required: true, wide: true, area: true, ph: '예: 다음 달 컴퓨터활용 과정 신청은 언제부터 할 수 있나요?' },
+      { id: 'channel', label: '회신 채널', select: ['문자', '전화 응대 메모', '이메일', '홈페이지 게시판'] },
+      { id: 'tone', label: '톤', select: ['정중하고 간결하게', '친절하고 자세하게', '공식 안내문'] },
+      { id: 'sign', label: '기관명·담당자 표기', wide: true, def: `${ORG} 담당자`, ph: '예: ○○센터 교육팀' }
+    ],
+    nodes: [
+      START('문의 내용과 안내자료를 받는다.'),
+      { kind: 'code', name: '개인정보 가리기', where: '브라우저', desc: '문의 속 이름·전화번호·이메일을 가린 뒤 AI에 보낸다.' },
+      { kind: 'kb', name: '안내자료에서 근거 찾기', where: 'AI', desc: '문의에 답할 수 있는 안내자료 문장을 찾는다.' },
+      { kind: 'branch', name: '근거 충분한가', where: 'AI', desc: '근거 문장이 있는지, 민감한 문의인지 본다.', branch: '근거 있음 → 답변 초안 / 근거 없음 또는 환불·민원·개인 사정 → "담당자 확인 필요"로 분류, 답변을 쓰지 않음' },
+      { kind: 'llm', name: '답변 초안', where: 'AI', desc: '채널과 톤에 맞춰 근거 문장 범위 안에서만 답한다.' },
+      HUMAN_NODE('담당자가 근거 문장과 답변을 대조하고 직접 보낸다. 자동 발송하지 않는다.'),
+      END('답변 초안 또는 담당자 확인 사유를 보인다.')
+    ],
+    task(inp) {
+      return [
+        `# 역할`,
+        `${ORG} 참여자 문의 응대 담당. 안내자료에 있는 내용만 답한다.`,
+        ``,
+        `# 입력`,
+        `- 문의 내용: ${v(inp, 'q')}`,
+        `- 회신 채널: ${v(inp, 'channel', '문자')}`,
+        `- 톤: ${v(inp, 'tone', '정중하고 간결하게')}`,
+        `- 서명: ${v(inp, 'sign', ORG + ' 담당자')}`,
+        ``,
+        `# 처리 순서`,
+        `1. 분류: 일반 문의 / 담당자 확인 필요. 환불, 민원, 개인 사정, 근거 없음은 "담당자 확인 필요".`,
+        `2. 근거: 안내자료의 해당 문장을 그대로 인용하고 위치를 적음.`,
+        `3. 답변 초안: 일반 문의일 때만 씀. 근거 범위를 넘는 약속·날짜·금액을 쓰지 않음.`,
+        `4. 담당자 확인 필요이면 답변 대신 사유와 담당자가 확인할 사항을 적음.`,
+        `5. 사람 확인 지점.`,
+        `- 결과물 형식 예외: 답변 초안 본문은 회신 채널에 맞는 문장체로 씀. 나머지는 개조식.`
+      ].join('\n');
+    }
+  },
+  {
+    id: 'data', abbr: 'DAT', name: '참여자 · 고객 데이터 관리', type: '워크플로우', needData: true,
+    desc: '참여자 명단의 개인정보 열을 지우고 ID로 바꾼 뒤, 결측·중복을 점검하고 선별 기준에 맞는 대상을 정리합니다.',
+    fields: [
+      { id: 'purpose', label: '관리 목적', ph: '예: 사후관리 대상 선별, 명단 정리' },
+      { id: 'criteria', label: '선별 기준', wide: true, area: true, ph: '예: 수료 후 6개월 이내, 미취업, 상담 희망' },
+      { id: 'idmode', label: '식별자 처리 방식', select: ['순번 ID로 바꾸기 (P001, P002 …)', '기존 ID 열 그대로 쓰기', '식별자 없이 집계만'] }
+    ],
+    nodes: [
+      START('관리 목적과 명단 자료를 받는다.'),
+      { kind: 'code', name: '개인정보 열 제거', where: '브라우저', desc: '이름·연락처·주소 등 개인정보 열을 시트마다 확인해 지운다.' },
+      { kind: 'code', name: '식별자 ID 변환', where: '브라우저', desc: '행마다 ID를 붙인다. 원래 이름과의 대응표는 브라우저 밖으로 내보내지 않는다.' },
+      { kind: 'code', name: '품질 점검', where: 'AI(계산 과정 표시)', desc: '빈칸, 중복, 형식 오류를 열별로 센다.' },
+      { kind: 'branch', name: '선별 기준 적용', where: 'AI', desc: '기준에 맞는 행과 판단할 수 없는 행을 나눈다.', branch: '충족 → 대상 목록 / 판단 불가(빈칸 등) → 확인 필요 목록' },
+      { kind: 'llm', name: '관리 요약', where: 'AI', desc: '대상 수, 점검 결과, 다음 할 일을 정리한다.' },
+      { kind: 'code', name: '수치 대조표', where: 'AI(대조표 형식)', desc: '요약의 수치를 자료와 대조한다.' },
+      HUMAN_NODE('담당자가 대상 목록과 확인 필요 목록을 원본 명단과 맞춰 본다.'),
+      END('요약과 목록을 보인다.')
+    ],
+    task(inp) {
+      return [
+        `# 역할`,
+        `${ORG}의 참여자 데이터 관리 담당. 식별자는 ID로만 다룬다.`,
+        ``,
+        `# 입력`,
+        `- 관리 목적: ${v(inp, 'purpose')}`,
+        `- 선별 기준: ${v(inp, 'criteria')}`,
+        `- 식별자 처리 방식: ${v(inp, 'idmode', '순번 ID로 바꾸기')}`,
+        ``,
+        `# 처리 순서`,
+        `1. 자료 현황: 시트별 행 수, 열 목록.`,
+        `2. 품질 점검 표: 열 | 빈칸 수 | 중복 수 | 형식 오류 수.`,
+        `3. 선별: 기준을 조건으로 풀어 적고, 대상 ID 목록과 판단 불가 ID 목록을 나눔.`,
+        `4. 관리 요약: 대상 수(분모 표시), 다음 할 일 (제안).`,
+        `5. 수치 대조표와 사람 확인 지점.`
+      ].join('\n');
+    }
+  }
+];
+
+/* ===== 지시문 만들기 ===== */
+function commonBlock() {
+  const lines = ['# 공통 지침 (반드시 지킴)'];
+  RULES.forEach(([k, t], i) => lines.push(`${i + 1}. ${k}: ${t}`));
+  lines.push('', '# 우리 기관 규칙');
+  if (CONFIG.orgRules.length || CONFIG.bannedWords.length) {
+    CONFIG.orgRules.forEach(r => lines.push(`- ${r}`));
+    CONFIG.bannedWords.forEach(r => lines.push(`- 쓰지 않는 표현: ${r}`));
+  } else {
+    lines.push('- [미기재] 기관 문서 규칙이 정해지지 않음. 날짜는 2026. 11. 13. 형식을 기본으로 씀.');
+  }
+  lines.push('', '# 사람이 반드시 확인하는 일');
+  HUMAN_CHECK.forEach(h => lines.push(`- ${h}`));
+  return lines.join('\n');
+}
+function dataBlock(agent) {
+  const pasted = (document.getElementById('pasteBox').value || '').trim();
+  const label = agent.dataLabel || '자료';
+  if (!pasted) return `# ${label}\n[${label} 없음]` + (agent.needData ? ' 자료가 없으면 분석하지 말고 필요한 자료 목록만 적음.' : '');
+  return `# ${label}\n<자료 시작>\n${pasted}\n<자료 끝>`;
+}
+function buildPrompt(agent) {
+  const inp = readInputs();
+  return [commonBlock(), '', agent.task(inp), '', dataBlock(agent),
+    '', '# 출력 끝에 붙일 것', '- 수치 대조표: 문장 | 수치 | 근거 위치 | 일치', '- 사람 확인 지점 목록'
+  ].join('\n');
+}
+
+/* ===== 화면 ===== */
+const $ = (id) => document.getElementById(id);
+let current = AGENTS[0];
+const inputsByAgent = {};   // 에이전트를 바꿔도 적은 내용 유지
+
+function store(k, val) { try { localStorage.setItem(k, val); } catch (e) {} }
+function load(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+
+function renderSidebar() {
+  $('agentList').innerHTML = AGENTS.map(a => `
+    <li><button class="agent-btn" type="button" data-id="${a.id}" aria-current="${a.id === current.id}">
+      <span class="abbr" aria-hidden="true">${a.abbr}</span>
+      <span><span class="agent-name">${esc(a.name)}</span><span class="agent-type">${a.type}</span></span>
+    </button></li>`).join('');
+}
+
+function renderFields() {
+  const saved = inputsByAgent[current.id] || {};
+  $('fields').innerHTML = current.fields.map(f => {
+    const id = `f-${current.id}-${f.id}`;
+    const val = saved[f.id] !== undefined ? saved[f.id] : (f.def || '');
+    let ctl;
+    if (f.select) ctl = `<select id="${id}" data-k="${f.id}">${f.select.map(o => `<option${o === val ? ' selected' : ''}>${esc(o)}</option>`).join('')}</select>`;
+    else if (f.area) ctl = `<textarea id="${id}" data-k="${f.id}" placeholder="${esc(f.ph || '')}">${esc(val)}</textarea>`;
+    else ctl = `<input type="text" id="${id}" data-k="${f.id}" value="${esc(val)}" placeholder="${esc(f.ph || '')}">`;
+    return `<div class="field${f.wide ? ' wide' : ''}"><label for="${id}">${esc(f.label)}${f.required ? '<span class="req">*</span>' : ''}</label>${ctl}</div>`;
+  }).join('');
+  $('dataNeed').textContent = current.needData ? `${current.dataLabel || '자료'} 필수` : '자료 선택 (없어도 실행)';
+}
+
+function readInputs() {
+  const out = {};
+  $('fields').querySelectorAll('[data-k]').forEach(el => { out[el.dataset.k] = el.value; });
+  inputsByAgent[current.id] = out;
+  return out;
+}
+
+function renderFlow() {
+  $('legend').innerHTML = Object.values(NODE_KINDS).map(k => `<span><i style="background:${k.color}"></i>${k.label}</span>`).join('');
+  $('flow').innerHTML = current.nodes.map(n => {
+    const k = NODE_KINDS[n.kind];
+    return `<li class="node" style="--nc:${k.color}">
+      <div class="node-kind">${k.label}<small>${esc(n.where)}</small></div>
+      <div class="node-body"><strong>${esc(n.name)}</strong><p>${esc(n.desc)}</p>${n.branch ? `<div class="node-branch">${esc(n.branch)}</div>` : ''}</div>
+    </li>`;
+  }).join('');
+}
+
+function renderPrompt() { $('promptText').textContent = buildPrompt(current); }
+
+function renderRules() {
+  $('rules').innerHTML = RULES.map(([k, t], i) => `<li><span class="no">${i + 1}</span><span class="key">${k}</span><span class="txt">${esc(t)}</span></li>`).join('')
+    + `<li><span class="no">+</span><span class="key">우리 기관</span><span class="txt">${CONFIG.orgRules.length ? esc(CONFIG.orgRules.join(' / ')) : '기관 문서 규칙 미기재. CLAUDE.md 0번을 채우면 여기에 추가됩니다.'}</span></li>`;
+}
+
+function selectAgent(id) {
+  readInputs();
+  current = AGENTS.find(a => a.id === id) || AGENTS[0];
+  store('studio.agent', current.id);
+  $('agentTitle').textContent = current.name;
+  $('agentTag').textContent = current.type;
+  $('agentDesc').textContent = current.desc;
+  $('runMsg').innerHTML = '';
+  renderSidebar(); renderFields(); renderFlow(); renderPrompt();
+}
+
+function selectTab(name) {
+  ['run', 'flow', 'prompt', 'rules'].forEach(t => {
+    $('tab-' + t).setAttribute('aria-selected', t === name);
+    $('panel-' + t).hidden = t !== name;
+  });
+  if (name === 'prompt') { readInputs(); renderPrompt(); }
+  store('studio.tab', name);
+}
+
+function notice(el, text, kind) { el.innerHTML = `<div class="notice ${kind || ''}"><p>${esc(text)}</p></div>`; }
+
+/* 이벤트 */
+$('agentList').addEventListener('click', e => { const b = e.target.closest('.agent-btn'); if (b) selectAgent(b.dataset.id); });
+document.querySelector('.tabs').addEventListener('click', e => { const t = e.target.closest('.tab'); if (t) selectTab(t.id.replace('tab-', '')); });
+$('fields').addEventListener('input', readInputs);
+$('toPromptBtn').addEventListener('click', () => selectTab('prompt'));
+$('fileInput').addEventListener('change', () => {
+  notice($('runMsg'), '파일 읽기와 개인정보 열 자동 제거는 2단계에서 연결합니다. 지금은 본문 붙여넣기를 써 주세요.', 'warn');
+  $('fileInput').value = '';
+});
+$('runBtn').addEventListener('click', () => {
+  const inp = readInputs();
+  const missing = current.fields.filter(f => f.required && !(inp[f.id] || '').trim()).map(f => f.label);
+  if (missing.length) { notice($('runMsg'), `필수 칸을 채워 주세요: ${missing.join(', ')}`, 'err'); return; }
+  if (current.needData && !$('pasteBox').value.trim()) { notice($('runMsg'), `${current.dataLabel || '자료'}를 올리거나 붙여넣어 주세요.`, 'err'); return; }
+  notice($('runMsg'), 'AI 실행은 3단계에서 연결합니다. 지금은 "지시문 보기"에서 지시문이 맞게 만들어지는지 확인해 주세요.', 'warn');
+});
+$('copyBtn').addEventListener('click', async () => {
+  readInputs(); renderPrompt();
+  const text = $('promptText').textContent;
+  try { await navigator.clipboard.writeText(text); notice($('copyMsg'), '지시문을 복사했습니다. Claude 대화창에 붙여넣어 쓸 수 있습니다.'); }
+  catch (e) {
+    const r = document.createRange(); r.selectNodeContents($('promptText'));
+    const s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+    notice($('copyMsg'), '자동 복사가 막혀 있습니다. 선택된 지시문을 Ctrl+C(맥은 Cmd+C)로 복사해 주세요.', 'warn');
+  }
+});
+
+/* 시작 */
+if (CONFIG.appTitle) $('appTitle').textContent = CONFIG.appTitle;
+if (CONFIG.accent) document.documentElement.style.setProperty('--accent', CONFIG.accent);
+$('appOrg').textContent = `${ORG} · 반복 업무 6종`;
+renderRules();
+const savedAgent = load('studio.agent');
+selectAgent(AGENTS.some(a => a.id === savedAgent) ? savedAgent : 'report');
+const savedTab = load('studio.tab');
+selectTab(['run', 'flow', 'prompt', 'rules'].includes(savedTab) ? savedTab : 'run');
+</script>
