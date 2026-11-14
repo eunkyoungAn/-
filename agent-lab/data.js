@@ -1027,6 +1027,26 @@ window.LAB_DATA = {
    "path": "스킬/my-agent-designer.zip"
   }
  ],
+ "reportSkills": [
+  {
+   "name": "one-page-report-docx",
+   "agent": "한 장 보고서 (워드)",
+   "lesson": "\"이 결과로 한 장 보고서 만들어줘\"",
+   "path": "스킬/one-page-report-docx.zip"
+  },
+  {
+   "name": "two-page-report-docx",
+   "agent": "두 장 보고서 (워드)",
+   "lesson": "\"두 장 보고서로 만들어줘\"",
+   "path": "스킬/two-page-report-docx.zip"
+  },
+  {
+   "name": "one-page-report-hwpx",
+   "agent": "한 장 보고서 (한글 hwpx)",
+   "lesson": "\"한 장 보고서 hwpx로 만들어줘\"",
+   "path": "스킬/one-page-report-hwpx.zip"
+  }
+ ],
  "zip": "업무에이전트_수강생실습자료.zip",
  "guide": {
   "id": "studio",
@@ -1297,7 +1317,7 @@ window.LAB_DATA = {
     "한글 1쪽"
    ]
   ],
-  "callsNote": "표의 스킬 이름은 강사 계정에 등록된 것입니다. 내 계정에 등록된 스킬만 불립니다. 보고서 스킬이 없다면 아래 \"보고서 규칙을 스킬로 만들기\"로 먼저 만들거나, 이 실습실의 \"스킬 등록\"에서 data-report-analyst를 등록합니다.",
+  "callsNote": "세 스킬은 내 계정에 등록되어 있어야 불립니다. 아직 없다면 \"스킬 등록\"에서 보고서 스킬 3종을 받아 먼저 등록합니다.",
   "warn": "분모를 사람이 확인한 뒤에 넘깁니다. 분모가 틀리면 보고서에 그대로 들어갑니다.",
   "skillSteps": [
    [

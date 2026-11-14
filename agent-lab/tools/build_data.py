@@ -593,7 +593,7 @@ PROJECT = {
         ['두 장 보고서로 만들어줘', 'two-page-report-docx', '워드 2쪽'],
         ['한 장 보고서 hwpx로 만들어줘', 'one-page-report-hwpx', '한글 1쪽'],
     ],
-    'callsNote': '표의 스킬 이름은 강사 계정에 등록된 것입니다. 내 계정에 등록된 스킬만 불립니다. 보고서 스킬이 없다면 아래 "보고서 규칙을 스킬로 만들기"로 먼저 만들거나, 이 실습실의 "스킬 등록"에서 data-report-analyst를 등록합니다.',
+    'callsNote': '세 스킬은 내 계정에 등록되어 있어야 불립니다. 아직 없다면 "스킬 등록"에서 보고서 스킬 3종을 받아 먼저 등록합니다.',
     'warn': '분모를 사람이 확인한 뒤에 넘깁니다. 분모가 틀리면 보고서에 그대로 들어갑니다.',
     'skillSteps': [
         ['01', '사람', '재료 모으기', '보고서 프로젝트 지침, 양식 파일(hwpx 등), 잘 쓴 보고서 예시를 모읍니다.'],
@@ -633,7 +633,12 @@ SKILLS = [
     ['schedule-manager', '일정 관리', '실습 7'],
     ['my-agent-designer', '나만의 에이전트', '실습 8'],
 ]
-for s in SKILLS:
+REPORT_SKILLS = [
+    ['one-page-report-docx', '한 장 보고서 (워드)', '"이 결과로 한 장 보고서 만들어줘"'],
+    ['two-page-report-docx', '두 장 보고서 (워드)', '"두 장 보고서로 만들어줘"'],
+    ['one-page-report-hwpx', '한 장 보고서 (한글 hwpx)', '"한 장 보고서 hwpx로 만들어줘"'],
+]
+for s in SKILLS + REPORT_SKILLS:
     assert os.path.exists(os.path.join(FILES, '스킬', s[0] + '.zip')), s[0]
 
 data = {
@@ -642,6 +647,7 @@ data = {
     'rules': RULES,
     'rulesText': code_block('공통지침.md'),
     'skills': [{'name': s[0], 'agent': s[1], 'lesson': s[2], 'path': '스킬/' + s[0] + '.zip'} for s in SKILLS],
+    'reportSkills': [{'name': s[0], 'agent': s[1], 'lesson': s[2], 'path': '스킬/' + s[0] + '.zip'} for s in REPORT_SKILLS],
     'zip': '업무에이전트_수강생실습자료.zip',
     'guide': GUIDE,
     'project': PROJECT,
