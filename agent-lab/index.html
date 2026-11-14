@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex">
+<title>업무 에이전트 실습실 | 커리어캐쳐</title>
+<meta name="description" content="업무 에이전트 설계와 실습: 실습 순서, 넣을 값, 자료 파일, 복사해서 쓰는 지시문, 결과 검수표를 한 곳에 모았습니다.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="g-header">
+  <div class="wrap">
+    <a class="g-brand" href="#home" aria-label="실습실 처음 화면">
+      <div class="g-mark">C</div>
+      <div><strong>업무 에이전트 실습실</strong><span>커리어캐쳐 · 공공·교육기관 실무</span></div>
+    </a>
+    <nav class="g-nav" aria-label="실습실 메뉴">
+      <a href="#downloads">자료 받기</a>
+      <a href="#rules">공통 규칙</a>
+      <a href="#help">안 될 때</a>
+      <a class="g-home" href="#home">전체 실습</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <!-- ================= 시작 화면 ================= -->
+  <div id="viewHome">
+    <section class="g-hero wrap">
+      <span class="eyebrow">업무 에이전트 설계와 실습</span>
+      <h1>순서대로 복사해 넣으면<br><em>일곱 가지 업무</em>가 끝납니다</h1>
+      <p class="hero-copy">실습을 고르면 스튜디오에 넣을 값, 올릴 자료 파일, Claude에 보낼 지시문이 차례로 나옵니다. <strong>복사 단추를 눌러 그대로 붙여넣고</strong>, 마지막에 결과를 검수합니다.</p>
+      <div class="hero-meta" aria-label="실습실 특징">
+        <span class="meta-chip active">3부 · 7개 실습</span>
+        <span class="meta-chip">자료 파일 한 곳에서 받기</span>
+        <span class="meta-chip">복사해서 쓰는 지시문</span>
+        <span class="meta-chip">결과 검수표</span>
+      </div>
+    </section>
+
+    <div class="wrap">
+      <div class="progress-card" aria-label="내 진행 상황">
+        <div class="progress-number"><span id="pgNum">0 / 7</span><small>검수까지 마친 실습</small></div>
+        <div class="progress-track"><span id="pgBar"></span></div>
+        <div class="progress-copy">검수 항목을 모두 확인한 실습을 완료로 셉니다.</div>
+      </div>
+
+      <div class="start-row">
+        <div class="start-item"><b>시작 전 1</b><strong>claude.ai에 로그인</strong><p>노트북의 크롬이나 엣지에서 로그인합니다. 스튜디오는 같은 브라우저에서 엽니다.</p></div>
+        <div class="start-item"><b>시작 전 2</b><strong>스튜디오 열어 두기</strong><p>실습은 <a id="studioLink" target="_blank" rel="noopener noreferrer">업무 에이전트 스튜디오</a>에서 실행합니다. 처음 실행할 때 허용 창이 뜨면 허용을 누릅니다.</p></div>
+        <div class="start-item"><b>시작 전 3</b><strong>가상 자료만 사용</strong><p>모든 자료는 교육·실습용 가상 자료입니다. 몸풀기는 <a id="warmupLink" target="_blank" rel="noopener noreferrer">AI 활용평가 연습실</a>에서 합니다.</p></div>
+      </div>
+
+      <div id="homeLevels"></div>
+      <p class="chain-note">실습 번호는 강의안의 번호와 같습니다. 실습 3은 이번 과정에서 다루지 않습니다. 실습 2는 실습 4의 결과를 이어받을 수 있습니다.</p>
+
+      <section class="info-section" id="sec-downloads">
+        <span class="level-kicker">DOWNLOADS</span>
+        <h2>자료 파일 한 곳에서 받기</h2>
+        <p class="lead">실습에 쓰는 파일을 모두 모았습니다. 한 번에 받으려면 전체 압축 파일을, 필요한 것만 받으려면 실습별 파일을 누릅니다.</p>
+        <div class="go-studio zip-bar">
+          <p><b>전체 자료 한 번에 받기</b> — 실습 자료, 양식, 스킬, 수강생 안내문이 들어 있는 압축 파일입니다. 받은 뒤 압축을 풉니다.</p>
+          <a class="g-btn" id="zipLink" download>전체 압축 파일 받기</a>
+        </div>
+        <div id="downloadGroups"></div>
+      </section>
+
+      <section class="info-section" id="sec-rules">
+        <span class="level-kicker">COMMON RULES</span>
+        <h2>모든 에이전트가 지키는 여덟 가지</h2>
+        <p class="lead">스튜디오의 모든 지시문 맨 앞에 같은 규칙이 붙습니다. 아래 글을 복사해 내 Claude 프로젝트의 지침 칸에 붙여 넣어도 됩니다.</p>
+        <div class="rule-grid" id="ruleGrid"></div>
+        <div class="prompt-box tall"><span class="box-label">프로젝트 지침에 붙여 넣을 글</span><button class="copy-button" type="button" data-copy="rulesText">지침 복사</button><pre id="rulesText"></pre></div>
+      </section>
+
+      <section class="info-section" id="sec-files">
+        <span class="level-kicker">RESULT FILES</span>
+        <h2>결과를 파일로 받기</h2>
+        <p class="lead">스튜디오에서 실행이 끝나면 결과 아래에 형식을 고르는 칸이 나옵니다. 형식을 바꿔 여러 번 받을 수 있습니다. 보고서 작성은 한 장 보고서 / 3장 이내 보고서 / 분석 결과 전체 가운데 무엇을 받을지도 고릅니다.</p>
+        <div class="g-table"><table>
+          <thead><tr><th>형식</th><th>받는 파일</th><th>참고</th></tr></thead>
+          <tbody>
+            <tr><td>한글 (hwpx)</td><td>…_hwpx.zip</td><td>압축을 풀면 hwpx 파일이 나옵니다. 한글 2014 이상에서 열립니다.</td></tr>
+            <tr><td>워드 (docx)</td><td>….docx</td><td>표가 워드 표로 들어갑니다.</td></tr>
+            <tr><td>PDF</td><td>….pdf</td><td>보기 · 인쇄용입니다. 글자를 고칠 수 없습니다.</td></tr>
+            <tr><td>한글 옛 형식 (hwp)</td><td>…_hwpx.zip</td><td>hwpx로 저장됩니다. 한글에서 열어 [파일 → 다른 이름으로 저장 → 한글 문서(*.hwp)]를 고릅니다.</td></tr>
+            <tr><td>글 파일 (md)</td><td>….md</td><td>메모장에서 열립니다.</td></tr>
+          </tbody></table></div>
+      </section>
+
+      <section class="info-section" id="sec-help">
+        <span class="level-kicker">TROUBLESHOOTING</span>
+        <h2>안 될 때</h2>
+        <p class="lead">스튜디오 화면에 붉은 상자가 나오면 그 안의 안내를 먼저 따릅니다. 끝내 실행되지 않으면 각 실습 맨 아래의 "Claude 채팅에서 하기" 지시문을 복사해 같은 결과를 얻을 수 있습니다.</p>
+        <div class="g-table"><table>
+          <thead><tr><th>화면에 나온 것</th><th>왜 그런가</th><th>할 일</th></tr></thead>
+          <tbody>
+            <tr><td>붉은 상자 "이 화면에서는 에이전트를 실행할 수 없음"</td><td>로그인하지 않은 화면에서 스튜디오 링크를 열었습니다.</td><td>크롬이나 엣지에서 claude.ai에 로그인한 뒤, 같은 브라우저에서 링크를 다시 엽니다.</td></tr>
+            <tr><td>붉은 상자 "실행하지 않았음 — 아래 항목이 비어 있음"</td><td>별표(*) 칸이나 자료가 비어 있습니다.</td><td>적힌 항목을 채웁니다. 자료는 파일 목록에 "읽음"이 보여야 합니다.</td></tr>
+            <tr><td>파일 이름 아래 붉은 글씨 "읽지 못함"</td><td>읽을 수 없는 형식이거나, 기관 네트워크가 읽기 도구를 막았습니다.</td><td>붉은 안내대로 합니다. 급하면 내용을 복사해 "본문 붙여넣기" 칸에 넣습니다.</td></tr>
+            <tr><td>"Claude에게 요청함 (○초 지남)"에서 멈춰 있다</td><td>허용을 묻는 창이 떠 있거나, 응답을 기다리는 중입니다.</td><td>화면에 뜬 창에서 허용을 누릅니다. 3분이 넘으면 중지하고 다시 실행합니다.</td></tr>
+            <tr><td>"요청이 많아 잠시 제한됨"</td><td>짧은 시간에 여러 번 실행했습니다.</td><td>1~2분 뒤 다시 실행합니다.</td></tr>
+            <tr><td>파일 받기를 눌렀는데 저장 창이 안 뜬다</td><td>저장 창이 이미 떠 있습니다.</td><td>한 번 더 누릅니다. 그래도 안 되면 "결과 복사"로 한글에 붙여 넣습니다.</td></tr>
+            <tr><td>이 실습실에서 복사 단추가 듣지 않는다</td><td>브라우저가 복사를 막았습니다.</td><td>글 상자가 선택된 상태가 되므로 Ctrl+C로 복사합니다.</td></tr>
+          </tbody></table></div>
+      </section>
+    </div>
+  </div>
+
+  <!-- ================= 실습 화면 ================= -->
+  <div id="viewLesson" class="lesson-shell wrap" hidden>
+    <nav class="breadcrumb" aria-label="현재 위치"><a href="#home">전체 실습</a><span>›</span><span id="bcPart"></span><span>›</span><span id="bcCode"></span></nav>
+    <header class="lesson-hero">
+      <span class="eyebrow" id="lhEyebrow"></span>
+      <h1 id="lhTitle"></h1>
+      <p id="lhSum"></p>
+      <div class="hero-meta" id="lhMeta"></div>
+    </header>
+    <div class="lesson-layout">
+      <aside class="toc" aria-label="실습 목차" id="toc"></aside>
+      <article class="lesson-content" id="lessonBody"></article>
+    </div>
+  </div>
+</main>
+
+<footer class="g-footer"><div class="wrap">
+  <span>커리어캐쳐 업무 에이전트 실습 · 모든 자료는 교육·실습용 가상 자료입니다.</span>
+  <span>이 화면은 입력한 내용을 어디에도 보내지 않습니다. 검수 표시는 이 기기에만 저장됩니다.</span>
+</div></footer>
+
+<script src="config.js"></script>
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
