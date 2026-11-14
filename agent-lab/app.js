@@ -23,6 +23,7 @@
   try { checks = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { checks = {}; }
   var saveChecks = function () { try { localStorage.setItem(KEY, JSON.stringify(checks)); } catch (e) { /* 저장이 막혀 있어도 화면은 동작함 */ } };
   var isDone = function (l) {
+    if (!l || !l.checks) return false;
     var c = checks[l.id] || [];
     return l.checks.every(function (_, i) { return !!c[i]; });
   };
@@ -89,6 +90,34 @@
     return '<a class="g-btn ghost" href="' + esc(fileUrl(f.path)) + '" download="' + esc(f.name) + '">' + esc(label || '받기') + '</a>';
   };
 
+  var G = D.guide;
+  var fileList = function (files, label) {
+    return '<div class="file-list">' + files.map(function (f) {
+      return '<div class="file-row"><div><strong>' + esc(f.name) + '</strong><span>' + esc(f.label) + ' · <em>' + esc(f.role) + '</em></span></div>' + dlLink(f, label) + '</div>';
+    }).join('') + '</div>';
+  };
+  var errorsHtml = function () {
+    return D.errors.map(function (g) {
+      return '<h3 class="dl-h">' + esc(g.title) + '</h3><div class="g-table"><table><thead><tr><th>화면에 나온 것</th><th>왜 그런가</th><th>할 일</th></tr></thead><tbody>' +
+        g.rows.map(function (r) { return '<tr><td>' + esc(r[0]) + '</td><td>' + esc(r[1]) + '</td><td>' + esc(r[2]) + '</td></tr>'; }).join('') + '</tbody></table></div>';
+    }).join('');
+  };
+  var checklistHtml = function (id, items) {
+    var c = checks[id] || [];
+    return '<div class="checklist">' + items.map(function (t, i) {
+      return '<label class="check-item"><input type="checkbox" data-check="' + i + '"' + (c[i] ? ' checked' : '') + '><span>' + esc(t) + '</span></label>';
+    }).join('') + '</div><div class="local-note">체크 상태는 지금 쓰는 기기에만 저장됩니다.</div>';
+  };
+  var bindChecks = function (id) {
+    $('lessonBody').querySelectorAll('[data-check]').forEach(function (el) {
+      el.addEventListener('change', function () {
+        var a = checks[id] || (checks[id] = []);
+        a[+el.getAttribute('data-check')] = el.checked;
+        saveChecks(); updateProgress();
+      });
+    });
+  };
+
   /* ---------- 시작 화면 ---------- */
   var renderHome = function () {
     $('studioLink').href = safeUrl(C.studioUrl);
@@ -96,21 +125,26 @@
     $('zipLink').href = fileUrl(D.zip);
     $('zipLink').setAttribute('download', D.zip);
 
+    var card = function (l, arrow) {
+      return '<a class="lesson-card' + (isDone(l) ? ' is-done' : '') + '" href="#' + l.id + '" data-lesson="' + l.id + '">' +
+        '<span class="lesson-code">' + esc(l.code + ' · ' + l.time) + '</span><h3>' + esc(l.title) + '</h3><p>' + esc(l.sum) + '</p>' +
+        '<div class="lesson-output"><span>완성 결과물</span> · ' + esc(l.out) + '</div><div class="lesson-arrow">' + arrow + ' →</div></a>';
+    };
+    var level = function (kicker, title, desc, cards) {
+      return '<section class="level-section"><div class="level-head"><div><span class="level-kicker">' + esc(kicker) + '</span><h2>' + esc(title) +
+        '</h2></div><p>' + esc(desc) + '</p></div><div class="lesson-grid">' + cards + '</div></section>';
+    };
     $('homeLevels').innerHTML = D.parts.map(function (p) {
-      return '<section class="level-section"><div class="level-head"><div><span class="level-kicker">' + esc(p.kicker) + '</span><h2>' + esc(p.title) +
-        '</h2></div><p>' + esc(p.desc) + '</p></div><div class="lesson-grid">' + p.lessons.map(function (id) {
-          var l = byId[id];
-          return '<a class="lesson-card' + (isDone(l) ? ' is-done' : '') + '" href="#' + l.id + '" data-lesson="' + l.id + '">' +
-            '<span class="lesson-code">' + esc(l.code + ' · ' + l.time) + '</span><h3>' + esc(l.title) + '</h3><p>' + esc(l.sum) + '</p>' +
-            '<div class="lesson-output"><span>완성 결과물</span> · ' + esc(l.out) + '</div><div class="lesson-arrow">실습 시작하기 →</div></a>';
-        }).join('') + '</div></section>';
-    }).join('');
+      return level(p.kicker, p.title, p.desc, p.lessons.map(function (id) { return card(byId[id], '실습 시작하기'); }).join(''));
+    }).join('') + level(G.kicker, G.partTitle, G.partDesc, card(G, '만드는 방법 보기') +
+      '<a class="lesson-card" href="#help"><span class="lesson-code">모음 · 6가지 상황</span><h3>오류가 나는 대표 사유</h3>' +
+      '<p>실행이 안 될 때, 파일이 안 들어갈 때, 파일로 못 받을 때의 원인과 할 일을 한 번에 모았습니다.</p>' +
+      '<div class="lesson-output"><span>바로 찾기</span> · 화면에 나온 문구로 찾습니다</div><div class="lesson-arrow">사유 한 번에 보기 →</div></a>');
+    $('errorGroups').innerHTML = errorsHtml();
 
     $('downloadGroups').innerHTML = D.lessons.map(function (l) {
-      return '<h3 class="dl-h">' + esc(l.code + ' · ' + l.agent) + '</h3><div class="file-list">' + l.files.map(function (f) {
-        return '<div class="file-row"><div><strong>' + esc(f.name) + '</strong><span>' + esc(f.label) + ' · <em>' + esc(f.role) + '</em></span></div>' + dlLink(f) + '</div>';
-      }).join('') + '</div>';
-    }).join('') +
+      return '<h3 class="dl-h">' + esc(l.code + ' · ' + l.agent) + '</h3>' + fileList(l.files, '받기');
+    }).join('') + '<h3 class="dl-h">선택 · 내 스튜디오 만들기</h3>' + fileList(G.files, '받기') +
       '<h3 class="dl-h">교육 뒤 · 내 Claude에 등록하는 스킬 (선택)</h3><p class="lead dl-lead">claude.ai → 설정 → 기능 → 스킬에서 압축을 풀지 않고 그대로 올립니다. 스튜디오로 실습할 때는 필요 없습니다.</p><div class="dl-grid">' +
       D.skills.map(function (s) {
         return '<div class="dl-item"><div><strong>' + esc(s.name) + '.zip</strong><span>' + esc(s.lesson + ' · ' + s.agent) + '</span></div>' +
@@ -129,7 +163,8 @@
     $('pgNum').textContent = n + ' / ' + t;
     $('pgBar').style.width = Math.round(n / t * 100) + '%';
     document.querySelectorAll('.lesson-card').forEach(function (el) {
-      el.classList.toggle('is-done', isDone(byId[el.getAttribute('data-lesson')]));
+      var id = el.getAttribute('data-lesson');
+      el.classList.toggle('is-done', isDone(id === G.id ? G : byId[id]));
     });
   };
 
@@ -162,10 +197,7 @@
       (l.before ? '<div class="safety-box sp"><strong>시작 전에</strong><p>' + esc(l.before) + '</p></div>' : ''), '만들 것');
 
     add('prepare', '자료 파일 받기',
-      '<p>아래 파일을 내 컴퓨터에 받아 둡니다. 전체 압축 파일을 이미 받았다면 건너뜁니다.</p><div class="file-list">' +
-      l.files.map(function (f) {
-        return '<div class="file-row"><div><strong>' + esc(f.name) + '</strong><span>' + esc(f.label) + ' · <em>' + esc(f.role) + '</em></span></div>' + dlLink(f, '파일 받기') + '</div>';
-      }).join('') + '</div>', '자료 받기');
+      '<p>아래 파일을 내 컴퓨터에 받아 둡니다. 전체 압축 파일을 이미 받았다면 건너뜁니다.</p>' + fileList(l.files, '파일 받기'), '자료 받기');
 
     var vals = l.values.map(function (v) {
       var action = v.kind === 'text' ? copyBtn(v.value, '복사', 'g-btn ghost') : '<span class="val-kind">' + KIND[v.kind] + '</span>';
@@ -186,11 +218,7 @@
     add('run', '실행 순서', olist(l.steps) +
       (l.tips.length ? '<h3>바꿔 보기</h3><ul class="plain">' + l.tips.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>' : ''), '실행 순서');
 
-    var c = checks[l.id] || [];
-    add('review', '결과 검수',
-      '<p>아래 항목을 직접 확인하면 실습이 완료됩니다.</p><div class="checklist">' + l.checks.map(function (t, i) {
-        return '<label class="check-item"><input type="checkbox" data-check="' + i + '"' + (c[i] ? ' checked' : '') + '><span>' + esc(t) + '</span></label>';
-      }).join('') + '</div><div class="local-note">체크 상태는 지금 쓰는 기기에만 저장됩니다.</div>', '결과 검수');
+    add('review', '결과 검수', '<p>아래 항목을 직접 확인하면 실습이 완료됩니다.</p>' + checklistHtml(l.id, l.checks), '결과 검수');
 
     add('human', '사람이 마무리할 일',
       '<ul class="plain">' + l.after.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>' +
@@ -201,7 +229,10 @@
 
     add('prompt', 'Claude 채팅에서 하기 (복사해서 쓰는 지시문)',
       '<p>스튜디오가 열리지 않을 때, 또는 Claude 채팅에서 직접 해 보고 싶을 때 씁니다. 결과는 같은 순서로 나옵니다(파일 받기 단추만 없습니다).</p>' +
-      olist(l.bSteps) +
+      olist(l.bSteps.map(function (t) {
+        l.files.forEach(function (f) { if (t.indexOf('<b>' + f.name) < 0) t = t.split(f.name).join('<b>' + f.name + '</b>'); });
+        return t;
+      })) + attachHtml(l) +
       '<div class="go-studio"><p><b>지시문을 복사한 뒤</b> Claude 새 채팅을 열어 붙여넣습니다.</p><a class="g-btn" href="' + esc(chat) + '" target="_blank" rel="noopener noreferrer">Claude 새 채팅 열기</a></div>' +
       '<div class="prompt-box tall"><span class="box-label">지시문 전체</span>' + copyBtn(l.prompt, '지시문 복사') + '<pre>' + esc(l.prompt) + '</pre></div>', '복사 지시문');
 
@@ -211,7 +242,8 @@
         : '<a class="' + cls + '" href="#home"><span>' + label + '</span><strong>전체 실습으로</strong></a>';
     };
     $('lessonBody').innerHTML = parts.join('') + '<nav class="lesson-navigation" aria-label="이전 · 다음 실습">' +
-      navA(prev, 'lesson-prev', '← 이전') + navA(next, 'lesson-next', '다음 →') + '</nav>';
+      navA(prev, 'lesson-prev', '← 이전') + (next ? navA(next, 'lesson-next', '다음 →') :
+        '<a class="lesson-next" href="#' + G.id + '"><span>다음 →</span><strong>' + esc(G.title) + '</strong></a>') + '</nav>';
     $('toc').innerHTML = '<strong>실습 목차</strong>' + toc.map(function (t) {
       return '<a href="#' + t[0] + '" data-jump="' + t[0] + '">' + esc(t[1]) + '</a>';
     }).join('');
@@ -220,13 +252,66 @@
       var sel = $('qPick'), show = function () { $('qText').textContent = l.inquiries[+sel.value].q; };
       sel.addEventListener('change', show); show();
     }
-    $('lessonBody').querySelectorAll('[data-check]').forEach(function (el) {
-      el.addEventListener('change', function () {
-        var a = checks[l.id] || (checks[l.id] = []);
-        a[+el.getAttribute('data-check')] = el.checked;
-        saveChecks(); updateProgress();
-      });
-    });
+    bindChecks(l.id);
+  };
+
+  /* 보내기 전 확인: 첨부할 파일 · 양식 */
+  var ATT = { '필수': ['must', '꼭 첨부'], '양식': ['form', '양식'], '금지': ['no', '올리지 않음'], '없음': ['none', '첨부 없음'] };
+  var attachHtml = function (l) {
+    var rows = l.attach.map(function (a) {
+      var k = ATT[a.kind];
+      return '<div class="att-row att-' + k[0] + '"><span class="att-tag">' + k[1] + '</span><div class="att-b"><strong>' + esc(a.name) + '</strong><p>' + esc(a.note) + '</p></div>' +
+        (a.path ? dlLink({ path: a.path, name: a.path.split('/').pop() }, '파일 받기') : '') + '</div>';
+    }).join('');
+    var must = l.attach.filter(function (a) { return a.kind === '필수'; });
+    var form = l.attach.filter(function (a) { return a.kind === '양식'; });
+    var asks = [];
+    if (must.length) asks.push('<b>파일을 넣었습니까?</b> ' + must.map(function (a) { return '<b>' + esc(a.name) + '</b>'; }).join(', '));
+    else asks.push('<b>첨부할 파일은 없습니다.</b> 지시문만 보냅니다.');
+    if (form.length) asks.push('<b>양식을 확인했습니까?</b> ' + form.map(function (a) { return '<b>' + esc(a.name) + '</b>'; }).join(', '));
+    return '<div class="attach-box"><div class="attach-h">보내기 전 확인 · 첨부할 파일과 양식</div>' + rows +
+      '<ul class="attach-ask">' + asks.map(function (t) { return '<li>' + t + '</li>'; }).join('') + '</ul></div>';
+  };
+
+  /* ---------- 내 스튜디오 만들기 화면 ---------- */
+  var renderGuide = function () {
+    store = {}; keySeq = 0;
+    $('bcPart').textContent = G.kicker + ' ' + G.partTitle;
+    $('bcCode').textContent = '만드는 방법';
+    $('lhEyebrow').textContent = G.code + ' · ' + G.time;
+    $('lhTitle').textContent = G.title;
+    $('lhSum').textContent = G.sum;
+    $('lhMeta').innerHTML = '<span class="meta-chip active">교육 뒤 선택 활동</span><span class="meta-chip">결과물 · ' + esc(G.out) + '</span><span class="meta-chip">코드 작성 없음</span>';
+    var chat = safeUrl(C.chatUrl), parts = [], toc = [], n = 0;
+    var add = function (id, title, body, tocLabel) {
+      n++; var no = (n < 10 ? '0' : '') + n;
+      parts.push(sec(no, id, title, body)); toc.push([id, tocLabel || title]);
+    };
+    add('goal', '만들 것', '<div class="result-card"><strong>' + esc(G.out) + '</strong><p>강사 스튜디오와 같은 화면에 내 기관명과 문서 규칙이 들어간 내 사이트입니다. 실습은 강사 스튜디오로 하므로, 교육 뒤 내 사이트를 따로 갖고 싶을 때만 합니다.</p></div>', '만들 것');
+    add('prepare', '준비 파일 받기', '<p>두 파일을 내 컴퓨터에 받습니다. <b>CLAUDE.md</b>와 <b>index.html</b>은 반드시 둘 다 있어야 합니다.</p>' + fileList(G.files, '파일 받기'), '준비 파일');
+    add('info', '(선택) 내 업무 정보 채우기',
+      '<p>CLAUDE.md를 메모장으로 열어 <b>0. 내 업무 정보</b>의 빈칸을 채우고 저장합니다. 비워 둬도 됩니다. 값에 작은따옴표(\')는 쓰지 않습니다.</p>' +
+      '<div class="g-table sp"><table><thead><tr><th>항목</th><th>어디에 쓰이나</th><th>예</th></tr></thead><tbody>' +
+      G.infoRows.map(function (r) { return '<tr><td>' + esc(r[0]) + '</td><td>' + esc(r[1]) + '</td><td>' + esc(r[2]) + '</td></tr>'; }).join('') + '</tbody></table></div>' +
+      '<div class="prompt-box"><span class="box-label">CLAUDE.md의 0번 칸</span>' + copyBtn(G.infoTemplate, '빈칸 복사') + '<pre>' + esc(G.infoTemplate) + '</pre></div>', '내 업무 정보');
+    add('make', 'Claude에 보내기', olist(G.makeSteps) +
+      '<div class="attach-box"><div class="attach-h">보내기 전 확인 · 첨부할 파일</div>' +
+      '<div class="att-row att-must"><span class="att-tag">꼭 첨부</span><div class="att-b"><strong>CLAUDE.md</strong><p>Claude가 따라 할 작업 순서입니다.</p></div></div>' +
+      '<div class="att-row att-must"><span class="att-tag">꼭 첨부</span><div class="att-b"><strong>index.html</strong><p>완성된 사이트 파일입니다. 내용을 복사해 붙여넣지 말고 파일로 첨부합니다.</p></div></div>' +
+      '<ul class="attach-ask"><li><b>두 파일을 함께 넣었습니까?</b> <b>CLAUDE.md</b>, <b>index.html</b></li></ul></div>' +
+      '<div class="go-studio"><p><b>문장을 복사한 뒤</b> Claude 새 채팅을 열어 두 파일을 첨부하고 붙여넣습니다.</p><a class="g-btn" href="' + esc(chat) + '" target="_blank" rel="noopener noreferrer">Claude 새 채팅 열기</a></div>' +
+      '<div class="prompt-box"><span class="box-label">Claude에 보낼 문장</span>' + copyBtn(G.makePrompt, '문장 복사') + '<pre>' + esc(G.makePrompt) + '</pre></div>', 'Claude에 보내기');
+    add('use', '만든 사이트 써 보기', olist(G.useSteps) + '<h3>확인</h3>' + checklistHtml(G.id, G.checks), '써 보기');
+    add('asks', '만든 뒤 Claude에 보낼 문장',
+      '<p>사이트를 만든 그 채팅에서 아래 문장을 복사해 보냅니다.</p><div class="val-list">' + G.asks.map(function (a) {
+        return '<div class="val-row"><div class="val-label">' + esc(a[0]) + '</div><div class="val-body"><pre>' + esc(a[1]) + '</pre></div>' + copyBtn(a[1], '복사', 'g-btn ghost') + '</div>';
+      }).join('') + '</div><ul class="plain">' + G.keep.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>', '보낼 문장');
+    add('errors', '오류가 나는 대표 사유', '<p>화면에 나온 문구로 찾습니다. 붉은 상자가 나오면 그 안의 안내를 먼저 따릅니다.</p>' + errorsHtml(), '오류 사유');
+    $('lessonBody').innerHTML = parts.join('') + '<nav class="lesson-navigation" aria-label="이전 · 다음">' +
+      '<a class="lesson-prev" href="#s8"><span>← 이전</span><strong>실습 8 · ' + esc(byId.s8.title) + '</strong></a>' +
+      '<a class="lesson-next" href="#home"><span>다음 →</span><strong>전체 실습으로</strong></a></nav>';
+    $('toc').innerHTML = '<strong>목차</strong>' + toc.map(function (t) { return '<a href="#' + t[0] + '" data-jump="' + t[0] + '">' + esc(t[1]) + '</a>'; }).join('');
+    bindChecks(G.id);
   };
 
   /* 실습 화면 안의 목차는 주소(#)를 바꾸지 않고 그 자리로만 옮긴다 */
@@ -242,13 +327,13 @@
   var shown = null;
   var route = function () {
     var h = (location.hash || '').slice(1);
-    var l = Object.prototype.hasOwnProperty.call(byId, h) ? byId[h] : null;
+    var l = Object.prototype.hasOwnProperty.call(byId, h) ? byId[h] : (h === G.id ? G : null);
     $('viewHome').hidden = !!l;
     $('viewLesson').hidden = !l;
     if (l) {
-      if (shown !== l.id) { renderLesson(l); shown = l.id; }
+      if (shown !== l.id) { if (l === G) renderGuide(); else renderLesson(l); shown = l.id; }
       window.scrollTo(0, 0);
-      document.title = l.code + ' ' + l.title + ' | 업무 에이전트 실습실';
+      document.title = (l === G ? l.title : l.code + ' ' + l.title) + ' | 업무 에이전트 실습실';
     } else {
       shown = null;
       updateProgress();

@@ -21,7 +21,8 @@
     <nav class="g-nav" aria-label="실습실 메뉴">
       <a href="#downloads">자료 받기</a>
       <a href="#rules">공통 규칙</a>
-      <a href="#help">안 될 때</a>
+      <a href="#studio">스튜디오 만들기</a>
+      <a href="#help">오류 사유</a>
       <a class="g-home" href="#home">전체 실습</a>
     </nav>
   </div>
@@ -35,7 +36,7 @@
       <h1>순서대로 복사해 넣으면<br><em>일곱 가지 업무</em>가 끝납니다</h1>
       <p class="hero-copy">실습을 고르면 스튜디오에 넣을 값, 올릴 자료 파일, Claude에 보낼 지시문이 차례로 나옵니다. <strong>복사 단추를 눌러 그대로 붙여넣고</strong>, 마지막에 결과를 검수합니다.</p>
       <div class="hero-meta" aria-label="실습실 특징">
-        <span class="meta-chip active">3부 · 7개 실습</span>
+        <span class="meta-chip active">7개 실습 + 스튜디오 만들기</span>
         <span class="meta-chip">자료 파일 한 곳에서 받기</span>
         <span class="meta-chip">복사해서 쓰는 지시문</span>
         <span class="meta-chip">결과 검수표</span>
@@ -94,19 +95,10 @@
 
       <section class="info-section" id="sec-help">
         <span class="level-kicker">TROUBLESHOOTING</span>
-        <h2>안 될 때</h2>
-        <p class="lead">스튜디오 화면에 붉은 상자가 나오면 그 안의 안내를 먼저 따릅니다. 끝내 실행되지 않으면 각 실습 맨 아래의 "Claude 채팅에서 하기" 지시문을 복사해 같은 결과를 얻을 수 있습니다.</p>
-        <div class="g-table"><table>
-          <thead><tr><th>화면에 나온 것</th><th>왜 그런가</th><th>할 일</th></tr></thead>
-          <tbody>
-            <tr><td>붉은 상자 "이 화면에서는 에이전트를 실행할 수 없음"</td><td>로그인하지 않은 화면에서 스튜디오 링크를 열었습니다.</td><td>크롬이나 엣지에서 claude.ai에 로그인한 뒤, 같은 브라우저에서 링크를 다시 엽니다.</td></tr>
-            <tr><td>붉은 상자 "실행하지 않았음 — 아래 항목이 비어 있음"</td><td>별표(*) 칸이나 자료가 비어 있습니다.</td><td>적힌 항목을 채웁니다. 자료는 파일 목록에 "읽음"이 보여야 합니다.</td></tr>
-            <tr><td>파일 이름 아래 붉은 글씨 "읽지 못함"</td><td>읽을 수 없는 형식이거나, 기관 네트워크가 읽기 도구를 막았습니다.</td><td>붉은 안내대로 합니다. 급하면 내용을 복사해 "본문 붙여넣기" 칸에 넣습니다.</td></tr>
-            <tr><td>"Claude에게 요청함 (○초 지남)"에서 멈춰 있다</td><td>허용을 묻는 창이 떠 있거나, 응답을 기다리는 중입니다.</td><td>화면에 뜬 창에서 허용을 누릅니다. 3분이 넘으면 중지하고 다시 실행합니다.</td></tr>
-            <tr><td>"요청이 많아 잠시 제한됨"</td><td>짧은 시간에 여러 번 실행했습니다.</td><td>1~2분 뒤 다시 실행합니다.</td></tr>
-            <tr><td>파일 받기를 눌렀는데 저장 창이 안 뜬다</td><td>저장 창이 이미 떠 있습니다.</td><td>한 번 더 누릅니다. 그래도 안 되면 "결과 복사"로 한글에 붙여 넣습니다.</td></tr>
-            <tr><td>이 실습실에서 복사 단추가 듣지 않는다</td><td>브라우저가 복사를 막았습니다.</td><td>글 상자가 선택된 상태가 되므로 Ctrl+C로 복사합니다.</td></tr>
-          </tbody></table></div>
+        <h2>오류가 나는 대표 사유</h2>
+        <p class="lead">화면에 나온 문구로 찾습니다. 붉은 상자가 나오면 그 안의 안내를 먼저 따릅니다. 끝내 실행되지 않으면 각 실습 맨 아래의 "Claude 채팅에서 하기" 지시문을 복사해 같은 결과를 얻을 수 있습니다.</p>
+        <div class="safety-box wide"><strong>스튜디오 링크는 누구에게나 열립니다. 실행에는 로그인이 필요합니다.</strong><p>강사 스튜디오는 링크가 있는 누구나 열 수 있게 공유되어 있습니다. 다만 "에이전트 실행"은 보는 사람 본인의 Claude 계정으로 이루어지므로 claude.ai에 로그인해야 하고, 사용량도 본인 요금제 한도에서 빠집니다. 이 실습실의 복사 단추가 듣지 않으면 글 상자가 선택된 상태가 되므로 Ctrl+C로 복사합니다.</p></div>
+        <div id="errorGroups"></div>
       </section>
     </div>
   </div>
