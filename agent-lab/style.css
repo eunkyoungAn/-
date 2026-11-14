@@ -478,3 +478,6 @@ body{letter-spacing:-.005em}
   .quiz-card{grid-template-columns:minmax(0,1fr)}
   .quiz-card img{display:none}
 }
+
+/* API key 그림 */
+.diagram{display:block;width:100%;height:auto;border:1px solid var(--rule);border-radius:14px;background:#fff;font-family:var(--font-ko)}

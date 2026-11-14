@@ -90,7 +90,7 @@
     return '<a class="g-btn ghost" href="' + esc(fileUrl(f.path)) + '" download="' + esc(f.name) + '">' + esc(label || '받기') + '</a>';
   };
 
-  var G = D.guide, P = D.project, B = D.basics;
+  var G = D.guide, P = D.project, B = D.basics, K = D.apikey;
   var fileList = function (files, label) {
     return '<div class="file-list">' + files.map(function (f) {
       return '<div class="file-row"><div><strong>' + esc(f.name) + '</strong><span>' + esc(f.label) + ' · <em>' + esc(f.role) + '</em></span></div>' + dlLink(f, label) + '</div>';
@@ -134,7 +134,7 @@
       return '<section class="level-section"><div class="level-head"><div><span class="level-kicker">' + esc(kicker) + '</span><h2>' + esc(title) +
         '</h2></div><p>' + esc(desc) + '</p></div><div class="lesson-grid">' + cards + '</div></section>';
     };
-    $('homeLevels').innerHTML = level(B.kicker, B.partTitle, B.partDesc, card(B, '기본 개념 보기')) + level(G.kicker, G.partTitle, G.partDesc, card(G, '만드는 방법 보기') +
+    $('homeLevels').innerHTML = level(B.kicker, B.partTitle, B.partDesc, card(B, '기본 개념 보기') + card(K, '언제 쓰는지 보기')) + level(G.kicker, G.partTitle, G.partDesc, card(G, '만드는 방법 보기') +
       '<a class="lesson-card" href="#help"><span class="lesson-code">모음 · 6가지 상황</span><h3>오류가 나는 대표 사유</h3>' +
       '<p>실행이 안 될 때, 파일이 안 들어갈 때, 파일로 못 받을 때의 원인과 할 일을 한 번에 모았습니다.</p>' +
       '<div class="lesson-output"><span>바로 찾기</span> · 화면에 나온 문구로 찾습니다</div><div class="lesson-arrow">사유 한 번에 보기 →</div></a>') +
@@ -163,7 +163,7 @@
     };
     var mGroup = function (title, links) { return '<div class="menu-group"><strong>' + esc(title) + '</strong>' + links + '</div>'; };
     $('quickPanel').innerHTML =
-      mGroup('시작 전', mLink(B.id, '기초', B.title) + mLink(G.id, '준비', G.title)) +
+      mGroup('시작 전', mLink(B.id, '기초', B.title) + mLink(K.id, '기초', K.title) + mLink(G.id, '준비', G.title)) +
       D.parts.map(function (p) {
         return mGroup(p.kicker + ' · ' + p.title, p.lessons.map(function (id) { return mLink(id, byId[id].code, byId[id].title); }).join(''));
       }).join('') +
@@ -183,7 +183,7 @@
     $('pgBar').style.width = Math.round(n / t * 100) + '%';
     document.querySelectorAll('.lesson-card').forEach(function (el) {
       var id = el.getAttribute('data-lesson');
-      el.classList.toggle('is-done', isDone(id === G.id ? G : id === P.id ? P : id === B.id ? B : byId[id]));
+      el.classList.toggle('is-done', isDone(id === G.id ? G : id === P.id ? P : id === B.id ? B : id === K.id ? K : byId[id]));
     });
   };
 
@@ -473,9 +473,71 @@
     add('review', '확인', '<p>아래 항목을 스스로 확인한 뒤 실습으로 넘어갑니다.</p>' + checklistHtml(B.id, B.checks), '확인');
     $('lessonBody').innerHTML = parts.join('') + '<nav class="lesson-navigation" aria-label="이전 · 다음">' +
       '<a class="lesson-prev" href="#home"><span>← 이전</span><strong>전체 실습으로</strong></a>' +
-      '<a class="lesson-next" href="#' + G.id + '"><span>다음 →</span><strong>' + esc(G.title) + '</strong></a></nav>';
+      '<a class="lesson-next" href="#' + K.id + '"><span>다음 →</span><strong>' + esc(K.title) + '</strong></a></nav>';
     $('toc').innerHTML = '<strong>목차</strong>' + toc.map(function (t) { return '<a href="#' + t[0] + '" data-jump="' + t[0] + '">' + esc(t[1]) + '</a>'; }).join('');
     bindChecks(B.id);
+  };
+
+  /* ---------- API key란? 화면 ---------- */
+  /* 그림: 사람은 로그인으로, 프로그램은 API key로 Claude를 부른다 */
+  var apiKeySvg = function () {
+    var box = function (x, y, w, h, t1, t2, fill) {
+      return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="14" fill="' + fill + '" stroke="#111113" stroke-opacity=".14"/>' +
+        '<text x="' + (x + w / 2) + '" y="' + (y + h / 2 - (t2 ? 6 : -5)) + '" text-anchor="middle" font-size="17" font-weight="700" fill="#111113">' + t1 + '</text>' +
+        (t2 ? '<text x="' + (x + w / 2) + '" y="' + (y + h / 2 + 18) + '" text-anchor="middle" font-size="13" fill="#6e6e76">' + t2 + '</text>' : '');
+    };
+    var arrow = function (x1, x2, y, label, color) {
+      return '<line x1="' + x1 + '" y1="' + y + '" x2="' + (x2 - 9) + '" y2="' + y + '" stroke="' + color + '" stroke-width="2"/>' +
+        '<path d="M' + (x2 - 10) + ' ' + (y - 6) + ' L' + x2 + ' ' + y + ' L' + (x2 - 10) + ' ' + (y + 6) + ' Z" fill="' + color + '"/>' +
+        '<text x="' + ((x1 + x2) / 2) + '" y="' + (y - 12) + '" text-anchor="middle" font-size="13.5" font-weight="700" fill="' + color + '">' + label + '</text>';
+    };
+    return '<figure class="fig"><svg class="diagram" viewBox="0 0 760 300" role="img" aria-label="사람은 claude.ai에 로그인해서 Claude를 쓰고, 프로그램은 요청에 API key를 함께 보내 Claude를 부른다는 그림" font-family="inherit">' +
+      '<rect x="0" y="0" width="760" height="300" rx="16" fill="#ffffff"/>' +
+      '<text x="24" y="34" font-size="12.5" font-weight="600" fill="#6e6e76" letter-spacing="1">이 과정에서 쓰는 길</text>' +
+      box(24, 48, 190, 78, '사람', '수강생 · 담당자', '#f3f3f4') +
+      arrow(214, 330, 87, '로그인', '#111113') +
+      box(330, 48, 190, 78, 'claude.ai', '채팅 · 프로젝트 · 스튜디오', '#f3f3f4') +
+      '<line x1="520" y1="87" x2="571" y2="87" stroke="#111113" stroke-width="2"/>' +
+      '<text x="24" y="176" font-size="12.5" font-weight="600" fill="#0b64f4" letter-spacing="1">API key를 쓰는 길</text>' +
+      box(24, 190, 190, 78, '프로그램', '내 코드 · 자동화 도구', '#eef4ff') +
+      arrow(214, 330, 229, '요청 + API key', '#0b64f4') +
+      box(330, 190, 190, 78, 'Claude API', '키를 확인하고 받음', '#eef4ff') +
+      '<line x1="520" y1="229" x2="571" y2="229" stroke="#0b64f4" stroke-width="2"/>' +
+      '<line x1="571" y1="87" x2="571" y2="229" stroke="#111113" stroke-opacity=".3" stroke-width="2"/>' +
+      '<line x1="571" y1="158" x2="601" y2="158" stroke="#111113" stroke-opacity=".3" stroke-width="2"/>' +
+      box(602, 118, 134, 80, 'Claude', '답변을 만듦', '#111113').replace('fill="#111113">Claude<', 'fill="#ffffff">Claude<').replace('fill="#6e6e76">답변을', 'fill="#c9c9cf">답변을') +
+      '</svg><figcaption>사람은 로그인으로, 프로그램은 API key로 같은 Claude를 부릅니다.</figcaption></figure>';
+  };
+  var renderApiKey = function () {
+    store = {}; keySeq = 0;
+    $('bcPart').textContent = B.partTitle;
+    $('bcCode').textContent = 'API key';
+    $('lhEyebrow').textContent = K.code + ' · ' + K.time;
+    $('lhTitle').textContent = K.title;
+    $('lhSum').textContent = K.sum;
+    $('lhMeta').innerHTML = '<span class="meta-chip active">이 과정에서는 필요 없음</span><span class="meta-chip">프로그램이 쓰는 비밀 문자열</span><span class="meta-chip">요금은 쓴 만큼 따로</span>';
+    var parts = [], toc = [], n = 0;
+    var add = function (id, title, body, tocLabel) {
+      n++; var no = (n < 10 ? '0' : '') + n;
+      parts.push(sec(no, id, title, body)); toc.push([id, tocLabel || title]);
+    };
+    var ul = function (items) { return '<ul class="plain">' + items.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>'; };
+    add('what', 'API key란', '<p>' + esc(K.what) + '</p>' + apiKeySvg() + ul(K.whatPoints), 'API key란');
+    add('compare', '로그인과 API key의 차이',
+      '<div class="g-table sp"><table><thead><tr><th>구분</th><th>로그인해서 쓰기</th><th>API key로 쓰기</th></tr></thead><tbody>' +
+      K.compare.map(function (r) { return '<tr><td>' + esc(r[0]) + '</td><td>' + esc(r[1]) + '</td><td>' + esc(r[2]) + '</td></tr>'; }).join('') + '</tbody></table></div>', '차이');
+    add('when', '언제 사용하나',
+      '<div class="step-grid cols-3">' + K.when.map(function (w, i) {
+        return '<div class="start-item"><b>경우 ' + (i + 1) + '</b><strong>' + esc(w[0]) + '</strong><p>' + esc(w[1]) + '</p></div>';
+      }).join('') + '</div>' +
+      '<div class="safety-box sp"><strong>이 과정에서는 필요 없습니다</strong><p>' + esc(K.notNeeded) + '</p></div>', '언제 쓰나');
+    add('care', '다룰 때 지킬 것', ul(K.care) + '<div class="local-note">' + esc(K.source) + '</div>', '지킬 것');
+    add('review', '확인', '<p>아래 항목을 스스로 확인합니다.</p>' + checklistHtml(K.id, K.checks), '확인');
+    $('lessonBody').innerHTML = parts.join('') + '<nav class="lesson-navigation" aria-label="이전 · 다음">' +
+      '<a class="lesson-prev" href="#' + B.id + '"><span>← 이전</span><strong>' + esc(B.title) + '</strong></a>' +
+      '<a class="lesson-next" href="#' + G.id + '"><span>다음 →</span><strong>' + esc(G.title) + '</strong></a></nav>';
+    $('toc').innerHTML = '<strong>목차</strong>' + toc.map(function (t) { return '<a href="#' + t[0] + '" data-jump="' + t[0] + '">' + esc(t[1]) + '</a>'; }).join('');
+    bindChecks(K.id);
   };
 
   /* 실습 화면 안의 목차는 주소(#)를 바꾸지 않고 그 자리로만 옮긴다 */
@@ -499,13 +561,13 @@
   var shown = null;
   var route = function () {
     var h = (location.hash || '').slice(1);
-    var l = Object.prototype.hasOwnProperty.call(byId, h) ? byId[h] : (h === G.id ? G : h === P.id ? P : h === B.id ? B : null);
+    var l = Object.prototype.hasOwnProperty.call(byId, h) ? byId[h] : (h === G.id ? G : h === P.id ? P : h === B.id ? B : h === K.id ? K : null);
     $('viewHome').hidden = !!l;
     $('viewLesson').hidden = !l;
     if (l) {
-      if (shown !== l.id) { if (l === G) renderGuide(); else if (l === P) renderProject(); else if (l === B) renderBasics(); else renderLesson(l); shown = l.id; }
+      if (shown !== l.id) { if (l === G) renderGuide(); else if (l === P) renderProject(); else if (l === B) renderBasics(); else if (l === K) renderApiKey(); else renderLesson(l); shown = l.id; }
       window.scrollTo(0, 0);
-      document.title = (l === G || l === P || l === B ? l.title : l.code + ' ' + l.title) + ' | 업무 에이전트 실습실';
+      document.title = (l === G || l === P || l === B || l === K ? l.title : l.code + ' ' + l.title) + ' | 업무 에이전트 실습실';
     } else {
       shown = null;
       updateProgress();
