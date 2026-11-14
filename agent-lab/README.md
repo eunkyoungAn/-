@@ -25,6 +25,10 @@
 2. 넣을 값, 실행 순서, 검수 항목은 `tools/build_data.py`의 `LESSONS`에서, Claude 채팅용 첨부 파일 확인은 `ATTACH`에서, 스튜디오 만들기는 `GUIDE`에서, 프로젝트로 진행하기는 `PROJECT`에서, Claude 기본 이해하기는 `BASICS`에서(그림은 `img/basics/`), 오류 사유는 `ERRORS`에서 고친다.
 3. `python3 agent-lab/tools/build_data.py`를 실행해 `data.js`를 다시 만들고 함께 커밋한다(openpyxl 필요).
 
+## 고친 뒤 반영이 안 보일 때
+
+`index.html`에서 `style.css`, `app.js`, `data.js`, `config.js` 뒤의 `?v=` 값을 바꾼다. 값을 바꾸지 않으면 브라우저가 예전 파일을 계속 써서 색상이나 내용이 섞여 보일 수 있다.
+
 ## 보안
 
 - CSP 메타: `default-src 'none'`, 스크립트·스타일은 같은 폴더 파일만(`'self'`), `connect-src 'none'`. 외부 글꼴·분석 도구·CDN을 쓰지 않으며, 화면에서 바깥으로 보내는 요청이 없다.
