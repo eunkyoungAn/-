@@ -90,7 +90,7 @@
     return '<a class="g-btn ghost" href="' + esc(fileUrl(f.path)) + '" download="' + esc(f.name) + '">' + esc(label || '받기') + '</a>';
   };
 
-  var G = D.guide;
+  var G = D.guide, P = D.project;
   var fileList = function (files, label) {
     return '<div class="file-list">' + files.map(function (f) {
       return '<div class="file-row"><div><strong>' + esc(f.name) + '</strong><span>' + esc(f.label) + ' · <em>' + esc(f.role) + '</em></span></div>' + dlLink(f, label) + '</div>';
@@ -140,7 +140,11 @@
       '<div class="lesson-output"><span>바로 찾기</span> · 화면에 나온 문구로 찾습니다</div><div class="lesson-arrow">사유 한 번에 보기 →</div></a>') +
       D.parts.map(function (p) {
         return level(p.kicker, p.title, p.desc, p.lessons.map(function (id) { return card(byId[id], '실습 시작하기'); }).join(''));
-      }).join('');
+      }).join('') +
+      level(P.kicker, P.partTitle, P.partDesc, card(P, '진행 방법 보기') +
+      '<a class="lesson-card" href="#skills"><span class="lesson-code">교육 뒤 · 선택</span><h3>내 Claude에 스킬 등록하기</h3>' +
+      '<p>일곱 에이전트를 스킬 파일로 받아 내 Claude에 등록합니다. 프로젝트 대화에서 불러 쓸 수 있습니다.</p>' +
+      '<div class="lesson-output"><span>받는 것</span> · 스킬 zip 파일 7개</div><div class="lesson-arrow">스킬 받으러 가기 →</div></a>');
     $('errorGroups').innerHTML = errorsHtml();
 
     $('downloadGroups').innerHTML = D.lessons.map(function (l) {
@@ -164,7 +168,7 @@
     $('pgBar').style.width = Math.round(n / t * 100) + '%';
     document.querySelectorAll('.lesson-card').forEach(function (el) {
       var id = el.getAttribute('data-lesson');
-      el.classList.toggle('is-done', isDone(id === G.id ? G : byId[id]));
+      el.classList.toggle('is-done', isDone(id === G.id ? G : id === P.id ? P : byId[id]));
     });
   };
 
@@ -243,7 +247,7 @@
     };
     $('lessonBody').innerHTML = parts.join('') + '<nav class="lesson-navigation" aria-label="이전 · 다음 실습">' +
       navA(prev, 'lesson-prev', '← 이전') + (next ? navA(next, 'lesson-next', '다음 →') :
-        '<a class="lesson-next" href="#' + G.id + '"><span>다음 →</span><strong>' + esc(G.title) + '</strong></a>') + '</nav>';
+        '<a class="lesson-next" href="#' + P.id + '"><span>다음 →</span><strong>' + esc(P.title) + '</strong></a>') + '</nav>';
     $('toc').innerHTML = '<strong>실습 목차</strong>' + toc.map(function (t) {
       return '<a href="#' + t[0] + '" data-jump="' + t[0] + '">' + esc(t[1]) + '</a>';
     }).join('');
@@ -330,6 +334,66 @@
     bindChecks(G.id);
   };
 
+  /* ---------- 프로젝트로 진행하기 화면 ---------- */
+  var renderProject = function () {
+    store = {}; keySeq = 0;
+    $('bcPart').textContent = P.kicker + ' ' + P.partTitle;
+    $('bcCode').textContent = '프로젝트';
+    $('lhEyebrow').textContent = P.code + ' · ' + P.time;
+    $('lhTitle').textContent = P.title;
+    $('lhSum').textContent = P.sum;
+    $('lhMeta').innerHTML = '<span class="meta-chip active">반복 업무에 맞는 방식</span><span class="meta-chip">결과물 · ' + esc(P.out) + '</span><span class="meta-chip">최종 확인 · 사람</span>';
+    var parts = [], toc = [], n = 0;
+    var add = function (id, title, body, tocLabel) {
+      n++; var no = (n < 10 ? '0' : '') + n;
+      parts.push(sec(no, id, title, body)); toc.push([id, tocLabel || title]);
+    };
+    var tbl = function (head, rows) {
+      return '<div class="g-table sp"><table><thead><tr>' + head.map(function (h) { return '<th>' + esc(h) + '</th>'; }).join('') + '</tr></thead><tbody>' +
+        rows.map(function (r) { return '<tr>' + r.map(function (c) { return '<td>' + esc(c) + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table></div>';
+    };
+    var stepGrid = function (rows) {
+      return '<div class="step-grid">' + rows.map(function (r) {
+        return '<div class="start-item"><b>' + esc(r[0]) + ' · ' + esc(r[1]) + '</b><strong>' + esc(r[2]) + '</strong><p>' + esc(r[3]) + '</p></div>';
+      }).join('') + '</div>';
+    };
+    var ul = function (items) { return '<ul class="plain">' + items.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>'; };
+    var copyRow = function (label, text) {
+      return '<div class="val-row"><div class="val-label">' + esc(label) + '</div><div class="val-body"><pre>' + esc(text) + '</pre></div>' + copyBtn(text, '복사', 'g-btn ghost') + '</div>';
+    };
+
+    add('who', '어떤 사람에게 맞는 방식인가',
+      '<p>실습실에는 세 가지 진행 방식이 있습니다. <b>프로젝트는 같은 일을 반복하는 담당자</b>에게 맞습니다.</p>' +
+      tbl(['방식', '이런 사람에게 맞습니다', '이럴 때는 맞지 않습니다'], P.who) +
+      '<div class="safety-box sp"><strong>권하는 순서</strong><p>' + esc(P.whoNote) + '</p></div>', '누구에게 맞나');
+    add('rule', '프로젝트는 각자 따로 움직입니다',
+      '<p>프로젝트마다 지침 · 지식 · 메모리가 따로 있어서, 한 프로젝트에서 다른 프로젝트의 자료를 읽을 수 없습니다.</p>' +
+      '<div class="two-col"><div class="result-card"><strong>안 되는 것</strong>' + ul(P.cannot) + '</div><div class="result-card"><strong>되는 것</strong>' + ul(P.can) + '</div></div>' +
+      '<div class="safety-box sp"><strong>' + esc(P.point) + '</strong></div>', '알아 둘 것');
+    add('make', '프로젝트 만들기', olist(P.makeSteps) +
+      '<div class="prompt-box tall"><span class="box-label">지침 칸에 붙여넣을 공통 지침</span>' + copyBtn(D.rulesText, '지침 복사') + '<pre>' + esc(D.rulesText) + '</pre></div>' +
+      '<div class="val-list">' + copyRow('지침 끝에 넣을 한 줄', P.line) + '</div>', '프로젝트 만들기');
+    add('analyze', '프로젝트에서 분석하기', '<p>' + esc(P.stepsLead) + '</p>' + stepGrid(P.steps) +
+      '<div class="safety-box sp"><strong>사람이 확인하는 곳</strong><p>' + esc(P.stepsNote) + ' 사람이 확인하는 곳은 자료 올리기, 분모 확인, 마지막 명단 추출입니다.</p></div>', '분석하기');
+    add('report', '분석이 끝나면 보고서 스킬 부르기',
+      '<p>분석한 그 대화에서 아래처럼 말하면 보고서 스킬이 불립니다. 말을 복사해 그대로 보냅니다.</p>' +
+      '<div class="val-list">' + P.calls.map(function (c) { return copyRow(c[1] + ' → ' + c[2], c[0]); }).join('') + '</div>' +
+      '<div class="local-note">' + esc(P.callsNote) + '</div>' +
+      '<div class="attach-box"><div class="attach-h">넘기기 전 확인</div><ul class="attach-ask first"><li><b>분모를 확인했습니까?</b> ' + esc(P.warn) + '</li></ul></div>' +
+      '<div class="go-studio"><p><b>보고서 스킬이 아직 없다면</b> 실습실의 스킬을 먼저 등록합니다.</p><a class="g-btn" href="#skills">스킬 등록으로 가기</a></div>', '보고서 스킬 부르기');
+    add('skill', '보고서 규칙을 스킬로 만들기',
+      '<p>보고서 프로젝트에만 있는 규칙(문체, 독자, 기관 양식)을 스킬로 바꿔 두면 어느 프로젝트에서나 같은 방식으로 부를 수 있습니다.</p>' + stepGrid(P.skillSteps) +
+      '<div class="val-list">' + copyRow('재료를 올리고 보낼 말', P.skillAsk) + copyRow('스킬 설명 예시 (언제 부를지를 정하는 한 줄)', P.skillDesc) + '</div>' +
+      '<p class="sp">' + esc(P.skillNote) + '</p>', '스킬로 만들기');
+    add('review', '확인', '<p>아래 항목을 직접 확인합니다.</p>' + checklistHtml(P.id, P.checks) +
+      '<div class="go-studio"><p><b>강사 슬라이드</b>에서 같은 내용을 네 장으로 볼 수 있습니다.</p><a class="g-btn ghost" href="' + esc(safeUrl(C.projectDeckUrl)) + '" target="_blank" rel="noopener noreferrer">슬라이드 보기</a></div>', '확인');
+    $('lessonBody').innerHTML = parts.join('') + '<nav class="lesson-navigation" aria-label="이전 · 다음">' +
+      '<a class="lesson-prev" href="#s8"><span>← 이전</span><strong>실습 8 · ' + esc(byId.s8.title) + '</strong></a>' +
+      '<a class="lesson-next" href="#skills"><span>다음 →</span><strong>내 Claude에 스킬 등록하기</strong></a></nav>';
+    $('toc').innerHTML = '<strong>목차</strong>' + toc.map(function (t) { return '<a href="#' + t[0] + '" data-jump="' + t[0] + '">' + esc(t[1]) + '</a>'; }).join('');
+    bindChecks(P.id);
+  };
+
   /* 실습 화면 안의 목차는 주소(#)를 바꾸지 않고 그 자리로만 옮긴다 */
   document.addEventListener('click', function (e) {
     var a = e.target.closest('[data-jump]');
@@ -343,13 +407,13 @@
   var shown = null;
   var route = function () {
     var h = (location.hash || '').slice(1);
-    var l = Object.prototype.hasOwnProperty.call(byId, h) ? byId[h] : (h === G.id ? G : null);
+    var l = Object.prototype.hasOwnProperty.call(byId, h) ? byId[h] : (h === G.id ? G : h === P.id ? P : null);
     $('viewHome').hidden = !!l;
     $('viewLesson').hidden = !l;
     if (l) {
-      if (shown !== l.id) { if (l === G) renderGuide(); else renderLesson(l); shown = l.id; }
+      if (shown !== l.id) { if (l === G) renderGuide(); else if (l === P) renderProject(); else renderLesson(l); shown = l.id; }
       window.scrollTo(0, 0);
-      document.title = (l === G ? l.title : l.code + ' ' + l.title) + ' | 업무 에이전트 실습실';
+      document.title = (l === G || l === P ? l.title : l.code + ' ' + l.title) + ' | 업무 에이전트 실습실';
     } else {
       shown = null;
       updateProgress();
