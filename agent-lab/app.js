@@ -288,40 +288,41 @@
       n++; var no = (n < 10 ? '0' : '') + n;
       parts.push(sec(no, id, title, body)); toc.push([id, tocLabel || title]);
     };
-    add('goal', '만들 것', '<div class="result-card"><strong>' + esc(G.out) + '</strong><p>강사 스튜디오와 같은 화면을 내 계정에 만듭니다. 기관명과 문서 규칙도 넣을 수 있습니다.</p></div>' +
-      '<div class="safety-box sp"><strong>실행하려면 내 계정의 스튜디오가 필요합니다</strong><p>링크로 공유받은 스튜디오는 화면만 보이고 "에이전트 실행"은 만든 사람 계정에서만 됩니다. 이 화면의 순서대로 내 스튜디오를 만들면 그 링크에서 바로 실행할 수 있습니다.</p></div>', '만들 것');
-    add('prepare', '준비 파일 받기', '<p>두 파일을 내 컴퓨터에 받습니다. <b>CLAUDE.md</b>와 <b>index.html</b>은 반드시 둘 다 있어야 합니다.</p>' + fileList(G.files, '파일 받기'), '준비 파일');
-    add('info', '(선택) 내 업무 정보 채우기',
-      '<p>CLAUDE.md를 메모장으로 열어 <b>0. 내 업무 정보</b>의 빈칸을 채우고 저장합니다. 비워 둬도 됩니다. 값에 작은따옴표(\')는 쓰지 않습니다.</p>' +
-      '<div class="g-table sp"><table><thead><tr><th>항목</th><th>어디에 쓰이나</th><th>예</th></tr></thead><tbody>' +
-      G.infoRows.map(function (r) { return '<tr><td>' + esc(r[0]) + '</td><td>' + esc(r[1]) + '</td><td>' + esc(r[2]) + '</td></tr>'; }).join('') + '</tbody></table></div>' +
-      '<div class="prompt-box"><span class="box-label">CLAUDE.md의 0번 칸</span>' + copyBtn(G.infoTemplate, '빈칸 복사') + '<pre>' + esc(G.infoTemplate) + '</pre></div>', '내 업무 정보');
-    add('where', 'Claude Code와 채팅, 어디서 만들까',
-      '<p>두 곳 모두 같은 사이트가 만들어집니다. <b>가능하면 Claude Code로 합니다.</b> 파일을 그대로 올리기 때문에 만드는 도중에 틀어질 일이 적습니다.</p>' +
+    var code = safeUrl(C.codeUrl);
+    add('goal', '만들 것', '<div class="result-card"><strong>' + esc(G.out) + '</strong><p>강사 스튜디오와 같은 화면을 내 계정에 만듭니다. 한 번 만들면 그 링크로 계속 씁니다.</p></div>' +
+      '<div class="safety-box sp"><strong>실행하려면 내 계정의 스튜디오가 필요합니다</strong><p>링크로 공유받은 스튜디오는 화면만 보이고 "에이전트 실행"은 만든 사람 계정에서만 됩니다. 아래 순서대로 내 스튜디오를 만들면 그 링크에서 바로 실행할 수 있습니다.</p></div>', '만들 것');
+    add('prepare', '파일 받기', '<p><b>index.html</b> 하나만 받으면 됩니다. 나머지 두 파일은 채팅으로 만들 때만 씁니다.</p>' + fileList(G.files, '파일 받기'), '파일 받기');
+    add('code', 'Claude Code에서 만들기', olist(G.codeSteps) +
+      '<div class="attach-box"><div class="attach-h">보내기 전 확인 · 첨부할 파일</div>' +
+      '<div class="att-row att-must"><span class="att-tag">꼭 첨부</span><div class="att-b"><strong>index.html</strong><p>완성된 사이트 파일입니다. 내용을 복사해 붙여넣지 말고 파일로 첨부합니다.</p></div></div>' +
+      '<ul class="attach-ask"><li><b>index.html을 첨부했습니까?</b> 입력 칸에 파일 이름 <b>index.html</b>이 보여야 합니다.</li></ul></div>' +
+      '<div class="go-studio"><p><b>문장을 복사한 뒤</b> Claude Code를 열어 index.html을 첨부하고 붙여넣습니다.</p><a class="g-btn" href="' + esc(code) + '" target="_blank" rel="noopener noreferrer">Claude Code 열기</a></div>' +
+      '<div class="prompt-box"><span class="box-label">Claude Code에 보낼 문장</span>' + copyBtn(G.codePrompt, '문장 복사') + '<pre>' + esc(G.codePrompt) + '</pre></div>', 'Claude Code로 만들기');
+    add('use', '만든 사이트 써 보기', olist(G.useSteps) + '<h3>확인</h3>' + checklistHtml(G.id, G.checks), '써 보기');
+    add('asks', '막혔을 때 Claude Code에 보낼 문장',
+      '<p>만들던 그 화면에서 아래 문장을 복사해 보냅니다.</p><div class="val-list">' + G.codeAsks.map(function (a) {
+        return '<div class="val-row"><div class="val-label">' + esc(a[0]) + '</div><div class="val-body"><pre>' + esc(a[1]) + '</pre></div>' + copyBtn(a[1], '복사', 'g-btn ghost') + '</div>';
+      }).join('') + '</div>' +
+      '<ul class="plain">' + G.keep.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>', '막혔을 때');
+    add('where', 'Claude Code와 채팅의 차이',
+      '<p>두 곳 모두 같은 사이트가 만들어집니다. <b>Claude Code로 합니다.</b> 올린 파일을 그대로 게시하기 때문에 만드는 도중에 틀어질 일이 적습니다. 채팅 방식은 Claude Code가 안 될 때만 씁니다.</p>' +
       '<div class="g-table sp"><table><thead><tr><th>비교</th><th>Claude Code (권장)</th><th>Claude 채팅</th></tr></thead><tbody>' +
       G.compare.map(function (r) { return '<tr><td>' + esc(r[0]) + '</td><td>' + esc(r[1]) + '</td><td>' + esc(r[2]) + '</td></tr>'; }).join('') + '</tbody></table></div>' +
-      '<div class="local-note">' + esc(G.compareSource) + '</div>', '어디서 만들까');
-    add('code', '방법 1 · Claude Code로 만들기 (권장)', olist(G.codeSteps) +
-      '<div class="attach-box"><div class="attach-h">보내기 전 확인 · 폴더에 넣을 파일</div>' +
-      '<div class="att-row att-must"><span class="att-tag">꼭 넣기</span><div class="att-b"><strong>CLAUDE.md</strong><p>Claude가 따라 할 작업 순서입니다.</p></div></div>' +
-      '<div class="att-row att-must"><span class="att-tag">꼭 넣기</span><div class="att-b"><strong>index.html</strong><p>완성된 사이트 파일입니다. 내용을 복사해 붙여넣지 말고 파일 그대로 둡니다.</p></div></div>' +
-      '<ul class="attach-ask"><li><b>폴더에 두 파일이 모두 있습니까?</b> <b>CLAUDE.md</b>, <b>index.html</b></li></ul></div>' +
-      '<div class="prompt-box"><span class="box-label">Claude Code에 보낼 문장</span>' + copyBtn(G.codePrompt, '문장 복사') + '<pre>' + esc(G.codePrompt) + '</pre></div>' +
-      '<h3>만든 뒤 Claude Code에 보낼 문장</h3><div class="val-list">' + G.codeAsks.map(function (a) {
-        return '<div class="val-row"><div class="val-label">' + esc(a[0]) + '</div><div class="val-body"><pre>' + esc(a[1]) + '</pre></div>' + copyBtn(a[1], '복사', 'g-btn ghost') + '</div>';
-      }).join('') + '</div>', 'Claude Code로');
-    add('make', '방법 2 · Claude 채팅으로 만들기', '<p>Claude Code를 쓸 수 없을 때 합니다.</p>' + olist(G.makeSteps) +
+      '<div class="local-note">' + esc(G.compareSource) + '</div>' +
+      '<details class="fold"><summary>Claude Code가 안 될 때 · 채팅으로 만들기</summary><div class="fold-b">' + olist(G.makeSteps) +
       '<div class="attach-box"><div class="attach-h">보내기 전 확인 · 첨부할 파일</div>' +
       '<div class="att-row att-must"><span class="att-tag">꼭 첨부</span><div class="att-b"><strong>CLAUDE.md</strong><p>Claude가 따라 할 작업 순서입니다.</p></div></div>' +
-      '<div class="att-row att-must"><span class="att-tag">꼭 첨부</span><div class="att-b"><strong>index.html</strong><p>완성된 사이트 파일입니다. 내용을 복사해 붙여넣지 말고 파일 그대로 둡니다.</p></div></div>' +
+      '<div class="att-row att-must"><span class="att-tag">꼭 첨부</span><div class="att-b"><strong>index.html</strong><p>완성된 사이트 파일입니다. 파일로 첨부합니다.</p></div></div>' +
       '<ul class="attach-ask"><li><b>두 파일을 함께 넣었습니까?</b> <b>CLAUDE.md</b>, <b>index.html</b></li></ul></div>' +
       '<div class="go-studio"><p><b>문장을 복사한 뒤</b> Claude 새 채팅을 열어 두 파일을 첨부하고 붙여넣습니다.</p><a class="g-btn" href="' + esc(chat) + '" target="_blank" rel="noopener noreferrer">Claude 새 채팅 열기</a></div>' +
-      '<div class="prompt-box"><span class="box-label">Claude 채팅에 보낼 문장</span>' + copyBtn(G.makePrompt, '문장 복사') + '<pre>' + esc(G.makePrompt) + '</pre></div>', '채팅으로');
-    add('use', '만든 사이트 써 보기', olist(G.useSteps) + '<h3>확인</h3>' + checklistHtml(G.id, G.checks), '써 보기');
-    add('asks', '채팅으로 만든 뒤 보낼 문장',
-      '<p>채팅으로 만들었다면, 사이트를 만든 그 채팅에서 아래 문장을 복사해 보냅니다.</p><div class="val-list">' + G.asks.map(function (a) {
+      '<div class="prompt-box"><span class="box-label">Claude 채팅에 보낼 문장</span>' + copyBtn(G.makePrompt, '문장 복사') + '<pre>' + esc(G.makePrompt) + '</pre></div>' +
+      '<h3>채팅으로 만든 뒤 보낼 문장</h3><div class="val-list">' + G.asks.map(function (a) {
         return '<div class="val-row"><div class="val-label">' + esc(a[0]) + '</div><div class="val-body"><pre>' + esc(a[1]) + '</pre></div>' + copyBtn(a[1], '복사', 'g-btn ghost') + '</div>';
-      }).join('') + '</div><ul class="plain">' + G.keep.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>', '보낼 문장');
+      }).join('') + '</div>' +
+      '<h3>(선택) 내 업무 정보 넣기</h3><p>채팅 방식에서는 CLAUDE.md를 메모장으로 열어 <b>0. 내 업무 정보</b>의 빈칸을 채우고 저장한 뒤 첨부하면 화면 이름과 기관명이 들어갑니다. 비워 둬도 됩니다.</p>' +
+      '<div class="g-table sp"><table><thead><tr><th>항목</th><th>어디에 쓰이나</th><th>예</th></tr></thead><tbody>' +
+      G.infoRows.map(function (r) { return '<tr><td>' + esc(r[0]) + '</td><td>' + esc(r[1]) + '</td><td>' + esc(r[2]) + '</td></tr>'; }).join('') + '</tbody></table></div></div></details>' +
+      '<details class="fold"><summary>데스크톱 앱이나 터미널의 Claude Code로 만들기</summary><div class="fold-b">' + olist(G.folderSteps) + '</div></details>', 'Code와 채팅의 차이');
     add('errors', '오류가 나는 대표 사유', '<p>화면에 나온 문구로 찾습니다. 붉은 상자가 나오면 그 안의 안내를 먼저 따릅니다.</p>' + errorsHtml(), '오류 사유');
     $('lessonBody').innerHTML = parts.join('') + '<nav class="lesson-navigation" aria-label="이전 · 다음">' +
       '<a class="lesson-prev" href="#s8"><span>← 이전</span><strong>실습 8 · ' + esc(byId.s8.title) + '</strong></a>' +
