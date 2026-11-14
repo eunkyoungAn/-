@@ -2,7 +2,7 @@
 
 「업무 에이전트 설계와 실습」 수강생용 안내 사이트. 실습 순서, 스튜디오에 넣을 값, 자료 파일, 복사해서 쓰는 지시문, 결과 검수표를 한 곳에 모았다.
 
-- 주소: `https://eunkyoungan.github.io/-/agent-lab/` (main 브랜치에 합쳐진 뒤 열림)
+- 주소: `https://eunkyoungan.github.io/-/agent-lab/` (실제 배포는 `gh-pages` 브랜치. main에 합친 뒤 `agent-lab/` 폴더를 `tools/`만 빼고 `gh-pages`에 그대로 올려야 반영된다)
 - 빌드·설치 없이 GitHub Pages에서 바로 동작한다.
 - 에이전트 실행은 이 사이트가 아니라 업무 에이전트 스튜디오(claude.ai 아티팩트) 또는 Claude 채팅에서 한다. 이 사이트는 거기에 넣을 것을 복사·내려받게 해 준다.
 
