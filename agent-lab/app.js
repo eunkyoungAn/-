@@ -90,7 +90,7 @@
     return '<a class="g-btn ghost" href="' + esc(fileUrl(f.path)) + '" download="' + esc(f.name) + '">' + esc(label || '받기') + '</a>';
   };
 
-  var G = D.guide, P = D.project;
+  var G = D.guide, P = D.project, B = D.basics;
   var fileList = function (files, label) {
     return '<div class="file-list">' + files.map(function (f) {
       return '<div class="file-row"><div><strong>' + esc(f.name) + '</strong><span>' + esc(f.label) + ' · <em>' + esc(f.role) + '</em></span></div>' + dlLink(f, label) + '</div>';
@@ -134,7 +134,7 @@
       return '<section class="level-section"><div class="level-head"><div><span class="level-kicker">' + esc(kicker) + '</span><h2>' + esc(title) +
         '</h2></div><p>' + esc(desc) + '</p></div><div class="lesson-grid">' + cards + '</div></section>';
     };
-    $('homeLevels').innerHTML = level(G.kicker, G.partTitle, G.partDesc, card(G, '만드는 방법 보기') +
+    $('homeLevels').innerHTML = level(B.kicker, B.partTitle, B.partDesc, card(B, '기본 개념 보기')) + level(G.kicker, G.partTitle, G.partDesc, card(G, '만드는 방법 보기') +
       '<a class="lesson-card" href="#help"><span class="lesson-code">모음 · 6가지 상황</span><h3>오류가 나는 대표 사유</h3>' +
       '<p>실행이 안 될 때, 파일이 안 들어갈 때, 파일로 못 받을 때의 원인과 할 일을 한 번에 모았습니다.</p>' +
       '<div class="lesson-output"><span>바로 찾기</span> · 화면에 나온 문구로 찾습니다</div><div class="lesson-arrow">사유 한 번에 보기 →</div></a>') +
@@ -157,6 +157,19 @@
     $('skillGrid').innerHTML = D.skills.map(skillItem).join('');
     $('reportSkillGrid').innerHTML = D.reportSkills.map(skillItem).join('');
 
+    /* 오른쪽 위 바로가기: 모든 파트와 실습 */
+    var mLink = function (href, code, title) {
+      return '<a href="#' + href + '"><span>' + esc(code) + '</span>' + esc(title) + '</a>';
+    };
+    var mGroup = function (title, links) { return '<div class="menu-group"><strong>' + esc(title) + '</strong>' + links + '</div>'; };
+    $('quickPanel').innerHTML =
+      mGroup('시작 전', mLink(B.id, '기초', B.title) + mLink(G.id, '준비', G.title)) +
+      D.parts.map(function (p) {
+        return mGroup(p.kicker + ' · ' + p.title, p.lessons.map(function (id) { return mLink(id, byId[id].code, byId[id].title); }).join(''));
+      }).join('') +
+      mGroup('교육 뒤', mLink(P.id, '프로젝트', P.title) + mLink('skills', '스킬', '내 Claude에 스킬 등록하기')) +
+      mGroup('모음', mLink('home', '처음', '전체 실습 보기') + mLink('downloads', '자료', '자료 파일 한 곳에서 받기') + mLink('rules', '규칙', '공통 규칙 여덟 가지') +
+        mLink('files', '파일', '결과를 파일로 받기') + mLink('help', '오류', '오류가 나는 대표 사유'));
     $('heroDemo').innerHTML = D.lessons[0].values.filter(function (v) { return v.kind === 'text'; }).slice(0, 3).map(function (v, i) {
       return '<div class="val-row"><div class="val-label">' + esc(v.label) + '</div><div class="val-body"><pre id="heroVal' + i + '">' + esc(v.value) + '</pre></div>' +
         '<button type="button" class="g-btn ghost" data-copy="heroVal' + i + '">복사</button></div>';
@@ -174,7 +187,7 @@
     $('pgBar').style.width = Math.round(n / t * 100) + '%';
     document.querySelectorAll('.lesson-card').forEach(function (el) {
       var id = el.getAttribute('data-lesson');
-      el.classList.toggle('is-done', isDone(id === G.id ? G : id === P.id ? P : byId[id]));
+      el.classList.toggle('is-done', isDone(id === G.id ? G : id === P.id ? P : id === B.id ? B : byId[id]));
     });
   };
 
@@ -400,6 +413,75 @@
     bindChecks(P.id);
   };
 
+  /* ---------- Claude 기본 이해하기 화면 ---------- */
+  var renderBasics = function () {
+    store = {}; keySeq = 0;
+    $('bcPart').textContent = B.partTitle;
+    $('bcCode').textContent = '기본 개념';
+    $('lhEyebrow').textContent = B.code + ' · ' + B.time;
+    $('lhTitle').textContent = B.title;
+    $('lhSum').textContent = B.sum;
+    $('lhMeta').innerHTML = '<span class="meta-chip active">실습 전에 읽기</span><span class="meta-chip">프로젝트와 스킬</span><span class="meta-chip">Quality = 인간의 몫</span>';
+    var parts = [], toc = [], n = 0;
+    var add = function (id, title, body, tocLabel) {
+      n++; var no = (n < 10 ? '0' : '') + n;
+      parts.push(sec(no, id, title, body)); toc.push([id, tocLabel || title]);
+    };
+    var fig = function (file, alt, cap) {
+      return '<figure class="fig"><img src="img/basics/' + file + '" alt="' + esc(alt) + '"><figcaption>' + esc(cap) + '</figcaption></figure>';
+    };
+    var tbl = function (head, rows) {
+      return '<div class="g-table sp"><table><thead><tr>' + head.map(function (h) { return '<th>' + esc(h) + '</th>'; }).join('') + '</tr></thead><tbody>' +
+        rows.map(function (r) { return '<tr>' + r.map(function (c) { return '<td>' + esc(c) + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table></div>';
+    };
+    var cards = function (rows, cols) {
+      return '<div class="step-grid cols-' + cols + '">' + rows.map(function (r) {
+        return '<div class="start-item"><strong>' + esc(r[0]) + '</strong><p>' + esc(r[1]) + '</p></div>';
+      }).join('') + '</div>';
+    };
+
+    add('ai', 'AI는 무엇일까요',
+      '<p>AI라는 큰 범위 안에 머신러닝, 딥러닝, LLM이 차례로 들어 있고, ChatGPT나 Claude 같은 생성형 AI는 그 가장 안쪽에 있습니다.</p>' +
+      fig('ai-layers.jpg', 'AI, Machine Learning, Deep Learning, LLM, 생성형 AI의 포함 관계를 겹친 원으로 나타낸 그림', '출처: 생성형 AI가 생성한 이미지') +
+      tbl(['범위', '뜻'], B.layers), 'AI란');
+    add('llm', 'LLM이 무엇일까',
+      '<p>질문을 받으면 관련 정보를 찾아 맥락과 함께 모델에 넘기고, 모델이 답변을 만듭니다.</p>' +
+      '<ol class="flow-list">' + B.llmFlow.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ol>' +
+      '<div class="local-note">' + esc(B.llmSource) + '</div>', 'LLM이란');
+    add('terms', '핵심 용어', tbl(['용어', '뜻'], B.terms), '핵심 용어');
+    add('orchestra', '우리는 오케스트레이터로서 사용해야 합니다',
+      fig('orchestrator.jpg', '가운데 오케스트레이터인 사람이 Claude, ChatGPT, GitHub Copilot, Gamma, Perplexity, Midjourney에 일을 나누는 그림', '출처: 생성형 AI 이미지') +
+      '<div class="safety-box sp"><strong>사람이 가운데에 있습니다</strong><p>' + esc(B.orchestra) + '</p></div>', '오케스트레이터');
+    add('token', '토큰이란', '<p><b>내가 작성한 글자는 몇 개의 토큰이 소비될까?</b></p><p>' + esc(B.token) + '</p>', '토큰');
+    add('ps', 'Claude Project & Skills',
+      fig('projects-skills.jpg', 'Projects는 작업용 방, Skills는 작업 매뉴얼이며 둘을 함께 사용한다는 그림', '출처: 생성형 AI 이미지') +
+      cards(B.ps, 3) +
+      '<div class="go-studio"><p><b>프로젝트로 이어 쓰는 방법</b>은 따로 정리해 두었습니다.</p><a class="g-btn ghost" href="#project">프로젝트로 진행하기</a></div>', '프로젝트와 스킬');
+    add('skill', '우리도 바로 활용할 수 있는 Skill 기능',
+      '<p>' + esc(B.skillGa) + '</p>' +
+      fig('skill-equation.jpg', 'Claude AI에 특정 양식과 규칙을 더하면 전용 비서인 Claude Skill이 된다는 그림과 일반 대화, 스킬 활용 비교', '출처: claude.ai, 생성형 AI 이미지') +
+      tbl(['방식', '차이'], B.skillVs), 'Skill 기능');
+    add('make', 'Claude Skills로 보고서 작성하기', olist(B.skillSteps) +
+      '<h3>스킬을 만드는 세 가지 방법</h3>' + tbl(['방법', '언제 쓰나'], B.skillWays) +
+      '<div class="go-studio"><p><b>이 실습실의 스킬 파일</b>(실습 에이전트 7종, 보고서 3종)을 받아 바로 올릴 수 있습니다.</p><a class="g-btn" href="#skills">스킬 등록으로 가기</a></div>', '스킬로 보고서');
+    add('desc', 'Claude Skills description',
+      '<p>' + esc(B.desc) + '</p>' +
+      '<div class="prompt-box"><span class="box-label">설명 예시</span>' + copyBtn(B.descExample, '복사') + '<pre>' + esc(B.descExample) + '</pre></div>', 'description');
+    add('quality', 'Quality = 인간의 몫',
+      '<p>AI가 만든 결과가 쓸 만한지는 아래 여섯 가지로 사람이 봅니다.</p>' +
+      '<div class="step-grid cols-3">' + B.quality.map(function (q) { return '<div class="start-item"><b>' + esc(q[0]) + '</b><strong>' + esc(q[1]) + '</strong></div>'; }).join('') + '</div>' +
+      fig('quality.jpg', 'AI는 90퍼센트를, 나머지 10퍼센트는 우리가 완성한다는 그림. 제목 줄 바꿈, 페이지 수 조정, 촘촘한 텍스트를 사람이 손본다', '출처: 생성형 AI 이미지') +
+      '<h3>사람이 직접 손보는 것</h3><ul class="plain">' + B.qualityHuman.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>', 'Quality');
+    add('custom', '스킬은 만들어도 되고 가져다 써도 됩니다',
+      '<div class="result-card"><strong>' + esc(B.custom) + '</strong><p>' + esc(B.customNote) + '</p></div>', '맞춤형 스킬');
+    add('review', '확인', '<p>아래 항목을 스스로 확인한 뒤 실습으로 넘어갑니다.</p>' + checklistHtml(B.id, B.checks), '확인');
+    $('lessonBody').innerHTML = parts.join('') + '<nav class="lesson-navigation" aria-label="이전 · 다음">' +
+      '<a class="lesson-prev" href="#home"><span>← 이전</span><strong>전체 실습으로</strong></a>' +
+      '<a class="lesson-next" href="#' + G.id + '"><span>다음 →</span><strong>' + esc(G.title) + '</strong></a></nav>';
+    $('toc').innerHTML = '<strong>목차</strong>' + toc.map(function (t) { return '<a href="#' + t[0] + '" data-jump="' + t[0] + '">' + esc(t[1]) + '</a>'; }).join('');
+    bindChecks(B.id);
+  };
+
   /* 실습 화면 안의 목차는 주소(#)를 바꾸지 않고 그 자리로만 옮긴다 */
   document.addEventListener('click', function (e) {
     var a = e.target.closest('[data-jump]');
@@ -409,17 +491,25 @@
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 
+  /* 바로가기 메뉴: 항목을 누르거나 바깥을 누르면 닫는다 */
+  document.addEventListener('click', function (e) {
+    var m = $('quickMenu');
+    if (!m || !m.open) return;
+    if (e.target.closest('#quickPanel a') || !e.target.closest('#quickMenu')) m.open = false;
+  });
+  document.addEventListener('keydown', function (e) { var m = $('quickMenu'); if (e.key === 'Escape' && m && m.open) m.open = false; });
+
   /* ---------- 화면 전환 ---------- */
   var shown = null;
   var route = function () {
     var h = (location.hash || '').slice(1);
-    var l = Object.prototype.hasOwnProperty.call(byId, h) ? byId[h] : (h === G.id ? G : h === P.id ? P : null);
+    var l = Object.prototype.hasOwnProperty.call(byId, h) ? byId[h] : (h === G.id ? G : h === P.id ? P : h === B.id ? B : null);
     $('viewHome').hidden = !!l;
     $('viewLesson').hidden = !l;
     if (l) {
-      if (shown !== l.id) { if (l === G) renderGuide(); else if (l === P) renderProject(); else renderLesson(l); shown = l.id; }
+      if (shown !== l.id) { if (l === G) renderGuide(); else if (l === P) renderProject(); else if (l === B) renderBasics(); else renderLesson(l); shown = l.id; }
       window.scrollTo(0, 0);
-      document.title = (l === G || l === P ? l.title : l.code + ' ' + l.title) + ' | 업무 에이전트 실습실';
+      document.title = (l === G || l === P || l === B ? l.title : l.code + ' ' + l.title) + ' | 업무 에이전트 실습실';
     } else {
       shown = null;
       updateProgress();
