@@ -121,7 +121,7 @@
   /* ---------- 시작 화면 ---------- */
   var renderHome = function () {
     $('studioLink').href = safeUrl(C.studioUrl);
-    $('warmupLink').href = safeUrl(C.warmupUrl);
+
     $('zipLink').href = fileUrl(D.zip);
     $('zipLink').setAttribute('download', D.zip);
 
@@ -170,10 +170,6 @@
       mGroup('교육 뒤', mLink(P.id, '프로젝트', P.title) + mLink('skills', '스킬', '내 Claude에 스킬 등록하기')) +
       mGroup('모음', mLink('home', '처음', '전체 실습 보기') + mLink('downloads', '자료', '자료 파일 한 곳에서 받기') + mLink('rules', '규칙', '공통 규칙 여덟 가지') +
         mLink('files', '파일', '결과를 파일로 받기') + mLink('help', '오류', '오류가 나는 대표 사유'));
-    $('heroDemo').innerHTML = D.lessons[0].values.filter(function (v) { return v.kind === 'text'; }).slice(0, 3).map(function (v, i) {
-      return '<div class="val-row"><div class="val-label">' + esc(v.label) + '</div><div class="val-body"><pre id="heroVal' + i + '">' + esc(v.value) + '</pre></div>' +
-        '<button type="button" class="g-btn ghost" data-copy="heroVal' + i + '">복사</button></div>';
-    }).join('');
     $('ruleGrid').innerHTML = D.rules.map(function (r) {
       return '<div class="rule-card"><b>' + esc(r[0]) + '</b><strong>' + esc(r[1]) + '</strong><p>' + esc(r[2]) + '</p></div>';
     }).join('');
