@@ -145,12 +145,11 @@
 
     $('downloadGroups').innerHTML = D.lessons.map(function (l) {
       return '<h3 class="dl-h">' + esc(l.code + ' · ' + l.agent) + '</h3>' + fileList(l.files, '받기');
-    }).join('') + '<h3 class="dl-h">선택 · 내 스튜디오 만들기</h3>' + fileList(G.files, '받기') +
-      '<h3 class="dl-h">교육 뒤 · 내 Claude에 등록하는 스킬 (선택)</h3><p class="lead dl-lead">claude.ai → 설정 → 기능 → 스킬에서 압축을 풀지 않고 그대로 올립니다. 스튜디오로 실습할 때는 필요 없습니다.</p><div class="dl-grid">' +
-      D.skills.map(function (s) {
-        return '<div class="dl-item"><div><strong>' + esc(s.name) + '.zip</strong><span>' + esc(s.lesson + ' · ' + s.agent) + '</span></div>' +
-          dlLink({ path: s.path, name: s.name + '.zip' }) + '</div>';
-      }).join('') + '</div>';
+    }).join('') + '<h3 class="dl-h">선택 · 내 스튜디오 만들기</h3>' + fileList(G.files, '받기');
+    $('skillGrid').innerHTML = D.skills.map(function (s) {
+      return '<div class="dl-item"><div><strong>' + esc(s.name) + '.zip</strong><span>' + esc(s.lesson + ' · ' + s.agent) + '</span></div>' +
+        dlLink({ path: s.path, name: s.name + '.zip' }) + '</div>';
+    }).join('');
 
     $('ruleGrid').innerHTML = D.rules.map(function (r) {
       return '<div class="rule-card"><b>' + esc(r[0]) + '</b><strong>' + esc(r[1]) + '</strong><p>' + esc(r[2]) + '</p></div>';
