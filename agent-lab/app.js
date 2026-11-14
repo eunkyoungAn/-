@@ -150,11 +150,17 @@
     $('downloadGroups').innerHTML = D.lessons.map(function (l) {
       return '<h3 class="dl-h">' + esc(l.code + ' · ' + l.agent) + '</h3>' + fileList(l.files, '받기');
     }).join('') + '<h3 class="dl-h">선택 · 내 스튜디오 만들기</h3>' + fileList(G.files, '받기');
-    $('skillGrid').innerHTML = D.skills.map(function (s) {
+    var skillItem = function (s) {
       return '<div class="dl-item"><div><strong>' + esc(s.name) + '.zip</strong><span>' + esc(s.lesson + ' · ' + s.agent) + '</span></div>' +
         dlLink({ path: s.path, name: s.name + '.zip' }) + '</div>';
-    }).join('');
+    };
+    $('skillGrid').innerHTML = D.skills.map(skillItem).join('');
+    $('reportSkillGrid').innerHTML = D.reportSkills.map(skillItem).join('');
 
+    $('heroDemo').innerHTML = D.lessons[0].values.filter(function (v) { return v.kind === 'text'; }).slice(0, 3).map(function (v, i) {
+      return '<div class="val-row"><div class="val-label">' + esc(v.label) + '</div><div class="val-body"><pre id="heroVal' + i + '">' + esc(v.value) + '</pre></div>' +
+        '<button type="button" class="g-btn ghost" data-copy="heroVal' + i + '">복사</button></div>';
+    }).join('');
     $('ruleGrid').innerHTML = D.rules.map(function (r) {
       return '<div class="rule-card"><b>' + esc(r[0]) + '</b><strong>' + esc(r[1]) + '</strong><p>' + esc(r[2]) + '</p></div>';
     }).join('');
@@ -380,7 +386,7 @@
       '<div class="val-list">' + P.calls.map(function (c) { return copyRow(c[1] + ' → ' + c[2], c[0]); }).join('') + '</div>' +
       '<div class="local-note">' + esc(P.callsNote) + '</div>' +
       '<div class="attach-box"><div class="attach-h">넘기기 전 확인</div><ul class="attach-ask first"><li><b>분모를 확인했습니까?</b> ' + esc(P.warn) + '</li></ul></div>' +
-      '<div class="go-studio"><p><b>보고서 스킬이 아직 없다면</b> 실습실의 스킬을 먼저 등록합니다.</p><a class="g-btn" href="#skills">스킬 등록으로 가기</a></div>', '보고서 스킬 부르기');
+      '<div class="go-studio"><p><b>보고서 스킬이 아직 없다면</b> 스킬 등록에서 보고서 스킬 3종을 받아 먼저 등록합니다.</p><a class="g-btn" href="#skills">스킬 등록으로 가기</a></div>', '보고서 스킬 부르기');
     add('skill', '보고서 규칙을 스킬로 만들기',
       '<p>보고서 프로젝트에만 있는 규칙(문체, 독자, 기관 양식)을 스킬로 바꿔 두면 어느 프로젝트에서나 같은 방식으로 부를 수 있습니다.</p>' + stepGrid(P.skillSteps) +
       '<div class="val-list">' + copyRow('재료를 올리고 보낼 말', P.skillAsk) + copyRow('스킬 설명 예시 (언제 부를지를 정하는 한 줄)', P.skillDesc) + '</div>' +
