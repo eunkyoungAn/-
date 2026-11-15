@@ -398,9 +398,15 @@
       '<div class="go-studio"><p><b>지침을 복사한 뒤</b> claude.ai를 열어 프로젝트를 만듭니다.</p><a class="g-btn" href="' + esc(chat) + '" target="_blank" rel="noopener noreferrer">claude.ai 열기</a></div>', '프로젝트 만들기');
     add('run', '실습 2 · 데이터 분석하기', olist(L.runSteps) + attachHtml({ attach: L.attach }) +
       '<div class="val-list">' + copyRow('보낼 말 1', L.say1) + '</div>', '분석하기');
-    add('funnel', '실습 3 · 분모 확정하기',
-      '<p>Claude가 낸 분모 깔때기 표를 보고 사람이 분모를 정합니다. 이 실습에서 사람이 판단하는 자리입니다.</p>' + ul(L.funnelLook) +
-      '<div class="val-list">' + copyRow('보낼 말 2', L.say2) + '</div>', '분모 확정');
+    add('funnel', '실습 3 · 기준 인원 확정하기',
+      '<p>Claude가 낸 <b>기준 인원 확인표</b>를 보고, 비율을 몇 명 기준으로 계산할지 사람이 정합니다. 이 실습에서 사람이 판단하는 자리입니다.</p>' +
+      '<div class="safety-box sp"><strong>기준 인원이란</strong><p>' + esc(L.funnelWhy) + '</p></div>' +
+      '<div class="funnel">' + L.funnelFlow.map(function (f, i) {
+        return (i ? '<span class="funnel-arrow" aria-hidden="true">→</span>' : '') +
+          '<div class="funnel-step' + (i === L.funnelFlow.length - 1 ? ' is-result' : '') + '"><b>' + esc(f[0]) + '</b><strong>' + esc(f[1]) + '</strong><p>' + esc(f[2]) + '</p></div>';
+      }).join('') + '</div>' +
+      '<h3>표에서 볼 것</h3>' + ul(L.funnelLook) +
+      '<div class="val-list">' + copyRow('보낼 말 2', L.say2) + '</div>', '기준 인원 확정');
     add('report', '실습 4 · 한 장 보고서 받기', olist(L.reportSteps) +
       '<div class="val-list">' + copyRow('보낼 말 3', L.say3) + '</div>' +
       '<h3>맞춰 볼 값</h3>' + tbl(['항목', '값', '기준'], L.answers) + '<div class="local-note">' + esc(L.answersNote) + '</div>', '보고서 받기');
