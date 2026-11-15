@@ -530,3 +530,26 @@ body{letter-spacing:-.005em}
 .way-card .way-who b{color:var(--ink);margin-right:6px}
 .way-card .prompt-box,.way-card .go-studio{max-width:none}
 @media (max-width:640px){.way-card > p{text-align:left}}
+
+/* 많이 설치된 스킬 */
+.pop-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:16px;max-width:860px}
+.pop-card{padding:18px 20px;border:1px solid var(--rule);border-radius:14px;background:var(--surface)}
+.pop-head{display:flex;gap:12px;align-items:center}
+.pop-rank{display:grid;place-items:center;width:30px;height:30px;flex:0 0 30px;border-radius:8px;background:var(--surface-2);font-weight:700;font-size:14px;color:var(--ink)}
+.pop-head strong{display:block;font-size:17px;font-weight:700;letter-spacing:-.02em}
+.pop-head em{font-style:normal;font-size:12.5px;color:var(--ink-mute);font-weight:600}
+.pop-what{margin-top:10px;color:var(--ink-soft);font-size:14.5px;line-height:1.7}
+.pop-card dl{margin:10px 0 0;display:grid;gap:4px}
+.pop-card dt{font-size:12px;font-weight:700;letter-spacing:.04em;color:var(--accent);margin-top:6px}
+.pop-card dd{margin:0;color:var(--ink-soft);font-size:14px;line-height:1.65}
+.pop-card dd.pop-cmd{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;color:var(--ink-mute);overflow-wrap:anywhere}
+@media (max-width:760px){.pop-list{grid-template-columns:minmax(0,1fr)}}
+/* 스스로 해 보기 점수 */
+.score-box{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-top:14px;padding:16px 20px;border:1.5px solid var(--rule);border-radius:14px;background:var(--surface);max-width:860px}
+.score-box.is-pass{border-color:var(--leaf);background:rgba(22,128,60,.05)}
+.score-num b{font-size:40px;font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.score-num span{margin-left:6px;color:var(--ink-mute);font-weight:600}
+.score-band{flex:1 1 240px;color:var(--ink-soft);font-size:14.5px;line-height:1.6}
+.score-item{grid-template-columns:22px 1fr auto}
+.score-item em{font-style:normal;font-weight:700;color:var(--ink-mute);font-size:13.5px;white-space:nowrap}
+.score-item:has(input:checked) em{color:var(--leaf);text-decoration:none}
