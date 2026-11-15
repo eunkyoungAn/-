@@ -95,6 +95,22 @@ function header(step) {
   const showLog = state.log.length && !['ask', 'loading', 'records'].includes(state.screen);
   return `<header class="top no-print"><button class="brand" data-act="home" aria-label="처음으로">커리어캐쳐 <b>면접 리허설</b></button>${showLog ? `<button class="btn ghost sm" data-act="records">리포트 ${state.log.length}</button>` : step ? `<span class="step">${esc(step)}</span>` : ''}</header>`;
 }
+// 휴대폰은 마이크를 한 곳에서만 쓸 수 있다. 영상 녹화가 마이크를 잡으면 음성 인식이 소리를 못 받는다.
+const MOBILE = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const IOS = /iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const SAMSUNG = /SamsungBrowser/i.test(navigator.userAgent);
+// 음성 인식 오류 코드를 참여자가 바로 조치할 수 있는 말로 바꾼다.
+function srHelp(code) {
+  if (code === 'not-allowed' || code === 'service-not-allowed') {
+    return IOS
+      ? '마이크 또는 받아쓰기가 꺼져 있어요. 아이폰 설정 > Safari > 마이크를 "허용"으로, 설정 > 일반 > 키보드 > "받아쓰기 활성화"를 켠 뒤 다시 시도해 주세요.'
+      : '마이크 권한이 꺼져 있어요. 주소창 왼쪽 아이콘 > 권한 > 마이크를 "허용"으로 바꾼 뒤 새로고침해 주세요.';
+  }
+  if (code === 'audio-capture') return '마이크를 사용할 수 없어요. 통화, 녹음 앱, 다른 탭이 마이크를 쓰고 있으면 닫고 다시 시도해 주세요.';
+  if (code === 'network') return '음성 인식 서버에 연결하지 못했어요. 인터넷 연결(와이파이·데이터)을 확인해 주세요.';
+  if (code === 'language-not-supported') return '이 브라우저는 한국어 음성 인식을 지원하지 않아요. Chrome(안드로이드) 또는 Safari(아이폰)에서 열어 주세요.';
+  return `음성 인식이 멈췄어요(${code || '알 수 없음'}).`;
+}
 function inAppBrowser() {
   const ua = navigator.userAgent;
   if (/KAKAOTALK/i.test(ua)) return '카카오톡';
@@ -170,6 +186,7 @@ function homeView() {
       <p>질문을 듣고 말로 답하면, 커리어캐쳐 기준으로 피드백을 드립니다. 같은 질문에 한 번 더 답해 달라진 점을 확인해 보세요. 카메라는 원할 때만 켭니다.</p>
     </section>
     ${inApp ? `<div class="notice warn"><b>${esc(inApp)} 안에서 열려 있어요.</b> 이 화면에서는 마이크가 막힐 수 있습니다. ${inApp === '카카오톡' ? `아래 버튼을 눌러 Chrome이나 Safari에서 열어 주세요.<a class="btn primary sm" href="${KAKAO_EXTERNAL}">다른 브라우저로 열기</a>` : '오른쪽 위 메뉴에서 <b>다른 브라우저로 열기</b>(Chrome, Safari 등)를 눌러 주세요.'}<button class="btn ghost sm" data-act="copy-link">주소 복사</button></div>` : ''}
+    ${SR && SAMSUNG ? '<div class="notice warn"><b>삼성 인터넷으로 열려 있어요.</b> 이 브라우저에서는 말한 내용이 글자로 바뀌지 않을 수 있습니다. Chrome 앱에서 같은 주소를 열어 주세요.<button class="btn ghost sm" data-act="copy-link">주소 복사</button></div>' : ''}
     ${!SR ? `<div class="notice">이 브라우저는 음성 인식을 지원하지 않아 <b>글로 답하기</b>로 진행합니다. 말로 연습하려면 Chrome(안드로이드·PC) 또는 Safari(아이폰)에서 열어 주세요.</div>` : ''}
     <button class="btn ghost wide" data-act="guide">처음이신가요? 이용 방법 보기</button>
     <section class="card form">
@@ -201,7 +218,7 @@ function homeView() {
         <button role="radio" aria-checked="${!settings.video}" class="${!settings.video ? 'on' : ''}" data-act="video-mode" data-v="0">목소리만</button>
         <button role="radio" aria-checked="${settings.video}" class="${settings.video ? 'on' : ''}" data-act="video-mode" data-v="1">영상 녹화</button>
       </div>
-      <p class="muted small">${settings.video ? '실제 화상 면접처럼 내 모습을 보며 답합니다. 시선, 억양, 템포 분석과 영상 저장이 추가됩니다. 휴대폰을 눈높이에 세워 두면 좋아요.' : '카메라 없이 목소리로만 연습합니다. 부담 없이 시작하기 좋아요.'}</p>
+      <p class="muted small">${settings.video ? '실제 화상 면접처럼 내 모습을 보며 답합니다. 시선, 억양, 템포 분석과 영상 저장이 추가됩니다. 휴대폰을 눈높이에 세워 두면 좋아요.' + (MOBILE ? ' 휴대폰에서는 마이크를 글자 인식에 쓰기 때문에 저장되는 영상에는 소리가 담기지 않고, 억양 분석은 빠집니다.' : '') : '카메라 없이 목소리로만 연습합니다. 부담 없이 시작하기 좋아요.'}</p>
     </section>` : ''}
     <details class="card settings gem" ${hasGemini() ? '' : ''}>
       <summary>AI 피드백·꼬리질문 (내 Gemini 키) ${hasGemini() ? '<span class="pill ok">연결됨</span>' : '<span class="pill">선택</span>'}</summary>
@@ -295,7 +312,7 @@ function bindAsk() {
   let gaze = null;
   if (cam) {
     const tip = document.getElementById('camTip');
-    openCamera().then(stream => {
+    openCamera(!MOBILE).then(stream => {
       if (phase === 'done') { stopStream(stream); return; }
       camStream = stream;
       cam.srcObject = stream;
@@ -351,8 +368,17 @@ function bindAsk() {
     msg.innerHTML = '<span class="rec-dot" aria-hidden="true"></span>듣고 있어요. 편하게 말해 주세요.';
     live.hidden = false;
     live.innerHTML = '<span class="muted">말하면 여기에 글자로 나타납니다.</span>';
+    let heard = false;
+    // 8초 동안 한 글자도 인식되지 않으면 이유와 대안을 바로 알려 준다(조용히 실패하지 않게).
+    const watchdog = setTimeout(() => {
+      if (heard || phase !== 'answer' || !rec) return;
+      msg.innerHTML = `<b>아직 목소리가 글자로 바뀌지 않고 있어요.</b> ${SAMSUNG ? '삼성 인터넷에서는 음성 인식이 안 될 수 있어요. Chrome에서 열어 주세요. ' : ''}마이크 권한이 허용돼 있는지, 통화·녹음 앱이 마이크를 쓰고 있지 않은지 확인해 주세요. 계속 말해도 되고, 아래 칸에 글로 써도 됩니다.`;
+      typed.hidden = false;
+    }, 8000);
+    cleanup.push(() => clearTimeout(watchdog));
     rec = createRecognizer(
       (finalText, interim) => {
+        if (!heard && (finalText || interim)) { heard = true; if (!typed.value) typed.hidden = true; msg.innerHTML = '<span class="rec-dot" aria-hidden="true"></span>듣고 있어요. 편하게 말해 주세요.'; }
         live.innerHTML = `${esc(finalText)} <span class="interim">${esc(interim)}</span>`;
         live.scrollTop = live.scrollHeight;
       },
@@ -363,8 +389,8 @@ function bindAsk() {
         rec = null;
         live.hidden = true;
         typed.hidden = false;
-        typed.value = sofar;
-        msg.textContent = denied ? '브라우저 주소창 옆 자물쇠 아이콘에서 마이크를 허용하면 다음부터 말로 답할 수 있습니다.' : '';
+        typed.value = join(sofar, typed.value.trim());
+        msg.textContent = srHelp(err) + ' 지금은 아래 칸에 글로 이어서 써 주세요.';
         if (denied) settings.textMode = true;
       },
     );
