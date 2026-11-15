@@ -555,3 +555,7 @@ body{letter-spacing:-.005em}
 .score-item:has(input:checked) em{color:var(--leaf);text-decoration:none}
 
 .start-item .kind-ex{margin-top:8px;padding-top:8px;border-top:1px solid var(--rule);font-size:13px;color:var(--accent)}
+
+a.start-item.quiz-link{display:block;transition:border-color .2s}
+a.start-item.quiz-link:hover{border-color:var(--ink)}
+.custom-fold{margin-top:14px}
