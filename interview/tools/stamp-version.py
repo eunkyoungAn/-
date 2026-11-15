@@ -32,4 +32,13 @@ n = re.sub(r'(href="style\.css|src="app\.js)(?:\?v=[\w-]*)?"', lambda m: f'{m.gr
 if n != s:
     idx.write_text(n, encoding='utf-8')
     changed.append('index.html')
+# 앱 안의 버전 번호와 version.json(새 버전 확인용)
+app = ROOT / 'app.js'
+a = app.read_text(encoding='utf-8')
+a2 = re.sub(r"const APP_VERSION = '[\w-]*';", f"const APP_VERSION = '{ver}';", a)
+if a2 != a:
+    app.write_text(a2, encoding='utf-8')
+    if 'app.js' not in changed: changed.append('app.js')
+(ROOT / 'version.json').write_text('{"v": "%s"}\n' % ver, encoding='utf-8')
+changed.append('version.json')
 print(f'버전 {ver}:', ', '.join(changed) or '바뀐 파일 없음')
