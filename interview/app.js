@@ -9,6 +9,8 @@ import { BASIS, REFS, NOTICE } from './rubric.js';
 import { buildSetText, fileName } from './save.js';
 import * as gem from './gemini.js';
 import * as files from './files.js';
+import * as claude from './claude.js';
+import { openMic, startAudioRecorder, toWavBase64, canRecordAudio } from './audio.js';
 import { canRecord, openCamera, stopStream, startRecorder, startAudioAnalysis, startGaze, loadGazeModel, scoreNonverbal, saveVideo } from './video.js';
 
 const PREP_SEC = 30;
@@ -37,6 +39,7 @@ const assigned = (params.get('q') || '').split(',').map(findQuestion).filter(Boo
 // 이메일 기능은 없앴다. 예전에 이 기기에 저장된 주소가 있으면 지운다.
 store.set('email', '');
 const KEY_URL = 'https://aistudio.google.com/apikey';
+const CLAUDE_KEY_URL = 'https://platform.claude.com/settings/keys';
 
 // 참여자가 직접 추가한 질문. 이 기기의 브라우저에만 저장되고 어디에도 보내지 않는다.
 const CUSTOM_TIP = '첫 문장에 답을 먼저 말하고, 경험 하나를 근거로 들어 보세요.';
@@ -51,7 +54,8 @@ if (qset && !(Array.isArray(qset.questions) && qset.questions.every(q => q && q.
 const saveQset = () => store.set('qset', qset ? JSON.stringify(qset) : '');
 const setQuestions = () => (qset ? qset.questions : []);
 const getQuestion = id => setQuestions().find(q => q.id === id) || custom.find(q => q.id === id) || findQuestion(id);
-const hasGemini = () => Boolean(gem.getKey());
+// 질문 만들기·꼬리질문·AI 평가에 쓸 키(Gemini 또는 Claude)가 있는지
+const hasAI = () => Boolean(gem.getKey());
 
 // 카카오톡 인앱 브라우저는 마이크가 막히는 경우가 많아, 처음 한 번은 외부 브라우저로 자동으로 넘긴다.
 const KAKAO_EXTERNAL = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(location.href);
@@ -203,8 +207,8 @@ function homeView() {
     <section class="card">
       <h2>시작 전에 확인해 주세요</h2>
       <ul class="plain">
-        <li>말한 소리는 휴대폰 브라우저의 음성 인식 기능(Chrome은 Google, 아이폰은 Apple)이 글자로 바꿉니다. 이 앱은 녹음 파일을 만들거나 보관하지 않습니다.</li>
-        <li>${hasGemini() ? '내 Gemini 키가 연결되어 있어, 피드백·꼬리질문을 만들 때 질문과 답변 글(질문 만들기에서는 넣은 자료)이 Google Gemini로 전송됩니다.' : aiOn ? '피드백을 만들 때 질문과 답변 글만 AI 평가 서버로 보냅니다. 서버는 답변을 저장하지 않습니다.' : '피드백은 이 휴대폰 안에서 만들어지며, 답변은 어디에도 전송하지 않습니다.'}</li>
+        <li>${MOBILE && gem.hasGeminiKey() ? '휴대폰에서는 답하는 동안 녹음하고, 답변이 끝나면 녹음을 내 Gemini 키로 보내 글자로 바꿉니다. 녹음 파일은 보관하지 않습니다.' : MOBILE ? '휴대폰에서는 글 칸을 누른 뒤 키보드의 마이크 버튼으로 말하면 글자로 바뀝니다. Gemini 키를 연결하면 녹음만 하고 자동으로 받아 적어요.' : '말한 소리는 브라우저의 음성 인식 기능(Chrome은 Google)이 글자로 바꿉니다. 이 앱은 녹음 파일을 만들거나 보관하지 않습니다.'}</li>
+        <li>${hasAI() ? `내 ${gem.providerName()} 키가 연결되어 있어, 피드백·꼬리질문을 만들 때 질문과 답변 글(질문 만들기에서는 넣은 자료)이 ${gem.providerName() === 'Claude' ? 'Anthropic Claude' : 'Google Gemini'}로 전송됩니다.` : aiOn ? '피드백을 만들 때 질문과 답변 글만 AI 평가 서버로 보냅니다. 서버는 답변을 저장하지 않습니다.' : '피드백은 이 휴대폰 안에서 만들어지며, 답변은 어디에도 전송하지 않습니다.'}</li>
         <li>회원가입이 없고, 화면을 닫으면 답변은 사라집니다. 실명, 학교, 회사 이름은 말하지 않아도 됩니다.</li>
         <li>점수는 연습용 참고치이며 합격을 예측하지 않습니다. 외모, 표정, 목소리 높낮이 자체는 평가하지 않습니다.</li>
         ${settings.video ? '<li>영상 녹화를 켜면 시선 방향, 억양 변화, 말 빠르기를 이 휴대폰 안에서만 분석합니다. 영상은 어디에도 전송되지 않으며, 저장 버튼을 눌러야 휴대폰에 남습니다.</li>' : ''}
@@ -224,10 +228,10 @@ function homeView() {
         <button role="radio" aria-checked="${!settings.video}" class="${!settings.video ? 'on' : ''}" data-act="video-mode" data-v="0">목소리만</button>
         <button role="radio" aria-checked="${settings.video}" class="${settings.video ? 'on' : ''}" data-act="video-mode" data-v="1">영상 녹화</button>
       </div>
-      <p class="muted small">${settings.video ? '실제 화상 면접처럼 내 모습을 보며 답합니다. 시선, 억양, 템포 분석과 영상 저장이 추가됩니다. 휴대폰을 눈높이에 세워 두면 좋아요.' + (MOBILE ? ' 휴대폰에서는 마이크를 글자 인식에 쓰기 때문에 저장되는 영상에는 소리가 담기지 않고, 억양 분석은 빠집니다.' : '') : '카메라 없이 목소리로만 연습합니다. 부담 없이 시작하기 좋아요.'}</p>
+      <p class="muted small">${settings.video ? '실제 화상 면접처럼 내 모습을 보며 답합니다. 시선, 억양, 템포 분석과 영상 저장이 추가됩니다. 휴대폰을 눈높이에 세워 두면 좋아요.' + (MOBILE ? (gem.hasGeminiKey() ? ' 휴대폰에서는 답변을 녹음해 두었다가 Gemini로 받아 적어요. 영상에도 소리가 담깁니다.' : ' 휴대폰에서 Gemini 키 없이 쓰면 키보드 마이크로 답하기 때문에 저장되는 영상에는 소리가 담기지 않고, 억양 분석은 빠집니다.') : '') : '카메라 없이 목소리로만 연습합니다. 부담 없이 시작하기 좋아요.'}</p>
     </section>` : ''}
-    <details class="card settings gem" ${hasGemini() ? '' : ''}>
-      <summary>AI 피드백·꼬리질문 (내 Gemini 키) ${hasGemini() ? '<span class="pill ok">연결됨</span>' : '<span class="pill">선택</span>'}</summary>
+    <details class="card settings gem" ${hasAI() ? '' : ''}>
+      <summary>AI 피드백·꼬리질문 (Gemini · Claude 키) ${hasAI() ? `<span class="pill ok">${gem.providerName()} 연결됨</span>` : '<span class="pill">선택</span>'}</summary>
       ${keyPanel()}
     </details>
     <button class="btn primary big" data-act="start">${assigned.length ? `강사가 준 질문 ${assigned.length}개로 시작` : '질문 고르기'}</button>
@@ -316,9 +320,15 @@ function bindAsk() {
   let recorder = null;
   let audioA = null;
   let gaze = null;
+  // 답변을 글자로 받는 방법: live(브라우저 실시간 받아쓰기, PC), record(휴대폰 녹음 → Gemini 받아쓰기), keyboard(휴대폰 키보드 마이크)
+  const capture = settings.textMode ? 'text' : !MOBILE ? 'live' : gem.hasGeminiKey() && canRecordAudio() ? 'record' : 'keyboard';
+  let micStream = null;
+  let audioRec = null;
+  let camFailed = false;
   if (cam) {
     const tip = document.getElementById('camTip');
-    openCamera(!MOBILE).then(stream => {
+    // 키보드 마이크를 쓸 때는 카메라가 마이크를 잡지 않게 영상만 연다.
+    openCamera(capture !== 'keyboard').then(stream => {
       if (phase === 'done') { stopStream(stream); return; }
       camStream = stream;
       cam.srcObject = stream;
@@ -333,7 +343,29 @@ function bindAsk() {
         : '브라우저의 카메라 권한을 확인해 주세요.'));
       const w = document.getElementById('camWrap');
       if (w) w.hidden = true;
+      camFailed = true;
+      if (phase === 'answer' && capture === 'record') startMic();
     });
+  }
+  // 녹음 방식: 카메라 없이 마이크만 연다.
+  function startMic() {
+    if (micStream || audioRec) return;
+    openMic().then(s => {
+      if (phase !== 'answer') { stopStream(s); return; }
+      micStream = s;
+      audioA = startAudioAnalysis(s);
+      try { audioRec = startAudioRecorder(s); } catch { keyboardMode('이 브라우저에서는 녹음을 시작하지 못했어요.'); }
+    }).catch(err => {
+      const n = err && err.name;
+      keyboardMode(n === 'NotAllowedError' || n === 'SecurityError' ? '마이크 권한이 꺼져 있어 녹음하지 못했어요. 주소창 왼쪽 아이콘 > 권한에서 마이크를 "허용"으로 바꿔 주세요.' : '마이크를 열지 못했어요. 통화나 녹음 앱이 마이크를 쓰고 있으면 닫아 주세요.');
+    });
+  }
+  // 키보드 마이크로 답하기(휴대폰 기본 받아쓰기). why가 있으면 녹음 실패 이유를 먼저 알린다.
+  function keyboardMode(why) {
+    typed.hidden = false;
+    typed.placeholder = '여기를 누르고 키보드의 마이크 버튼을 눌러 말해 주세요';
+    msg.innerHTML = `${why ? `<b>${esc(why)}</b> ` : ''}<b>키보드 마이크로 말해 주세요.</b> 아래 칸을 누르면 키보드가 열려요. ${IOS ? '키보드 아래쪽' : '키보드 위쪽(또는 오른쪽 위)'}의 마이크 모양을 누르고 말하면 글자로 바뀝니다. 글로 써도 됩니다.`;
+    typed.focus();
   }
   // 답하는 동안 화면이 꺼지면 음성 인식과 녹화가 멈추므로 화면을 켜 둔다(지원 기기만).
   let wake = null;
@@ -345,6 +377,9 @@ function bindAsk() {
     if (!camStream || recorder) return;
     try { recorder = startRecorder(camStream); } catch { toast('이 브라우저에서는 녹화를 시작하지 못했어요.'); }
     audioA = startAudioAnalysis(camStream);
+    if (capture === 'record' && !audioRec && camStream.getAudioTracks().length) {
+      try { audioRec = startAudioRecorder(camStream); } catch { keyboardMode('이 브라우저에서는 녹음을 시작하지 못했어요.'); }
+    }
     gaze = startGaze(cam);
     document.getElementById('camTip').innerHTML = '<span class="rec-dot" aria-hidden="true"></span>녹화 중';
   }
@@ -379,6 +414,16 @@ function bindAsk() {
       msg.textContent = '답변을 글로 써 주세요. 시간이 지나도 이어서 쓸 수 있습니다.';
       typed.hidden = false;
       typed.focus();
+      return;
+    }
+    if (capture === 'record') {
+      msg.innerHTML = '<span class="rec-dot" aria-hidden="true"></span>녹음 중이에요. 편하게 말해 주세요. 답변을 끝내면 글자로 바꿔 드려요.';
+      if (cam && !camFailed) startCapture(); else startMic();
+      return;
+    }
+    if (capture === 'keyboard') {
+      startCapture();
+      keyboardMode('');
       return;
     }
     startCapture();
@@ -436,8 +481,27 @@ function bindAsk() {
       state.draft.gaze = gaze ? gaze.stop() : null;
       if (recorder) { try { state.draft.video = await Promise.race([recorder.stop(), new Promise(r => setTimeout(() => r(null), 5000))]); } catch { state.draft.video = null; } }
     }
+    if (audioRec) {
+      // 녹음을 Gemini로 보내 받아쓴다. 실패해도 답변 확인 화면에서 직접 쓰거나 다시 답할 수 있다.
+      btn.disabled = true;
+      btn.textContent = '글자로 바꾸는 중...';
+      msg.textContent = '녹음을 글자로 바꾸고 있어요. 10초 안팎 걸립니다.';
+      const a = audioRec;
+      audioRec = null;
+      let heardText = '';
+      try {
+        const blob = await Promise.race([a.stop(), new Promise(r => setTimeout(() => r(null), 5000))]);
+        heardText = await gem.transcribeAudio(await toWavBase64(blob));
+        if (!heardText) toast('녹음에서 말소리를 찾지 못했어요. 다음 화면에서 직접 쓰거나 다시 답해 주세요.');
+      } catch (err) {
+        toast(`녹음을 글자로 바꾸지 못했어요. 다음 화면에서 직접 쓰거나 다시 답해 주세요. (${err.cause || err.message})`);
+      }
+      state.draft.answer = state.draft.rawAnswer = join(heardText, state.draft.answer);
+    }
     stopStream(camStream);
     camStream = null;
+    stopStream(micStream);
+    micStream = null;
     // 인식 마지막 조각이 늦게 도착하는 경우가 있어 잠깐 기다린다.
     setTimeout(() => { if (rec) state.draft.answer = state.draft.rawAnswer = join(rec.text(), typed.value.trim()); go('review'); }, rec ? 600 : 0);
   }
@@ -454,9 +518,11 @@ function bindAsk() {
       if (recorder) recorder.stop();
       if (audioA) audioA.stop();
       if (gaze) gaze.stop();
+      if (audioRec) audioRec.stop();
       phase = 'done';
     }
     stopStream(camStream);
+    stopStream(micStream);
     if ('speechSynthesis' in window) speechSynthesis.cancel();
   });
 }
@@ -465,7 +531,7 @@ function bindAsk() {
 function reviewView() {
   const d = state.draft;
   const empty = !d.answer;
-  const willFollow = !state.follow && hasGemini();
+  const willFollow = !state.follow && hasAI();
   return `${header(state.follow ? '꼬리질문 답변 확인' : '답변 확인')}
   <main class="wrap">
     <section class="card">
@@ -509,7 +575,7 @@ async function evaluate(skipFollow) {
 
   const main = { answer, metrics, d };
   state.draft = null;
-  if (hasGemini() && !skipFollow) {
+  if (hasAI() && !skipFollow) {
     showLoading('꼬리질문 고르는 중', '답변을 듣고 면접관이 더 확인하고 싶은 부분을 찾고 있어요.');
     try {
       const fu = await gem.pickFollowup(q, answer);
@@ -547,13 +613,13 @@ async function finalizeInner(main, follow) {
   showLoading('피드백 만드는 중', '답변을 커리어캐쳐 기준으로 살펴보고 있어요.');
   const prev = state.attempts[state.attempts.length - 1];
   let result = null;
-  if (hasGemini()) {
+  if (hasAI()) {
     try {
       const r = await gem.evaluateAnswer({ q, answer, follow, previous: prev ? { answer: prev.answer, next_fix: prev.result.next_fix } : null });
       if (!validResult(r)) throw new Error('AI 응답 형식이 맞지 않음');
       result = { ...r, source: 'ai' };
     } catch (err) {
-      toast(`Gemini 평가에 실패해 자동 피드백으로 보여 드려요. (${err.cause || err.message}) 자세한 원인은 처음 화면의 연결 점검에서 볼 수 있어요.`);
+      toast(`${gem.providerName()} 평가에 실패해 자동 피드백으로 보여 드려요. (${err.cause || err.message}) 자세한 원인은 처음 화면의 연결 점검에서 볼 수 있어요.`);
     }
   }
   if (!result && settings.relay) {
@@ -786,7 +852,7 @@ function scoreGuide(a) {
     </tbody></table>
     <h3 class="guide-h">점수를 매기는 방법</h3>
     <ul class="plain small">
-      <li><b>답변 내용 3항목</b>: ${ai ? 'AI(Gemini)가 위 5점·3점·1점 기준을 보고 매기고 이유를 적습니다.' : '답변에 나온 표현을 정해진 규칙으로 세어 계산합니다(AI 미연결). 내용의 깊이까지는 판단하지 못하므로 방향을 잡는 참고로 봐 주세요. Gemini 키를 연결하면 기준표에 따라 평가합니다.'}</li>
+      <li><b>답변 내용 3항목</b>: ${ai ? 'AI(Gemini 또는 Claude)가 위 5점·3점·1점 기준을 보고 매기고 이유를 적습니다.' : '답변에 나온 표현을 정해진 규칙으로 세어 계산합니다(AI 미연결). 내용의 깊이까지는 판단하지 못하므로 방향을 잡는 참고로 봐 주세요. Gemini 키를 연결하면 기준표에 따라 평가합니다.'}</li>
       <li><b>음성 전달력</b>: 5점에서 깎습니다. 말 속도가 분당 200음절보다 느리거나 420음절보다 빠르면 1~2점, 2.5초 넘는 침묵이 잦으면 1~2점, "음, 어"가 1분에 8번을 넘으면 1점, 억양 변화가 거의 없어 강조가 안 되면 1점. 목소리 높낮이, 답변 길이는 보지 않습니다.</li>
       <li><b>비언어적 전달력</b>(영상 녹화 시): 좌우로 벗어난 시선의 비율로 매깁니다(10% 미만 5점, 20% 미만 4점, 35% 미만 3점, 50% 미만 2점). 위아래 시선은 감점하지 않습니다. 반복적인 큰 움직임이나 화면 이탈이 잦으면 1점. 표정은 측정하지 않습니다.</li>
       <li><b>영상 환경</b>(영상 녹화 시): 5점에서 깎습니다. 얼굴이 화면에 안 보인 시간, 어두운 화면, 작게 녹음된 목소리, 큰 주변 소음.</li>
@@ -867,7 +933,7 @@ function reportBody() {
   return `<section class="hero small">
       <p class="eyebrow">커리어캐쳐 면접 리허설</p>
       <h1>면접 피드백 리포트 <small class="muted">${d.getFullYear()}.${d.getMonth() + 1}.${d.getDate()}</small></h1>
-      <p>연습한 질문 ${state.log.length}개 · ${o.ai ? 'AI(Gemini) 평가' : '자동 평가(AI 미연결, 표현 규칙 기반)'}${qset ? ` · 지원 직무: ${esc(qset.job)}` : ''}</p>
+      <p>연습한 질문 ${state.log.length}개 · ${o.ai ? 'AI 평가' : '자동 평가(AI 미연결, 표현 규칙 기반)'}${qset ? ` · 지원 직무: ${esc(qset.job)}` : ''}</p>
     </section>
     ${totalCard(o.total)}
     <section class="card">
@@ -1019,6 +1085,7 @@ function guideView() {
     </section>
     <section class="card" id="mic-help">
       <h2>말해도 글자가 안 나올 때</h2>
+      <p class="small"><b>휴대폰은 답변 받는 방식이 달라요.</b> Gemini 키를 연결하면 답하는 동안 녹음했다가 끝나면 자동으로 받아 적고, 키가 없으면 글 칸을 누른 뒤 키보드의 마이크 버튼으로 말합니다. 노트북(Chrome)에서는 말하는 대로 바로 글자가 나와요.</p>
       <p class="muted small">아래 순서대로 확인해 주세요. 하나씩 고친 뒤 이 페이지를 새로고침하고 다시 해 보세요.</p>
       <h3>갤럭시(안드로이드)</h3>
       <ol>
@@ -1047,7 +1114,7 @@ function guideView() {
       <dl class="rules">
         <dt>내 답변과 영상은 어디에 저장되나요?</dt><dd>어디에도 저장되지 않아요. 영상과 분석은 휴대폰 안에서만 처리되고, 화면을 닫으면 사라집니다. AI 키를 연결한 경우에만 질문과 답변 글이 Google Gemini로 전송됩니다.</dd>
         <dt>말했는데 글자가 안 나와요.</dt><dd>위의 "말해도 글자가 안 나올 때"를 순서대로 확인해 주세요. 그래도 안 되면 글로 답하기로 연습할 수 있어요.</dd>
-        <dt>AI 오류가 나요.</dt><dd>첫 화면의 Gemini 키 카드에서 "연결 점검"을 누르면 원인과 해결 방법이 나옵니다.</dd>
+        <dt>AI 오류가 나요.</dt><dd>첫 화면의 AI 키 카드에서 "연결 점검"을 누르면 원인과 해결 방법이 나옵니다.</dd>
         <dt>점수가 실제 AI면접 점수와 같나요?</dt><dd>아니요. 연습을 위한 자체 평가도구이고, AI면접 시스템마다 평가방식이 다릅니다.</dd>
       </dl>
     </section>
@@ -1057,11 +1124,42 @@ function guideView() {
 
 // ---------- Gemini 키 ----------
 function keyPanel() {
-  if (hasGemini()) {
+  const both = gem.hasGeminiKey() && claude.getKey();
+  return `${both ? `<div class="keybox"><p class="small"><b>질문 만들기·꼬리질문·평가에 쓸 AI</b></p><div class="seg" role="radiogroup" aria-label="사용할 AI">
+      ${['gemini', 'claude'].map(p => `<button role="radio" aria-checked="${gem.getProvider() === p}" class="${gem.getProvider() === p ? 'on' : ''}" data-act="provider" data-v="${p}">${p === 'gemini' ? 'Gemini' : 'Claude'}</button>`).join('')}
+    </div><p class="muted small">휴대폰 답변 녹음 받아쓰기는 어느 쪽을 골라도 Gemini가 맡아요(Claude는 소리를 받지 않음).</p></div>` : ''}
+    ${geminiPanel()}
+    ${claudePanel()}`;
+}
+
+function claudePanel() {
+  const on = Boolean(claude.getKey());
+  return `<details class="filehelp claudebox" ${on ? 'open' : ''}>
+    <summary>Claude API 키 (운영자·강사용) ${on ? '<span class="pill ok">연결됨</span>' : ''}</summary>
+    ${on ? `<div class="keybox">
+      <p>Claude에 연결되어 있어요. ${claude.keyRemembered() ? '키가 이 기기에 저장되어 있습니다.' : '키는 이 화면을 닫으면 지워집니다.'}</p>
+      <label class="field">모델 이름<input id="claudeModel2" type="text" value="${esc(claude.getModel())}"></label>
+      <button class="btn primary wide" data-act="diag" data-p="claude">Claude 연결 점검</button>
+      <button class="btn ghost wide" data-act="claude-model-save">모델 이름 저장</button>
+      <button class="btn ghost wide" data-act="claude-clear">Claude 키 연결 해제</button>
+    </div>` : `<div class="keybox">
+      <p class="muted small">강사·운영자가 자기 Claude API 키로 질문 만들기, 꼬리질문, 평가를 돌릴 때 씁니다. 비용은 키 주인의 Claude Console 계정에 청구돼요. 키가 브라우저에 들어가므로 본인 기기에서만 넣고, 참여자에게 키를 나눠 주지 마세요.</p>
+      <a class="btn ghost wide" href="${CLAUDE_KEY_URL}" target="_blank" rel="noopener noreferrer">Claude API 키 받으러 가기 (Claude Console)</a>
+      <label class="field">Claude API 키<input id="claudeKey" type="password" autocomplete="off" placeholder="sk-ant-로 시작하는 키"></label>
+      <label class="check"><input type="checkbox" id="claudeRemember"> 이 기기에 키 기억하기</label>
+      <details><summary class="muted small">모델 바꾸기</summary><label class="field">모델 이름<input id="claudeModel" type="text" value="${esc(claude.getModel())}"></label></details>
+      <button class="btn primary wide" data-act="claude-save">Claude 키 연결</button>
+      <p class="muted small">Claude는 녹음 받아쓰기를 하지 않아요. 휴대폰에서 말로 답하려면 Gemini 키도 함께 연결하거나, 키보드 마이크로 답하면 됩니다.</p>
+    </div>`}
+  </details>`;
+}
+
+function geminiPanel() {
+  if (gem.hasGeminiKey()) {
     return `<div class="keybox">
       <p>Gemini에 연결되어 있어요. ${gem.keyRemembered() ? '키가 이 휴대폰에 저장되어 있습니다.' : '키는 이 화면을 닫으면 지워집니다.'}</p>
       <label class="field">모델 이름<input id="gemModel2" type="text" value="${esc(gem.getModel())}"></label>
-      <button class="btn primary wide" data-act="diag">연결 점검: 오류 원인 확인하기</button>
+      <button class="btn primary wide" data-act="diag" data-p="gemini">Gemini 연결 점검: 오류 원인 확인하기</button>
       <button class="btn ghost wide" data-act="model-save">모델 이름 저장</button>
       <button class="btn ghost wide" data-act="key-clear">키 연결 해제</button>
     </div>`;
@@ -1097,6 +1195,8 @@ function keyPanel() {
 
 // ---------- 화면: 연결 점검 ----------
 let diagSteps = null;
+let diagProvider = '';
+const diagName = () => ((diagProvider || gem.getProvider()) === 'claude' ? 'Claude' : 'Gemini');
 let diagRunning = false;
 function diagView() {
   const le = gem.getLastError();
@@ -1105,7 +1205,7 @@ function diagView() {
   return `${header('연결 점검')}
   <main class="wrap">
     <section class="hero small">
-      <h1>${diagRunning ? '점검하는 중이에요...' : !diagSteps ? 'Gemini 연결을 점검합니다.' : bad ? `"${esc(bad.name)}" 단계에서 문제가 있어요.` : '모두 정상이에요.'}</h1>
+      <h1>${diagRunning ? '점검하는 중이에요...' : !diagSteps ? `${diagName()} 연결을 점검합니다.` : bad ? `"${esc(bad.name)}" 단계에서 문제가 있어요.` : '모두 정상이에요.'}</h1>
       <p>키 확인 → 모델 확인 → 실제 요청 순서로 시험합니다. 점검에는 아주 짧은 요청 두 번만 쓰고, 자료나 답변은 보내지 않아요.</p>
     </section>
     ${diagSteps ? `<section class="card diag"><ol>${diagSteps.map(x => `<li class="d-${x.state}"><span class="lv lv-${x.state === 'ok' ? 'ok' : x.state === 'warn' ? 'mid' : 'no'}">${mark[x.state]}</span><div><b>${esc(x.name)}</b><p class="small">${esc(x.detail)}</p>${x.fix ? `<p class="small fix">해결: ${esc(x.fix)}</p>` : ''}</div></li>`).join('')}</ol></section>` : ''}
@@ -1135,13 +1235,13 @@ async function runDiag() {
   diagRunning = true;
   diagSteps = [];
   render();
-  try { diagSteps = await gem.diagnose(steps => { diagSteps = [...steps]; if (state.screen === 'diag') render(); }); }
+  try { diagSteps = await gem.diagnose(steps => { diagSteps = [...steps]; if (state.screen === 'diag') render(); }, diagProvider || gem.getProvider()); }
   finally { diagRunning = false; if (state.screen === 'diag') render(); }
 }
 
 function diagText() {
   const le = gem.getLastError();
-  const lines = ['[면접 리허설] Gemini 연결 점검', `모델 설정: ${gem.getModel()}`, `브라우저: ${navigator.userAgent.slice(0, 120)}`];
+  const lines = [`[면접 리허설] ${diagName()} 연결 점검`, `모델 설정: ${diagName() === 'Claude' ? claude.getModel() : gem.getModel()}`, `브라우저: ${navigator.userAgent.slice(0, 120)}`];
   (diagSteps || []).forEach(x => lines.push(`- ${x.name}: ${x.state === 'ok' ? '정상' : x.state === 'warn' ? '주의' : '문제'} / ${x.detail}${x.fix ? ' / 해결: ' + x.fix : ''}`));
   if (le) lines.push(`마지막 오류(${le.at}): ${le.cause} / 코드 ${le.status} ${le.gstatus} / 모델 ${le.model} / 원문: ${le.detail}`);
   return lines.join('\n');
@@ -1158,14 +1258,14 @@ function materialView() {
   const m = state.material;
   return `${header('내 자료 넣기')}
   <main class="wrap">
-    ${hasGemini() ? '' : `<section class="card"><h2>1. Gemini 키 연결</h2>${keyPanel()}</section>`}
+    ${hasAI() ? '' : `<section class="card"><h2>1. AI 키 연결</h2>${keyPanel()}</section>`}
     <section class="card form">
-      <h2>${hasGemini() ? '1' : '2'}. 지원 정보</h2>
+      <h2>${hasAI() ? '1' : '2'}. 지원 정보</h2>
       <label class="field">지원 직무 (필수)<input id="mJob" type="text" maxlength="60" placeholder="예: 사무행정, 콘텐츠 마케터, 요양보호사" value="${esc(m.job)}"></label>
       <label class="field">지원 회사 (선택)<input id="mCompany" type="text" maxlength="60" value="${esc(m.company)}"></label>
     </section>
     <section class="card form">
-      <h2>${hasGemini() ? '2' : '3'}. 자료 넣기 <small class="muted">파일 첨부 또는 붙여넣기</small></h2>
+      <h2>${hasAI() ? '2' : '3'}. 자료 넣기 <small class="muted">파일 첨부 또는 붙여넣기</small></h2>
       <label class="dropzone" id="dropzone">
         <input type="file" id="fileTop" multiple accept="${files.ACCEPT}">
         <b>파일 첨부해서 자동으로 읽기</b>
@@ -1191,7 +1291,7 @@ function materialView() {
           <li>한 칸에 15,000자까지 들어가요. 한 파일은 15MB까지 올릴 수 있어요.</li>
         </ul>
       </details>
-      ${m.files.length ? `<ul class="filelist">${m.files.map(f => `<li class="${f.error ? 'err' : ''}"><b>${esc(f.name)}</b><span>${f.error ? esc(f.error) : `${esc(f.slot)}에 ${f.chars.toLocaleString()}자 · ${f.ai ? 'Gemini로 읽음' : '휴대폰에서 읽음'}${f.cut ? ' · 길어서 일부만' : ''}`}</span></li>`).join('')}</ul><p class="muted small">읽어 온 내용은 아래 칸에 들어갔어요. 잘못 읽힌 부분이 있으면 고쳐 주세요.</p>` : ''}
+      ${m.files.length ? `<ul class="filelist">${m.files.map(f => `<li class="${f.error ? 'err' : ''}"><b>${esc(f.name)}</b><span>${f.error ? esc(f.error) : `${esc(f.slot)}에 ${f.chars.toLocaleString()}자 · ${f.ai ? 'AI로 읽음' : '휴대폰에서 읽음'}${f.cut ? ' · 길어서 일부만' : ''}`}</span></li>`).join('')}</ul><p class="muted small">읽어 온 내용은 아래 칸에 들어갔어요. 잘못 읽힌 부분이 있으면 고쳐 주세요.</p>` : ''}
       ${SLOTS.map(([k, label, hint]) => {
         const v = k === '채용공고' ? m.posting : m.docs[k];
         return `<details class="doc" ${v ? 'open' : ''}><summary>${label} <small class="muted">${v ? `${v.length.toLocaleString()}자` : hint}</small></summary>
@@ -1249,10 +1349,10 @@ async function handleFiles(list, fixedSlot) {
     try {
       let { text, needsAI } = await files.readLocal(file);
       if (needsAI) {
-        if (!hasGemini()) throw new Error('사진이나 스캔한 PDF는 Gemini 키를 연결하면 읽을 수 있어요. 글자를 복사해 붙여 넣어도 됩니다.');
-        const ok = confirm(`"${file.name}"은(는) 휴대폰에서 글자를 바로 읽을 수 없는 파일(사진·스캔본)이에요.\n본인 Gemini로 파일을 보내 글자를 읽을까요?\n파일이 그대로 전송되므로 연락처 자동 가림이 적용되지 않아요.`);
-        if (!ok) throw new Error('Gemini로 보내지 않아 읽지 않았어요.');
-        showLoading('파일 읽는 중', `"${file.name}"의 글자를 Gemini로 읽고 있어요.`);
+        if (!hasAI()) throw new Error('사진이나 스캔한 PDF는 AI 키(Gemini 또는 Claude)를 연결하면 읽을 수 있어요. 글자를 복사해 붙여 넣어도 됩니다.');
+        const ok = confirm(`"${file.name}"은(는) 휴대폰에서 글자를 바로 읽을 수 없는 파일(사진·스캔본)이에요.\n본인 ${gem.providerName()}(으)로 파일을 보내 글자를 읽을까요?\n파일이 그대로 전송되므로 연락처 자동 가림이 적용되지 않아요.`);
+        if (!ok) throw new Error('AI로 보내지 않아 읽지 않았어요.');
+        showLoading('파일 읽는 중', `"${file.name}"의 글자를 ${gem.providerName()}(으)로 읽고 있어요.`);
         text = await gem.transcribeFile(await files.toBase64(file), files.mimeOf(file));
         rec.ai = true;
       }
@@ -1293,7 +1393,7 @@ function maskedMaterial() {
 async function doExtract(auto) {
   readMaterial();
   const m = state.material;
-  if (!hasGemini()) { toast('먼저 Gemini API 키를 연결해 주세요.'); return; }
+  if (!hasAI()) { toast('먼저 AI 키(Gemini 또는 Claude)를 연결해 주세요.'); return; }
   if (!m.job) { toast('지원 직무를 써 주세요.'); document.getElementById('mJob').focus(); return; }
   const total = Object.values(m.docs).join('').length;
   if (total < 100) { toast('자료를 100자 이상 넣어 주세요. 경험이 담긴 글일수록 질문이 정확해져요.'); return; }
@@ -1484,10 +1584,24 @@ app.addEventListener('click', async e => {
     gem.setKey(k, document.getElementById('gemRemember').checked);
     const md = document.getElementById('gemModel');
     if (md) gem.setModel(md.value);
+    if (!claude.getKey()) gem.setProvider('gemini');
     toast('Gemini 키를 연결했어요. 실제 사용 가능 여부는 첫 요청 때 확인됩니다.');
     render();
   }
-  else if (act === 'diag') { readMaterial(); const md = document.getElementById('gemModel2'); if (md) gem.setModel(md.value); go('diag'); runDiag(); }
+  else if (act === 'provider') { readMaterial(); gem.setProvider(el.dataset.v); toast(`${gem.providerName()}(으)로 질문 만들기·평가를 합니다.`); render(); }
+  else if (act === 'claude-save') {
+    const k = document.getElementById('claudeKey').value.trim();
+    if (k.length < 20) { toast('Claude API 키를 확인해 주세요.'); return; }
+    readMaterial();
+    claude.setKey(k, document.getElementById('claudeRemember').checked);
+    claude.setModel(document.getElementById('claudeModel').value);
+    gem.setProvider('claude');
+    toast('Claude 키를 연결했어요. 연결 점검으로 바로 확인해 보세요.');
+    render();
+  }
+  else if (act === 'claude-model-save') { readMaterial(); claude.setModel(document.getElementById('claudeModel2').value); toast('Claude 모델 이름을 저장했어요.'); render(); }
+  else if (act === 'claude-clear') { readMaterial(); claude.setKey('', false); toast('Claude 키 연결을 해제했어요.'); render(); }
+  else if (act === 'diag') { diagProvider = el.dataset.p || gem.getProvider(); readMaterial(); const md = document.getElementById('gemModel2'); if (md) gem.setModel(md.value); go('diag'); runDiag(); }
   else if (act === 'diag-run') runDiag();
   else if (act === 'diag-copy') copy(diagText(), '점검 결과를 복사했어요. 키는 들어 있지 않아요.');
   else if (act === 'model-save') { readMaterial(); gem.setModel(document.getElementById('gemModel2').value); toast('모델 이름을 저장했어요.'); render(); }

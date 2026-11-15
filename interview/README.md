@@ -25,6 +25,27 @@
 - 첫 화면 **이용 방법 보기**: 순서, 준비, 세 가지 연습 방법, 내 자료로 질문 만들기, 피드백 읽는 법, 리포트 받기, 자주 묻는 질문.
 - Gemini 키 카드: **키 받으러 가기**(https://aistudio.google.com/apikey) 버튼과 받는 방법 6단계, 주의사항.
 
+## 휴대폰에서 답변 받기 (2026-11)
+
+휴대폰 브라우저의 실시간 받아쓰기는 말을 잠깐 멈추면 끊기고 카메라와 마이크를 서로 차지해서, 휴대폰은 방식을 바꿨습니다.
+
+| 기기 | 답변을 글자로 바꾸는 방법 |
+|---|---|
+| PC(노트북) | 지금처럼 브라우저 실시간 받아쓰기(Chrome 권장) |
+| 휴대폰 + Gemini 키 | 답하는 동안 녹음만 하고, 끝나면 녹음을 16kHz WAV로 바꿔 Gemini에 받아쓰기를 맡김(`audio.js`, `gemini.js`의 `transcribeAudio`). 영상 모드면 영상에도 소리가 담기고 억양 분석도 됨 |
+| 휴대폰 + 키 없음 | 글 칸을 열고 휴대폰 키보드의 마이크 버튼으로 말하도록 안내(키보드 받아쓰기). 이 경우 말 빠르기·침묵은 측정하지 않음 |
+
+- 녹음 파일은 보관하지 않습니다. 받아쓰기 후 버립니다.
+- 받아쓰기에 실패하면 답변 확인 화면에서 직접 쓰거나 다시 답할 수 있습니다.
+
+## Claude API 연결 (운영자·강사용, 2026-11)
+
+- 첫 화면 "AI 피드백·꼬리질문 (Gemini · Claude 키)" 카드 안의 **Claude API 키 (운영자·강사용)** 에 키를 넣으면 질문 만들기, 꼬리질문, 평가, 사진·PDF 읽기를 Claude로 합니다(`claude.js`).
+- 공식 Anthropic SDK(`@anthropic-ai/sdk` 1.8.0)를 브라우저용 파일 하나로 묶어 `vendor/anthropic/sdk.js`에 두었습니다(라이선스 `vendor/anthropic/LICENSE`). 다시 묶는 방법: `npm install @anthropic-ai/sdk esbuild` 후 `export { default } from '@anthropic-ai/sdk'` 한 줄짜리 파일을 `esbuild --bundle --format=esm --platform=browser --minify`.
+- 기본 모델 `claude-opus-5-5`, 정해진 JSON 형식(`output_config.format`)으로 받고, 안전 정책으로 거절되면 서버가 다른 모델로 이어서 답하는 설정(`fallbacks: "default"`)을 켜 두었습니다. 모델 이름은 카드에서 바꿀 수 있습니다.
+- 비용은 키 주인의 Claude Console 계정에 청구됩니다. 키가 브라우저에 들어가므로 본인 기기에서만 넣고, 참여자에게 나눠 주지 마세요.
+- Claude는 소리를 받지 않으므로 휴대폰 녹음 받아쓰기는 항상 Gemini 키로 합니다. Gemini 키와 Claude 키를 함께 넣으면 카드에서 질문·평가에 쓸 쪽을 고를 수 있습니다.
+
 ## 평가 기준 (2026-11 대표 정리본 적용)
 
 기준·가중치·주의점·근거 문헌은 `rubric.js` 한 파일에 있습니다. 바꾸려면 이 파일만 고칩니다.
