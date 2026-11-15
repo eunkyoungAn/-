@@ -3,15 +3,15 @@
 // 음성 모드: 브라우저 음성 인식으로 글자만 받는다. 녹음 파일은 만들지 않는다.
 // 영상 모드(선택): 카메라로 녹화하고 시선·억양·템포를 휴대폰 안에서만 분석한다. 영상은 참여자가 직접 저장한다.
 
-import { QUESTIONS, CATEGORIES, findQuestion } from './questions.js?v=202611152';
-import { RUBRIC, measure, speedLabel, localEvaluate, totalScore, voiceScore } from './scoring.js?v=202611152';
-import { BASIS, REFS, NOTICE } from './rubric.js?v=202611152';
-import { buildSetText, fileName } from './save.js?v=202611152';
-import * as gem from './gemini.js?v=202611152';
-import * as files from './files.js?v=202611152';
-import * as claude from './claude.js?v=202611152';
-import { openMic, startAudioRecorder, toWavBase64, canRecordAudio } from './audio.js?v=202611152';
-import { canRecord, openCamera, stopStream, startRecorder, startAudioAnalysis, startGaze, loadGazeModel, scoreNonverbal, saveVideo } from './video.js?v=202611152';
+import { QUESTIONS, CATEGORIES, findQuestion } from './questions.js?v=202611153';
+import { RUBRIC, measure, speedLabel, localEvaluate, totalScore, voiceScore } from './scoring.js?v=202611153';
+import { BASIS, REFS, NOTICE } from './rubric.js?v=202611153';
+import { buildSetText, fileName } from './save.js?v=202611153';
+import * as gem from './gemini.js?v=202611153';
+import * as files from './files.js?v=202611153';
+import * as claude from './claude.js?v=202611153';
+import { openMic, startAudioRecorder, toWavBase64, canRecordAudio } from './audio.js?v=202611153';
+import { canRecord, openCamera, stopStream, startRecorder, startAudioAnalysis, startGaze, loadGazeModel, scoreNonverbal, saveVideo } from './video.js?v=202611153';
 
 const PREP_SEC = 30;
 const FOLLOW_PREP_SEC = 10;
@@ -20,6 +20,7 @@ const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
 // ---------- 설정 (링크 파라미터 > 이 기기에 저장한 값) ----------
 const params = new URLSearchParams(location.search);
+const APP_VERSION = '202611153'; // stamp-version.py가 배포 때 바꾼다
 const store = {
   get(k) { try { return localStorage.getItem('cc-interview-' + k); } catch { return null; } },
   set(k, v) { try { v ? localStorage.setItem('cc-interview-' + k, v) : localStorage.removeItem('cc-interview-' + k); } catch { /* 저장 불가 환경 */ } },
@@ -1002,7 +1003,7 @@ async function downloadPdf() {
   pdfBusy = true;
   toast('PDF를 만드는 중이에요. 잠시만 기다려 주세요...');
   try {
-    const { buildPdf } = await import('./pdf.js?v=202611152');
+    const { buildPdf } = await import('./pdf.js?v=202611153');
     const blob = await buildPdf(reportBody(), (i, n) => { document.getElementById('toast').textContent = `PDF를 만드는 중이에요... ${Math.round((i / n) * 100)}%`; });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -1769,6 +1770,21 @@ async function copy(text, msg) {
   try { await navigator.clipboard.writeText(text); toast(msg); }
   catch { prompt('아래 내용을 길게 눌러 복사해 주세요.', text); }
 }
+
+// 새 버전 확인: 휴대폰 브라우저가 예전 화면(index.html)을 최대 10분 붙잡아 두는 문제를 피한다.
+// version.json은 캐시 없이 받아 보고, 번호가 다르면 주소에 ?v=새번호를 붙여 한 번만 다시 연다(연습 중에는 하지 않음).
+function checkNewVersion() {
+  fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then(r => (r.ok ? r.json() : null)).then(j => {
+    if (!j || !j.v || j.v === APP_VERSION) return;
+    if (!['home', 'guide', 'tips'].includes(state.screen) || state.log.length) return;
+    const k = 'cc-interview-reload-' + j.v;
+    try { if (sessionStorage.getItem(k)) return; sessionStorage.setItem(k, '1'); } catch { return; }
+    const u = new URL(location.href);
+    u.searchParams.set('v', j.v);
+    location.replace(u.href);
+  }).catch(() => {});
+}
+setTimeout(checkNewVersion, 500);
 
 // 다른 페이지에서 interview/#tips 로 들어오면 안내 화면을 바로 연다.
 const HASH_VIEWS = { '#tips': 'tips', '#guide': 'guide' };
