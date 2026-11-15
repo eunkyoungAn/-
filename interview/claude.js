@@ -59,7 +59,7 @@ export function explain(status, kind = '', detail = '') {
 }
 
 let sdkPromise = null;
-const loadSdk = () => (sdkPromise ||= import('./vendor/anthropic/sdk.js?v=202611154').then(m => m.default).catch(e => { sdkPromise = null; throw e; }));
+const loadSdk = () => (sdkPromise ||= import('./vendor/anthropic/sdk.js?v=202611155').then(m => m.default).catch(e => { sdkPromise = null; throw e; }));
 
 // 공식 SDK의 오류 종류를 위 설명으로 바꾼다.
 function mapError(Anthropic, e, model) {

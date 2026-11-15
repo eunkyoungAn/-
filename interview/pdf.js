@@ -24,7 +24,7 @@ function blocksOf(root) {
 }
 
 export async function buildPdf(html, onProgress = () => {}) {
-  const html2canvas = (await import('./vendor/html2canvas/html2canvas.esm.js?v=202611154')).default;
+  const html2canvas = (await import('./vendor/html2canvas/html2canvas.esm.js?v=202611155')).default;
   const holder = document.createElement('div');
   holder.className = 'wrap records pdf-sheet';
   holder.style.cssText = `position:fixed;left:-10000px;top:0;width:${CONTENT_W}px;max-width:none;padding:0;margin:0;`;
