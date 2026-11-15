@@ -1,6 +1,6 @@
 // 연습 기록 저장: 이미지(PNG), 글(복사), PDF(인쇄). 모두 이 기기 안에서 만들고 어디에도 보내지 않는다.
-import { RUBRIC, totalScore } from './scoring.js';
-import { NOTICE } from './rubric.js';
+import { RUBRIC, totalScore } from './scoring.js?v=202611151';
+import { NOTICE } from './rubric.js?v=202611151';
 
 const SITE = 'eunkyoungan.github.io/-/interview';
 
