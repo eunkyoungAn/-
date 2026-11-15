@@ -497,3 +497,17 @@ body{letter-spacing:-.005em}
 .funnel-step.is-result b,.funnel-step.is-result strong{color:var(--accent)}
 .funnel-arrow{align-self:center;color:var(--ink-mute);font-size:20px;flex:0 0 auto}
 @media (max-width:640px){.funnel{flex-direction:column}.funnel-arrow{transform:rotate(90deg)}}
+
+/* 고민해봅시다! (#think) */
+.lesson-content details.think-fold{max-width:none}
+.think-table{margin:0 14px 14px;box-shadow:none}
+.think-table td:first-child{min-width:120px}
+.think-table td:nth-child(2){min-width:260px}
+.think-table td:nth-child(3){white-space:nowrap}
+.think-table td a{color:var(--accent-2);font-weight:700;white-space:nowrap}
+.think-tag{display:inline-grid;place-items:center;min-width:24px;height:24px;padding:0 6px;border:1px solid var(--rule-strong);border-radius:999px;color:var(--accent);font-size:12.5px;font-weight:700}
+.think-split{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 22px}
+.think-split b{color:var(--ink)}
+.think-check{margin-top:10px}
+.think-sample{margin:0 14px 14px;max-width:none}
+@media (max-width:640px){.think-split{grid-template-columns:minmax(0,1fr)}.think-table td:nth-child(2){min-width:200px}}
