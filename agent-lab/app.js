@@ -90,7 +90,7 @@
     return '<a class="g-btn ghost" href="' + esc(fileUrl(f.path)) + '" download="' + esc(f.name) + '">' + esc(label || '받기') + '</a>';
   };
 
-  var G = D.guide, P = D.project, B = D.basics, K = D.apikey, T = D.think, L = D.projectlab;
+  var G = D.guide, P = D.project, B = D.basics, K = D.apikey, T = D.think, L = D.projectlab, SK = D.skillintro;
   var fileList = function (files, label) {
     return '<div class="file-list">' + files.map(function (f) {
       return '<div class="file-row"><div><strong>' + esc(f.name) + '</strong><span>' + esc(f.label) + ' · <em>' + esc(f.role) + '</em></span></div>' + dlLink(f, label) + '</div>';
@@ -134,7 +134,7 @@
       return '<section class="level-section"><div class="level-head"><div><span class="level-kicker">' + esc(kicker) + '</span><h2>' + esc(title) +
         '</h2></div><p>' + esc(desc) + '</p></div><div class="lesson-grid">' + cards + '</div></section>';
     };
-    $('homeLevels').innerHTML = level(B.kicker, B.partTitle, B.partDesc, card(B, '기본 개념 보기') + card(K, '언제 쓰는지 보기') + card(T, '내 직무에 적용해 보기')) + level(G.kicker, G.partTitle, G.partDesc, card(G, '만드는 방법 보기') +
+    $('homeLevels').innerHTML = level(B.kicker, B.partTitle, B.partDesc, card(B, '기본 개념 보기') + card(SK, '스킬 알아보기') + card(K, '언제 쓰는지 보기') + card(T, '내 직무에 적용해 보기')) + level(G.kicker, G.partTitle, G.partDesc, card(G, '만드는 방법 보기') +
       '<a class="lesson-card" href="#help"><span class="lesson-code">모음 · 6가지 상황</span><h3>오류가 나는 대표 사유</h3>' +
       '<p>실행이 안 될 때, 파일이 안 들어갈 때, 파일로 못 받을 때의 원인과 할 일을 한 번에 모았습니다.</p>' +
       '<div class="lesson-output"><span>바로 찾기</span> · 화면에 나온 문구로 찾습니다</div><div class="lesson-arrow">사유 한 번에 보기 →</div></a>') +
@@ -163,7 +163,7 @@
     };
     var mGroup = function (title, links) { return '<div class="menu-group"><strong>' + esc(title) + '</strong>' + links + '</div>'; };
     $('quickPanel').innerHTML =
-      mGroup('시작 전', mLink(B.id, '기초', B.title) + mLink(K.id, '기초', K.title) + mLink(T.id, '적용', T.title) + mLink(G.id, '준비', G.title)) +
+      mGroup('시작 전', mLink(B.id, '기초', B.title) + mLink(SK.id, '기초', SK.title) + mLink(K.id, '기초', K.title) + mLink(T.id, '적용', T.title) + mLink(G.id, '준비', G.title)) +
       D.parts.map(function (p) {
         return mGroup(p.kicker + ' · ' + p.title, p.lessons.map(function (id) { return mLink(id, byId[id].code, byId[id].title); }).join(''));
       }).join('') +
@@ -183,7 +183,7 @@
     $('pgBar').style.width = Math.round(n / t * 100) + '%';
     document.querySelectorAll('.lesson-card').forEach(function (el) {
       var id = el.getAttribute('data-lesson');
-      el.classList.toggle('is-done', isDone(id === G.id ? G : id === P.id ? P : id === B.id ? B : id === K.id ? K : id === T.id ? T : byId[id]));
+      el.classList.toggle('is-done', isDone(id === G.id ? G : id === P.id ? P : id === B.id ? B : id === K.id ? K : id === T.id ? T : id === SK.id ? SK : byId[id]));
     });
   };
 
@@ -475,7 +475,7 @@
       tbl(['방식', '차이'], B.skillVs), 'Skill 기능');
     add('make', 'Claude Skills로 보고서 작성하기', olist(B.skillSteps) +
       '<h3>스킬을 만드는 세 가지 방법</h3>' + tbl(['방법', '언제 쓰나'], B.skillWays) +
-      '<div class="go-studio"><p><b>이 실습실의 스킬 파일</b>(실습 에이전트 7종, 보고서 3종)을 받아 바로 올릴 수 있습니다.</p><a class="g-btn" href="#skills">스킬 등록으로 가기</a></div>', '스킬로 보고서');
+      '<div class="go-studio"><p><b>스킬을 더 자세히</b> 보려면 "Claude 스킬이란?"으로 갑니다. 스킬 파일은 스킬 등록에서 받습니다.</p><a class="g-btn" href="#' + SK.id + '">Claude 스킬이란?</a><a class="g-btn ghost" href="#skills">스킬 등록</a></div>', '스킬로 보고서');
     add('desc', 'Claude Skills description',
       '<p>' + esc(B.desc) + '</p>' +
       '<div class="prompt-box"><span class="box-label">설명 예시</span>' + copyBtn(B.descExample, '복사') + '<pre>' + esc(B.descExample) + '</pre></div>', 'description');
@@ -489,7 +489,7 @@
     add('review', '확인', '<p>아래 항목을 스스로 확인한 뒤 실습으로 넘어갑니다.</p>' + checklistHtml(B.id, B.checks), '확인');
     $('lessonBody').innerHTML = parts.join('') + '<nav class="lesson-navigation" aria-label="이전 · 다음">' +
       '<a class="lesson-prev" href="#home"><span>← 이전</span><strong>전체 실습으로</strong></a>' +
-      '<a class="lesson-next" href="#' + K.id + '"><span>다음 →</span><strong>' + esc(K.title) + '</strong></a></nav>';
+      '<a class="lesson-next" href="#' + SK.id + '"><span>다음 →</span><strong>' + esc(SK.title) + '</strong></a></nav>';
     $('toc').innerHTML = '<strong>목차</strong>' + toc.map(function (t) { return '<a href="#' + t[0] + '" data-jump="' + t[0] + '">' + esc(t[1]) + '</a>'; }).join('');
     bindChecks(B.id);
   };
@@ -554,7 +554,7 @@
     add('care', '다룰 때 지킬 것', ul(K.care) + '<div class="local-note">' + esc(K.source) + '</div>', '지킬 것');
     add('review', '확인', '<p>아래 항목을 스스로 확인합니다.</p>' + checklistHtml(K.id, K.checks), '확인');
     $('lessonBody').innerHTML = parts.join('') + '<nav class="lesson-navigation" aria-label="이전 · 다음">' +
-      '<a class="lesson-prev" href="#' + B.id + '"><span>← 이전</span><strong>' + esc(B.title) + '</strong></a>' +
+      '<a class="lesson-prev" href="#' + SK.id + '"><span>← 이전</span><strong>' + esc(SK.title) + '</strong></a>' +
       '<a class="lesson-next" href="#' + T.id + '"><span>다음 →</span><strong>' + esc(T.title) + '</strong></a></nav>';
     $('toc').innerHTML = '<strong>목차</strong>' + toc.map(function (t) { return '<a href="#' + t[0] + '" data-jump="' + t[0] + '">' + esc(t[1]) + '</a>'; }).join('');
     bindChecks(K.id);
@@ -611,6 +611,79 @@
     bindChecks(T.id);
   };
 
+  /* ---------- Claude 스킬이란? 화면 ---------- */
+  /* 그림: 화면에서의 위치와 파일로 본 스킬의 모양 */
+  var skillWhereSvg = function () {
+    var chip = function (x, label, on) {
+      return '<rect x="' + x + '" y="62" width="128" height="44" rx="10" fill="' + (on ? '#111113' : '#f3f3f4') + '" stroke="#111113" stroke-opacity=".14"/>' +
+        '<text x="' + (x + 64) + '" y="90" text-anchor="middle" font-size="15" font-weight="700" fill="' + (on ? '#ffffff' : '#111113') + '">' + label + '</text>';
+    };
+    var arr = function (x) { return '<path d="M' + x + ' 84 L' + (x + 14) + ' 84 M' + (x + 8) + ' 78 L' + (x + 14) + ' 84 L' + (x + 8) + ' 90" stroke="#6e6e76" stroke-width="2" fill="none"/>'; };
+    var row = function (y, indent, icon, name, note, strong) {
+      return '<text x="' + (54 + indent) + '" y="' + y + '" font-size="15" font-weight="' + (strong ? 700 : 600) + '" fill="#111113">' + icon + ' ' + name + '</text>' +
+        '<text x="420" y="' + y + '" font-size="13.5" fill="#6e6e76">' + note + '</text>';
+    };
+    return '<figure class="fig"><svg class="diagram" viewBox="0 0 760 350" role="img" aria-label="스킬은 claude.ai의 설정, 기능, 스킬 화면에 있고, 파일로 보면 스킬 이름의 폴더 안에 SKILL.md와 양식 파일이 들어 있다는 그림" font-family="inherit">' +
+      '<rect x="0" y="0" width="760" height="350" rx="16" fill="#ffffff"/>' +
+      '<text x="24" y="40" font-size="12.5" font-weight="600" fill="#6e6e76" letter-spacing="1">화면에서 찾기</text>' +
+      chip(24, 'claude.ai', false) + arr(158) + chip(178, '설정', false) + arr(312) + chip(332, '기능', false) + arr(466) + chip(486, '스킬', true) +
+      '<text x="630" y="82" font-size="13" fill="#6e6e76">+ 를 눌러</text><text x="630" y="100" font-size="13" fill="#6e6e76">새로 추가</text>' +
+      '<line x1="24" y1="140" x2="736" y2="140" stroke="#111113" stroke-opacity=".08"/>' +
+      '<text x="24" y="178" font-size="12.5" font-weight="600" fill="#0b64f4" letter-spacing="1">파일로 보면 (zip 안의 모양)</text>' +
+      '<rect x="24" y="194" width="712" height="134" rx="12" fill="#eef4ff" stroke="#0b64f4" stroke-opacity=".25"/>' +
+      row(226, 0, '📁', 'one-page-report/', '스킬 이름과 같은 폴더', true).replace('📁 ', '') +
+      row(262, 26, '·', 'SKILL.md', '이름 · 설명 · 지침이 적힌 글 파일', true) +
+      row(298, 26, '·', 'assets/한장보고서_양식.hwpx', '함께 쓰는 양식 파일 (있을 때만)', false) +
+      '</svg><figcaption>화면에서는 설정 → 기능 → 스킬에서 관리하고, 파일로는 폴더 하나(SKILL.md + 양식)를 zip으로 묶어 주고받습니다.</figcaption></figure>';
+  };
+  var renderSkillIntro = function () {
+    store = {}; keySeq = 0;
+    $('bcPart').textContent = B.partTitle;
+    $('bcCode').textContent = '스킬';
+    $('lhEyebrow').textContent = SK.code + ' · ' + SK.time;
+    $('lhTitle').textContent = SK.title;
+    $('lhSum').textContent = SK.sum;
+    $('lhMeta').innerHTML = '<span class="meta-chip active">작업 매뉴얼</span><span class="meta-chip">어느 대화에서나 사용</span><span class="meta-chip">만드는 방법 3가지</span>';
+    var chat = safeUrl(C.chatUrl), parts = [], toc = [], n = 0;
+    var add = function (id, title, body, tocLabel) {
+      n++; var no = (n < 10 ? '0' : '') + n;
+      parts.push(sec(no, id, title, body)); toc.push([id, tocLabel || title]);
+    };
+    var tbl = function (head, rows) {
+      return '<div class="g-table sp"><table><thead><tr>' + head.map(function (h) { return '<th>' + esc(h) + '</th>'; }).join('') + '</tr></thead><tbody>' +
+        rows.map(function (r) { return '<tr>' + r.map(function (c) { return '<td>' + esc(c) + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table></div>';
+    };
+    var cards = function (rows, cols, label) {
+      return '<div class="step-grid cols-' + cols + '">' + rows.map(function (r, i) {
+        return '<div class="start-item">' + (label ? '<b>' + label + ' ' + (i + 1) + '</b>' : '') + '<strong>' + esc(r[0]) + '</strong><p>' + esc(r[1]) + '</p></div>';
+      }).join('') + '</div>';
+    };
+    add('what', '스킬이란', '<p>' + esc(SK.what) + '</p>' +
+      '<figure class="fig"><img src="img/basics/skill-equation.jpg" alt="Claude AI에 특정 양식과 규칙을 더하면 전용 비서인 Claude Skill이 된다는 그림과 일반 대화, 스킬 활용 비교"><figcaption>출처: claude.ai, 생성형 AI 이미지 (강의 슬라이드)</figcaption></figure>' +
+      '<h3>스킬은 세 부분으로 되어 있습니다</h3>' + cards(SK.parts, 3, ''), '스킬이란');
+    add('when', '언제 사용하나', cards(SK.when, 2, '경우') +
+      '<h3>채팅 · 프로젝트 · 스킬 고르기</h3>' + tbl(['방식', '무엇을 담나', '이럴 때 씁니다'], SK.compare), '언제 쓰나');
+    add('where', '스킬의 위치', skillWhereSvg() + '<ul class="plain">' + SK.where.map(function (t) { return '<li>' + t + '</li>'; }).join('') + '</ul>', '스킬의 위치');
+    add('make', '스킬을 만드는 방법', olist(SK.makeSteps), '만드는 방법');
+    add('ways', '스킬을 만드는 세 가지 방법',
+      '<div class="way-list">' + SK.ways.map(function (w, i) {
+        return '<div class="way-card"><div class="way-head"><span class="way-no">' + (i + 1) + '</span><div><strong>' + esc(w.name) + '</strong><em>' + esc(w.tag) + '</em></div></div>' +
+          '<p class="way-who"><b>이럴 때</b> ' + esc(w.who) + '</p><p>' + esc(w.how) + '</p>' +
+          (w.copy ? '<div class="prompt-box' + (w.copy.length > 300 ? ' tall' : '') + '"><span class="box-label">' + esc(w.copyLabel) + '</span>' + copyBtn(w.copy, '복사') + '<pre>' + esc(w.copy) + '</pre></div>' :
+            '<div class="go-studio"><p><b>이 실습실의 스킬 파일</b>(실습 에이전트 7종, 보고서 3종)을 받아 바로 올릴 수 있습니다.</p><a class="g-btn" href="#skills">스킬 파일 받기</a></div>') +
+          '</div>';
+      }).join('') + '</div>' +
+      '<div class="safety-box sp"><strong>남이 만든 스킬을 올릴 때</strong><p>' + esc(SK.careful) + '</p></div>' +
+      '<div class="local-note">' + esc(SK.source) + '</div>', '세 가지 방법');
+    add('review', '확인', '<p>아래 항목을 스스로 확인합니다.</p>' + checklistHtml(SK.id, SK.checks) +
+      '<div class="go-studio"><p><b>스킬을 프로젝트와 함께</b> 쓰는 실습은 "프로젝트로 진행"에 있습니다.</p><a class="g-btn ghost" href="#project">프로젝트로 진행</a></div>', '확인');
+    $('lessonBody').innerHTML = parts.join('') + '<nav class="lesson-navigation" aria-label="이전 · 다음">' +
+      '<a class="lesson-prev" href="#' + B.id + '"><span>← 이전</span><strong>' + esc(B.title) + '</strong></a>' +
+      '<a class="lesson-next" href="#' + K.id + '"><span>다음 →</span><strong>' + esc(K.title) + '</strong></a></nav>';
+    $('toc').innerHTML = '<strong>목차</strong>' + toc.map(function (t) { return '<a href="#' + t[0] + '" data-jump="' + t[0] + '">' + esc(t[1]) + '</a>'; }).join('');
+    bindChecks(SK.id);
+  };
+
   /* 실습 화면 안의 목차는 주소(#)를 바꾸지 않고 그 자리로만 옮긴다 */
   document.addEventListener('click', function (e) {
     var a = e.target.closest('[data-jump]');
@@ -632,14 +705,14 @@
   var shown = null;
   var route = function () {
     var h = (location.hash || '').slice(1);
-    var l = Object.prototype.hasOwnProperty.call(byId, h) ? byId[h] : (h === G.id ? G : h === P.id ? P : h === B.id ? B : h === K.id ? K : h === T.id ? T : h === L.id ? P : null);
+    var l = Object.prototype.hasOwnProperty.call(byId, h) ? byId[h] : (h === G.id ? G : h === P.id ? P : h === B.id ? B : h === K.id ? K : h === T.id ? T : h === SK.id ? SK : h === L.id ? P : null);
     $('viewHome').hidden = !!l;
     $('viewLesson').hidden = !l;
     if (l) {
-      if (shown !== l.id) { if (l === G) renderGuide(); else if (l === P) renderProject(); else if (l === B) renderBasics(); else if (l === K) renderApiKey(); else if (l === T) renderThink(); else renderLesson(l); shown = l.id; }
+      if (shown !== l.id) { if (l === G) renderGuide(); else if (l === P) renderProject(); else if (l === B) renderBasics(); else if (l === K) renderApiKey(); else if (l === T) renderThink(); else if (l === SK) renderSkillIntro(); else renderLesson(l); shown = l.id; }
       var labEl = h === L.id ? $('lab') : null;
       if (labEl) labEl.scrollIntoView({ block: 'start' }); else window.scrollTo(0, 0);
-      document.title = (l === G || l === P || l === B || l === K || l === T ? l.title : l.code + ' ' + l.title) + ' | 업무 에이전트 실습실';
+      document.title = (l === G || l === P || l === B || l === K || l === T || l === SK ? l.title : l.code + ' ' + l.title) + ' | 업무 에이전트 실습실';
     } else {
       shown = null;
       updateProgress();

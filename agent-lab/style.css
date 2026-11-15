@@ -511,3 +511,22 @@ body{letter-spacing:-.005em}
 .think-check{margin-top:10px}
 .think-sample{margin:0 14px 14px;max-width:none}
 @media (max-width:640px){.think-split{grid-template-columns:minmax(0,1fr)}.think-table td:nth-child(2){min-width:200px}}
+
+/* 첫 줄(시작 전) 카드 네 개 */
+#homeLevels .level-section:first-child .lesson-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+#homeLevels .level-section:first-child .lesson-card h3{font-size:21px}
+@media (max-width:1100px){#homeLevels .level-section:first-child .lesson-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){#homeLevels .level-section:first-child .lesson-grid{grid-template-columns:minmax(0,1fr)}}
+.step-grid.cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:640px){.step-grid.cols-2{grid-template-columns:minmax(0,1fr)}}
+/* 스킬 만드는 세 가지 방법 */
+.way-list{display:grid;gap:14px;margin-top:16px;max-width:860px}
+.way-card{padding:20px 22px;border:1px solid var(--rule);border-radius:16px;background:var(--surface)}
+.way-head{display:flex;gap:14px;align-items:center}
+.way-no{display:grid;place-items:center;width:36px;height:36px;flex:0 0 36px;border-radius:50%;background:var(--ink);color:#fff;font-weight:700;font-size:16px}
+.way-head strong{display:block;font-size:19px;font-weight:700;letter-spacing:-.02em}
+.way-head em{font-style:normal;font-size:12.5px;font-weight:600;color:var(--accent)}
+.way-card > p{margin-top:10px;color:var(--ink-soft);font-size:15px;line-height:1.75;text-align:justify;word-break:keep-all}
+.way-card .way-who b{color:var(--ink);margin-right:6px}
+.way-card .prompt-box,.way-card .go-studio{max-width:none}
+@media (max-width:640px){.way-card > p{text-align:left}}
