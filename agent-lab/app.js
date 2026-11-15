@@ -734,7 +734,11 @@
     add('how', '이 파트에서 하는 일',
       '<ol class="flow-list wide">' + ST.flow.map(function (f) { return '<li><div><strong>' + esc(f[0]) + '</strong><p>' + esc(f[1]) + '</p></div></li>'; }).join('') + '</ol>' +
       '<div class="safety-box sp"><strong>푸는 규칙</strong><ul class="plain">' + ST.rules.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul></div>', '하는 일');
-    add('setup', '준비 · 보고서 연습실 프로젝트', olist(ST.prepSteps) +
+    add('setup', '준비 · 보고서 연습실 프로젝트',
+      '<h3>이 프로젝트에 올리는 파일 세 가지</h3><p>지침은 문제마다 받는 세 가지 파일에 맞춰 쓰여 있습니다. 문제가 바뀌어도 지침은 그대로 둡니다.</p>' +
+      '<div class="step-grid cols-3">' + ST.fileKinds.map(function (f, i) {
+        return '<div class="start-item"><b>파일 ' + (i + 1) + ' · ' + esc(f[1]) + '</b><strong>' + esc(f[0]) + '</strong><p>' + esc(f[2]) + '</p><p class="kind-ex">' + esc(f[3]) + '</p></div>';
+      }).join('') + '</div><h3>프로젝트 만들기</h3>' + olist(ST.prepSteps) +
       '<div class="val-list">' + copyRow('프로젝트 이름', ST.projectName) + '</div>' +
       '<div class="prompt-box tall"><span class="box-label">지침 전체 · 그대로 붙여넣기</span>' + copyBtn(ST.projectGuide, '지침 복사') + '<pre>' + esc(ST.projectGuide) + '</pre></div>' +
       '<div class="go-studio"><p><b>지침을 복사한 뒤</b> claude.ai를 열어 프로젝트를 만듭니다.</p><a class="g-btn" href="' + esc(chat) + '" target="_blank" rel="noopener noreferrer">claude.ai 열기</a></div>', '준비');

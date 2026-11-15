@@ -553,3 +553,5 @@ body{letter-spacing:-.005em}
 .score-item{grid-template-columns:22px 1fr auto}
 .score-item em{font-style:normal;font-weight:700;color:var(--ink-mute);font-size:13.5px;white-space:nowrap}
 .score-item:has(input:checked) em{color:var(--leaf);text-decoration:none}
+
+.start-item .kind-ex{margin-top:8px;padding-top:8px;border-top:1px solid var(--rule);font-size:13px;color:var(--accent)}
