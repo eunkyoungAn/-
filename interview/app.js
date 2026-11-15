@@ -203,7 +203,7 @@ function homeView() {
     ${inApp ? `<div class="notice warn"><b>${esc(inApp)} 안에서 열려 있어요.</b> 이 화면에서는 마이크가 막힐 수 있습니다. ${inApp === '카카오톡' ? `아래 버튼을 눌러 Chrome이나 Safari에서 열어 주세요.<a class="btn primary sm" href="${KAKAO_EXTERNAL}">다른 브라우저로 열기</a>` : '오른쪽 위 메뉴에서 <b>다른 브라우저로 열기</b>(Chrome, Safari 등)를 눌러 주세요.'}<button class="btn ghost sm" data-act="copy-link">주소 복사</button></div>` : ''}
     ${SR && SAMSUNG ? '<div class="notice warn"><b>삼성 인터넷으로 열려 있어요.</b> 이 브라우저에서는 말한 내용이 글자로 바뀌지 않을 수 있습니다. Chrome 앱에서 같은 주소를 열어 주세요.<button class="btn ghost sm" data-act="copy-link">주소 복사</button></div>' : ''}
     ${!SR ? `<div class="notice">이 브라우저는 음성 인식을 지원하지 않아 <b>글로 답하기</b>로 진행합니다. 말로 연습하려면 Chrome(안드로이드·PC) 또는 Safari(아이폰)에서 열어 주세요.</div>` : ''}
-    <button class="btn ghost wide" data-act="guide">처음이신가요? 이용 방법 보기</button>
+    <div class="row2"><button class="btn ghost" data-act="tips">면접 전에 꼭 볼 것</button><button class="btn ghost" data-act="guide">이용 방법 보기</button></div>
     <section class="card">
       <h2>시작 전에 확인해 주세요</h2>
       <ul class="plain">
@@ -1015,6 +1015,95 @@ window.addEventListener('beforeunload', e => {
   if (state.log.length && !state.saved) { e.preventDefault(); e.returnValue = ''; }
 });
 
+// ---------- 화면: 면접 전에 꼭 볼 것 ----------
+// 커리어캐쳐 평가 기준표(rubric.js), 블로그 글(AI면접 컨설팅 후기, 1분 자기소개, AI 시대 구직자)을 바탕으로 정리.
+// 근거가 약한 내용은 단정하지 않는다. 특정 회사의 채점 방식은 추측해서 쓰지 않는다.
+function tipsView() {
+  const SHORT = { koutsoumpis2024: 'Koutsoumpis 외, 2024', hirevue: 'HireVue 공식 자료', eeoc: '미국 EEOC', basch2025: 'Basch·Melchers, 2025', levashina2014: 'Levashina 외, 2014' };
+  const ref = k => `<a href="${REFS[k].url}" target="_blank" rel="noopener noreferrer">${esc(SHORT[k])}</a>`;
+  return `${header('면접 전에 꼭 볼 것')}
+  <main class="wrap guidepage tipspage">
+    <section class="hero small">
+      <h1>면접 전에 꼭 볼 것</h1>
+      <p>어떤 면접이든 통하는 기본, AI면접에서 주의할 점, 자주 듣는 오해를 3분 분량으로 정리했어요.</p>
+    </section>
+
+    <section class="card">
+      <h2>1. 면접 기본: 어떤 면접이든 공통</h2>
+      <ol class="steps">
+        <li><b>결론부터 말해요.</b> 첫 문장에 질문의 답을 말하고, 근거가 되는 경험을 덧붙여요.</li>
+        <li><b>내가 한 행동을 말해요.</b> "우리 팀이 했다"보다 "제가 ○○를 해서"처럼 본인 역할이 드러나게 말해요.</li>
+        <li><b>결과는 숫자로 말해요.</b> 기간, 건수, 전후 비교를 넣어요. 예: "제가 전표 200건을 직접 검토해 오류율이 5%에서 1%로 줄었습니다." 숫자를 모르면 지어내지 말고 면접 전에 확인해 두세요.</li>
+        <li><b>한 답변은 60~90초 안에.</b> 길게 말하기보다 핵심 하나를 분명하게 말해요. 부족한 부분은 면접관이 꼬리질문으로 묻습니다.</li>
+        <li><b>직무와 연결하며 마무리해요.</b> 마지막 문장은 "이 경험을 ○○ 업무에서 이렇게 쓰겠습니다"로 끝내요.</li>
+        <li><b>외우지 말고 키워드로 준비해요.</b> 문장을 통째로 외우면 막혔을 때 다시 잇기 어려워요. 경험마다 키워드 3개만 기억해요.</li>
+      </ol>
+    </section>
+
+    <section class="card">
+      <h2>2. 1분 자기소개 3단계</h2>
+      <p class="muted small">면접관은 1분 동안 세 가지를 들어요: 나를 한 단어로 정리할 수 있는가, 그 말을 뒷받침하는 경험이 있는가, 회사와 직무를 이해하고 있는가.</p>
+      <ol class="steps">
+        <li><b>한 줄 정체성 (10초)</b>: 나를 보여 주는 핵심 키워드 하나. 예: "고객의 불편을 숫자로 찾아 고치는 지원자 ○○○입니다."</li>
+        <li><b>근거 경험 1~2개 (35초)</b>: 키워드를 증명하는 경험과 결과 숫자. 신입이라면 수업·졸업 프로젝트, 인턴·현장실습, 아르바이트, 동아리·공모전, 자격증·독학 경험으로 충분해요.</li>
+        <li><b>입사 후 기여 (15초)</b>: 그 강점을 지원 직무에서 어떻게 쓸지 한 문장으로 마무리.</li>
+      </ol>
+      <div class="notice"><b>빈칸 틀</b>저는 [핵심 키워드]를 가진 지원자 [이름]입니다. [경험]에서 제가 [행동]해서 [결과 숫자]를 만들었습니다. 이 경험을 살려 [회사]의 [직무]에서 [기여]하겠습니다.</div>
+      <p class="small"><b>피할 것</b>: 이력서를 처음부터 끝까지 읽기, 성장 과정이나 가족 이야기로 시작하기, "성실하다"처럼 근거 없는 형용사만 나열하기, 1분을 크게 넘기기</p>
+    </section>
+
+    <section class="card">
+      <h2>3. AI면접에서 주의할 점</h2>
+      <ul class="plain">
+        <li><b>환경</b>: 조용하고 밝은 곳에서 얼굴 정면에 빛이 오게 앉아요. 창이나 조명을 등지면 얼굴이 어둡게 찍혀요.</li>
+        <li><b>카메라와 시선</b>: 카메라는 눈높이에 두고, 화면 속 내 얼굴이 아니라 카메라 렌즈를 보며 말해요. 옆으로 오래 보는 것이 위아래로 보는 것보다 더 눈에 띕니다.</li>
+        <li><b>움직임</b>: 손동작, 몸 흔들림, 머리 만지기는 줄여요. 움직임 자체가 감점이라서가 아니라, 보는 사람의 주의가 답변 내용에서 흩어지기 때문이에요.</li>
+        <li><b>준비 시간</b>: 질문이 나오면 준비 시간에 키워드 3개만 떠올려요. 답을 전부 머릿속으로 쓰려고 하면 시간이 부족해요.</li>
+        <li><b>말하기</b>: 또박또박 말하고 문장 끝을 흐리지 않아요. 숫자와 결과는 조금 힘주어 말해요. 말이 막히면 길게 멈추기보다 "다시 말씀드리면"처럼 짧게 이어요.</li>
+        <li><b>기기</b>: 노트북 Chrome을 권장해요. 휴대폰 알림과 메신저는 끄고, 충전기를 연결해 두고, 인터넷이 안정적인지 미리 확인해요.</li>
+        <li><b>미리 찍어 보기</b>: 내 모습을 영상으로 보면 스스로 몰랐던 습관이 보여요. 이 앱의 영상 녹화로 한 번 찍어 보세요.</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>4. 자주 듣는 오해</h2>
+      <p class="muted small">AI면접은 회사와 운영사마다 평가 방식이 다르고, 공개되지 않은 부분이 많아요. 아래는 공개된 연구와 공식 자료로 확인할 수 있는 내용입니다.</p>
+      <dl class="rules">
+        <dt>"표정이나 웃는 횟수로 점수가 정해진다"</dt>
+        <dd>근거가 약해요. 연구에서는 표정·음성 특징보다 말한 내용(언어적 특징)이 더 중요했어요(${ref('koutsoumpis2024')}). 표정·몸짓·목소리 톤을 채점하지 않는다고 밝힌 운영사도 있어요(${ref('hirevue')}). 준비의 중심은 답변 내용입니다.</dd>
+        <dt>"목소리가 낮거나 사투리, 말더듬이 있으면 떨어진다"</dt>
+        <dd>목소리 특성으로 판단하는 자동 평가는 불공정할 수 있다는 지적이 있어요(${ref('eeoc')}). 목소리를 바꾸려 하기보다 결론과 숫자를 또렷하게 말하는 데 집중하세요.</dd>
+        <dt>"시선을 피하면 거짓말하는 것으로 본다"</dt>
+        <dd>시선으로 거짓말을 판단한다는 근거는 없어요. 다만 화상 면접에서 옆으로 시선을 돌리면 인상이 나빠질 수 있다는 연구가 있어요(${ref('basch2025')}). 그래서 카메라 렌즈를 보는 연습은 해 두는 것이 좋아요.</dd>
+        <dt>"말을 길게 해야 성의 있어 보인다"</dt>
+        <dd>구조화 면접 연구에서는 답변을 정해진 기준으로 평가해요(${ref('levashina2014')}). 길이보다 질문에 맞는 근거가 있는지가 중요합니다.</dd>
+      </dl>
+    </section>
+
+    <section class="card">
+      <h2>5. 면접 직전 3분 체크리스트</h2>
+      <ul class="checklist">
+        <li><label class="check"><input type="checkbox"> 카메라 눈높이, 얼굴 정면 조명, 조용한 곳</label></li>
+        <li><label class="check"><input type="checkbox"> 휴대폰 알림 끄기, 충전기 연결, 인터넷 확인</label></li>
+        <li><label class="check"><input type="checkbox"> 대표 경험 3개와 경험마다 결과 숫자 1개</label></li>
+        <li><label class="check"><input type="checkbox"> 지원 회사·직무에서 하고 싶은 일 한 문장</label></li>
+        <li><label class="check"><input type="checkbox"> 1분 자기소개 한 번 소리 내어 말하기</label></li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>6. 이 앱으로 연습하는 법</h2>
+      <ol class="steps">
+        <li>질문을 듣고 답한 뒤, 피드백의 <b>"다음에 고칠 한 가지"</b>만 고쳐 같은 질문에 다시 답해요.</li>
+        <li><b>영상 녹화</b>로 시선과 습관을 확인해요.</li>
+        <li>자기소개서가 있다면 <b>내 자료로 예상 질문 만들기</b>로 내 경험에서 나올 질문을 연습해요.</li>
+      </ol>
+      <button class="btn primary big" data-act="${state.consent ? 'pick' : 'home'}">연습하러 가기</button>
+    </section>
+    <p class="disclaimer">커리어캐쳐 면접 코칭 기준과 공개된 연구·공식 자료를 바탕으로 정리한 연습용 안내입니다. 실제 채용 결과를 보장하지 않으며, 회사마다 면접 방식은 다를 수 있어요.</p>
+  </main>`;
+}
+
 // ---------- 화면: 이용 방법(설명서) ----------
 function guideView() {
   return `${header('이용 방법')}
@@ -1023,6 +1112,7 @@ function guideView() {
       <h1>면접 리허설 이용 방법</h1>
       <p>질문을 듣고 답한 뒤, 평가 기준에 따른 피드백을 받고 다시 답해 보는 연습 도구예요. 회원가입 없이 무료로 씁니다.</p>
     </section>
+    <button class="btn ghost wide" data-act="tips">면접 기본과 AI면접 주의할 점 보기 (면접 전에 꼭 볼 것)</button>
     <section class="card">
       <h2>한눈에 보는 순서</h2>
       <ol class="steps">
@@ -1505,7 +1595,7 @@ function qsetView() {
 }
 
 // ---------- 렌더링 ----------
-const views = { guide: guideView, diag: diagView, material: materialView, comps: compsView, qset: qsetView, home: homeView, pick: pickView, ask: askView, review: reviewView, report: reportView, compare: compareView, records: recordsView };
+const views = { tips: tipsView, guide: guideView, diag: diagView, material: materialView, comps: compsView, qset: qsetView, home: homeView, pick: pickView, ask: askView, review: reviewView, report: reportView, compare: compareView, records: recordsView };
 function render() {
   try {
     app.innerHTML = views[state.screen]();
@@ -1637,6 +1727,7 @@ app.addEventListener('click', async e => {
   }
   else if (act === 'save-pdf') doSave(act);
   else if (act === 'guide') go('guide');
+  else if (act === 'tips') go('tips');
   else if (act === 'save-settings' || act === 'share-link') {
     settings.relay = document.getElementById('relay').value.trim();
     settings.code = document.getElementById('code').value.trim();
