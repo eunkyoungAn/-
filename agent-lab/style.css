@@ -481,3 +481,8 @@ body{letter-spacing:-.005em}
 
 /* API key 그림 */
 .diagram{display:block;width:100%;height:auto;border:1px solid var(--rule);border-radius:14px;background:#fff;font-family:var(--font-ko)}
+
+/* 단계 목록(제목 + 설명) */
+.flow-list.wide li{align-items:start}
+.flow-list.wide li strong{display:block;font-size:16.5px;font-weight:700;color:var(--ink)}
+.flow-list.wide li p{margin-top:3px;color:var(--ink-soft);font-size:15px;line-height:1.7;text-align:left}
