@@ -4,10 +4,12 @@
 const VENDOR = new URL('./vendor/mediapipe/', import.meta.url).href;
 
 // ---------- 카메라·녹화 ----------
-export async function openCamera() {
+// withAudio가 false면 영상만 연다. 휴대폰은 마이크를 한 곳에서만 쓸 수 있어,
+// 카메라가 마이크를 잡으면 음성 인식이 소리를 받지 못한다.
+export async function openCamera(withAudio = true) {
   return navigator.mediaDevices.getUserMedia({
     video: { facingMode: 'user', width: { ideal: 720 }, height: { ideal: 960 } },
-    audio: { echoCancellation: true, noiseSuppression: true },
+    audio: withAudio ? { echoCancellation: true, noiseSuppression: true } : false,
   });
 }
 
@@ -51,7 +53,7 @@ export function startRecorder(stream) {
 // 목소리의 높낮이 자체(성별·나이와 관련)는 점수에 쓰지 않고, 얼마나 변화하는지만 본다.
 export function startAudioAnalysis(stream) {
   const Ctx = window.AudioContext || window.webkitAudioContext;
-  if (!Ctx) return { stop: () => null };
+  if (!Ctx || !stream.getAudioTracks().length) return { stop: () => null };
   const ctx = new Ctx();
   const src = ctx.createMediaStreamSource(stream);
   const an = ctx.createAnalyser();
