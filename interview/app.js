@@ -6,7 +6,7 @@
 import { QUESTIONS, CATEGORIES, findQuestion } from './questions.js';
 import { RUBRIC, measure, speedLabel, localEvaluate, totalScore, voiceScore } from './scoring.js';
 import { BASIS, REFS, NOTICE } from './rubric.js';
-import { buildText, buildSetText, fileName } from './save.js';
+import { buildSetText, fileName } from './save.js';
 import * as gem from './gemini.js';
 import * as files from './files.js';
 import { canRecord, openCamera, stopStream, startRecorder, startAudioAnalysis, startGaze, loadGazeModel, scoreNonverbal, saveVideo } from './video.js';
@@ -34,9 +34,8 @@ const settings = {
 };
 const assigned = (params.get('q') || '').split(',').map(findQuestion).filter(Boolean);
 
-// 리포트를 받을 이메일(선택). 이 기기 브라우저에만 기억하고, 보내기를 누를 때만 쓴다.
-const EMAIL_RE = /^[^\s@,;<>]+@[^\s@,;<>]+\.[^\s@,;<>]+$/;
-let email = store.get('email') || '';
+// 이메일 기능은 없앴다. 예전에 이 기기에 저장된 주소가 있으면 지운다.
+store.set('email', '');
 const KEY_URL = 'https://aistudio.google.com/apikey';
 
 // 참여자가 직접 추가한 질문. 이 기기의 브라우저에만 저장되고 어디에도 보내지 않는다.
@@ -201,11 +200,6 @@ function homeView() {
     ${SR && SAMSUNG ? '<div class="notice warn"><b>삼성 인터넷으로 열려 있어요.</b> 이 브라우저에서는 말한 내용이 글자로 바뀌지 않을 수 있습니다. Chrome 앱에서 같은 주소를 열어 주세요.<button class="btn ghost sm" data-act="copy-link">주소 복사</button></div>' : ''}
     ${!SR ? `<div class="notice">이 브라우저는 음성 인식을 지원하지 않아 <b>글로 답하기</b>로 진행합니다. 말로 연습하려면 Chrome(안드로이드·PC) 또는 Safari(아이폰)에서 열어 주세요.</div>` : ''}
     <button class="btn ghost wide" data-act="guide">처음이신가요? 이용 방법 보기</button>
-    <section class="card form">
-      <h2>피드백 리포트 받을 이메일 <small class="muted">선택</small></h2>
-      <label class="field">이메일 주소<input id="email" type="email" inputmode="email" autocomplete="email" placeholder="name@example.com" value="${esc(email)}"></label>
-      <p class="muted small">연습을 마치고 "이메일로 리포트 받기"를 누르면 이 주소로 피드백 리포트를 보내 드려요. 주소는 이 휴대폰에만 기억하고, 보내기를 누를 때만 사용합니다. 비워 두고 시작해도 됩니다.</p>
-    </section>
     <section class="card">
       <h2>시작 전에 확인해 주세요</h2>
       <ul class="plain">
@@ -842,10 +836,6 @@ function savePanel() {
     <p class="muted small">화면을 닫으면 기록이 사라져요. 오늘 연습한 질문 ${n}개의 종합 평가, 항목별 점수, 질문별 피드백, 평가 기준과 근거가 PDF 한 파일에 담깁니다.</p>
     <button class="btn primary big" data-act="save-pdf">PDF로 내려받기</button>
     <p class="muted small">버튼을 누르면 PDF 파일이 휴대폰(다운로드 폴더)에 바로 저장돼요. 영상은 들어가지 않습니다.</p>
-    <div class="mailrow">
-      <label class="field">이메일로도 받기<input id="mailTo" type="email" inputmode="email" autocomplete="email" placeholder="name@example.com" value="${esc(email)}"></label>
-      <button class="btn ghost" data-act="save-mail">이메일로 보내기</button>
-    </div>
     ${state.screen !== 'records' ? '<button class="linkbtn" data-act="records">피드백 리포트 미리 보기</button>' : ''}
   </section>`;
 }
@@ -952,66 +942,12 @@ async function downloadPdf() {
 
 async function doSave(act) {
   if (!state.log.length) { toast('먼저 질문 하나를 연습해 주세요.'); return; }
-  if (act === 'save-mail') await sendReportMail();
-  else if (act === 'save-pdf') await downloadPdf();
+  if (act === 'save-pdf') await downloadPdf();
 }
 
 window.addEventListener('beforeunload', e => {
   if (state.log.length && !state.saved) { e.preventDefault(); e.returnValue = ''; }
 });
-
-// ---------- 이메일로 리포트 보내기 ----------
-function saveEmailField(silent) {
-  const el = document.getElementById('email');
-  if (!el) return true;
-  const v = el.value.trim();
-  if (v && !EMAIL_RE.test(v)) { if (!silent) { toast('이메일 주소를 확인해 주세요. 비워 두고 시작해도 됩니다.'); el.focus(); } return false; }
-  email = v;
-  store.set('email', email);
-  return true;
-}
-
-// 메일 발송 주소: 저장소 루트의 mail-config.json (기존 커리어캐쳐 메일 발송 웹앱과 같이 쓴다)
-async function mailEndpoint() {
-  try {
-    const res = await fetch('../mail-config.json', { cache: 'no-store' });
-    if (!res.ok) return '';
-    const url = String((await res.json()).mailEndpoint || '').trim();
-    return /^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(url) ? url : '';
-  } catch { return ''; }
-}
-
-async function sendReportMail() {
-  const el = document.getElementById('mailTo');
-  const to = (el ? el.value : email).trim();
-  if (!EMAIL_RE.test(to)) { toast('받을 이메일 주소를 써 주세요.'); if (el) el.focus(); return; }
-  email = to;
-  store.set('email', email);
-  const subject = `면접 피드백 리포트 ${new Date().toLocaleDateString('ko-KR')}`;
-  const body = buildText(state.log);
-  const endpoint = await mailEndpoint();
-  if (endpoint) {
-    if (!confirm(`${to} 주소로 피드백 리포트를 보낼까요?\n리포트 글(질문, 내 답변, 피드백)이 커리어캐쳐 메일 발송 서비스(Google)를 거쳐 전송됩니다. 영상은 보내지 않아요.`)) return;
-    toast('리포트를 보내는 중이에요...');
-    try {
-      const res = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ to, subject, body: body.slice(0, 58000) }) });
-      const data = await res.json();
-      if (!data.ok) throw new Error(data.error || '메일 발송에 실패했어요.');
-      state.saved = true;
-      toast(`${to}(으)로 리포트를 보냈어요. 안 보이면 스팸함도 확인해 주세요.`);
-      return;
-    } catch (err) {
-      toast(`${err.message || '메일 서버에 연결하지 못했어요.'} 대신 내 메일 앱으로 보낼 수 있게 열어 드려요.`);
-    }
-  }
-  // 발송 서비스가 설정되지 않았거나 실패하면, 참여자 휴대폰의 메일 앱을 리포트가 채워진 상태로 연다.
-  // 메일 앱 주소 길이 제한 때문에 길면 요약만 넣고 전체는 복사해 둔다.
-  const short = body.length > 1500 ? body.slice(0, 1500) + '\n\n(내용이 길어 일부만 넣었어요. 전체 리포트는 복사되어 있으니 여기에 붙여 넣어 주세요.)' : body;
-  try { await navigator.clipboard.writeText(body); } catch { /* 복사 실패는 무시 */ }
-  state.saved = true;
-  location.href = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent('[커리어캐쳐] ' + subject)}&body=${encodeURIComponent(short)}`;
-  toast('메일 앱이 열리면 "보내기"를 눌러 주세요. 전체 리포트는 복사해 두었어요.');
-}
 
 // ---------- 화면: 이용 방법(설명서) ----------
 function guideView() {
@@ -1024,14 +960,14 @@ function guideView() {
     <section class="card">
       <h2>한눈에 보는 순서</h2>
       <ol class="steps">
-        <li><b>준비</b>: 이메일(선택)을 쓰고, 답변 시간(60초·90초)과 답변 방식(목소리만·영상 녹화)을 고릅니다.</li>
+        <li><b>준비</b>: 답변 시간(60초·90초)과 답변 방식(목소리만·영상 녹화)을 고릅니다.</li>
         <li><b>질문 고르기</b>: 공통 질문 20개, 내가 추가한 질문, 내 자료로 만든 예상 질문 중에서 고릅니다.</li>
         <li><b>답하기</b>: 질문을 소리로 듣고 30초 준비한 뒤 말로 답합니다. 말한 내용이 글자로 나타나요.</li>
         <li><b>답변 확인</b>: 잘못 받아 적힌 낱말만 고칩니다.</li>
         <li><b>꼬리질문</b>(AI 키 연결 시): 부족한 근거를 묻는 질문에 한 번 더 답합니다.</li>
         <li><b>피드백</b>: 총점, 항목별 점수, 다음에 고칠 한 가지, 바꿔 말하기 예시를 봅니다.</li>
         <li><b>다시 답하기</b>: 한 가지를 고쳐 같은 질문에 다시 답하고 전후를 비교합니다.</li>
-        <li><b>리포트 받기</b>: 피드백 리포트를 PDF 파일로 내려받습니다. 이메일로도 받을 수 있어요.</li>
+        <li><b>리포트 받기</b>: 피드백 리포트를 PDF 파일로 내려받습니다.</li>
       </ol>
     </section>
     <section class="card">
@@ -1077,7 +1013,6 @@ function guideView() {
       <h2>피드백 리포트 받기</h2>
       <ul class="plain">
         <li><b>PDF로 내려받기</b>: 버튼을 누르면 피드백 리포트가 PDF 파일로 휴대폰에 바로 저장됩니다.</li>
-        <li><b>이메일로 보내기</b>: 처음에 쓴 주소로 리포트 글을 보냅니다. 바로 발송되지 않고 메일 앱이 열리면, 내용이 채워진 메일의 "보내기"를 눌러 주세요.</li>
         <li>영상은 피드백 화면의 "이 영상 내 휴대폰에 저장"으로 따로 저장해요.</li>
         <li>화면을 닫으면 기록이 사라지니, 끝내기 전에 꼭 받아 두세요.</li>
       </ul>
@@ -1503,8 +1438,6 @@ app.addEventListener('drop', e => { const z = e.target.closest && e.target.close
 
 app.addEventListener('change', e => {
   if (e.target.id === 'consent') state.consent = e.target.checked;
-  if (e.target.id === 'email') saveEmailField(true);
-  if (e.target.id === 'mailTo' && EMAIL_RE.test(e.target.value.trim())) { email = e.target.value.trim(); store.set('email', email); }
   if (e.target.id === 'textmode') settings.textMode = e.target.checked;
   if (e.target.type === 'file' && e.target.files && e.target.files.length) { const fl = [...e.target.files]; e.target.value = ''; handleFiles(fl, e.target.dataset.slot || null); return; }
   if (e.target.dataset && e.target.dataset.comp != null && state.comps) { state.comps[Number(e.target.dataset.comp)].on = e.target.checked; e.target.closest('.comp').classList.toggle('off', !e.target.checked); }
@@ -1517,7 +1450,6 @@ app.addEventListener('click', async e => {
   if (act === 'home') { if (state.screen !== 'loading') go('home'); }
   else if (act === 'limit') { settings.limit = Number(el.dataset.v); store.set('limit', String(settings.limit)); render(); }
   else if (act === 'start') {
-    if (!saveEmailField()) return;
     if (!state.consent) { toast('시작 전 확인 항목에 체크해 주세요.'); document.getElementById('consent').focus(); return; }
     go('pick');
   }
@@ -1589,8 +1521,8 @@ app.addEventListener('click', async e => {
     saveCustom();
     render();
   }
-  else if (['save-pdf', 'save-mail'].includes(act)) doSave(act);
-  else if (act === 'guide') { saveEmailField(true); go('guide'); }
+  else if (act === 'save-pdf') doSave(act);
+  else if (act === 'guide') go('guide');
   else if (act === 'save-settings' || act === 'share-link') {
     settings.relay = document.getElementById('relay').value.trim();
     settings.code = document.getElementById('code').value.trim();
