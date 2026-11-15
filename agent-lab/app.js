@@ -90,7 +90,7 @@
     return '<a class="g-btn ghost" href="' + esc(fileUrl(f.path)) + '" download="' + esc(f.name) + '">' + esc(label || '받기') + '</a>';
   };
 
-  var G = D.guide, P = D.project, B = D.basics, K = D.apikey;
+  var G = D.guide, P = D.project, B = D.basics, K = D.apikey, L = D.projectlab;
   var fileList = function (files, label) {
     return '<div class="file-list">' + files.map(function (f) {
       return '<div class="file-row"><div><strong>' + esc(f.name) + '</strong><span>' + esc(f.label) + ' · <em>' + esc(f.role) + '</em></span></div>' + dlLink(f, label) + '</div>';
@@ -141,7 +141,7 @@
       D.parts.map(function (p) {
         return level(p.kicker, p.title, p.desc, p.lessons.map(function (id) { return card(byId[id], '실습 시작하기'); }).join(''));
       }).join('') +
-      level(P.kicker, P.partTitle, P.partDesc, card(P, '진행 방법 보기') +
+      level(P.kicker, P.partTitle, P.partDesc, card(P, '진행 방법 보기') + card(L, '실습 시작하기') +
       '<a class="lesson-card" href="#skills"><span class="lesson-code">교육 뒤 · 선택</span><h3>내 Claude에 스킬 등록하기</h3>' +
       '<p>일곱 에이전트를 스킬 파일로 받아 내 Claude에 등록합니다. 프로젝트 대화에서 불러 쓸 수 있습니다.</p>' +
       '<div class="lesson-output"><span>받는 것</span> · 스킬 zip 파일 7개</div><div class="lesson-arrow">스킬 받으러 가기 →</div></a>');
@@ -167,7 +167,7 @@
       D.parts.map(function (p) {
         return mGroup(p.kicker + ' · ' + p.title, p.lessons.map(function (id) { return mLink(id, byId[id].code, byId[id].title); }).join(''));
       }).join('') +
-      mGroup('교육 뒤', mLink(P.id, '프로젝트', P.title) + mLink('skills', '스킬', '내 Claude에 스킬 등록하기')) +
+      mGroup('교육 뒤', mLink(P.id, '프로젝트', P.title) + mLink(L.id, '추가 실습', L.title) + mLink('skills', '스킬', '내 Claude에 스킬 등록하기')) +
       mGroup('모음', mLink('home', '처음', '전체 실습 보기') + mLink('downloads', '자료', '자료 파일 한 곳에서 받기') + mLink('rules', '규칙', '공통 규칙 여덟 가지') +
         mLink('files', '파일', '결과를 파일로 받기') + mLink('help', '오류', '오류가 나는 대표 사유'));
     $('ruleGrid').innerHTML = D.rules.map(function (r) {
@@ -183,7 +183,7 @@
     $('pgBar').style.width = Math.round(n / t * 100) + '%';
     document.querySelectorAll('.lesson-card').forEach(function (el) {
       var id = el.getAttribute('data-lesson');
-      el.classList.toggle('is-done', isDone(id === G.id ? G : id === P.id ? P : id === B.id ? B : id === K.id ? K : byId[id]));
+      el.classList.toggle('is-done', isDone(id === G.id ? G : id === P.id ? P : id === B.id ? B : id === K.id ? K : id === L.id ? L : byId[id]));
     });
   };
 
@@ -380,7 +380,8 @@
     add('who', '어떤 사람에게 맞는 방식인가',
       '<p>실습실에는 세 가지 진행 방식이 있습니다. <b>프로젝트는 같은 일을 반복하는 담당자</b>에게 맞습니다.</p>' +
       tbl(['방식', '이런 사람에게 맞습니다', '이럴 때는 맞지 않습니다'], P.who) +
-      '<div class="safety-box sp"><strong>권하는 순서</strong><p>' + esc(P.whoNote) + '</p></div>', '누구에게 맞나');
+      '<div class="safety-box sp"><strong>권하는 순서</strong><p>' + esc(P.whoNote) + '</p></div>' +
+      '<div class="go-studio"><p><b>직접 해 보기</b> — "데이터 에이전트" 프로젝트를 만들어 가상 데이터를 분석하고 한 장 보고서까지 받는 실습이 있습니다.</p><a class="g-btn" href="#' + L.id + '">프로젝트 실습 하기</a></div>', '누구에게 맞나');
     add('rule', '프로젝트는 각자 따로 움직입니다',
       '<p>프로젝트마다 지침 · 지식 · 메모리가 따로 있어서, 한 프로젝트에서 다른 프로젝트의 자료를 읽을 수 없습니다.</p>' +
       '<div class="two-col"><div class="result-card"><strong>안 되는 것</strong>' + ul(P.cannot) + '</div><div class="result-card"><strong>되는 것</strong>' + ul(P.can) + '</div></div>' +
@@ -404,7 +405,7 @@
       '<div class="go-studio"><p><b>강사 슬라이드</b>에서 같은 내용을 네 장으로 볼 수 있습니다.</p><a class="g-btn ghost" href="' + esc(safeUrl(C.projectDeckUrl)) + '" target="_blank" rel="noopener noreferrer">슬라이드 보기</a></div>', '확인');
     $('lessonBody').innerHTML = parts.join('') + '<nav class="lesson-navigation" aria-label="이전 · 다음">' +
       '<a class="lesson-prev" href="#s8"><span>← 이전</span><strong>실습 8 · ' + esc(byId.s8.title) + '</strong></a>' +
-      '<a class="lesson-next" href="#skills"><span>다음 →</span><strong>내 Claude에 스킬 등록하기</strong></a></nav>';
+      '<a class="lesson-next" href="#' + L.id + '"><span>다음 →</span><strong>' + esc(L.title) + '</strong></a></nav>';
     $('toc').innerHTML = '<strong>목차</strong>' + toc.map(function (t) { return '<a href="#' + t[0] + '" data-jump="' + t[0] + '">' + esc(t[1]) + '</a>'; }).join('');
     bindChecks(P.id);
   };
@@ -531,6 +532,10 @@
         return '<div class="start-item"><b>경우 ' + (i + 1) + '</b><strong>' + esc(w[0]) + '</strong><p>' + esc(w[1]) + '</p></div>';
       }).join('') + '</div>' +
       '<div class="safety-box sp"><strong>이 과정에서는 필요 없습니다</strong><p>' + esc(K.notNeeded) + '</p></div>', '언제 쓰나');
+    add('issue', '발급 방법',
+      '<p>필요해졌을 때 아래 네 단계로 만듭니다. Claude Platform 공식 문서의 순서입니다.</p>' +
+      '<ol class="flow-list wide">' + K.issueSteps.map(function (t) { return '<li><div><strong>' + esc(t[0]) + '</strong><p>' + esc(t[1]) + '</p></div></li>'; }).join('') + '</ol>' +
+      '<ul class="plain">' + K.issueNotes.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>', '발급 방법');
     add('care', '다룰 때 지킬 것', ul(K.care) + '<div class="local-note">' + esc(K.source) + '</div>', '지킬 것');
     add('review', '확인', '<p>아래 항목을 스스로 확인합니다.</p>' + checklistHtml(K.id, K.checks), '확인');
     $('lessonBody').innerHTML = parts.join('') + '<nav class="lesson-navigation" aria-label="이전 · 다음">' +
@@ -538,6 +543,54 @@
       '<a class="lesson-next" href="#' + G.id + '"><span>다음 →</span><strong>' + esc(G.title) + '</strong></a></nav>';
     $('toc').innerHTML = '<strong>목차</strong>' + toc.map(function (t) { return '<a href="#' + t[0] + '" data-jump="' + t[0] + '">' + esc(t[1]) + '</a>'; }).join('');
     bindChecks(K.id);
+  };
+
+  /* ---------- 프로젝트 실습: 데이터 에이전트 ---------- */
+  var renderProjectLab = function () {
+    store = {}; keySeq = 0;
+    $('bcPart').textContent = P.kicker + ' ' + P.partTitle;
+    $('bcCode').textContent = '프로젝트 실습';
+    $('lhEyebrow').textContent = L.code + ' · ' + L.time;
+    $('lhTitle').textContent = L.title;
+    $('lhSum').textContent = L.sum;
+    $('lhMeta').innerHTML = '<span class="meta-chip active">프로젝트 + 스킬</span><span class="meta-chip">결과물 · 한 장 보고서(워드)</span><span class="meta-chip">분모 확정 · 사람</span>';
+    var chat = safeUrl(C.chatUrl), parts = [], toc = [], n = 0;
+    var add = function (id, title, body, tocLabel) {
+      n++; var no = (n < 10 ? '0' : '') + n;
+      parts.push(sec(no, id, title, body)); toc.push([id, tocLabel || title]);
+    };
+    var copyRow = function (label, text) {
+      return '<div class="val-row"><div class="val-label">' + esc(label) + '</div><div class="val-body"><pre>' + esc(text) + '</pre></div>' + copyBtn(text, '복사', 'g-btn ghost') + '</div>';
+    };
+    var tbl = function (head, rows) {
+      return '<div class="g-table sp"><table><thead><tr>' + head.map(function (h) { return '<th>' + esc(h) + '</th>'; }).join('') + '</tr></thead><tbody>' +
+        rows.map(function (r) { return '<tr>' + r.map(function (c) { return '<td>' + esc(c) + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table></div>';
+    };
+    var ul = function (items) { return '<ul class="plain">' + items.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>'; };
+
+    add('goal', '이번 실습에서 만들 것',
+      '<div class="result-card"><strong>' + esc(L.out) + '</strong><p>프로젝트에 지침을 한 번 넣어 두고, 대화에서는 파일을 올리고 짧은 말만 보냅니다. 분석이 끝나면 같은 대화에서 스킬을 불러 보고서 파일을 받습니다.</p></div>', '만들 것');
+    add('prepare', '준비', olist(L.prepSteps) + fileList(L.files, '파일 받기'), '준비');
+    add('make', '프로젝트 만들기', olist(L.makeSteps) +
+      '<div class="val-list">' + copyRow('프로젝트 이름', L.name) + copyRow('설명 (선택)', L.desc) + '</div>' +
+      '<div class="prompt-box tall"><span class="box-label">지침 전체 · 그대로 붙여넣기</span>' + copyBtn(L.guide, '지침 복사') + '<pre>' + esc(L.guide) + '</pre></div>' +
+      '<div class="go-studio"><p><b>지침을 복사한 뒤</b> claude.ai를 열어 프로젝트를 만듭니다.</p><a class="g-btn" href="' + esc(chat) + '" target="_blank" rel="noopener noreferrer">claude.ai 열기</a></div>', '프로젝트 만들기');
+    add('run', '데이터 분석하기', olist(L.runSteps) + attachHtml({ attach: L.attach }) +
+      '<div class="val-list">' + copyRow('보낼 말 1', L.say1) + '</div>', '분석하기');
+    add('funnel', '분모 확정하기',
+      '<p>Claude가 낸 분모 깔때기 표를 보고 사람이 분모를 정합니다. 이 실습에서 사람이 판단하는 자리입니다.</p>' + ul(L.funnelLook) +
+      '<div class="val-list">' + copyRow('보낼 말 2', L.say2) + '</div>', '분모 확정');
+    add('report', '한 장 보고서 받기', olist(L.reportSteps) +
+      '<div class="val-list">' + copyRow('보낼 말 3', L.say3) + '</div>' +
+      '<h3>맞춰 볼 값</h3>' + tbl(['항목', '값', '기준'], L.answers) + '<div class="local-note">' + esc(L.answersNote) + '</div>', '보고서 받기');
+    add('review', '결과 검수', '<p>아래 항목을 직접 확인하면 실습이 완료됩니다.</p>' + checklistHtml(L.id, L.checks) +
+      '<h3>사람이 마무리할 일</h3>' + ul(L.after), '결과 검수');
+    add('errors', '안 될 때', tbl(['화면에 나온 것', '왜 그런가', '할 일'], L.errors), '안 될 때');
+    $('lessonBody').innerHTML = parts.join('') + '<nav class="lesson-navigation" aria-label="이전 · 다음">' +
+      '<a class="lesson-prev" href="#' + P.id + '"><span>← 이전</span><strong>' + esc(P.title) + '</strong></a>' +
+      '<a class="lesson-next" href="#skills"><span>다음 →</span><strong>내 Claude에 스킬 등록하기</strong></a></nav>';
+    $('toc').innerHTML = '<strong>실습 목차</strong>' + toc.map(function (t) { return '<a href="#' + t[0] + '" data-jump="' + t[0] + '">' + esc(t[1]) + '</a>'; }).join('');
+    bindChecks(L.id);
   };
 
   /* 실습 화면 안의 목차는 주소(#)를 바꾸지 않고 그 자리로만 옮긴다 */
@@ -561,13 +614,13 @@
   var shown = null;
   var route = function () {
     var h = (location.hash || '').slice(1);
-    var l = Object.prototype.hasOwnProperty.call(byId, h) ? byId[h] : (h === G.id ? G : h === P.id ? P : h === B.id ? B : h === K.id ? K : null);
+    var l = Object.prototype.hasOwnProperty.call(byId, h) ? byId[h] : (h === G.id ? G : h === P.id ? P : h === B.id ? B : h === K.id ? K : h === L.id ? L : null);
     $('viewHome').hidden = !!l;
     $('viewLesson').hidden = !l;
     if (l) {
-      if (shown !== l.id) { if (l === G) renderGuide(); else if (l === P) renderProject(); else if (l === B) renderBasics(); else if (l === K) renderApiKey(); else renderLesson(l); shown = l.id; }
+      if (shown !== l.id) { if (l === G) renderGuide(); else if (l === P) renderProject(); else if (l === B) renderBasics(); else if (l === K) renderApiKey(); else if (l === L) renderProjectLab(); else renderLesson(l); shown = l.id; }
       window.scrollTo(0, 0);
-      document.title = (l === G || l === P || l === B || l === K ? l.title : l.code + ' ' + l.title) + ' | 업무 에이전트 실습실';
+      document.title = (l === G || l === P || l === B || l === K || l === L ? l.title : l.code + ' ' + l.title) + ' | 업무 에이전트 실습실';
     } else {
       shown = null;
       updateProgress();
