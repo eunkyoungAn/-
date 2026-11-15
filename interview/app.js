@@ -3,15 +3,15 @@
 // 음성 모드: 브라우저 음성 인식으로 글자만 받는다. 녹음 파일은 만들지 않는다.
 // 영상 모드(선택): 카메라로 녹화하고 시선·억양·템포를 휴대폰 안에서만 분석한다. 영상은 참여자가 직접 저장한다.
 
-import { QUESTIONS, CATEGORIES, findQuestion } from './questions.js';
-import { RUBRIC, measure, speedLabel, localEvaluate, totalScore, voiceScore } from './scoring.js';
-import { BASIS, REFS, NOTICE } from './rubric.js';
-import { buildSetText, fileName } from './save.js';
-import * as gem from './gemini.js';
-import * as files from './files.js';
-import * as claude from './claude.js';
-import { openMic, startAudioRecorder, toWavBase64, canRecordAudio } from './audio.js';
-import { canRecord, openCamera, stopStream, startRecorder, startAudioAnalysis, startGaze, loadGazeModel, scoreNonverbal, saveVideo } from './video.js';
+import { QUESTIONS, CATEGORIES, findQuestion } from './questions.js?v=202611151';
+import { RUBRIC, measure, speedLabel, localEvaluate, totalScore, voiceScore } from './scoring.js?v=202611151';
+import { BASIS, REFS, NOTICE } from './rubric.js?v=202611151';
+import { buildSetText, fileName } from './save.js?v=202611151';
+import * as gem from './gemini.js?v=202611151';
+import * as files from './files.js?v=202611151';
+import * as claude from './claude.js?v=202611151';
+import { openMic, startAudioRecorder, toWavBase64, canRecordAudio } from './audio.js?v=202611151';
+import { canRecord, openCamera, stopStream, startRecorder, startAudioAnalysis, startGaze, loadGazeModel, scoreNonverbal, saveVideo } from './video.js?v=202611151';
 
 const PREP_SEC = 30;
 const FOLLOW_PREP_SEC = 10;
@@ -986,7 +986,7 @@ async function downloadPdf() {
   pdfBusy = true;
   toast('PDF를 만드는 중이에요. 잠시만 기다려 주세요...');
   try {
-    const { buildPdf } = await import('./pdf.js');
+    const { buildPdf } = await import('./pdf.js?v=202611151');
     const blob = await buildPdf(reportBody(), (i, n) => { document.getElementById('toast').textContent = `PDF를 만드는 중이에요... ${Math.round((i / n) * 100)}%`; });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -1754,4 +1754,8 @@ async function copy(text, msg) {
   catch { prompt('아래 내용을 길게 눌러 복사해 주세요.', text); }
 }
 
+// 다른 페이지에서 interview/#tips 로 들어오면 안내 화면을 바로 연다.
+const HASH_VIEWS = { '#tips': 'tips', '#guide': 'guide' };
+if (HASH_VIEWS[location.hash]) state.screen = HASH_VIEWS[location.hash];
+window.addEventListener('hashchange', () => { if (HASH_VIEWS[location.hash] && state.screen !== 'ask') go(HASH_VIEWS[location.hash]); });
 render();

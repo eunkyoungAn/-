@@ -30,5 +30,15 @@ body{word-break:keep-all;overflow-wrap:anywhere}.mo-only{display:none}.explain-s
 .iv-crit .ok{background:#e3f4ea;color:#1d6b41}.iv-crit .mid{background:#fff3d6;color:#8a5a00}.iv-crit .no{background:#fde8e1;color:#a33a16}
 .iv-follow{border:1px solid #ffffff44;border-radius:12px;padding:12px 14px;font-size:14px}
 .iv-card .button{width:100%;margin-top:18px;background:#fff;color:#4c1d95;box-shadow:none}
+.iv-tips{margin-top:28px;padding:24px;border:1px solid var(--line);border-radius:18px;background:#faf8ff}
+.iv-tips-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.iv-tips-head h3{margin:4px 0 6px;font-size:20px}
+.iv-tips-head p{margin:0;font-size:14px;color:var(--muted);max-width:620px}
+.iv-tips-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:18px}
+.iv-tips-grid>div{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.iv-tips-grid b{display:block;font-size:15px;margin-bottom:4px}
+.iv-tips-grid p{margin:0;font-size:13px;color:var(--muted)}
+@media (max-width:900px){.iv-tips-grid{grid-template-columns:1fr 1fr}}
+@media (max-width:560px){.iv-tips-grid{grid-template-columns:1fr}.iv-tips{padding:18px}}
 .iv-note{margin-top:22px;display:flex;flex-wrap:wrap;gap:8px 18px}
 @media(max-width:860px){.iv-grid{grid-template-columns:1fr}.iv-card{position:static}}
