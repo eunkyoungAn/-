@@ -486,3 +486,14 @@ body{letter-spacing:-.005em}
 .flow-list.wide li{align-items:start}
 .flow-list.wide li strong{display:block;font-size:16.5px;font-weight:700;color:var(--ink)}
 .flow-list.wide li p{margin-top:3px;color:var(--ink-soft);font-size:15px;line-height:1.7;text-align:left}
+
+/* 기준 인원 그림: 전체 → 빼기 → 기준 인원 */
+.funnel{display:flex;align-items:stretch;gap:10px;margin-top:16px;max-width:860px}
+.funnel-step{flex:1 1 0;min-width:0;padding:16px 18px;border:1px solid var(--rule);border-radius:14px;background:var(--surface)}
+.funnel-step b{display:block;font-size:12.5px;font-weight:600;letter-spacing:.08em;color:var(--ink-mute)}
+.funnel-step strong{display:block;margin:4px 0 6px;font-size:26px;font-weight:700;letter-spacing:-.03em;color:var(--ink);font-variant-numeric:tabular-nums}
+.funnel-step p{color:var(--ink-soft);font-size:14px;line-height:1.6}
+.funnel-step.is-result{border-color:var(--accent);background:rgba(11,100,244,.04)}
+.funnel-step.is-result b,.funnel-step.is-result strong{color:var(--accent)}
+.funnel-arrow{align-self:center;color:var(--ink-mute);font-size:20px;flex:0 0 auto}
+@media (max-width:640px){.funnel{flex-direction:column}.funnel-arrow{transform:rotate(90deg)}}
