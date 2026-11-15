@@ -47,6 +47,8 @@ const saveCustom = () => store.set('custom', custom.length ? JSON.stringify(cust
 // 내 자료로 만든 예상 질문집. 이 기기 브라우저에만 저장된다.
 let qset = null;
 try { qset = JSON.parse(store.get('qset') || 'null'); } catch { qset = null; }
+// 저장된 질문집이 깨져 있으면 화면이 열리지 않으므로 버린다.
+if (qset && !(Array.isArray(qset.questions) && qset.questions.every(q => q && q.id && q.text))) { qset = null; store.set('qset', ''); }
 const saveQset = () => store.set('qset', qset ? JSON.stringify(qset) : '');
 const setQuestions = () => (qset ? qset.questions : []);
 const getQuestion = id => setQuestions().find(q => q.id === id) || custom.find(q => q.id === id) || findQuestion(id);
@@ -165,7 +167,10 @@ function createRecognizer(onText, onError) {
   rec.onend = () => {
     committed = join(committed, sessionFinals.join(' '));
     sessionFinals = [];
-    if (active) { try { rec.start(); } catch { /* 이미 시작됨 */ } }
+    if (!active) return;
+    try { rec.start(); } catch {
+      setTimeout(() => { if (!active) return; try { rec.start(); } catch (e2) { if (e2 && e2.name === 'InvalidStateError') return; active = false; onError('restart-failed'); } }, 400);
+    }
   };
   return {
     start() { active = true; rec.start(); },
@@ -319,10 +324,21 @@ function bindAsk() {
       tip.textContent = '화면 속 얼굴 말고 카메라 렌즈를 봐 주세요';
       loadGazeModel().catch(() => {}); // 준비 시간 동안 시선 분석 모델을 미리 불러 둔다
       if (phase === 'answer') startCapture();
-    }).catch(() => {
-      toast('카메라를 켜지 못해 목소리로만 진행합니다. 브라우저에서 카메라 권한을 확인해 주세요.');
-      document.getElementById('camWrap').hidden = true;
+    }).catch(err => {
+      const n = err && err.name;
+      toast('카메라를 켜지 못해 목소리로만 진행합니다. ' + (n === 'NotAllowedError' || n === 'SecurityError' ? '주소창 왼쪽 아이콘 > 권한에서 카메라를 "허용"으로 바꿔 주세요.'
+        : n === 'NotFoundError' || n === 'OverconstrainedError' ? '이 기기에서 앞쪽 카메라를 찾지 못했어요.'
+        : n === 'NotReadableError' || n === 'AbortError' ? '다른 앱(영상통화, 카메라)이 카메라를 쓰고 있으면 닫고 다시 시도해 주세요.'
+        : '브라우저의 카메라 권한을 확인해 주세요.'));
+      const w = document.getElementById('camWrap');
+      if (w) w.hidden = true;
     });
+  }
+  // 답하는 동안 화면이 꺼지면 음성 인식과 녹화가 멈추므로 화면을 켜 둔다(지원 기기만).
+  let wake = null;
+  if (navigator.wakeLock && navigator.wakeLock.request) {
+    navigator.wakeLock.request('screen').then(w => { if (phase === 'done') w.release().catch(() => {}); else wake = w; }).catch(() => {});
+    cleanup.push(() => { if (wake) wake.release().catch(() => {}); });
   }
   function startCapture() {
     if (!camStream || recorder) return;
@@ -394,7 +410,13 @@ function bindAsk() {
         if (denied) settings.textMode = true;
       },
     );
-    try { rec.start(); } catch { toast('음성 인식을 시작하지 못했어요.'); }
+    try { rec.start(); } catch {
+      rec = null;
+      clearTimeout(watchdog);
+      live.hidden = true;
+      typed.hidden = false;
+      msg.textContent = '이 브라우저에서 음성 인식을 시작하지 못했어요. 아래 칸에 글로 써 주세요. 말로 연습하려면 Chrome(안드로이드) 또는 Safari(아이폰)에서 열어 주세요.';
+    }
   }
 
   async function finish() {
@@ -411,7 +433,7 @@ function bindAsk() {
       btn.textContent = '영상 정리 중...';
       state.draft.audio = audioA ? audioA.stop() : null;
       state.draft.gaze = gaze ? gaze.stop() : null;
-      if (recorder) { try { state.draft.video = await recorder.stop(); } catch { state.draft.video = null; } }
+      if (recorder) { try { state.draft.video = await Promise.race([recorder.stop(), new Promise(r => setTimeout(() => r(null), 5000))]); } catch { state.draft.video = null; } }
     }
     stopStream(camStream);
     camStream = null;
@@ -502,7 +524,23 @@ async function evaluate(skipFollow) {
   return finalize(main, null);
 }
 
+// AI 응답이 정해진 모양(항목별 점수)이 아니면 쓰지 않는다.
+const validResult = r => Boolean(r && r.scores && typeof r.scores === 'object' && (r.scores.lead != null || ['specific', 'jobfit', 'logic'].every(k => Number.isFinite(Number(r.scores[k])))));
+
+// 피드백을 만들다 예상하지 못한 오류가 나도 답변을 잃지 않게, 답변 확인 화면으로 되돌린다.
 async function finalize(main, follow) {
+  try {
+    await finalizeInner(main, follow);
+  } catch (err) {
+    console.error(err);
+    state.follow = null;
+    state.draft = { ...main.d, answer: main.answer, rawAnswer: main.d.rawAnswer || main.answer };
+    go('review');
+    toast('피드백을 만드는 중 문제가 생겼어요. 답변은 그대로 두었으니 "피드백 받기"를 다시 눌러 주세요.');
+  }
+}
+
+async function finalizeInner(main, follow) {
   const { answer, metrics, d } = main;
   const q = state.question;
   showLoading('피드백 만드는 중', '답변을 커리어캐쳐 기준으로 살펴보고 있어요.');
@@ -511,6 +549,7 @@ async function finalize(main, follow) {
   if (hasGemini()) {
     try {
       const r = await gem.evaluateAnswer({ q, answer, follow, previous: prev ? { answer: prev.answer, next_fix: prev.result.next_fix } : null });
+      if (!validResult(r)) throw new Error('AI 응답 형식이 맞지 않음');
       result = { ...r, source: 'ai' };
     } catch (err) {
       toast(`Gemini 평가에 실패해 자동 피드백으로 보여 드려요. (${err.cause || err.message}) 자세한 원인은 처음 화면의 연결 점검에서 볼 수 있어요.`);
@@ -519,11 +558,13 @@ async function finalize(main, follow) {
   if (!result && settings.relay) {
     try {
       result = await remoteEvaluate({ answer, metrics, prev });
+      if (!validResult(result)) { result = null; throw new Error('응답 형식이 맞지 않음'); }
     } catch (err) {
       toast(`AI 평가 서버에 연결하지 못해 간이 피드백으로 보여 드려요. (${err.message})`);
     }
   }
   if (!result) result = localEvaluate({ answer, metrics, limitSec: settings.limit });
+  result.reasons = result.reasons || {};
   // 옛 형식(중계 서버) 결과를 새 기준 항목으로 옮긴다.
   if (result.scores.lead != null) {
     const o = result.scores;
@@ -1399,9 +1440,29 @@ function qsetView() {
 // ---------- 렌더링 ----------
 const views = { guide: guideView, diag: diagView, material: materialView, comps: compsView, qset: qsetView, home: homeView, pick: pickView, ask: askView, review: reviewView, report: reportView, compare: compareView, records: recordsView };
 function render() {
-  app.innerHTML = views[state.screen]();
-  if (state.screen === 'ask') bindAsk();
+  try {
+    app.innerHTML = views[state.screen]();
+    if (state.screen === 'ask') bindAsk();
+  } catch (err) {
+    console.error(err);
+    cleanup.forEach(fn => { try { fn(); } catch { /* 무시 */ } });
+    cleanup = [];
+    const was = state.screen;
+    state.screen = 'home';
+    app.innerHTML = `${header()}<main class="wrap"><section class="card"><h2>화면을 여는 중 문제가 생겼어요</h2><p>연습 기록은 그대로 있습니다. 아래 버튼으로 돌아가 다시 시도해 주세요. 같은 문제가 반복되면 새로고침해 주세요.</p><p class="muted small">문제가 난 화면: ${esc(was)} / ${esc(String(err && err.message).slice(0, 120))}</p><button class="btn primary big" data-act="${state.log.length ? 'records' : 'home'}">${state.log.length ? '피드백 리포트로 가기' : '처음으로'}</button></section></main>`;
+  }
 }
+
+// 예상하지 못한 오류가 나도 조용히 멈추지 않게 알린다. 기다리는 화면에서 멈췄으면 처음 화면으로 돌린다.
+function onUnexpected(err) {
+  console.error(err);
+  const text = String((err && (err.message || err.reason)) || err || '').slice(0, 100);
+  if (/ResizeObserver|Script error/i.test(text)) return;
+  if (state.screen === 'loading') go(state.log.length ? 'records' : state.consent ? 'pick' : 'home');
+  toast(`문제가 생겼어요. 다시 시도해 주세요. 계속되면 새로고침해 주세요. (${text})`);
+}
+window.addEventListener('error', e => onUnexpected(e.error || e.message));
+window.addEventListener('unhandledrejection', e => onUnexpected(e.reason));
 
 // PC에서는 파일을 끌어다 놓아도 읽는다.
 app.addEventListener('dragover', e => { const z = e.target.closest && e.target.closest('#dropzone'); if (z) { e.preventDefault(); z.classList.add('over'); } });
