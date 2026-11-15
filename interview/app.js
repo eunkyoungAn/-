@@ -3,15 +3,15 @@
 // 음성 모드: 브라우저 음성 인식으로 글자만 받는다. 녹음 파일은 만들지 않는다.
 // 영상 모드(선택): 카메라로 녹화하고 시선·억양·템포를 휴대폰 안에서만 분석한다. 영상은 참여자가 직접 저장한다.
 
-import { QUESTIONS, CATEGORIES, findQuestion } from './questions.js?v=202611153';
-import { RUBRIC, measure, speedLabel, localEvaluate, totalScore, voiceScore } from './scoring.js?v=202611153';
-import { BASIS, REFS, NOTICE } from './rubric.js?v=202611153';
-import { buildSetText, fileName } from './save.js?v=202611153';
-import * as gem from './gemini.js?v=202611153';
-import * as files from './files.js?v=202611153';
-import * as claude from './claude.js?v=202611153';
-import { openMic, startAudioRecorder, toWavBase64, canRecordAudio } from './audio.js?v=202611153';
-import { canRecord, openCamera, stopStream, startRecorder, startAudioAnalysis, startGaze, loadGazeModel, scoreNonverbal, saveVideo } from './video.js?v=202611153';
+import { QUESTIONS, CATEGORIES, findQuestion } from './questions.js?v=202611154';
+import { RUBRIC, measure, speedLabel, localEvaluate, totalScore, voiceScore } from './scoring.js?v=202611154';
+import { BASIS, REFS, NOTICE } from './rubric.js?v=202611154';
+import { buildSetText, fileName } from './save.js?v=202611154';
+import * as gem from './gemini.js?v=202611154';
+import * as files from './files.js?v=202611154';
+import * as claude from './claude.js?v=202611154';
+import { openMic, startAudioRecorder, toWavBase64, canRecordAudio } from './audio.js?v=202611154';
+import { canRecord, openCamera, stopStream, startRecorder, startAudioAnalysis, startGaze, loadGazeModel, scoreNonverbal, saveVideo } from './video.js?v=202611154';
 
 const PREP_SEC = 30;
 const FOLLOW_PREP_SEC = 10;
@@ -20,7 +20,7 @@ const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
 // ---------- 설정 (링크 파라미터 > 이 기기에 저장한 값) ----------
 const params = new URLSearchParams(location.search);
-const APP_VERSION = '202611153'; // stamp-version.py가 배포 때 바꾼다
+const APP_VERSION = '202611154'; // stamp-version.py가 배포 때 바꾼다
 const store = {
   get(k) { try { return localStorage.getItem('cc-interview-' + k); } catch { return null; } },
   set(k, v) { try { v ? localStorage.setItem('cc-interview-' + k, v) : localStorage.removeItem('cc-interview-' + k); } catch { /* 저장 불가 환경 */ } },
@@ -1003,7 +1003,7 @@ async function downloadPdf() {
   pdfBusy = true;
   toast('PDF를 만드는 중이에요. 잠시만 기다려 주세요...');
   try {
-    const { buildPdf } = await import('./pdf.js?v=202611153');
+    const { buildPdf } = await import('./pdf.js?v=202611154');
     const blob = await buildPdf(reportBody(), (i, n) => { document.getElementById('toast').textContent = `PDF를 만드는 중이에요... ${Math.round((i / n) * 100)}%`; });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
