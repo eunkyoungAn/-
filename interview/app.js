@@ -141,6 +141,7 @@ function createRecognizer(onText, onError) {
   rec.interimResults = true;
   let committed = '';
   let sessionFinals = [];
+  let lastInterim = ''; // 안드로이드는 확정 없이 끝나는 경우가 있어, 마지막 중간 결과도 붙잡아 둔다.
   let active = false;
 
   rec.onresult = e => {
@@ -157,6 +158,7 @@ function createRecognizer(onText, onError) {
         interim += ' ' + t;
       }
     }
+    lastInterim = interim.trim();
     onText(join(committed, sessionFinals.join(' ')), interim.trim());
   };
   rec.onerror = e => {
@@ -165,20 +167,25 @@ function createRecognizer(onText, onError) {
     onError(e.error);
   };
   rec.onend = () => {
-    committed = join(committed, sessionFinals.join(' '));
+    committed = join(committed, sessionFinals.join(' '), lastInterim);
     sessionFinals = [];
+    lastInterim = '';
     if (!active) return;
-    try { rec.start(); } catch {
-      setTimeout(() => { if (!active) return; try { rec.start(); } catch (e2) { if (e2 && e2.name === 'InvalidStateError') return; active = false; onError('restart-failed'); } }, 400);
-    }
+    // 바로 다시 켜면 일부 갤럭시에서 무시되므로 잠깐 쉬었다가 켠다.
+    setTimeout(() => {
+      if (!active) return;
+      try { rec.start(); } catch {
+        setTimeout(() => { if (!active) return; try { rec.start(); } catch (e2) { if (e2 && e2.name === 'InvalidStateError') return; active = false; onError('restart-failed'); } }, 400);
+      }
+    }, 150);
   };
   return {
     start() { active = true; rec.start(); },
-    stop() { active = false; try { rec.stop(); } catch { /* 무시 */ } return join(committed, sessionFinals.join(' ')); },
-    text() { return join(committed, sessionFinals.join(' ')); },
+    stop() { active = false; try { rec.stop(); } catch { /* 무시 */ } return join(committed, sessionFinals.join(' '), lastInterim); },
+    text() { return join(committed, sessionFinals.join(' '), lastInterim); },
   };
 }
-const join = (a, b) => [a, b].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
+const join = (...parts) => parts.filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
 
 // ---------- 화면: 시작 ----------
 function homeView() {
@@ -388,7 +395,7 @@ function bindAsk() {
     // 8초 동안 한 글자도 인식되지 않으면 이유와 대안을 바로 알려 준다(조용히 실패하지 않게).
     const watchdog = setTimeout(() => {
       if (heard || phase !== 'answer' || !rec) return;
-      msg.innerHTML = `<b>아직 목소리가 글자로 바뀌지 않고 있어요.</b> ${SAMSUNG ? '삼성 인터넷에서는 음성 인식이 안 될 수 있어요. Chrome에서 열어 주세요. ' : ''}마이크 권한이 허용돼 있는지, 통화·녹음 앱이 마이크를 쓰고 있지 않은지 확인해 주세요. 계속 말해도 되고, 아래 칸에 글로 써도 됩니다.`;
+      msg.innerHTML = `<b>아직 목소리가 글자로 바뀌지 않고 있어요.</b> ${SAMSUNG ? '삼성 인터넷에서는 음성 인식이 안 될 수 있어요. Chrome에서 열어 주세요. ' : ''}마이크 권한이 허용돼 있는지, 통화·녹음 앱이 마이크를 쓰고 있지 않은지 확인해 주세요. 계속 말해도 되고, 아래 칸에 글로 써도 됩니다. 휴대폰 설정 방법은 처음 화면의 "이용 방법 보기" > "말해도 글자가 안 나올 때"에 있어요.`;
       typed.hidden = false;
     }, 8000);
     cleanup.push(() => clearTimeout(watchdog));
@@ -1075,11 +1082,36 @@ function guideView() {
         <li>화면을 닫으면 기록이 사라지니, 끝내기 전에 꼭 받아 두세요.</li>
       </ul>
     </section>
+    <section class="card" id="mic-help">
+      <h2>말해도 글자가 안 나올 때</h2>
+      <p class="muted small">아래 순서대로 확인해 주세요. 하나씩 고친 뒤 이 페이지를 새로고침하고 다시 해 보세요.</p>
+      <h3>갤럭시(안드로이드)</h3>
+      <ol>
+        <li><b>Chrome 앱에서 열기</b>: 카카오톡·문자·다른 앱에서 링크를 눌렀다면 오른쪽 위 ⋮ 메뉴 &gt; "Chrome에서 열기"를 눌러 주세요. 삼성 인터넷은 음성 인식이 안 될 수 있어요.</li>
+        <li><b>사이트 권한</b>: Chrome 주소창 왼쪽 아이콘 &gt; 권한 &gt; 마이크, 카메라를 "허용"으로.</li>
+        <li><b>앱 권한</b>: 휴대폰 설정 &gt; 애플리케이션 &gt; Chrome &gt; 권한 &gt; 마이크, 카메라를 "앱 사용 중에만 허용"으로.</li>
+        <li><b>마이크 접근 켜기</b>: 화면 위에서 아래로 두 번 내려 빠른 설정의 "마이크 접근", "카메라 접근"이 켜져 있는지 확인.</li>
+        <li><b>Google 음성 인식</b>: Play 스토어에서 "Google" 앱과 "Google 음성 인식 및 합성"을 최신으로 업데이트하고, 꺼져 있다면 켜 주세요(설정 &gt; 애플리케이션에서 "사용 중지됨"이면 "사용").</li>
+        <li><b>음성 입력 언어</b>: 설정 &gt; 일반 &gt; 언어 및 입력 &gt; (화면 키보드 또는 음성 입력) &gt; Google 음성 입력 &gt; 언어에 "한국어"가 있는지 확인.</li>
+        <li><b>마이크를 쓰는 앱 끄기</b>: 통화 중, 녹음 앱, 빅스비 음성 호출, 다른 Chrome 탭이 마이크를 쓰고 있으면 닫아 주세요.</li>
+        <li><b>인터넷</b>: 음성 인식은 Google 서버를 거칩니다. 와이파이나 데이터가 켜져 있어야 하고, 절전 모드의 "데이터 제한"은 꺼 주세요.</li>
+      </ol>
+      <h3>아이폰</h3>
+      <ol>
+        <li><b>Safari에서 열기</b>: 카카오톡 등에서 열렸다면 오른쪽 아래 메뉴 &gt; "Safari로 열기".</li>
+        <li><b>받아쓰기 켜기</b>: 설정 &gt; 일반 &gt; 키보드 &gt; "받아쓰기 활성화" 켜기. 꺼져 있으면 음성 인식이 동작하지 않아요.</li>
+        <li><b>Siri 언어</b>: 설정 &gt; Siri &gt; 언어를 "한국어"로.</li>
+        <li><b>사이트 권한</b>: 설정 &gt; 앱 &gt; Safari &gt; 마이크, 카메라를 "확인" 또는 "허용"으로. 주소창 "가가" 버튼 &gt; 웹 사이트 설정에서도 확인할 수 있어요.</li>
+        <li><b>스크린 타임 제한</b>: 설정 &gt; 스크린 타임 &gt; 콘텐츠 및 개인정보 보호 제한에서 마이크·받아쓰기가 막혀 있지 않은지 확인.</li>
+      </ol>
+      <p class="muted small">영상이 너무 어둡게 나오면 얼굴 정면에 빛이 오도록 창이나 조명을 바라보고 앉아 주세요. 휴대폰 케이스나 손가락이 앞 카메라를 가리고 있지 않은지도 확인해 주세요.</p>
+      <p class="muted small">모두 확인했는데도 안 되면 "글로 답하기"로 연습할 수 있어요. 피드백 기준은 같습니다.</p>
+    </section>
     <section class="card">
       <h2>자주 묻는 질문</h2>
       <dl class="rules">
         <dt>내 답변과 영상은 어디에 저장되나요?</dt><dd>어디에도 저장되지 않아요. 영상과 분석은 휴대폰 안에서만 처리되고, 화면을 닫으면 사라집니다. AI 키를 연결한 경우에만 질문과 답변 글이 Google Gemini로 전송됩니다.</dd>
-        <dt>말했는데 글자가 안 나와요.</dt><dd>마이크 권한을 확인하고 Chrome이나 Safari에서 다시 열어 주세요. 그래도 안 되면 글로 답하기로 연습할 수 있어요.</dd>
+        <dt>말했는데 글자가 안 나와요.</dt><dd>위의 "말해도 글자가 안 나올 때"를 순서대로 확인해 주세요. 그래도 안 되면 글로 답하기로 연습할 수 있어요.</dd>
         <dt>AI 오류가 나요.</dt><dd>첫 화면의 Gemini 키 카드에서 "연결 점검"을 누르면 원인과 해결 방법이 나옵니다.</dd>
         <dt>점수가 실제 AI면접 점수와 같나요?</dt><dd>아니요. 연습을 위한 자체 평가도구이고, AI면접 시스템마다 평가방식이 다릅니다.</dd>
       </dl>
