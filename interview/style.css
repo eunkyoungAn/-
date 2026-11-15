@@ -1,6 +1,6 @@
 /* 커리어캐쳐 면접 리허설: 모바일 우선, 큰 글씨, 화면당 주요 버튼 하나 */
 :root {
-  --bg: #f4f7ff; --panel: #fff; --fg: #1b2235; --muted: #687089; --line: #e3e8f4;
+  --bg: #ffffff; --panel: #fff; --fg: #1b2235; --muted: #687089; --line: #e3e8f4;
   --accent: #2f5fe8; --accent-fg: #fff; --soft: #eaf0ff; --warn: #c2410c; --warn-soft: #fff1ea;
   --ok: #0f8a63; --focus: #fff8e1; --focus-line: #f2c14e;
   --mint: #19c39a; --mint-soft: #e4f9f2; --navy: #1f2433; --band: #2f5fe8;
@@ -313,7 +313,7 @@ a.btn.primary { color: var(--accent-fg); }
 
 /* PDF 리포트: 화면이 어두운 테마여도 PDF는 항상 밝은 바탕으로 만든다 */
 .pdf-sheet {
-  --bg: #f4f7ff; --panel: #fff; --fg: #1b2235; --muted: #687089; --line: #e3e8f4;
+  --bg: #ffffff; --panel: #fff; --fg: #1b2235; --muted: #687089; --line: #e3e8f4;
   --accent: #2f5fe8; --accent-fg: #fff; --soft: #eaf0ff; --warn: #c2410c; --warn-soft: #fff1ea;
   --ok: #0f8a63; --focus: #fff8e1; --focus-line: #f2c14e; --mint: #19c39a; --mint-soft: #e4f9f2; --shadow: none;
   background: #fff; color: var(--fg); display: block; font-size: 15px;
@@ -429,3 +429,7 @@ blockquote { border-left-color: var(--mint); background: var(--mint-soft); }
 .dropzone { border-radius: 18px; }
 .diag .fix, .linkbtn, .filehelp summary, .refs a { color: var(--accent); }
 #toast { border-radius: 999px; background: var(--navy); color: var(--panel); }
+
+/* 2026-11: 휴대폰이 어두운 모드여도 항상 흰 바탕(index.html의 data-theme="light"). 흰 바탕 위에서 카드가 구분되게 옅은 테두리 */
+.card, .stats > div, .stage, .qlist button { border: 1px solid var(--line); }
+.live, .metrics div, .filelist li, .field input, .settings input, textarea { background: #f6f8ff; }
