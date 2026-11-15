@@ -3,15 +3,15 @@
 // 음성 모드: 브라우저 음성 인식으로 글자만 받는다. 녹음 파일은 만들지 않는다.
 // 영상 모드(선택): 카메라로 녹화하고 시선·억양·템포를 휴대폰 안에서만 분석한다. 영상은 참여자가 직접 저장한다.
 
-import { QUESTIONS, CATEGORIES, findQuestion } from './questions.js?v=202611154';
-import { RUBRIC, measure, speedLabel, localEvaluate, totalScore, voiceScore } from './scoring.js?v=202611154';
-import { BASIS, REFS, NOTICE } from './rubric.js?v=202611154';
-import { buildSetText, fileName } from './save.js?v=202611154';
-import * as gem from './gemini.js?v=202611154';
-import * as files from './files.js?v=202611154';
-import * as claude from './claude.js?v=202611154';
-import { openMic, startAudioRecorder, toWavBase64, canRecordAudio } from './audio.js?v=202611154';
-import { canRecord, openCamera, stopStream, startRecorder, startAudioAnalysis, startGaze, loadGazeModel, scoreNonverbal, saveVideo } from './video.js?v=202611154';
+import { QUESTIONS, CATEGORIES, findQuestion } from './questions.js?v=202611155';
+import { RUBRIC, measure, speedLabel, localEvaluate, totalScore, voiceScore } from './scoring.js?v=202611155';
+import { BASIS, REFS, NOTICE } from './rubric.js?v=202611155';
+import { buildSetText, fileName } from './save.js?v=202611155';
+import * as gem from './gemini.js?v=202611155';
+import * as files from './files.js?v=202611155';
+import * as claude from './claude.js?v=202611155';
+import { openMic, startAudioRecorder, toWavBase64, canRecordAudio } from './audio.js?v=202611155';
+import { canRecord, openCamera, stopStream, startRecorder, startAudioAnalysis, startGaze, loadGazeModel, scoreNonverbal, saveVideo } from './video.js?v=202611155';
 
 const PREP_SEC = 30;
 const FOLLOW_PREP_SEC = 10;
@@ -20,7 +20,7 @@ const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
 // ---------- 설정 (링크 파라미터 > 이 기기에 저장한 값) ----------
 const params = new URLSearchParams(location.search);
-const APP_VERSION = '202611154'; // stamp-version.py가 배포 때 바꾼다
+const APP_VERSION = '202611155'; // stamp-version.py가 배포 때 바꾼다
 const store = {
   get(k) { try { return localStorage.getItem('cc-interview-' + k); } catch { return null; } },
   set(k, v) { try { v ? localStorage.setItem('cc-interview-' + k, v) : localStorage.removeItem('cc-interview-' + k); } catch { /* 저장 불가 환경 */ } },
@@ -200,21 +200,21 @@ function homeView() {
     <section class="hero home-hero">
       <p class="kicker">AI 면접 리허설 · 무료</p>
       <h1>듣고, 말하고,<br><span class="hl">한 가지만</span> 고쳐서 다시.</h1>
-      <p>질문을 듣고 말로 답하면, 커리어캐쳐 기준으로 피드백을 드립니다. 같은 질문에 한 번 더 답해 달라진 점을 확인해 보세요. 카메라는 원할 때만 켭니다.</p>
+      <p>실제 면접처럼 질문을 듣고 말로 답하면, 커리어캐쳐의 구조화 면접 평가 기준으로 답변을 분석하고 다음 답변에서 고칠 한 가지를 제시합니다. 같은 질문에 다시 답하며 개선 정도를 직접 확인하세요.</p>
     </section>
     <section class="stats" aria-label="연습 방식 요약">
-      <div><span class="badge">01</span><b>30<small>초</small></b><p>질문을 듣고 준비하는 시간</p></div>
-      <div><span class="badge mint">02</span><b class="mint">6<small>가지</small></b><p>근거 있는 평가 항목으로 피드백</p></div>
-      <div><span class="badge">03</span><b>1<small>가지</small></b><p>다음 답변에서 고칠 한 가지</p></div>
+      <div><span class="badge">01</span><b>30<small>초</small></b><p>질문 청취 후 답변 준비</p></div>
+      <div><span class="badge mint">02</span><b class="mint">6<small>가지</small></b><p>연구 근거 기반 평가 항목</p></div>
+      <div><span class="badge">03</span><b>1<small>가지</small></b><p>다음 답변의 핵심 개선 과제</p></div>
     </section>
     <section class="flow" aria-label="연습 순서">
-      <h2>쉬운 연습, <span>한 번 더 성장</span></h2>
+      <h2>실전과 같은 <span>5단계 리허설</span></h2>
       <ol>
-        <li><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg></i><b>질문 <em>듣기</em></b></li>
-        <li><i><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg></i><b>30초 <em>준비</em></b></li>
-        <li><i><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></i><b>말로 <em>답하기</em></b></li>
-        <li><i><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/></svg></i><b>피드백 <em>확인</em></b></li>
-        <li><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.7"/><path d="M20 4v5h-5"/></svg></i><b>다시 <em>답하기</em></b></li>
+        <li><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg></i><b>질문 <em>청취</em></b></li>
+        <li><i><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg></i><b>답변 <em>준비</em></b></li>
+        <li><i><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></i><b>음성 <em>답변</em></b></li>
+        <li><i><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/></svg></i><b>피드백 <em>분석</em></b></li>
+        <li><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.7"/><path d="M20 4v5h-5"/></svg></i><b>개선 <em>재답변</em></b></li>
       </ol>
     </section>
     ${inApp ? `<div class="notice warn"><b>${esc(inApp)} 안에서 열려 있어요.</b> 이 화면에서는 마이크가 막힐 수 있습니다. ${inApp === '카카오톡' ? `아래 버튼을 눌러 Chrome이나 Safari에서 열어 주세요.<a class="btn primary sm" href="${KAKAO_EXTERNAL}">다른 브라우저로 열기</a>` : '오른쪽 위 메뉴에서 <b>다른 브라우저로 열기</b>(Chrome, Safari 등)를 눌러 주세요.'}<button class="btn ghost sm" data-act="copy-link">주소 복사</button></div>` : ''}
@@ -224,10 +224,10 @@ function homeView() {
     <section class="card">
       <h2>시작 전에 확인해 주세요</h2>
       <ul class="plain">
-        <li>${MOBILE && gem.hasGeminiKey() ? '휴대폰에서는 답하는 동안 녹음하고, 답변이 끝나면 녹음을 내 Gemini 키로 보내 글자로 바꿉니다. 녹음 파일은 보관하지 않습니다.' : MOBILE ? '휴대폰에서는 글 칸을 누른 뒤 키보드의 마이크 버튼으로 말하면 글자로 바뀝니다. Gemini 키를 연결하면 녹음만 하고 자동으로 받아 적어요.' : '말한 소리는 브라우저의 음성 인식 기능(Chrome은 Google)이 글자로 바꿉니다. 이 앱은 녹음 파일을 만들거나 보관하지 않습니다.'}</li>
-        <li>${hasAI() ? `내 ${gem.providerName()} 키가 연결되어 있어, 피드백·꼬리질문을 만들 때 질문과 답변 글(질문 만들기에서는 넣은 자료)이 ${gem.providerName() === 'Claude' ? 'Anthropic Claude' : 'Google Gemini'}로 전송됩니다.` : aiOn ? '피드백을 만들 때 질문과 답변 글만 AI 평가 서버로 보냅니다. 서버는 답변을 저장하지 않습니다.' : '피드백은 이 휴대폰 안에서 만들어지며, 답변은 어디에도 전송하지 않습니다.'}</li>
-        <li>회원가입이 없고, 화면을 닫으면 답변은 사라집니다. 실명, 학교, 회사 이름은 말하지 않아도 됩니다.</li>
-        <li>점수는 연습용 참고치이며 합격을 예측하지 않습니다. 외모, 표정, 목소리 높낮이 자체는 평가하지 않습니다.</li>
+        <li>${MOBILE && gem.hasGeminiKey() ? '휴대폰에서는 답변을 녹음한 뒤, 답변이 끝나면 본인의 Gemini 키로 녹음을 보내 글자로 변환합니다. 녹음 파일은 변환 후 보관하지 않습니다.' : MOBILE ? '휴대폰에서는 답변 입력 칸을 누른 뒤 키보드의 마이크 버튼으로 말하면 글자로 입력됩니다. Gemini 키를 연결하면 답변을 녹음해 자동으로 받아 적습니다.' : '답변 음성은 브라우저의 음성 인식 기능(Chrome은 Google)이 글자로 변환합니다. 이 서비스는 녹음 파일을 만들거나 보관하지 않습니다.'}</li>
+        <li>${hasAI() ? `내 ${gem.providerName()} 키가 연결되어 있어, 피드백·꼬리질문을 만들 때 질문과 답변 글(질문 만들기에서는 넣은 자료)이 ${gem.providerName() === 'Claude' ? 'Anthropic Claude' : 'Google Gemini'}로 전송됩니다.` : aiOn ? '피드백을 만들 때 질문과 답변 글만 AI 평가 서버로 보냅니다. 서버는 답변을 저장하지 않습니다.' : '피드백은 이 기기 안에서 생성되며, 답변은 외부로 전송하지 않습니다.'}</li>
+        <li>회원가입 없이 이용하며, 화면을 닫으면 답변 기록은 삭제됩니다. 실명, 학교, 회사 이름은 말하지 않아도 됩니다.</li>
+        <li>점수는 연습을 위한 참고 지표이며 합격 여부를 예측하지 않습니다. 외모, 표정, 목소리 높낮이는 평가하지 않습니다.</li>
         ${settings.video ? '<li>영상 녹화를 켜면 시선 방향, 억양 변화, 말 빠르기를 이 휴대폰 안에서만 분석합니다. 영상은 어디에도 전송되지 않으며, 저장 버튼을 눌러야 휴대폰에 남습니다.</li>' : ''}
       </ul>
       <label class="check"><input type="checkbox" id="consent" ${state.consent ? 'checked' : ''}> 위 내용을 확인했습니다</label>
@@ -237,7 +237,7 @@ function homeView() {
       <div class="seg" role="radiogroup" aria-label="답변 시간">
         ${[60, 90].map(s => `<button role="radio" aria-checked="${settings.limit === s}" class="${settings.limit === s ? 'on' : ''}" data-act="limit" data-v="${s}">${s}초</button>`).join('')}
       </div>
-      ${SR ? `<label class="check"><input type="checkbox" id="textmode" ${settings.textMode ? 'checked' : ''}> 말하기가 어려우면 글로 답하기</label>` : ''}
+      ${SR ? `<label class="check"><input type="checkbox" id="textmode" ${settings.textMode ? 'checked' : ''}> 음성 답변이 어려우면 글로 답하기</label>` : ''}
     </section>
     ${canRecord() ? `<section class="card">
       <h2>답변 방식</h2>
@@ -245,7 +245,7 @@ function homeView() {
         <button role="radio" aria-checked="${!settings.video}" class="${!settings.video ? 'on' : ''}" data-act="video-mode" data-v="0">목소리만</button>
         <button role="radio" aria-checked="${settings.video}" class="${settings.video ? 'on' : ''}" data-act="video-mode" data-v="1">영상 녹화</button>
       </div>
-      <p class="muted small">${settings.video ? '실제 화상 면접처럼 내 모습을 보며 답합니다. 시선, 억양, 템포 분석과 영상 저장이 추가됩니다. 휴대폰을 눈높이에 세워 두면 좋아요.' + (MOBILE ? (gem.hasGeminiKey() ? ' 휴대폰에서는 답변을 녹음해 두었다가 Gemini로 받아 적어요. 영상에도 소리가 담깁니다.' : ' 휴대폰에서 Gemini 키 없이 쓰면 키보드 마이크로 답하기 때문에 저장되는 영상에는 소리가 담기지 않고, 억양 분석은 빠집니다.') : '') : '카메라 없이 목소리로만 연습합니다. 부담 없이 시작하기 좋아요.'}</p>
+      <p class="muted small">${settings.video ? '실제 화상 면접처럼 내 모습을 보며 답합니다. 시선, 억양, 템포 분석과 영상 저장이 추가됩니다. 휴대폰을 눈높이에 세워 두면 좋아요.' + (MOBILE ? (gem.hasGeminiKey() ? ' 휴대폰에서는 답변을 녹음해 두었다가 Gemini로 받아 적어요. 영상에도 소리가 담깁니다.' : ' 휴대폰에서 Gemini 키 없이 쓰면 키보드 마이크로 답하기 때문에 저장되는 영상에는 소리가 담기지 않고, 억양 분석은 빠집니다.') : '') : '카메라 없이 음성으로만 연습합니다. 처음 연습할 때 권장합니다.'}</p>
     </section>` : ''}
     <details class="card settings gem" ${hasAI() ? '' : ''}>
       <summary>AI 피드백·꼬리질문 (Gemini · Claude 키) ${hasAI() ? `<span class="pill ok">${gem.providerName()} 연결됨</span>` : '<span class="pill">선택</span>'}</summary>
@@ -253,7 +253,7 @@ function homeView() {
     </details>
     <button class="btn primary big" data-act="start">${assigned.length ? `강사가 준 질문 ${assigned.length}개로 시작` : '질문 고르기'}</button>
     <details class="card settings">
-      <summary>강사용 설정 ${aiOn ? '<span class="pill ok">AI 연결됨</span>' : '<span class="pill">자동 피드백</span>'}</summary>
+      <summary>강사용 설정 ${aiOn ? '<span class="pill ok">AI 연결됨</span>' : '<span class="pill">규칙 기반 피드백</span>'}</summary>
       <p class="muted">AI 평가 서버 주소와 수업 코드를 넣으면 AI 피드백을 받습니다. 배포 링크에 <code>?relay=주소&amp;code=수업코드&amp;q=1,4,7</code>를 붙이면 참여자는 입력 없이 바로 시작합니다.</p>
       <label>AI 평가 서버 주소<input id="relay" type="url" inputmode="url" placeholder="https://....workers.dev" value="${esc(settings.relay)}"></label>
       <label>수업 코드<input id="code" type="text" autocomplete="off" value="${esc(settings.code)}"></label>
@@ -283,7 +283,7 @@ function pickView() {
     </section>
     ${custom.length ? `<h2 class="group">내가 추가한 질문</h2>
       <ul class="qlist">${custom.map(q => `<li class="mine"><button data-act="choose" data-id="${q.id}"><span class="qn">내</span>${esc(q.text)}</button><button class="del" data-act="del-custom" data-id="${q.id}" aria-label="이 질문 지우기">지우기</button></li>`).join('')}</ul>` : ''}
-    <button class="btn ghost wide" data-act="random">아무 질문이나 골라 주세요</button>
+    <button class="btn ghost wide" data-act="random">무작위 질문으로 연습하기</button>
     ${groups.map(([name, qs]) => `
       <h2 class="group">${esc(name)}</h2>
       <ul class="qlist">${qs.map(q => `<li><button data-act="choose" data-id="${q.id}"><span class="qn">${q.id}</span>${esc(q.text)}</button></li>`).join('')}</ul>
@@ -552,7 +552,7 @@ function reviewView() {
   return `${header(state.follow ? '꼬리질문 답변 확인' : '답변 확인')}
   <main class="wrap">
     <section class="card">
-      <h2>${state.follow ? '꼬리질문에 이렇게 답하셨어요' : '이렇게 답하셨어요'}</h2>
+      <h2>${state.follow ? '꼬리질문 답변 확인' : '답변 내용 확인'}</h2>
       <p class="muted">${d.typed ? '' : '음성 인식이 잘못 받아 적은 낱말만 고쳐 주세요. 내용을 새로 쓰면 실제 말하기와 달라집니다. '}답변 시간 ${Math.round(d.durationSec)}초</p>
       <textarea id="answer" rows="9">${esc(d.answer)}</textarea>
       ${empty ? '<p class="warn-text">인식된 답변이 없어요. 다시 답하거나 글로 써 주세요.</p>' : ''}
@@ -636,7 +636,7 @@ async function finalizeInner(main, follow) {
       if (!validResult(r)) throw new Error('AI 응답 형식이 맞지 않음');
       result = { ...r, source: 'ai' };
     } catch (err) {
-      toast(`${gem.providerName()} 평가에 실패해 자동 피드백으로 보여 드려요. (${err.cause || err.message}) 자세한 원인은 처음 화면의 연결 점검에서 볼 수 있어요.`);
+      toast(`${gem.providerName()} 평가에 실패해 규칙 기반 피드백으로 안내합니다. (${err.cause || err.message}) 자세한 원인은 처음 화면의 연결 점검에서 볼 수 있어요.`);
     }
   }
   if (!result && settings.relay) {
@@ -737,7 +737,7 @@ function totalCard(t, prevT) {
   const diff = prevT && prevT.total != null ? Math.round((t.total - prevT.total) * 10) / 10 : null;
   return `<section class="total">
     <div><p class="eyebrow">총점</p><p class="tnum2">${t.total.toFixed(1)}<small>점</small>${diff ? `<span class="diff ${diff > 0 ? 'up' : 'down'}">${diff > 0 ? '+' : ''}${diff}</span>` : ''}</p><p class="muted small">100점 만점</p></div>
-    <p class="muted small">${t.missing.length ? `${t.missing.join(', ')}은(는) 측정하지 않아 나머지 항목(가중치 합 ${t.measuredWeight}%)으로 환산했습니다.` : '여섯 항목을 가중치대로 합산했습니다.'} 연습용 참고치입니다.</p>
+    <p class="muted small">${t.missing.length ? `측정하지 않은 항목(${t.missing.join(', ')})을 제외하고, 나머지 항목(가중치 합 ${t.measuredWeight}%)으로 환산했습니다.` : '여섯 항목을 가중치대로 합산했습니다.'} 연습용 참고치입니다.</p>
   </section>`;
 }
 
@@ -755,9 +755,9 @@ function feedbackBody(a) {
   return `
     <div class="nextfix"><p class="eyebrow">다음에 고칠 한 가지</p><p class="big">${esc(r.next_fix)}</p></div>
     <section class="card fb">
-      <h3>잘한 점</h3><p>${esc(r.strength)}</p>
-      <h3>고칠 점</h3><p>${esc(r.improvement)}</p>
-      <h3>이렇게 바꿔 말해 보세요</h3><blockquote>${esc(r.rewrite_example)}</blockquote>
+      <h3>강점</h3><p>${esc(r.strength)}</p>
+      <h3>보완할 점</h3><p>${esc(r.improvement)}</p>
+      <h3>개선 답변 예시</h3><blockquote>${esc(r.rewrite_example)}</blockquote>
       ${r.probe && !a.follow ? `<h3>추천 꼬리질문</h3><p>${esc(r.probe)}</p><p class="muted small">면접관이라면 이렇게 더 물을 수 있어요. 이 질문에 답할 내용을 다음 답변에 미리 넣어 보세요.</p>` : ''}
       <p class="muted small">[ ] 표시는 본인의 실제 경험으로 채워 주세요. 하지 않은 일을 지어내지 않도록 비워 두었습니다.</p>
     </section>`;
@@ -779,7 +779,7 @@ function numbersSection(a) {
   const add = a.result.numbers_to_add || [];
   if (!found.length && !add.length) return '';
   return `<section class="card nums-fb">
-    <h3>숫자로 보완하기 <small class="muted">성과는 숫자와 전후 비교로</small></h3>
+    <h3>정량 근거 보완 <small class="muted">성과는 수치와 전후 비교로 제시</small></h3>
     <p class="small"><b>답변에 나온 숫자</b> ${found.length ? found.map(n => `<span class="tag">${esc(n)}</span>`).join(' ') : '<span class="muted">없음. 결과를 숫자로 말해 보세요.</span>'}</p>
     ${add.length ? `<p class="small"><b>덧붙이면 좋은 숫자</b></p><ul>${add.map(n => `<li>${esc(n)}</li>`).join('')}</ul>` : ''}
     <p class="muted small">기억나는 실제 값만 쓰세요. 정확하지 않으면 "약", "이상"을 붙여 말해도 됩니다.</p>
@@ -801,7 +801,7 @@ function followSection(a) {
 }
 
 function disclaimer(a) {
-  return `<p class="disclaimer">${a.result.source === 'ai' ? 'AI 피드백' : '자동 피드백(답변 속 표현을 정해진 규칙으로 살펴본 결과로, 내용의 깊이까지는 판단하지 못할 수 있습니다)'}입니다. ${NOTICE} 음성 인식은 "음, 어" 같은 군말을 빠뜨리기도 합니다.</p>`;
+  return `<p class="disclaimer">${a.result.source === 'ai' ? 'AI 피드백' : '규칙 기반 피드백(답변 속 표현을 정해진 규칙으로 분석한 결과로, 내용의 깊이까지는 판단하지 못할 수 있습니다)'}입니다. ${NOTICE} 음성 인식은 "음, 어" 같은 군말을 빠뜨리기도 합니다.</p>`;
 }
 
 function reportView() {
@@ -815,7 +815,7 @@ function reportView() {
     ${criteriaSection(a)}
     ${numbersSection(a)}
     ${followSection(a)}
-    <section class="card"><h3>말하기 지표</h3>${metricsRow(a.metrics)}</section>
+    <section class="card"><h3>말하기 분석</h3>${metricsRow(a.metrics)}</section>
     ${nvSection(a)}
     ${scoreGuide(a)}
     <details class="card"><summary>내 답변 보기</summary><p class="answer">${esc(a.answer)}</p></details>
@@ -879,7 +879,7 @@ function scoreGuide(a) {
       <li>시선 이탈을 거짓말이나 부정행위로 해석하지 않습니다.</li>
       <li>낮은 목소리, 억양, 방언, 말더듬을 역량 부족으로 보지 않습니다.</li>
       <li>웃는 횟수나 움직임으로 성격, 태도, 불안을 판단하지 않습니다.</li>
-      <li>"AI면접 점수가 떨어진다"고 단정하지 않습니다. AI면접 시스템마다 평가방식이 다르고, 표정·몸짓·목소리 톤을 채점하지 않는다고 밝힌 운영사도 있습니다.</li>
+      <li>"AI 면접 점수가 떨어진다"고 단정하지 않습니다. AI 면접 시스템마다 평가방식이 다르고, 표정·몸짓·목소리 톤을 채점하지 않는다고 밝힌 운영사도 있습니다.</li>
     </ul>
     <h3 class="guide-h">근거 자료</h3>
     <p class="muted small">근거 등급 A: ${BASIS.A} / B: ${BASIS.B} / C: ${BASIS.C}</p>
@@ -970,11 +970,11 @@ function reportBody() {
         <div class="nextfix"><p class="eyebrow">다음에 고칠 한 가지</p><p class="big">${esc(r.next_fix)}</p></div>
         ${scoreBars(r.scores, r.reasons, item.attempts.length > 1 ? first.result.scores : null)}
         <div class="fb">
-          <h3>잘한 점</h3><p>${esc(r.strength)}</p>
-          <h3>고칠 점</h3><p>${esc(r.improvement)}</p>
-          <h3>이렇게 바꿔 말해 보세요</h3><blockquote>${esc(r.rewrite_example)}</blockquote>
+          <h3>강점</h3><p>${esc(r.strength)}</p>
+          <h3>보완할 점</h3><p>${esc(r.improvement)}</p>
+          <h3>개선 답변 예시</h3><blockquote>${esc(r.rewrite_example)}</blockquote>
           ${r.probe ? `<h3>추천 꼬리질문</h3><p>${esc(r.probe)}</p>` : ''}
-          ${r.numbers_to_add && r.numbers_to_add.length ? `<h3>숫자로 보완하기</h3><ul class="critlist">${r.numbers_to_add.map(n => `<li>${esc(n)}</li>`).join('')}</ul>` : ''}
+          ${r.numbers_to_add && r.numbers_to_add.length ? `<h3>정량 근거 보완</h3><ul class="critlist">${r.numbers_to_add.map(n => `<li>${esc(n)}</li>`).join('')}</ul>` : ''}
           <h3>마지막 답변</h3><p class="answer">${esc(last.answer)}</p>
         </div>
         ${r.criteria_results && r.criteria_results.length ? `<div class="nv-rec"><h3>이 질문의 핵심</h3><ul class="critlist">${r.criteria_results.map(c => `<li><b>${esc(c.level)}</b> ${esc(c.criterion)} <span class="muted">${esc(c.comment)}</span></li>`).join('')}</ul></div>` : ''}
@@ -1003,7 +1003,7 @@ async function downloadPdf() {
   pdfBusy = true;
   toast('PDF를 만드는 중이에요. 잠시만 기다려 주세요...');
   try {
-    const { buildPdf } = await import('./pdf.js?v=202611154');
+    const { buildPdf } = await import('./pdf.js?v=202611155');
     const blob = await buildPdf(reportBody(), (i, n) => { document.getElementById('toast').textContent = `PDF를 만드는 중이에요... ${Math.round((i / n) * 100)}%`; });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -1033,7 +1033,7 @@ window.addEventListener('beforeunload', e => {
 });
 
 // ---------- 화면: 면접 전에 꼭 볼 것 ----------
-// 커리어캐쳐 평가 기준표(rubric.js), 블로그 글(AI면접 컨설팅 후기, 1분 자기소개, AI 시대 구직자)을 바탕으로 정리.
+// 커리어캐쳐 평가 기준표(rubric.js), 블로그 글(AI 면접 컨설팅 후기, 1분 자기소개, AI 시대 구직자)을 바탕으로 정리.
 // 근거가 약한 내용은 단정하지 않는다. 특정 회사의 채점 방식은 추측해서 쓰지 않는다.
 function tipsView() {
   const SHORT = { koutsoumpis2024: 'Koutsoumpis 외, 2024', hirevue: 'HireVue 공식 자료', eeoc: '미국 EEOC', basch2025: 'Basch·Melchers, 2025', levashina2014: 'Levashina 외, 2014' };
@@ -1042,27 +1042,27 @@ function tipsView() {
   <main class="wrap guidepage tipspage">
     <section class="hero small">
       <h1>면접 전에 꼭 볼 것</h1>
-      <p>어떤 면접이든 통하는 기본, AI면접에서 주의할 점, 자주 듣는 오해를 3분 분량으로 정리했어요.</p>
+      <p>모든 면접에 공통으로 적용되는 원칙, AI 면접에서 주의할 점, AI 면접에 대한 오해와 사실을 면접 전 3분 안에 확인할 수 있도록 정리했습니다.</p>
     </section>
 
     <section class="card">
-      <h2>1. 면접 기본: 어떤 면접이든 공통</h2>
+      <h2>1. 면접 공통 원칙</h2>
       <ol class="steps">
-        <li><b>결론부터 말해요.</b> 첫 문장에 질문의 답을 말하고, 근거가 되는 경험을 덧붙여요.</li>
-        <li><b>내가 한 행동을 말해요.</b> "우리 팀이 했다"보다 "제가 ○○를 해서"처럼 본인 역할이 드러나게 말해요.</li>
-        <li><b>결과는 숫자로 말해요.</b> 기간, 건수, 전후 비교를 넣어요. 예: "제가 전표 200건을 직접 검토해 오류율이 5%에서 1%로 줄었습니다." 숫자를 모르면 지어내지 말고 면접 전에 확인해 두세요.</li>
-        <li><b>한 답변은 60~90초 안에.</b> 길게 말하기보다 핵심 하나를 분명하게 말해요. 부족한 부분은 면접관이 꼬리질문으로 묻습니다.</li>
-        <li><b>직무와 연결하며 마무리해요.</b> 마지막 문장은 "이 경험을 ○○ 업무에서 이렇게 쓰겠습니다"로 끝내요.</li>
-        <li><b>외우지 말고 키워드로 준비해요.</b> 문장을 통째로 외우면 막혔을 때 다시 잇기 어려워요. 경험마다 키워드 3개만 기억해요.</li>
+        <li><b>결론부터 말합니다.</b> 첫 문장에서 질문에 대한 답을 제시하고, 이를 뒷받침하는 경험을 이어서 설명합니다.</li>
+        <li><b>본인의 행동을 드러냅니다.</b> "우리 팀이 했다"보다 "제가 ○○를 해서"처럼 본인의 역할과 기여가 드러나게 말합니다.</li>
+        <li><b>성과는 수치로 제시합니다.</b> 기간, 건수, 전후 비교를 넣습니다. 예: "제가 전표 200건을 직접 검토해 오류율이 5%에서 1%로 줄었습니다." 정확한 수치를 모른다면 추정하지 말고 면접 전에 확인해 두세요.</li>
+        <li><b>한 답변은 60~90초 안에 마칩니다.</b> 길게 말하기보다 핵심 하나를 분명하게 전달합니다. 부족한 부분은 면접관이 꼬리질문으로 확인합니다.</li>
+        <li><b>직무 기여로 마무리합니다.</b> 마지막 문장은 "이 경험을 ○○ 업무에서 이렇게 활용하겠습니다"처럼 직무와 연결합니다.</li>
+        <li><b>문장이 아닌 키워드로 준비합니다.</b> 답변을 통째로 외우면 막혔을 때 이어 가기 어렵습니다. 경험마다 핵심 키워드 3개를 기억해 두세요.</li>
       </ol>
     </section>
 
     <section class="card">
       <h2>2. 1분 자기소개 3단계</h2>
-      <p class="muted small">면접관은 1분 동안 세 가지를 들어요: 나를 한 단어로 정리할 수 있는가, 그 말을 뒷받침하는 경험이 있는가, 회사와 직무를 이해하고 있는가.</p>
+      <p class="muted small">면접관은 1분 자기소개에서 세 가지를 확인합니다: 나를 한 단어로 정리할 수 있는가, 그 말을 뒷받침하는 경험이 있는가, 회사와 직무를 이해하고 있는가.</p>
       <ol class="steps">
         <li><b>한 줄 정체성 (10초)</b>: 나를 보여 주는 핵심 키워드 하나. 예: "고객의 불편을 숫자로 찾아 고치는 지원자 ○○○입니다."</li>
-        <li><b>근거 경험 1~2개 (35초)</b>: 키워드를 증명하는 경험과 결과 숫자. 신입이라면 수업·졸업 프로젝트, 인턴·현장실습, 아르바이트, 동아리·공모전, 자격증·독학 경험으로 충분해요.</li>
+        <li><b>근거 경험 1~2개 (35초)</b>: 키워드를 증명하는 경험과 결과 숫자. 신입이라면 수업·졸업 프로젝트, 인턴·현장실습, 아르바이트, 동아리·공모전, 자격증·독학 경험으로도 충분합니다.</li>
         <li><b>입사 후 기여 (15초)</b>: 그 강점을 지원 직무에서 어떻게 쓸지 한 문장으로 마무리.</li>
       </ol>
       <div class="notice"><b>빈칸 틀</b>저는 [핵심 키워드]를 가진 지원자 [이름]입니다. [경험]에서 제가 [행동]해서 [결과 숫자]를 만들었습니다. 이 경험을 살려 [회사]의 [직무]에서 [기여]하겠습니다.</div>
@@ -1070,30 +1070,30 @@ function tipsView() {
     </section>
 
     <section class="card">
-      <h2>3. AI면접에서 주의할 점</h2>
+      <h2>3. AI 면접에서 주의할 점</h2>
       <ul class="plain">
-        <li><b>환경</b>: 조용하고 밝은 곳에서 얼굴 정면에 빛이 오게 앉아요. 창이나 조명을 등지면 얼굴이 어둡게 찍혀요.</li>
-        <li><b>카메라와 시선</b>: 카메라는 눈높이에 두고, 화면 속 내 얼굴이 아니라 카메라 렌즈를 보며 말해요. 옆으로 오래 보는 것이 위아래로 보는 것보다 더 눈에 띕니다.</li>
-        <li><b>움직임</b>: 손동작, 몸 흔들림, 머리 만지기는 줄여요. 움직임 자체가 감점이라서가 아니라, 보는 사람의 주의가 답변 내용에서 흩어지기 때문이에요.</li>
-        <li><b>준비 시간</b>: 질문이 나오면 준비 시간에 키워드 3개만 떠올려요. 답을 전부 머릿속으로 쓰려고 하면 시간이 부족해요.</li>
-        <li><b>말하기</b>: 또박또박 말하고 문장 끝을 흐리지 않아요. 숫자와 결과는 조금 힘주어 말해요. 말이 막히면 길게 멈추기보다 "다시 말씀드리면"처럼 짧게 이어요.</li>
-        <li><b>기기</b>: 노트북 Chrome을 권장해요. 휴대폰 알림과 메신저는 끄고, 충전기를 연결해 두고, 인터넷이 안정적인지 미리 확인해요.</li>
-        <li><b>미리 찍어 보기</b>: 내 모습을 영상으로 보면 스스로 몰랐던 습관이 보여요. 이 앱의 영상 녹화로 한 번 찍어 보세요.</li>
+        <li><b>환경</b>: 조용하고 밝은 곳에서 얼굴 정면으로 빛이 오도록 앉습니다. 창이나 조명을 등지면 얼굴이 어둡게 촬영됩니다.</li>
+        <li><b>카메라와 시선</b>: 카메라를 눈높이에 두고, 화면 속 내 얼굴이 아닌 카메라 렌즈를 보며 말합니다. 좌우로 오래 시선을 돌리는 것이 위아래보다 더 눈에 띕니다.</li>
+        <li><b>움직임</b>: 잦은 손동작, 몸 흔들림, 머리 만지기는 줄입니다. 움직임 자체가 감점 요인이어서가 아니라, 듣는 사람의 주의가 답변 내용에서 흩어지기 때문입니다.</li>
+        <li><b>준비 시간</b>: 준비 시간에는 답변의 키워드 3개만 정리합니다. 답변 전체를 머릿속으로 작성하려 하면 시간이 부족합니다.</li>
+        <li><b>말하기</b>: 또박또박 말하고 문장 끝을 흐리지 않습니다. 수치와 결과는 강조해서 전달합니다. 말이 막히면 길게 멈추기보다 "다시 말씀드리면"처럼 짧게 이어 갑니다.</li>
+        <li><b>기기</b>: 노트북의 Chrome 브라우저를 권장합니다. 알림과 메신저를 끄고, 충전기를 연결하고, 인터넷 연결 상태를 미리 확인합니다.</li>
+        <li><b>사전 녹화 점검</b>: 영상으로 자신의 모습을 확인하면 스스로 알지 못했던 습관이 보입니다. 면접 리허설의 영상 녹화로 미리 점검해 보세요.</li>
       </ul>
     </section>
 
     <section class="card">
-      <h2>4. 자주 듣는 오해</h2>
-      <p class="muted small">AI면접은 회사와 운영사마다 평가 방식이 다르고, 공개되지 않은 부분이 많아요. 아래는 공개된 연구와 공식 자료로 확인할 수 있는 내용입니다.</p>
+      <h2>4. AI 면접에 대한 오해와 사실</h2>
+      <p class="muted small">AI 면접은 기업과 운영사마다 평가 방식이 다르고, 공개되지 않은 부분이 많습니다. 아래 내용은 공개된 연구와 공식 자료로 확인할 수 있는 범위에서 정리했습니다.</p>
       <dl class="rules">
         <dt>"표정이나 웃는 횟수로 점수가 정해진다"</dt>
-        <dd>근거가 약해요. 연구에서는 표정·음성 특징보다 말한 내용(언어적 특징)이 더 중요했어요(${ref('koutsoumpis2024')}). 표정·몸짓·목소리 톤을 채점하지 않는다고 밝힌 운영사도 있어요(${ref('hirevue')}). 준비의 중심은 답변 내용입니다.</dd>
+        <dd>근거가 약합니다. 연구에서는 표정·음성 특징보다 답변 내용(언어적 특징)이 더 중요한 것으로 나타났습니다(${ref('koutsoumpis2024')}). 표정·몸짓·목소리 톤을 채점하지 않는다고 밝힌 운영사도 있습니다(${ref('hirevue')}). 준비의 중심은 답변 내용입니다.</dd>
         <dt>"목소리가 낮거나 사투리, 말더듬이 있으면 떨어진다"</dt>
-        <dd>목소리 특성으로 판단하는 자동 평가는 불공정할 수 있다는 지적이 있어요(${ref('eeoc')}). 목소리를 바꾸려 하기보다 결론과 숫자를 또렷하게 말하는 데 집중하세요.</dd>
+        <dd>목소리 특성으로 판단하는 자동 평가는 불공정할 수 있다는 지적이 있습니다(${ref('eeoc')}). 목소리를 바꾸려 하기보다 결론과 숫자를 또렷하게 말하는 데 집중하세요.</dd>
         <dt>"시선을 피하면 거짓말하는 것으로 본다"</dt>
-        <dd>시선으로 거짓말을 판단한다는 근거는 없어요. 다만 화상 면접에서 옆으로 시선을 돌리면 인상이 나빠질 수 있다는 연구가 있어요(${ref('basch2025')}). 그래서 카메라 렌즈를 보는 연습은 해 두는 것이 좋아요.</dd>
+        <dd>시선으로 거짓말을 판단한다는 근거는 없습니다. 다만 화상 면접에서 좌우로 시선을 돌리면 인상이 나빠질 수 있다는 연구가 있습니다(${ref('basch2025')}). 카메라 렌즈를 보는 연습은 해 두는 것이 좋습니다.</dd>
         <dt>"말을 길게 해야 성의 있어 보인다"</dt>
-        <dd>구조화 면접 연구에서는 답변을 정해진 기준으로 평가해요(${ref('levashina2014')}). 길이보다 질문에 맞는 근거가 있는지가 중요합니다.</dd>
+        <dd>구조화 면접 연구에서는 답변을 정해진 기준으로 평가합니다(${ref('levashina2014')}). 길이보다 질문에 맞는 근거가 있는지가 중요합니다.</dd>
       </dl>
     </section>
 
@@ -1109,15 +1109,15 @@ function tipsView() {
     </section>
 
     <section class="card">
-      <h2>6. 이 앱으로 연습하는 법</h2>
+      <h2>6. 면접 리허설 활용법</h2>
       <ol class="steps">
-        <li>질문을 듣고 답한 뒤, 피드백의 <b>"다음에 고칠 한 가지"</b>만 고쳐 같은 질문에 다시 답해요.</li>
-        <li><b>영상 녹화</b>로 시선과 습관을 확인해요.</li>
-        <li>자기소개서가 있다면 <b>내 자료로 예상 질문 만들기</b>로 내 경험에서 나올 질문을 연습해요.</li>
+        <li>질문에 답한 뒤 피드백의 <b>"다음에 고칠 한 가지"</b>를 반영해 같은 질문에 다시 답합니다.</li>
+        <li><b>영상 녹화</b>로 시선과 습관을 점검합니다.</li>
+        <li>자기소개서가 있다면 <b>내 자료로 예상 질문 만들기</b>로 본인 경험에서 나올 질문을 연습합니다.</li>
       </ol>
       <button class="btn primary big" data-act="${state.consent ? 'pick' : 'home'}">연습하러 가기</button>
     </section>
-    <p class="disclaimer">커리어캐쳐 면접 코칭 기준과 공개된 연구·공식 자료를 바탕으로 정리한 연습용 안내입니다. 실제 채용 결과를 보장하지 않으며, 회사마다 면접 방식은 다를 수 있어요.</p>
+    <p class="disclaimer">커리어캐쳐 면접 코칭 기준과 공개된 연구·공식 자료를 바탕으로 정리한 연습용 안내입니다. 실제 채용 결과를 보장하지 않으며, 기업마다 면접 방식은 다를 수 있습니다.</p>
   </main>`;
 }
 
@@ -1127,11 +1127,11 @@ function guideView() {
   <main class="wrap guidepage">
     <section class="hero small">
       <h1>면접 리허설 이용 방법</h1>
-      <p>질문을 듣고 답한 뒤, 평가 기준에 따른 피드백을 받고 다시 답해 보는 연습 도구예요. 회원가입 없이 무료로 씁니다.</p>
+      <p>질문을 듣고 답한 뒤 평가 기준에 따른 피드백을 받고, 같은 질문에 다시 답하며 개선하는 면접 연습 도구입니다. 회원가입 없이 무료로 이용할 수 있습니다.</p>
     </section>
-    <button class="btn ghost wide" data-act="tips">면접 기본과 AI면접 주의할 점 보기 (면접 전에 꼭 볼 것)</button>
+    <button class="btn ghost wide" data-act="tips">면접 공통 원칙과 AI 면접 주의사항 보기</button>
     <section class="card">
-      <h2>한눈에 보는 순서</h2>
+      <h2>연습 순서</h2>
       <ol class="steps">
         <li><b>준비</b>: 답변 시간(60초·90초)과 답변 방식(목소리만·영상 녹화)을 고릅니다.</li>
         <li><b>질문 고르기</b>: 공통 질문 20개, 내가 추가한 질문, 내 자료로 만든 예상 질문 중에서 고릅니다.</li>
@@ -1154,8 +1154,8 @@ function guideView() {
     </section>
     <section class="card">
       <h2>세 가지 연습 방법</h2>
-      <table class="errtable"><thead><tr><th>방법</th><th>필요한 것</th><th>되는 것</th></tr></thead><tbody>
-        <tr><td>기본 연습</td><td>없음</td><td>공통 질문·내 질문으로 연습, 자동 피드백(답변 속 표현을 규칙으로 확인), 리포트</td></tr>
+      <table class="errtable"><thead><tr><th>방법</th><th>필요 조건</th><th>제공 기능</th></tr></thead><tbody>
+        <tr><td>기본 연습</td><td>없음</td><td>공통 질문·직접 추가한 질문 연습, 규칙 기반 피드백, PDF 리포트</td></tr>
         <tr><td>AI 연습</td><td>내 Gemini API 키</td><td>답변을 읽고 하는 꼬리질문, 평가 기준표에 따른 AI 피드백</td></tr>
         <tr><td>내 자료 연습</td><td>내 Gemini API 키 + 자기소개서 등</td><td>내 자료로 예상 질문과 핵심 답변 스크립트 만들기</td></tr>
       </tbody></table>
@@ -1222,7 +1222,7 @@ function guideView() {
         <dt>내 답변과 영상은 어디에 저장되나요?</dt><dd>어디에도 저장되지 않아요. 영상과 분석은 휴대폰 안에서만 처리되고, 화면을 닫으면 사라집니다. AI 키를 연결한 경우에만 질문과 답변 글이 Google Gemini로 전송됩니다.</dd>
         <dt>말했는데 글자가 안 나와요.</dt><dd>위의 "말해도 글자가 안 나올 때"를 순서대로 확인해 주세요. 그래도 안 되면 글로 답하기로 연습할 수 있어요.</dd>
         <dt>AI 오류가 나요.</dt><dd>첫 화면의 AI 키 카드에서 "연결 점검"을 누르면 원인과 해결 방법이 나옵니다.</dd>
-        <dt>점수가 실제 AI면접 점수와 같나요?</dt><dd>아니요. 연습을 위한 자체 평가도구이고, AI면접 시스템마다 평가방식이 다릅니다.</dd>
+        <dt>점수가 실제 AI 면접 점수와 같나요?</dt><dd>아니요. 연습을 위한 자체 평가도구이고, AI 면접 시스템마다 평가방식이 다릅니다.</dd>
       </dl>
     </section>
     <button class="btn primary big" data-act="home">연습 시작하러 가기</button>

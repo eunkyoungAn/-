@@ -1,4 +1,4 @@
-// 면접 피드백 평가 기준 (2026년 11월 기준, 대표 정리본 「AI면접 및 일반면접 피드백 평가기준과 근거자료」).
+// 면접 피드백 평가 기준 (2026년 11월 기준, 대표 정리본 「AI 면접 및 일반면접 피드백 평가기준과 근거자료」).
 // 기준·가중치·주의점·근거를 바꾸려면 이 파일만 고친다.
 // 원칙: 답변 내용의 구체성과 직무역량 입증이 주요 평가항목이고,
 //       목소리·시선·표정·움직임은 전달력 개선을 위한 코칭 지표다. 행동을 성격이나 능력으로 단정하지 않는다.
@@ -47,7 +47,7 @@ export const RUBRIC = [
 
 export const BASIS = {
   A: '학술연구·메타분석·검증된 면접평가 연구',
-  B: '대학 커리어센터·공공기관·AI면접 운영사 공식 가이드',
+  B: '대학 커리어센터·공공기관·AI 면접 운영사 공식 가이드',
   C: '코치의 경험적 관찰, 자체 개발한 개선 지침(추후 검증 필요)',
 };
 
@@ -60,11 +60,11 @@ export const REFS = {
   shinya2024: { grade: 'A', cite: 'Shinya et al. (2024). Scientific Reports.', url: 'https://doi.org/10.1038/s41598-024-60371-5', use: '카메라 밖 시선이 모의 온라인 면접 평가에 미치는 영향' },
   koutsoumpis2024: { grade: 'A', cite: 'Koutsoumpis et al. (2024). Computers in Human Behavior.', url: 'https://doi.org/10.1016/j.chb.2023.108128', use: '언어적 특징이 표정·음성 특징보다 중요, 알고리즘 편향 주의' },
   eeoc: { grade: 'B', cite: '미국 평등고용기회위원회(EEOC) AI 채용도구 안내', url: 'https://www.eeoc.gov/', use: '말더듬 등 음성 특성을 쓰는 자동평가의 불공정 위험' },
-  hirevue: { grade: 'B', cite: 'HireVue 공식 AI 평가 설명자료', url: 'https://www.hirevue.com/platform/our-science', use: '표정·몸짓·목소리 톤을 채점하지 않고 답변 내용을 분석. AI면접마다 평가방식이 다름' },
+  hirevue: { grade: 'B', cite: 'HireVue 공식 AI 평가 설명자료', url: 'https://www.hirevue.com/platform/our-science', use: '표정·몸짓·목소리 톤을 채점하지 않고 답변 내용을 분석. AI 면접마다 평가방식이 다름' },
   nist: { grade: 'A', cite: 'NIST AI Risk Management Framework (2023)', url: 'https://doi.org/10.6028/NIST.AI.100-1', use: '공정성, 정확성, 평가결과의 설명 가능성' },
 };
 
-export const NOTICE = '이 평가표는 면접 연습을 위한 자체 평가도구입니다. 과학적으로 타당성이 검증된 채용 선발 척도가 아니며, 특정 AI면접 기업의 공식 채점표도 아닙니다. 가중치는 임시 제안값입니다. 장애, 언어적 특성, 비언어적 차이를 이유로 낮게 평가하지 않습니다.';
+export const NOTICE = '이 평가표는 면접 연습을 위한 자체 평가도구입니다. 과학적으로 타당성이 검증된 채용 선발 척도가 아니며, 특정 AI 면접 기업의 공식 채점표도 아닙니다. 가중치는 임시 제안값입니다. 장애, 언어적 특성, 비언어적 차이를 이유로 낮게 평가하지 않습니다.';
 
 const clamp = n => Math.max(1, Math.min(5, Math.round(n)));
 
