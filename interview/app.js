@@ -3,15 +3,15 @@
 // 음성 모드: 브라우저 음성 인식으로 글자만 받는다. 녹음 파일은 만들지 않는다.
 // 영상 모드(선택): 카메라로 녹화하고 시선·억양·템포를 휴대폰 안에서만 분석한다. 영상은 참여자가 직접 저장한다.
 
-import { QUESTIONS, CATEGORIES, findQuestion } from './questions.js?v=202611151';
-import { RUBRIC, measure, speedLabel, localEvaluate, totalScore, voiceScore } from './scoring.js?v=202611151';
-import { BASIS, REFS, NOTICE } from './rubric.js?v=202611151';
-import { buildSetText, fileName } from './save.js?v=202611151';
-import * as gem from './gemini.js?v=202611151';
-import * as files from './files.js?v=202611151';
-import * as claude from './claude.js?v=202611151';
-import { openMic, startAudioRecorder, toWavBase64, canRecordAudio } from './audio.js?v=202611151';
-import { canRecord, openCamera, stopStream, startRecorder, startAudioAnalysis, startGaze, loadGazeModel, scoreNonverbal, saveVideo } from './video.js?v=202611151';
+import { QUESTIONS, CATEGORIES, findQuestion } from './questions.js?v=202611152';
+import { RUBRIC, measure, speedLabel, localEvaluate, totalScore, voiceScore } from './scoring.js?v=202611152';
+import { BASIS, REFS, NOTICE } from './rubric.js?v=202611152';
+import { buildSetText, fileName } from './save.js?v=202611152';
+import * as gem from './gemini.js?v=202611152';
+import * as files from './files.js?v=202611152';
+import * as claude from './claude.js?v=202611152';
+import { openMic, startAudioRecorder, toWavBase64, canRecordAudio } from './audio.js?v=202611152';
+import { canRecord, openCamera, stopStream, startRecorder, startAudioAnalysis, startGaze, loadGazeModel, scoreNonverbal, saveVideo } from './video.js?v=202611152';
 
 const PREP_SEC = 30;
 const FOLLOW_PREP_SEC = 10;
@@ -196,9 +196,25 @@ function homeView() {
   const aiOn = Boolean(settings.relay);
   return `${header()}
   <main class="wrap">
-    <section class="hero">
-      <h1>듣고, 말하고,<br>한 가지만 고쳐서 다시.</h1>
+    <section class="hero home-hero">
+      <p class="kicker">AI 면접 리허설 · 무료</p>
+      <h1>듣고, 말하고,<br><span class="hl">한 가지만</span> 고쳐서 다시.</h1>
       <p>질문을 듣고 말로 답하면, 커리어캐쳐 기준으로 피드백을 드립니다. 같은 질문에 한 번 더 답해 달라진 점을 확인해 보세요. 카메라는 원할 때만 켭니다.</p>
+    </section>
+    <section class="stats" aria-label="연습 방식 요약">
+      <div><span class="badge">01</span><b>30<small>초</small></b><p>질문을 듣고 준비하는 시간</p></div>
+      <div><span class="badge mint">02</span><b class="mint">6<small>가지</small></b><p>근거 있는 평가 항목으로 피드백</p></div>
+      <div><span class="badge">03</span><b>1<small>가지</small></b><p>다음 답변에서 고칠 한 가지</p></div>
+    </section>
+    <section class="flow" aria-label="연습 순서">
+      <h2>쉬운 연습, <span>한 번 더 성장</span></h2>
+      <ol>
+        <li><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg></i><b>질문 <em>듣기</em></b></li>
+        <li><i><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg></i><b>30초 <em>준비</em></b></li>
+        <li><i><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></i><b>말로 <em>답하기</em></b></li>
+        <li><i><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/></svg></i><b>피드백 <em>확인</em></b></li>
+        <li><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.7"/><path d="M20 4v5h-5"/></svg></i><b>다시 <em>답하기</em></b></li>
+      </ol>
     </section>
     ${inApp ? `<div class="notice warn"><b>${esc(inApp)} 안에서 열려 있어요.</b> 이 화면에서는 마이크가 막힐 수 있습니다. ${inApp === '카카오톡' ? `아래 버튼을 눌러 Chrome이나 Safari에서 열어 주세요.<a class="btn primary sm" href="${KAKAO_EXTERNAL}">다른 브라우저로 열기</a>` : '오른쪽 위 메뉴에서 <b>다른 브라우저로 열기</b>(Chrome, Safari 등)를 눌러 주세요.'}<button class="btn ghost sm" data-act="copy-link">주소 복사</button></div>` : ''}
     ${SR && SAMSUNG ? '<div class="notice warn"><b>삼성 인터넷으로 열려 있어요.</b> 이 브라우저에서는 말한 내용이 글자로 바뀌지 않을 수 있습니다. Chrome 앱에서 같은 주소를 열어 주세요.<button class="btn ghost sm" data-act="copy-link">주소 복사</button></div>' : ''}
@@ -986,7 +1002,7 @@ async function downloadPdf() {
   pdfBusy = true;
   toast('PDF를 만드는 중이에요. 잠시만 기다려 주세요...');
   try {
-    const { buildPdf } = await import('./pdf.js?v=202611151');
+    const { buildPdf } = await import('./pdf.js?v=202611152');
     const blob = await buildPdf(reportBody(), (i, n) => { document.getElementById('toast').textContent = `PDF를 만드는 중이에요... ${Math.round((i / n) * 100)}%`; });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
