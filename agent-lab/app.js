@@ -142,8 +142,7 @@
       D.parts.map(function (p) {
         return level(p.kicker, p.title, p.desc, p.lessons.map(function (id) { return card(byId[id], '실습 시작하기'); }).join(''));
       }).join('') +
-      level(ST.kicker, ST.partTitle, ST.partDesc, card(ST, '시작 안내 보기') + ST.quizzes.map(function (q) { return card(q, '문제 풀기'); }).join('')) +
-      level(P.kicker, P.partTitle, P.partDesc, card(P, '방법과 실습 보기') +
+      level(P.kicker, P.partTitle, P.partDesc, card(P, '방법과 실습 보기') + card(ST, '시작 안내 보기') + ST.quizzes.map(function (q) { return card(q, '문제 풀기'); }).join('') +
       '<a class="lesson-card" href="#skills"><span class="lesson-code">교육 뒤 · 선택</span><h3>내 Claude에 스킬 등록하기</h3>' +
       '<p>일곱 에이전트를 스킬 파일로 받아 내 Claude에 등록합니다. 프로젝트 대화에서 불러 쓸 수 있습니다.</p>' +
       '<div class="lesson-output"><span>받는 것</span> · 스킬 zip 파일 7개</div><div class="lesson-arrow">스킬 받으러 가기 →</div></a>');
@@ -169,8 +168,8 @@
       D.parts.map(function (p) {
         return mGroup(p.kicker + ' · ' + p.title, p.lessons.map(function (id) { return mLink(id, byId[id].code, byId[id].title); }).join(''));
       }).join('') +
-      mGroup('스스로 해 보기', mLink(ST.id, '안내', '시작 안내') + ST.quizzes.map(function (q) { return mLink(q.id, q.code, q.title); }).join('')) +
-      mGroup('교육 뒤', mLink(P.id, '프로젝트', P.title) + mLink(L.id, '실습', '데이터 에이전트 프로젝트 실습') + mLink('skills', '스킬', '내 Claude에 스킬 등록하기')) +
+      mGroup('교육 뒤 · 프로젝트', mLink(P.id, '프로젝트', P.title) + mLink(L.id, '실습', '데이터 에이전트 프로젝트 실습') +
+        mLink(ST.id, '혼자 풀기', '스스로 해 보기 안내') + ST.quizzes.map(function (q) { return mLink(q.id, q.code, q.title); }).join('') + mLink('skills', '스킬', '내 Claude에 스킬 등록하기')) +
       mGroup('모음', mLink('home', '처음', '전체 실습 보기') + mLink('downloads', '자료', '자료 파일 한 곳에서 받기') + mLink('rules', '규칙', '공통 규칙 여덟 가지') +
         mLink('files', '파일', '결과를 파일로 받기') + mLink('help', '오류', '오류가 나는 대표 사유'));
     $('ruleGrid').innerHTML = D.rules.map(function (r) {
@@ -256,7 +255,7 @@
         return t;
       })) + attachHtml(l) +
       '<div class="go-studio"><p><b>지시문을 복사한 뒤</b> Claude 새 채팅을 열어 붙여넣습니다.</p><a class="g-btn" href="' + esc(chat) + '" target="_blank" rel="noopener noreferrer">Claude 새 채팅 열기</a></div>' +
-      '<div class="prompt-box tall"><span class="box-label">지시문 전체</span>' + copyBtn(l.prompt, '지시문 복사') + '<pre>' + esc(l.prompt) + '</pre></div>', '복사 지시문');
+      '<div class="prompt-box tall"><span class="box-label">지시문 전체</span>' + copyBtn(l.prompt, '지시문 복사') + '<pre>' + esc(l.prompt) + '</pre></div>' + customHtml(), '복사 지시문');
 
     var prev = D.lessons[l.index - 1], next = D.lessons[l.index + 1];
     var navA = function (x, cls, label) {
@@ -265,7 +264,7 @@
     };
     $('lessonBody').innerHTML = parts.join('') + '<nav class="lesson-navigation" aria-label="이전 · 다음 실습">' +
       navA(prev, 'lesson-prev', '← 이전') + (next ? navA(next, 'lesson-next', '다음 →') :
-        '<a class="lesson-next" href="#' + ST.id + '"><span>다음 →</span><strong>' + esc(ST.title) + '</strong></a>') + '</nav>';
+        '<a class="lesson-next" href="#' + P.id + '"><span>다음 →</span><strong>' + esc(P.title) + '</strong></a>') + '</nav>';
     $('toc').innerHTML = '<strong>실습 목차</strong>' + toc.map(function (t) {
       return '<a href="#' + t[0] + '" data-jump="' + t[0] + '">' + esc(t[1]) + '</a>';
     }).join('');
@@ -278,6 +277,14 @@
   };
 
   /* 보내기 전 확인: 첨부할 파일 · 양식 */
+  /* 실습 지시문을 내 업무에 맞게 고쳐 쓰는 안내 */
+  var customHtml = function () {
+    var cu = D.custom;
+    return '<details class="fold custom-fold"><summary>' + esc(cu.title) + '</summary><div class="fold-b"><p class="sp">' + esc(cu.text) + '</p>' +
+      '<div class="g-table sp"><table><thead><tr><th>바꿀 곳</th><th>어떻게</th></tr></thead><tbody>' +
+      cu.where.map(function (w) { return '<tr><td>' + esc(w[0]) + '</td><td>' + esc(w[1]) + '</td></tr>'; }).join('') + '</tbody></table></div>' +
+      '<p class="sp">' + esc(cu.use) + '</p></div></details>';
+  };
   var ATT = { '필수': ['must', '꼭 첨부'], '양식': ['form', '양식'], '금지': ['no', '올리지 않음'], '없음': ['none', '첨부 없음'] };
   var attachHtml = function (l) {
     var rows = l.attach.map(function (a) {
@@ -421,9 +428,15 @@
       '<h3>사람이 마무리할 일</h3>' + ul(L.after) +
       '<div class="go-studio"><p><b>강사 슬라이드</b>에서 프로젝트와 스킬 사용법을 네 장으로 볼 수 있습니다.</p><a class="g-btn ghost" href="' + esc(safeUrl(C.projectDeckUrl)) + '" target="_blank" rel="noopener noreferrer">슬라이드 보기</a></div>', '결과 검수');
     add('errors', '안 될 때', tbl(['화면에 나온 것', '왜 그런가', '할 일'], L.errors), '안 될 때');
+    add('selftest', '스스로 해 보기 · 혼자 풀고 채점하기',
+      '<p>' + esc(ST.partDesc) + '</p>' +
+      '<div class="step-grid cols-2">' + ST.quizzes.map(function (q) {
+        return '<a class="start-item quiz-link" href="#' + q.id + '"><b>' + esc(q.code + ' · ' + q.time) + '</b><strong>' + esc(q.title) + '</strong><p>' + esc(q.sum) + '</p><p class="kind-ex">문제 풀기 →</p></a>';
+      }).join('') + '</div>' +
+      '<div class="go-studio"><p><b>준비</b>는 "보고서 연습실" 프로젝트 하나입니다. 지침과 파일 세 가지는 안내 화면에 있습니다.</p><a class="g-btn" href="#' + ST.id + '">스스로 해 보기 안내</a></div>', '스스로 해 보기');
     $('lessonBody').innerHTML = parts.join('') + '<nav class="lesson-navigation" aria-label="이전 · 다음">' +
       '<a class="lesson-prev" href="#s8"><span>← 이전</span><strong>실습 8 · ' + esc(byId.s8.title) + '</strong></a>' +
-      '<a class="lesson-next" href="#skills"><span>다음 →</span><strong>내 Claude에 스킬 등록하기</strong></a></nav>';
+      '<a class="lesson-next" href="#' + ST.id + '"><span>다음 →</span><strong>' + esc(ST.title) + '</strong></a></nav>';
     $('toc').innerHTML = '<strong>목차</strong>' + toc.map(function (t) { return '<a href="#' + t[0] + '" data-jump="' + t[0] + '">' + esc(t[1]) + '</a>'; }).join('');
     bindChecks(P.id);
   };
@@ -713,7 +726,7 @@
   };
   var renderSelfTest = function () {
     store = {}; keySeq = 0;
-    $('bcPart').textContent = ST.kicker + ' ' + ST.partTitle;
+    $('bcPart').textContent = P.kicker + ' ' + P.partTitle;
     $('bcCode').textContent = '데이터 기반 한 장 보고서';
     $('lhEyebrow').textContent = ST.code + ' · ' + ST.time;
     $('lhTitle').textContent = ST.title;
@@ -762,8 +775,8 @@
       '<ul class="plain">' + ST.bands.map(function (b) { return '<li><b>' + (b[0] ? b[0] + '점 이상' : '70점 미만') + '</b> · ' + esc(b[1]) + '</li>'; }).join('') + '</ul>' +
       '<div class="go-studio"><p><b>더 연습하려면</b> 프로젝트 실습(데이터 에이전트)이나 실습 1(보고서 작성)을 다시 해 봅니다.</p><a class="g-btn ghost" href="#project">프로젝트로 진행</a><a class="g-btn ghost" href="#s1">실습 1</a></div>', '다 풀었다면');
     $('lessonBody').innerHTML = parts.join('') + '<nav class="lesson-navigation" aria-label="이전 · 다음">' +
-      '<a class="lesson-prev" href="#s8"><span>← 이전</span><strong>실습 8 · ' + esc(byId.s8.title) + '</strong></a>' +
-      '<a class="lesson-next" href="#' + P.id + '"><span>다음 →</span><strong>' + esc(P.title) + '</strong></a></nav>';
+      '<a class="lesson-prev" href="#' + P.id + '"><span>← 이전</span><strong>' + esc(P.title) + '</strong></a>' +
+      '<a class="lesson-next" href="#skills"><span>다음 →</span><strong>내 Claude에 스킬 등록하기</strong></a></nav>';
     $('toc').innerHTML = '<strong>목차</strong>' + toc.map(function (t) { return '<a href="#' + t[0] + '" data-jump="' + t[0] + '">' + esc(t[1]) + '</a>'; }).join('');
     $('lessonBody').querySelectorAll('[data-quiz]').forEach(function (el) {
       el.addEventListener('change', function () {
