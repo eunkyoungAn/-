@@ -90,7 +90,7 @@
     return '<a class="g-btn ghost" href="' + esc(fileUrl(f.path)) + '" download="' + esc(f.name) + '">' + esc(label || '받기') + '</a>';
   };
 
-  var G = D.guide, P = D.project, B = D.basics, K = D.apikey, L = D.projectlab;
+  var G = D.guide, P = D.project, B = D.basics, K = D.apikey, T = D.think, L = D.projectlab;
   var fileList = function (files, label) {
     return '<div class="file-list">' + files.map(function (f) {
       return '<div class="file-row"><div><strong>' + esc(f.name) + '</strong><span>' + esc(f.label) + ' · <em>' + esc(f.role) + '</em></span></div>' + dlLink(f, label) + '</div>';
@@ -134,7 +134,7 @@
       return '<section class="level-section"><div class="level-head"><div><span class="level-kicker">' + esc(kicker) + '</span><h2>' + esc(title) +
         '</h2></div><p>' + esc(desc) + '</p></div><div class="lesson-grid">' + cards + '</div></section>';
     };
-    $('homeLevels').innerHTML = level(B.kicker, B.partTitle, B.partDesc, card(B, '기본 개념 보기') + card(K, '언제 쓰는지 보기')) + level(G.kicker, G.partTitle, G.partDesc, card(G, '만드는 방법 보기') +
+    $('homeLevels').innerHTML = level(B.kicker, B.partTitle, B.partDesc, card(B, '기본 개념 보기') + card(K, '언제 쓰는지 보기') + card(T, '내 직무에 적용해 보기')) + level(G.kicker, G.partTitle, G.partDesc, card(G, '만드는 방법 보기') +
       '<a class="lesson-card" href="#help"><span class="lesson-code">모음 · 6가지 상황</span><h3>오류가 나는 대표 사유</h3>' +
       '<p>실행이 안 될 때, 파일이 안 들어갈 때, 파일로 못 받을 때의 원인과 할 일을 한 번에 모았습니다.</p>' +
       '<div class="lesson-output"><span>바로 찾기</span> · 화면에 나온 문구로 찾습니다</div><div class="lesson-arrow">사유 한 번에 보기 →</div></a>') +
@@ -163,7 +163,7 @@
     };
     var mGroup = function (title, links) { return '<div class="menu-group"><strong>' + esc(title) + '</strong>' + links + '</div>'; };
     $('quickPanel').innerHTML =
-      mGroup('시작 전', mLink(B.id, '기초', B.title) + mLink(K.id, '기초', K.title) + mLink(G.id, '준비', G.title)) +
+      mGroup('시작 전', mLink(B.id, '기초', B.title) + mLink(K.id, '기초', K.title) + mLink(T.id, '적용', T.title) + mLink(G.id, '준비', G.title)) +
       D.parts.map(function (p) {
         return mGroup(p.kicker + ' · ' + p.title, p.lessons.map(function (id) { return mLink(id, byId[id].code, byId[id].title); }).join(''));
       }).join('') +
@@ -183,7 +183,7 @@
     $('pgBar').style.width = Math.round(n / t * 100) + '%';
     document.querySelectorAll('.lesson-card').forEach(function (el) {
       var id = el.getAttribute('data-lesson');
-      el.classList.toggle('is-done', isDone(id === G.id ? G : id === P.id ? P : id === B.id ? B : id === K.id ? K : byId[id]));
+      el.classList.toggle('is-done', isDone(id === G.id ? G : id === P.id ? P : id === B.id ? B : id === K.id ? K : id === T.id ? T : byId[id]));
     });
   };
 
@@ -555,9 +555,60 @@
     add('review', '확인', '<p>아래 항목을 스스로 확인합니다.</p>' + checklistHtml(K.id, K.checks), '확인');
     $('lessonBody').innerHTML = parts.join('') + '<nav class="lesson-navigation" aria-label="이전 · 다음">' +
       '<a class="lesson-prev" href="#' + B.id + '"><span>← 이전</span><strong>' + esc(B.title) + '</strong></a>' +
-      '<a class="lesson-next" href="#' + G.id + '"><span>다음 →</span><strong>' + esc(G.title) + '</strong></a></nav>';
+      '<a class="lesson-next" href="#' + T.id + '"><span>다음 →</span><strong>' + esc(T.title) + '</strong></a></nav>';
     $('toc').innerHTML = '<strong>목차</strong>' + toc.map(function (t) { return '<a href="#' + t[0] + '" data-jump="' + t[0] + '">' + esc(t[1]) + '</a>'; }).join('');
     bindChecks(K.id);
+  };
+
+  /* ---------- 고민해봅시다! (내 직무에 AI 적용하기) ---------- */
+  var renderThink = function () {
+    store = {}; keySeq = 0;
+    $('bcPart').textContent = B.partTitle;
+    $('bcCode').textContent = '내 직무에 적용';
+    $('lhEyebrow').textContent = T.code + ' · ' + T.time;
+    $('lhTitle').textContent = T.title;
+    $('lhSum').textContent = T.sum;
+    $('lhMeta').innerHTML = '<span class="meta-chip active">내 직무에 적용하기</span><span class="meta-chip">맡기기 좋은 일 네 가지</span><span class="meta-chip">직무별 예시</span><span class="meta-chip">내 업무 적용 질문지</span>';
+    var parts = [], toc = [], n = 0;
+    var add = function (id, title, body, tocLabel) {
+      n++; var no = (n < 10 ? '0' : '') + n;
+      parts.push(sec(no, id, title, body)); toc.push([id, tocLabel || title]);
+    };
+    add('types', 'AI에 맡기기 좋은 일 네 가지',
+      '<p>' + esc(T.intro) + '</p><div class="rule-grid sp">' + T.types.map(function (r) {
+        return '<div class="rule-card"><b>' + esc(r[0]) + '</b><strong>' + esc(r[1]) + '</strong><p>' + esc(r[2]) + '</p></div>';
+      }).join('') + '</div>', '네 가지 유형');
+    add('jobs', '직무별 예시',
+      '<p>내 직무와 가까운 것을 펼쳐 봅니다. 유형 칸의 숫자는 위 네 가지 유형의 번호입니다.</p>' +
+      T.jobs.map(function (j, i) {
+        return '<details class="fold think-fold"' + (i === 0 ? ' open' : '') + '><summary>' + esc(j.name) + '</summary><div class="g-table think-table"><table>' +
+          '<thead><tr><th>업무</th><th>이렇게 시켜 봅니다</th><th>유형</th><th>함께 해 볼 실습</th></tr></thead><tbody>' +
+          j.rows.map(function (r) {
+            var l = byId[r[3]];
+            return '<tr><td>' + esc(r[0]) + '</td><td>"' + esc(r[1]) + '"</td><td>' +
+              r[2].map(function (t) { return '<span class="think-tag">' + esc(t) + '</span>'; }).join(' ') + '</td><td>' +
+              (l ? '<a href="#' + l.id + '">' + esc(l.code + ' · ' + l.agent) + '</a>' : '') + '</td></tr>';
+          }).join('') + '</tbody></table></div></details>';
+      }).join(''), '직무별 예시');
+    add('safe', '넣어도 되는 자료인지 먼저 확인합니다',
+      '<div class="safety-box sp think-safe"><div class="think-split"><p><b>바로 써 볼 수 있는 자료</b><br>' + esc(T.safeOk) + '</p>' +
+      '<p><b>기관 지침을 먼저 확인할 자료</b><br>' + esc(T.safeAsk) + '</p></div><p class="think-check">' + esc(T.safeCheck) + '</p></div>' +
+      '<div class="local-note">' + esc(T.source) + '</div>', '자료 확인');
+    add('plan', '나는 AI를 어떻게 쓸 것인가',
+      '<p>아래 세 단계로 정리합니다. 질문지를 복사해 Claude 채팅에 붙여 넣고, 대괄호와 빈 줄을 내 내용으로 채웁니다.</p>' +
+      '<div class="step-grid cols-3">' + T.steps.map(function (s, i) {
+        return '<div class="start-item"><b>' + (i + 1) + '단계</b><strong>' + esc(s[0]) + '</strong><p>' + esc(s[1]) + '</p></div>';
+      }).join('') + '</div>' +
+      '<div class="prompt-box"><span class="box-label">내 업무 적용 질문지 · Claude 채팅에 붙여 넣기</span>' + copyBtn(T.prompt, '질문지 복사') + '<pre>' + esc(T.prompt) + '</pre></div>' +
+      '<details class="fold"><summary>' + esc(T.exampleTitle) + '</summary><div class="sample-note think-sample"><pre>' + esc(T.example) + '</pre></div></details>' +
+      '<div class="go-studio"><p><b>정리한 표는 실습 8에서 내 업무용 에이전트로 만듭니다.</b> 1순위로 고른 업무를 실습 8의 설계 틀에 넣으면 됩니다.</p>' +
+      '<a class="g-btn" href="#s8">' + esc(byId.s8.code + ' · ' + byId.s8.title) + '</a></div>', '3단계로 정리');
+    add('review', '확인', '<p>아래 항목을 스스로 확인합니다.</p>' + checklistHtml(T.id, T.checks), '확인');
+    $('lessonBody').innerHTML = parts.join('') + '<nav class="lesson-navigation" aria-label="이전 · 다음">' +
+      '<a class="lesson-prev" href="#' + K.id + '"><span>← 이전</span><strong>' + esc(K.title) + '</strong></a>' +
+      '<a class="lesson-next" href="#' + G.id + '"><span>다음 →</span><strong>' + esc(G.title) + '</strong></a></nav>';
+    $('toc').innerHTML = '<strong>목차</strong>' + toc.map(function (t) { return '<a href="#' + t[0] + '" data-jump="' + t[0] + '">' + esc(t[1]) + '</a>'; }).join('');
+    bindChecks(T.id);
   };
 
   /* 실습 화면 안의 목차는 주소(#)를 바꾸지 않고 그 자리로만 옮긴다 */
@@ -581,14 +632,14 @@
   var shown = null;
   var route = function () {
     var h = (location.hash || '').slice(1);
-    var l = Object.prototype.hasOwnProperty.call(byId, h) ? byId[h] : (h === G.id ? G : h === P.id ? P : h === B.id ? B : h === K.id ? K : h === L.id ? P : null);
+    var l = Object.prototype.hasOwnProperty.call(byId, h) ? byId[h] : (h === G.id ? G : h === P.id ? P : h === B.id ? B : h === K.id ? K : h === T.id ? T : h === L.id ? P : null);
     $('viewHome').hidden = !!l;
     $('viewLesson').hidden = !l;
     if (l) {
-      if (shown !== l.id) { if (l === G) renderGuide(); else if (l === P) renderProject(); else if (l === B) renderBasics(); else if (l === K) renderApiKey(); else renderLesson(l); shown = l.id; }
+      if (shown !== l.id) { if (l === G) renderGuide(); else if (l === P) renderProject(); else if (l === B) renderBasics(); else if (l === K) renderApiKey(); else if (l === T) renderThink(); else renderLesson(l); shown = l.id; }
       var labEl = h === L.id ? $('lab') : null;
       if (labEl) labEl.scrollIntoView({ block: 'start' }); else window.scrollTo(0, 0);
-      document.title = (l === G || l === P || l === B || l === K ? l.title : l.code + ' ' + l.title) + ' | 업무 에이전트 실습실';
+      document.title = (l === G || l === P || l === B || l === K || l === T ? l.title : l.code + ' ' + l.title) + ' | 업무 에이전트 실습실';
     } else {
       shown = null;
       updateProgress();
