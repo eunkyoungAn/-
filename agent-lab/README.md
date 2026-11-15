@@ -22,7 +22,7 @@
 ## 내용 고치기
 
 1. 자료 파일이나 지시문을 바꾸려면 `files/` 안의 파일을 바꾼다. 전체 압축 파일(`files/업무에이전트_수강생실습자료.zip`)도 같은 내용으로 다시 묶어 넣는다.
-2. 넣을 값, 실행 순서, 검수 항목은 `tools/build_data.py`의 `LESSONS`에서, Claude 채팅용 첨부 파일 확인은 `ATTACH`에서, 스튜디오 만들기는 `GUIDE`에서, 프로젝트로 진행하기는 `PROJECT`에서, 프로젝트 실습(데이터 에이전트)은 `PROJECTLAB`에서 고치며 `#project` 화면 안에 표시된다(지침 글은 `AGENT_GUIDE`, 실습용 사본은 `files/프로젝트실습_데이터에이전트/`), Claude 기본 이해하기는 `BASICS`에서(그림은 `img/basics/`), API key란?은 `APIKEY`에서(그림은 `app.js`의 `apiKeySvg`), 오류 사유는 `ERRORS`에서 고친다.
+2. 넣을 값, 실행 순서, 검수 항목은 `tools/build_data.py`의 `LESSONS`에서, Claude 채팅용 첨부 파일 확인은 `ATTACH`에서, 스튜디오 만들기는 `GUIDE`에서, 프로젝트로 진행하기는 `PROJECT`에서, 프로젝트 실습(데이터 에이전트)은 `PROJECTLAB`에서 고치며 `#project` 화면 안에 표시된다(지침 글은 `AGENT_GUIDE`, 실습용 사본은 `files/프로젝트실습_데이터에이전트/`), Claude 기본 이해하기는 `BASICS`에서(그림은 `img/basics/`), API key란?은 `APIKEY`에서(그림은 `app.js`의 `apiKeySvg`), 고민해봅시다!(내 직무에 AI 적용하기, `#think`)는 `THINK`에서, 오류 사유는 `ERRORS`에서 고친다.
 3. `python3 agent-lab/tools/build_data.py`를 실행해 `data.js`를 다시 만들고 함께 커밋한다(openpyxl 필요).
 
 ## 고친 뒤 반영이 안 보일 때
