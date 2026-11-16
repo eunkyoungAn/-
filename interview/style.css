@@ -452,3 +452,5 @@ main.has-pickbar { padding-bottom: 96px; }
 body:has(.pickbar:not([hidden])) #toast { bottom: calc(max(12px, env(safe-area-inset-bottom)) + 76px); }
 .savebtns .qset-pickhint { grid-column: 1 / -1; margin: 0 0 4px; }
 .savebtns .btn.ghost[data-act="qset-pdf"] { grid-column: 1 / -1; }
+.textmode-note { margin: 2px 0 0; }
+.textmode-note b { color: var(--warn); font-weight: 700; }
