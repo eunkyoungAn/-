@@ -450,3 +450,5 @@ blockquote { border-left-color: var(--mint); background: var(--mint-soft); }
 main.has-pickbar { padding-bottom: 96px; }
 @media (max-width: 400px) { .pickbar { padding-left: 14px; gap: 6px; } .pickbar .btn.ghost { display: none; } }
 body:has(.pickbar:not([hidden])) #toast { bottom: calc(max(12px, env(safe-area-inset-bottom)) + 76px); }
+.savebtns .qset-pickhint { grid-column: 1 / -1; margin: 0 0 4px; }
+.savebtns .btn.ghost[data-act="qset-pdf"] { grid-column: 1 / -1; }
