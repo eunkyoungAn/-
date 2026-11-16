@@ -3,15 +3,15 @@
 // 음성 모드: 브라우저 음성 인식으로 글자만 받는다. 녹음 파일은 만들지 않는다.
 // 영상 모드(선택): 카메라로 녹화하고 시선·억양·템포를 휴대폰 안에서만 분석한다. 영상은 참여자가 직접 저장한다.
 
-import { QUESTIONS, CATEGORIES, findQuestion } from './questions.js?v=202611155';
-import { RUBRIC, measure, speedLabel, localEvaluate, totalScore, voiceScore } from './scoring.js?v=202611155';
-import { BASIS, REFS, NOTICE } from './rubric.js?v=202611155';
-import { buildSetText, fileName } from './save.js?v=202611155';
-import * as gem from './gemini.js?v=202611155';
-import * as files from './files.js?v=202611155';
-import * as claude from './claude.js?v=202611155';
-import { openMic, startAudioRecorder, toWavBase64, canRecordAudio } from './audio.js?v=202611155';
-import { canRecord, openCamera, stopStream, startRecorder, startAudioAnalysis, startGaze, loadGazeModel, scoreNonverbal, saveVideo } from './video.js?v=202611155';
+import { QUESTIONS, CATEGORIES, findQuestion } from './questions.js?v=202611162';
+import { RUBRIC, measure, speedLabel, localEvaluate, totalScore, voiceScore } from './scoring.js?v=202611162';
+import { BASIS, REFS, NOTICE } from './rubric.js?v=202611162';
+import { buildSetText, fileName } from './save.js?v=202611162';
+import * as gem from './gemini.js?v=202611162';
+import * as files from './files.js?v=202611162';
+import * as claude from './claude.js?v=202611162';
+import { openMic, startAudioRecorder, toWavBase64, canRecordAudio } from './audio.js?v=202611162';
+import { canRecord, openCamera, stopStream, startRecorder, startAudioAnalysis, startGaze, loadGazeModel, scoreNonverbal, saveVideo } from './video.js?v=202611162';
 
 const PREP_SEC = 30;
 const FOLLOW_PREP_SEC = 10;
@@ -20,7 +20,7 @@ const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
 // ---------- 설정 (링크 파라미터 > 이 기기에 저장한 값) ----------
 const params = new URLSearchParams(location.search);
-const APP_VERSION = '202611155'; // stamp-version.py가 배포 때 바꾼다
+const APP_VERSION = '202611162'; // stamp-version.py가 배포 때 바꾼다
 const store = {
   get(k) { try { return localStorage.getItem('cc-interview-' + k); } catch { return null; } },
   set(k, v) { try { v ? localStorage.setItem('cc-interview-' + k, v) : localStorage.removeItem('cc-interview-' + k); } catch { /* 저장 불가 환경 */ } },
@@ -78,6 +78,8 @@ const state = {
   follow: null,  // 꼬리질문 진행 중 {text, missing, main}
   material: { job: '', company: '', docs: { 자기소개서: '', 경력기술서: '', 포트폴리오: '', 경험노트: '' }, posting: '', files: [] },
   comps: null,   // 뽑은 핵심 역량(질문 만들기 전 확인용)
+  selected: [],  // 질문 고르기에서 고른 질문 id(최대 MAX_PICK개, 고른 순서)
+  queue: null,   // 고른 질문을 차례로 연습 중이면 {ids, pos}
 };
 
 // ---------- 공통 ----------
@@ -267,14 +269,14 @@ function pickView() {
   const list = assigned.length ? assigned : QUESTIONS;
   const groups = assigned.length ? [['강사가 준 질문', list]] : CATEGORIES.map(c => [c, list.filter(q => q.cat === c)]);
   return `${header('질문 고르기')}
-  <main class="wrap">
+  <main class="wrap${state.selected.length ? ' has-pickbar' : ''}">
     <section class="card mine-set">
       <h2>내 자료로 예상 질문 만들기</h2>
       <p class="muted small">자기소개서, 경력기술서, 포트폴리오, 경험노트 파일을 첨부하거나 붙여 넣으면 지원 직무에서 검증할 역량을 뽑고, 역량별 예상 질문과 핵심 답변 스크립트를 만들어 드려요. 내 Gemini API 키가 필요합니다.</p>
       <button class="btn primary wide" data-act="${qset ? 'qset' : 'material'}">${qset ? `나의 예상 질문집 보기 (${qset.questions.length}개)` : '자료 넣고 질문 만들기'}</button>
     </section>
     ${qset ? `<h2 class="group">내 자료 기반 질문 · ${esc(qset.job)}</h2>
-      <ul class="qlist">${qset.questions.map((q, i) => `<li><button data-act="choose" data-id="${q.id}"><span class="qn">${i + 1}</span>${esc(q.text)}</button></li>`).join('')}</ul>` : ''}
+      <ul class="qlist">${qset.questions.map((q, i) => qItem(q, String(i + 1))).join('')}</ul>` : ''}
     <section class="card ask-custom">
       <h2>연습하고 싶은 질문이 있나요?</h2>
       <p class="muted small">지원하는 회사에서 나올 것 같은 질문, 받기 두려운 질문을 직접 넣어 보세요. 이 휴대폰에만 저장됩니다.</p>
@@ -282,13 +284,66 @@ function pickView() {
       <button class="btn primary wide" data-act="add-custom">내 질문 추가하고 바로 연습</button>
     </section>
     ${custom.length ? `<h2 class="group">내가 추가한 질문</h2>
-      <ul class="qlist">${custom.map(q => `<li class="mine"><button data-act="choose" data-id="${q.id}"><span class="qn">내</span>${esc(q.text)}</button><button class="del" data-act="del-custom" data-id="${q.id}" aria-label="이 질문 지우기">지우기</button></li>`).join('')}</ul>` : ''}
+      <ul class="qlist">${custom.map(q => `<li class="mine"><button data-act="toggle-q" data-id="${q.id}" class="${state.selected.includes(q.id) ? 'sel' : ''}" aria-pressed="${state.selected.includes(q.id)}"><span class="qn">내</span><span class="qt">${esc(q.text)}</span><span class="pick-mark" aria-hidden="true">${state.selected.indexOf(q.id) + 1 || ''}</span></button><button class="del" data-act="del-custom" data-id="${q.id}" aria-label="이 질문 지우기">지우기</button></li>`).join('')}</ul>` : ''}
+    <div class="notice pickhelp"><b>질문을 눌러 선택하세요.</b> 최대 ${MAX_PICK}개까지 골라 차례대로 연습할 수 있습니다. 한 질문만 골라도 됩니다.</div>
     <button class="btn ghost wide" data-act="random">무작위 질문으로 연습하기</button>
     ${groups.map(([name, qs]) => `
       <h2 class="group">${esc(name)}</h2>
-      <ul class="qlist">${qs.map(q => `<li><button data-act="choose" data-id="${q.id}"><span class="qn">${q.id}</span>${esc(q.text)}</button></li>`).join('')}</ul>
+      <ul class="qlist">${qs.map(q => qItem(q, String(q.id))).join('')}</ul>
     `).join('')}
+    ${pickBar()}
   </main>`;
+}
+
+// 질문 여러 개 고르기
+const MAX_PICK = 5;
+const qItem = (q, label) => {
+  const order = state.selected.indexOf(String(q.id)) + 1;
+  return `<li><button data-act="toggle-q" data-id="${q.id}" class="${order ? 'sel' : ''}" aria-pressed="${order ? 'true' : 'false'}"><span class="qn">${esc(label)}</span><span class="qt">${esc(q.text)}</span><span class="pick-mark" aria-hidden="true">${order || ''}</span></button></li>`;
+};
+function pickBar() {
+  const n = state.selected.length;
+  return `<div class="pickbar" id="pickbar" ${n ? '' : 'hidden'}>
+    <span><b id="pickCount">${n}</b> / ${MAX_PICK}개 선택</span>
+    <button class="btn ghost sm" data-act="clear-selected">선택 해제</button>
+    <button class="btn primary sm" data-act="start-selected">선택한 질문 연습 시작</button>
+  </div>`;
+}
+// 화면 전체를 다시 그리지 않고 선택 표시만 바꾼다(스크롤 위치 유지).
+function refreshPicks() {
+  document.querySelectorAll('[data-act="toggle-q"]').forEach(b => {
+    const order = state.selected.indexOf(b.dataset.id) + 1;
+    b.classList.toggle('sel', Boolean(order));
+    b.setAttribute('aria-pressed', order ? 'true' : 'false');
+    b.querySelector('.pick-mark').textContent = order || '';
+  });
+  const bar = document.getElementById('pickbar');
+  if (bar) { bar.hidden = !state.selected.length; document.getElementById('pickCount').textContent = state.selected.length; }
+  document.querySelector('main').classList.toggle('has-pickbar', state.selected.length > 0);
+}
+function startQueued() {
+  const q = state.queue;
+  state.question = getQuestion(q.ids[q.pos]);
+  state.attempts = [];
+  state.follow = null;
+  go('ask');
+}
+// 피드백 화면 아래 버튼: 고른 질문을 차례로 연습 중이면 다음 질문으로 안내한다.
+function nextButtons(retryLabel, isCompare) {
+  const q = state.queue;
+  if (q && q.pos < q.ids.length - 1) {
+    return `<button class="btn primary big" data-act="next-q">다음 질문으로 (${q.pos + 2}/${q.ids.length})</button>
+    <button class="btn ghost wide" data-act="retry">${retryLabel}</button>`;
+  }
+  if (q) {
+    return `<button class="btn primary big" data-act="records">선택한 질문 ${q.ids.length}개 완료 · 피드백 리포트 보기</button>
+    <button class="btn ghost wide" data-act="retry">${retryLabel}</button>`;
+  }
+  return isCompare
+    ? `<button class="btn primary big" data-act="pick">다른 질문 연습하기</button>
+    <button class="btn ghost wide" data-act="retry">${retryLabel}</button>`
+    : `<button class="btn primary big" data-act="retry">${retryLabel}</button>
+    <button class="btn ghost wide" data-act="pick">다른 질문 연습하기</button>`;
 }
 
 // ---------- 화면: 질문 듣기·준비·답변 ----------
@@ -298,7 +353,8 @@ function askView() {
   const f = state.follow;
   const hint = !f && q.keywords && q.keywords.length
     ? `<details class="card hint"><summary>막히면 키워드 보기</summary><p class="kw">${q.keywords.map(k => `<span>${esc(k)}</span>`).join('')}</p>${q.numbers && q.numbers.length ? `<p class="muted small">넣을 숫자: ${q.numbers.map(esc).join(' / ')}</p>` : ''}</details>` : '';
-  return `${header(f ? '꼬리질문' : round === 1 ? '첫 번째 답변' : `${round}번째 답변`)}
+  const qpos = state.queue ? `질문 ${state.queue.pos + 1}/${state.queue.ids.length} · ` : '';
+  return `${header(qpos + (f ? '꼬리질문' : round === 1 ? '첫 번째 답변' : `${round}번째 답변`))}
   <main class="wrap">
     <section class="question">
       <p class="qcat">${f ? '꼬리질문' : `${esc(q.cat)} 질문`}</p>
@@ -819,8 +875,7 @@ function reportView() {
     ${nvSection(a)}
     ${scoreGuide(a)}
     <details class="card"><summary>내 답변 보기</summary><p class="answer">${esc(a.answer)}</p></details>
-    <button class="btn primary big" data-act="retry">한 가지 고쳐서 다시 답하기</button>
-    <button class="btn ghost wide" data-act="pick">다른 질문 연습하기</button>
+    ${nextButtons('한 가지 고쳐서 다시 답하기', false)}
     ${savePanel()}
     ${disclaimer(a)}
   </main>`;
@@ -850,8 +905,7 @@ function compareView() {
     ${followSection(last)}
     ${nvSection(last)}
     ${scoreGuide(last)}
-    <button class="btn primary big" data-act="pick">다른 질문 연습하기</button>
-    <button class="btn ghost wide" data-act="retry">같은 질문 한 번 더</button>
+    ${nextButtons('같은 질문 한 번 더', true)}
     ${savePanel()}
     ${disclaimer(last)}
   </main>`;
@@ -1003,7 +1057,7 @@ async function downloadPdf() {
   pdfBusy = true;
   toast('PDF를 만드는 중이에요. 잠시만 기다려 주세요...');
   try {
-    const { buildPdf } = await import('./pdf.js?v=202611155');
+    const { buildPdf } = await import('./pdf.js?v=202611162');
     const blob = await buildPdf(reportBody(), (i, n) => { document.getElementById('toast').textContent = `PDF를 만드는 중이에요... ${Math.round((i / n) * 100)}%`; });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -1660,7 +1714,31 @@ app.addEventListener('click', async e => {
     if (!state.consent) { toast('시작 전 확인 항목에 체크해 주세요.'); document.getElementById('consent').focus(); return; }
     go('pick');
   }
+  else if (act === 'toggle-q') {
+    const id = el.dataset.id;
+    const i = state.selected.indexOf(id);
+    if (i >= 0) state.selected.splice(i, 1);
+    else if (state.selected.length >= MAX_PICK) { toast(`질문은 최대 ${MAX_PICK}개까지 고를 수 있어요. 다른 질문을 빼고 골라 주세요.`); return; }
+    else state.selected.push(id);
+    refreshPicks();
+  }
+  else if (act === 'clear-selected') { state.selected = []; refreshPicks(); }
+  else if (act === 'start-selected') {
+    const ids = state.selected.filter(id => getQuestion(id));
+    if (!ids.length) { toast('연습할 질문을 먼저 골라 주세요.'); return; }
+    state.selected = [];
+    if (ids.length === 1) { state.queue = null; state.question = getQuestion(ids[0]); state.attempts = []; state.follow = null; go('ask'); return; }
+    state.queue = { ids, pos: 0 };
+    startQueued();
+  }
+  else if (act === 'next-q') {
+    if (!state.queue) { go('pick'); return; }
+    state.queue.pos += 1;
+    if (state.queue.pos >= state.queue.ids.length) { state.queue = null; go('records'); return; }
+    startQueued();
+  }
   else if (act === 'choose' || act === 'random') {
+    state.queue = null;
     const pool = assigned.length ? assigned : QUESTIONS;
     state.question = act === 'random' ? pool[Math.floor(Math.random() * pool.length)] : getQuestion(el.dataset.id);
     state.attempts = [];
@@ -1669,7 +1747,7 @@ app.addEventListener('click', async e => {
   else if (act === 'listen') speak(state.question.text);
   else if (act === 'redo' || act === 'retry') go('ask');
   else if (act === 'evaluate') evaluate();
-  else if (act === 'pick') go('pick');
+  else if (act === 'pick') { state.queue = null; go('pick'); }
   else if (act === 'records') go('records');
   else if (act === 'evaluate-skip') evaluate(true);
   else if (act === 'material') { readMaterial(); go('material'); }
@@ -1735,6 +1813,7 @@ app.addEventListener('click', async e => {
     saveCustom();
     state.question = q;
     state.attempts = [];
+    state.queue = null;
     go('ask');
   }
   else if (act === 'del-custom') {
