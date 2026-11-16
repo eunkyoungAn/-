@@ -1,7 +1,7 @@
 // 말하기 지표 계산과 AI 미연결 시 쓰는 간이 피드백.
 // 전달 점수는 AI 연결 여부와 관계없이 항상 여기서 계산한다(같은 기준으로 비교하기 위해).
 
-import { RUBRIC, totalScore, voiceScore } from './rubric.js?v=202611155';
+import { RUBRIC, totalScore, voiceScore } from './rubric.js?v=202611162';
 export { RUBRIC, totalScore, voiceScore };
 
 // 단독으로 쓰인 군말만 센다. "그"는 "그래서" 같은 단어 안에서는 세지 않는다.
