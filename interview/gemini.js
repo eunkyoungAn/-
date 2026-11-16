@@ -3,8 +3,8 @@
 //          ③ 답변을 듣고 꼬리질문 1개 고르기 ④ 질문별 평가 기준으로 답변 평가
 // 키는 기본적으로 메모리에만 두고, 참여자가 고르면 이 기기 브라우저에 저장한다.
 
-import { RUBRIC } from './rubric.js?v=202611162';
-import * as claude from './claude.js?v=202611162';
+import { RUBRIC } from './rubric.js?v=202611163';
+import * as claude from './claude.js?v=202611163';
 
 const API_ROOT = 'https://generativelanguage.googleapis.com/v1beta';
 export const DEFAULT_MODEL = 'gemini-3.1-flash-lite';

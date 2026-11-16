@@ -3,15 +3,15 @@
 // 음성 모드: 브라우저 음성 인식으로 글자만 받는다. 녹음 파일은 만들지 않는다.
 // 영상 모드(선택): 카메라로 녹화하고 시선·억양·템포를 휴대폰 안에서만 분석한다. 영상은 참여자가 직접 저장한다.
 
-import { QUESTIONS, CATEGORIES, findQuestion } from './questions.js?v=202611162';
-import { RUBRIC, measure, speedLabel, localEvaluate, totalScore, voiceScore } from './scoring.js?v=202611162';
-import { BASIS, REFS, NOTICE } from './rubric.js?v=202611162';
-import { buildSetText, fileName } from './save.js?v=202611162';
-import * as gem from './gemini.js?v=202611162';
-import * as files from './files.js?v=202611162';
-import * as claude from './claude.js?v=202611162';
-import { openMic, startAudioRecorder, toWavBase64, canRecordAudio } from './audio.js?v=202611162';
-import { canRecord, openCamera, stopStream, startRecorder, startAudioAnalysis, startGaze, loadGazeModel, scoreNonverbal, saveVideo } from './video.js?v=202611162';
+import { QUESTIONS, CATEGORIES, findQuestion } from './questions.js?v=202611163';
+import { RUBRIC, measure, speedLabel, localEvaluate, totalScore, voiceScore } from './scoring.js?v=202611163';
+import { BASIS, REFS, NOTICE } from './rubric.js?v=202611163';
+import { buildSetText, fileName } from './save.js?v=202611163';
+import * as gem from './gemini.js?v=202611163';
+import * as files from './files.js?v=202611163';
+import * as claude from './claude.js?v=202611163';
+import { openMic, startAudioRecorder, toWavBase64, canRecordAudio } from './audio.js?v=202611163';
+import { canRecord, openCamera, stopStream, startRecorder, startAudioAnalysis, startGaze, loadGazeModel, scoreNonverbal, saveVideo } from './video.js?v=202611163';
 
 const PREP_SEC = 30;
 const FOLLOW_PREP_SEC = 10;
@@ -20,7 +20,7 @@ const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
 // ---------- 설정 (링크 파라미터 > 이 기기에 저장한 값) ----------
 const params = new URLSearchParams(location.search);
-const APP_VERSION = '202611162'; // stamp-version.py가 배포 때 바꾼다
+const APP_VERSION = '202611163'; // stamp-version.py가 배포 때 바꾼다
 const store = {
   get(k) { try { return localStorage.getItem('cc-interview-' + k); } catch { return null; } },
   set(k, v) { try { v ? localStorage.setItem('cc-interview-' + k, v) : localStorage.removeItem('cc-interview-' + k); } catch { /* 저장 불가 환경 */ } },
@@ -1057,7 +1057,7 @@ async function downloadPdf() {
   pdfBusy = true;
   toast('PDF를 만드는 중이에요. 잠시만 기다려 주세요...');
   try {
-    const { buildPdf } = await import('./pdf.js?v=202611162');
+    const { buildPdf } = await import('./pdf.js?v=202611163');
     const blob = await buildPdf(reportBody(), (i, n) => { document.getElementById('toast').textContent = `PDF를 만드는 중이에요... ${Math.round((i / n) * 100)}%`; });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -1635,6 +1635,8 @@ function qsetView() {
       <p>${qset.createdAt} · 질문 ${qset.questions.length}개. 스크립트는 외우지 말고, 키워드만 떠올리며 내 말로 답해 보세요.</p>
       ${qset.competencies && qset.competencies.length ? `<p class="kw">${qset.competencies.map(c => `<span>${esc(c.name)}</span>`).join('')}</p><p class="muted small no-print">자료에서 뽑은 검증 역량이에요. 바꾸고 싶으면 "새로 만들기"에서 "역량 먼저 확인하고 만들기"를 눌러 주세요.</p>` : ''}
     </section>
+    <button class="btn primary big no-print" data-act="pick">질문 고르기 화면으로 돌아가기</button>
+    <p class="muted small center no-print">질문 고르기 화면에서 이 질문집의 질문을 최대 5개까지 골라 차례대로 연습할 수 있습니다.</p>
     <section class="card no-print">
       <div class="savebtns">
         <button class="btn primary" data-act="qset-pdf">질문집 PDF로 저장</button>
@@ -1661,6 +1663,7 @@ function qsetView() {
       ${q.followups.length ? `<p class="eyebrow">예상 꼬리질문</p><ul class="fu">${q.followups.map(f => `<li>${esc(f)}</li>`).join('')}</ul>` : ''}
       <button class="btn ghost wide no-print" data-act="choose" data-id="${q.id}">이 질문으로 연습하기</button>
     </article>`).join('')}
+    <button class="btn primary big no-print" data-act="pick">질문 고르기 화면으로 돌아가기</button>
     <p class="disclaimer">AI가 넣어 주신 자료를 바탕으로 만든 예상 질문과 예시 답변입니다. 실제 면접 질문과 다를 수 있고, 스크립트의 사실 여부는 본인이 확인해 주세요.</p>
   </main>`;
 }
