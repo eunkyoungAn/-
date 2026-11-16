@@ -3,15 +3,15 @@
 // 음성 모드: 브라우저 음성 인식으로 글자만 받는다. 녹음 파일은 만들지 않는다.
 // 영상 모드(선택): 카메라로 녹화하고 시선·억양·템포를 휴대폰 안에서만 분석한다. 영상은 참여자가 직접 저장한다.
 
-import { QUESTIONS, CATEGORIES, findQuestion } from './questions.js?v=202611164';
-import { RUBRIC, measure, speedLabel, localEvaluate, totalScore, voiceScore } from './scoring.js?v=202611164';
-import { BASIS, REFS, NOTICE } from './rubric.js?v=202611164';
-import { buildSetText, fileName } from './save.js?v=202611164';
-import * as gem from './gemini.js?v=202611164';
-import * as files from './files.js?v=202611164';
-import * as claude from './claude.js?v=202611164';
-import { openMic, startAudioRecorder, toWavBase64, canRecordAudio } from './audio.js?v=202611164';
-import { canRecord, openCamera, stopStream, startRecorder, startAudioAnalysis, startGaze, loadGazeModel, scoreNonverbal, saveVideo } from './video.js?v=202611164';
+import { QUESTIONS, CATEGORIES, findQuestion } from './questions.js?v=202611165';
+import { RUBRIC, measure, speedLabel, localEvaluate, totalScore, voiceScore } from './scoring.js?v=202611165';
+import { BASIS, REFS, NOTICE } from './rubric.js?v=202611165';
+import { buildSetText, fileName } from './save.js?v=202611165';
+import * as gem from './gemini.js?v=202611165';
+import * as files from './files.js?v=202611165';
+import * as claude from './claude.js?v=202611165';
+import { openMic, startAudioRecorder, toWavBase64, canRecordAudio } from './audio.js?v=202611165';
+import { canRecord, openCamera, stopStream, startRecorder, startAudioAnalysis, startGaze, loadGazeModel, scoreNonverbal, saveVideo } from './video.js?v=202611165';
 
 const PREP_SEC = 30;
 const FOLLOW_PREP_SEC = 10;
@@ -20,7 +20,7 @@ const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
 // ---------- 설정 (링크 파라미터 > 이 기기에 저장한 값) ----------
 const params = new URLSearchParams(location.search);
-const APP_VERSION = '202611164'; // stamp-version.py가 배포 때 바꾼다
+const APP_VERSION = '202611165'; // stamp-version.py가 배포 때 바꾼다
 const store = {
   get(k) { try { return localStorage.getItem('cc-interview-' + k); } catch { return null; } },
   set(k, v) { try { v ? localStorage.setItem('cc-interview-' + k, v) : localStorage.removeItem('cc-interview-' + k); } catch { /* 저장 불가 환경 */ } },
@@ -239,7 +239,9 @@ function homeView() {
       <div class="seg" role="radiogroup" aria-label="답변 시간">
         ${[60, 90].map(s => `<button role="radio" aria-checked="${settings.limit === s}" class="${settings.limit === s ? 'on' : ''}" data-act="limit" data-v="${s}">${s}초</button>`).join('')}
       </div>
-      ${SR ? `<label class="check"><input type="checkbox" id="textmode" ${settings.textMode ? 'checked' : ''}> 음성 답변이 어려우면 글로 답하기</label>` : ''}
+      ${SR ? `<label class="check"><input type="checkbox" id="textmode" ${settings.textMode ? 'checked' : ''}> 음성 답변이 어려우면 글로 답하기</label>
+      <p class="muted small textmode-note">글로 답하기를 켜면 카메라와 마이크를 쓰지 않아 <b>영상 녹화 면접은 진행되지 않습니다.</b> 시선·음성 전달력 분석과 영상 저장도 빠지고, 답변 내용만 평가합니다.</p>` : ''}
+      ${!SR ? `<p class="muted small textmode-note">이 브라우저는 음성 인식을 지원하지 않아 글로 답하기로 진행하며, <b>영상 녹화 면접은 진행되지 않습니다.</b></p>` : ''}
     </section>
     ${canRecord() ? `<section class="card">
       <h2>답변 방식</h2>
@@ -247,6 +249,7 @@ function homeView() {
         <button role="radio" aria-checked="${!settings.video}" class="${!settings.video ? 'on' : ''}" data-act="video-mode" data-v="0">목소리만</button>
         <button role="radio" aria-checked="${settings.video}" class="${settings.video ? 'on' : ''}" data-act="video-mode" data-v="1">영상 녹화</button>
       </div>
+      ${settings.video && settings.textMode ? '<div class="notice warn"><b>지금은 영상 녹화가 진행되지 않습니다.</b> "글로 답하기"가 켜져 있어 카메라를 켜지 않습니다. 영상 면접으로 연습하려면 위의 "음성 답변이 어려우면 글로 답하기" 체크를 해제해 주세요.</div>' : ''}
       <p class="muted small">${settings.video ? '실제 화상 면접처럼 내 모습을 보며 답합니다. 시선, 억양, 템포 분석과 영상 저장이 추가됩니다. 휴대폰을 눈높이에 세워 두면 좋아요.' + (MOBILE ? (gem.hasGeminiKey() ? ' 휴대폰에서는 답변을 녹음해 두었다가 Gemini로 받아 적어요. 영상에도 소리가 담깁니다.' : ' 휴대폰에서 Gemini 키 없이 쓰면 키보드 마이크로 답하기 때문에 저장되는 영상에는 소리가 담기지 않고, 억양 분석은 빠집니다.') : '') : '카메라 없이 음성으로만 연습합니다. 처음 연습할 때 권장합니다.'}</p>
     </section>` : ''}
     <details class="card settings gem" ${hasAI() ? '' : ''}>
@@ -1057,7 +1060,7 @@ async function downloadPdf() {
   pdfBusy = true;
   toast('PDF를 만드는 중이에요. 잠시만 기다려 주세요...');
   try {
-    const { buildPdf } = await import('./pdf.js?v=202611164');
+    const { buildPdf } = await import('./pdf.js?v=202611165');
     const blob = await buildPdf(reportBody(), (i, n) => { document.getElementById('toast').textContent = `PDF를 만드는 중이에요... ${Math.round((i / n) * 100)}%`; });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -1702,7 +1705,11 @@ app.addEventListener('drop', e => { const z = e.target.closest && e.target.close
 
 app.addEventListener('change', e => {
   if (e.target.id === 'consent') state.consent = e.target.checked;
-  if (e.target.id === 'textmode') settings.textMode = e.target.checked;
+  if (e.target.id === 'textmode') {
+    settings.textMode = e.target.checked;
+    if (settings.textMode && settings.video) toast('글로 답하기를 켜면 영상 녹화 면접은 진행되지 않습니다. 답변 내용만 평가합니다.');
+    const y = window.scrollY; render(); window.scrollTo(0, y);
+  }
   if (e.target.type === 'file' && e.target.files && e.target.files.length) { const fl = [...e.target.files]; e.target.value = ''; handleFiles(fl, e.target.dataset.slot || null); return; }
   if (e.target.dataset && e.target.dataset.comp != null && state.comps) { state.comps[Number(e.target.dataset.comp)].on = e.target.checked; e.target.closest('.comp').classList.toggle('off', !e.target.checked); }
 });
