@@ -95,7 +95,7 @@
 
   var G = D.guide, P = D.project, B = D.basics, K = D.apikey, T = D.think, L = D.projectlab, SK = D.skillintro, ST = D.selftest, FP = D.freeplan, QZ = {};
   /* 무료플랜 파트 안의 실습으로 바로 가는 주소 */
-  var FPS = { fpgpt: ['gpt', '연습', '질문 구조 연습'], fpa: ['practiceA', '실습 A', '퍼플렉시티로 찾고 Claude로 보고서'], fpb: ['practiceB', '실습 B', '제미나이 일정 비서 스킬 등록'], fpc: ['practiceC', '실습 C', '스킬로 캘린더 일정 · 브리핑'] };
+  var FPS = { fpgpt: ['gpt', '연습', '질문 구조 연습'], fpa: ['practiceA', '실습 A', '퍼플렉시티로 찾고 Claude로 보고서'], fpb: ['practiceB', '실습 B', '제미나이 일정 비서 스킬 등록'], fpc: ['practiceC', '실습 C', '스킬로 캘린더 일정 · 브리핑'], fpd: ['practiceD', '실습 D', '혼자 해 보기 · 여행지 자료 모으기'] };
   var isFPS = function (h) { return Object.prototype.hasOwnProperty.call(FPS, h); };
   ST.quizzes.forEach(function (q) { QZ[q.id] = q; });
   var fileList = function (files, label) {
@@ -792,7 +792,7 @@
       '<h3>직접 입력하기 순서</h3>' + olist(Bx.steps) +
       box('설명 칸에 넣을 문장', Bx.desc) +
       box('지침 칸에 넣을 것', FP.skill) +
-      '<h3>파일로 올릴 때 받을 것</h3>' + fileList(FP.files.slice(0, 2), '받기') +
+      '<h3>파일로 올릴 때 받을 것</h3>' + fileList(FP.files.slice(1, 3), '받기') +
       '<h3>Gemini로 만들기 순서</h3>' + olist(Bx.chatSteps) +
       box('스킬 만들기 요청문 · Gemini로 만들기 창에 보낼 것', Bx.chatPrompt) +
       '<div class="attach-box"><div class="attach-h">저장 전 확인 · 지침에 들어 있어야 할 규칙 아홉 가지</div><ul class="attach-ask">' +
@@ -804,16 +804,33 @@
     add('practiceC', '실습 C · 스킬로 캘린더 일정 넣고 브리핑 받기',
       '<h3>시작 전 준비</h3>' + cards(Cx.prep, 3, '준비') +
       '<h3>1. 포스터로 일정 등록하기 (5~7분)</h3>' +
-      '<figure class="fig fig-poster"><img src="img/freeplan/poster.jpg" alt="연습 포스터: 서울커리업 단기과정 A28 여행기록 앱 과정. 일정 12.4(금)~12.11(금), 시간 금 10:00~13:00, 수강료 30,000원, 장소 교육관 102호 강의실, 신청 9.7(월)~12.3(목) 온라인접수"><figcaption>연습 포스터 · 아래 받기 단추로 원본 이미지를 받아 제미나이에 첨부합니다.</figcaption></figure>' +
-      fileList(FP.files.slice(2, 3), '포스터 받기') + olist(Cx.one) +
+      '<figure class="fig fig-poster"><img src="img/freeplan/poster.jpg" width="720" height="900" alt="연습 포스터: 서울커리업 단기과정 A28 여행기록 앱 과정. 일정 12.4(금)~12.11(금), 시간 금 10:00~13:00, 수강료 30,000원, 장소 교육관 102호 강의실, 신청 9.7(월)~12.3(목) 온라인접수"><figcaption>연습 포스터 · 아래 받기 단추로 원본 이미지를 받아 제미나이에 첨부합니다.</figcaption></figure>' +
+      fileList(FP.files.slice(3, 4), '포스터 받기') + olist(Cx.one) +
       box('일정 등록 지시문 (포스터 글 포함) · @ 로 일정 비서를 고른 뒤 붙여넣기', FP.g1) +
-      fileList(FP.files.slice(3), '받기') +
+      fileList(FP.files.slice(4), '받기') +
       '<h3>2. 이번 주 일정 브리핑 받기 (5~7분)</h3>' + olist(Cx.two) +
       box('주간 브리핑 지시문 · @ 로 일정 비서를 고른 뒤 붙여넣기', FP.g2) + box('이어서 보낼 문장 (선택)', FP.g3) +
       '<div class="safety-box sp"><strong>스킬을 켰을 때와 껐을 때 비교</strong><p>' + esc(Cx.compare) + '</p></div>' +
       '<div class="local-note">' + esc(Cx.fallback) + '</div>' +
       '<h3>확인</h3>' + checklistHtml(FP.id + '-c', Cx.checks) +
       '<div class="local-note">' + esc(Cx.source) + '</div>', '실습 C');
+    var Dx = FP.d;
+    add('practiceD', '실습 D · 혼자 해 보기 · 퍼플렉시티로 여행지 분석 자료 모으기',
+      '<p>' + esc(Dx.intro) + '</p>' +
+      '<div class="result-card"><strong>상황</strong><p>' + esc(Dx.situation) + '</p><p>' + esc(Dx.ask) + '</p></div>' +
+      '<div class="g-table sp"><table><tbody>' + Dx.deliver.map(function (r) { return '<tr><td>' + esc(r[0]) + '</td><td>' + esc(r[1]) + '</td></tr>'; }).join('') + '</tbody></table></div>' +
+      '<h3>퍼플렉시티 쓰는 요령 세 가지</h3>' + cards(Dx.tips, 3, '요령') +
+      '<h3>진행 순서</h3>' + olist(Dx.steps) +
+      fileList(FP.files.slice(0, 1), '양식 받기') +
+      '<h3>회차별 지시문</h3>' + FP.dPrompts.map(function (x) { return box(x[0], x[1]); }).join('') +
+      go(extUrl('https://www.perplexity.ai/'), '<b>1회차 지시문을 복사한 뒤</b> 퍼플렉시티 새 대화를 엽니다.', '퍼플렉시티 열기') +
+      '<h3>자주 빠지는 함정 다섯 가지</h3>' +
+      '<div class="g-table sp"><table><thead><tr><th>함정</th><th>이렇게 확인합니다</th></tr></thead><tbody>' +
+      Dx.traps.map(function (r) { return '<tr><td>' + esc(r[0]) + '</td><td>' + esc(r[1]) + '</td></tr>'; }).join('') + '</tbody></table></div>' +
+      '<h3>점검표 · 스스로 채점</h3><p>표를 다 채운 뒤 해당하는 항목에 체크합니다. 70점 이상이면 통과입니다.</p>' + scoreHtml(Dx) +
+      '<h3>한 번 더 · 내 여행지로</h3><p>' + esc(Dx.more) + '</p>' +
+      '<div class="safety-box sp"><strong>다음 단계</strong><p>' + esc(Dx.next) + '</p></div>' +
+      '<div class="local-note">' + esc(Dx.source) + '</div>', '실습 D');
     add('trouble', '막혔을 때',
       '<div class="g-table sp"><table><thead><tr><th>화면에 나온 것</th><th>왜 그런가</th><th>할 일</th></tr></thead><tbody>' +
       FP.trouble.map(function (r) { return '<tr><td>' + esc(r[0]) + '</td><td>' + esc(r[1]) + '</td><td>' + esc(r[2]) + '</td></tr>'; }).join('') + '</tbody></table></div>', '막혔을 때');
@@ -822,6 +839,14 @@
       '<a class="lesson-prev" href="#' + G.id + '"><span>← 이전</span><strong>' + esc(G.title) + '</strong></a>' +
       '<a class="lesson-next" href="#home"><span>다음 →</span><strong>전체 실습으로</strong></a></nav>';
     $('toc').innerHTML = '<strong>목차</strong>' + toc.map(function (t) { return '<a href="#' + t[0] + '" data-jump="' + t[0] + '">' + esc(t[1]) + '</a>'; }).join('');
+    $('lessonBody').querySelectorAll('[data-quiz="' + Dx.id + '"]').forEach(function (el) {
+      el.addEventListener('change', function () {
+        var a = checks[Dx.id] || (checks[Dx.id] = []);
+        a[+el.getAttribute('data-i')] = el.checked;
+        saveChecks(); updateScore(Dx);
+      });
+    });
+    updateScore(Dx);
     bindChecks(FP.id); bindChecks(FP.id + '-a'); bindChecks(FP.id + '-b'); bindChecks(FP.id + '-c');
   };
 
@@ -838,7 +863,7 @@
     q.rubric.forEach(function (r, i) { if (c[i]) sum += r[1]; });
     var box = $('score-' + q.id); if (!box) return;
     box.querySelector('b').textContent = sum;
-    var band = ST.bands.filter(function (b) { return sum >= b[0]; })[0];
+    var band = (q.bands || ST.bands).filter(function (b) { return sum >= b[0]; })[0];
     box.querySelector('.score-band').textContent = band ? band[1] : '';
     box.classList.toggle('is-pass', sum >= 70);
   };
