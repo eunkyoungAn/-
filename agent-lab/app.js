@@ -779,10 +779,10 @@
     add('practiceC', '실습 C · 스킬로 캘린더 일정 넣고 브리핑 받기',
       '<h3>시작 전 준비</h3>' + cards(Cx.prep, 3, '준비') +
       '<h3>1. 안내문으로 일정 등록하기 (5~7분)</h3>' + olist(Cx.one) +
-      box('일정 등록 지시문 (가상 안내문 포함)', FP.g1) +
+      box('일정 등록 지시문 (가상 안내문 포함) · / 로 일정 비서를 고른 뒤 붙여넣기', FP.g1) +
       fileList(FP.files.slice(2), '받기') +
       '<h3>2. 이번 주 일정 브리핑 받기 (5~7분)</h3>' + olist(Cx.two) +
-      box('주간 브리핑 지시문', FP.g2) + box('이어서 보낼 문장 (선택)', FP.g3) +
+      box('주간 브리핑 지시문 · / 로 일정 비서를 고른 뒤 붙여넣기', FP.g2) + box('이어서 보낼 문장 (선택)', FP.g3) +
       '<div class="safety-box sp"><strong>스킬을 켰을 때와 껐을 때 비교</strong><p>' + esc(Cx.compare) + '</p></div>' +
       '<div class="local-note">' + esc(Cx.fallback) + '</div>' +
       '<h3>확인</h3>' + checklistHtml(FP.id + '-c', Cx.checks) +
