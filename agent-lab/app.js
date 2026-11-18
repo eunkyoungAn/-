@@ -752,6 +752,18 @@
       }).join('') + '</div>';
     };
     var g = FP.gpt, A = FP.a, Bx = FP.b, Cx = FP.c;
+    var FLOW = [
+      ['fpa', '실습 A', '퍼플렉시티 → Claude', '찾고 보고서 쓰기', '출처가 붙은 한 장 보고서'],
+      ['fpb', '실습 B', '퍼플렉시티', '혼자 해 보기 · 여행지 자료 모으기', '자료 수집표 9칸 · 점검표 점수'],
+      ['fpc', '실습 C', '제미나이', '일정 비서 스킬 등록하기', '내 제미나이의 일정 비서 스킬'],
+      ['fpd', '실습 D', '제미나이 + 구글 캘린더', '스킬로 일정 넣고 브리핑 받기', '캘린더 일정 · 주간 브리핑']
+    ];
+    add('order', '실습 순서 한눈에',
+      '<p>질문 구조 연습으로 지시문을 다듬은 뒤, 아래 순서대로 진행합니다. 카드를 누르면 그 실습으로 바로 갑니다.</p>' +
+      '<ol class="flow4">' + FLOW.map(function (f) {
+        return '<li><a href="#' + f[0] + '"><span class="flow4-code">' + esc(f[1]) + '</span><span class="flow4-tool">' + esc(f[2]) + '</span>' +
+          '<strong>' + esc(f[3]) + '</strong><span class="flow4-out"><b>결과물</b> ' + esc(f[4]) + '</span></a></li>';
+      }).join('') + '</ol>', '실습 순서');
     add('why', '왜 나눠 쓰나', '<p>' + esc(FP.why) + '</p>' +
       '<div class="g-table sp"><table><thead><tr><th>AI</th><th>잘하는 일</th><th>여기서 맡기는 일</th><th>실습</th></tr></thead><tbody>' +
       FP.roles.map(function (r) { return '<tr><td>' + esc(r[0]) + '</td><td>' + esc(r[1]) + '</td><td>' + esc(r[2]) + '</td><td>' + esc(r[3]) + '</td></tr>'; }).join('') + '</tbody></table></div>' +
@@ -796,12 +808,12 @@
       '<h3>한 번 더 · 내 여행지로</h3><p>' + esc(Dx.more) + '</p>' +
       '<div class="safety-box sp"><strong>다음 단계</strong><p>' + esc(Dx.next) + '</p></div>' +
       '<div class="local-note">' + esc(Dx.source) + '</div>', '실습 B');
-    add('gems', '제미나이 · 젬(Gems)이 스킬(Skills)로 바뀌었습니다',
-      '<p>제미나이에서 자주 쓰는 지시를 저장해 두던 <b>젬</b>이 <b>스킬</b>로 바뀌는 중입니다. 쓰던 젬이 있다면 아래 일정에 맞춰 스킬로 옮깁니다.</p>' +
+    add('practiceC', '실습 C · 제미나이에 일정 비서 스킬 등록하기',
+      '<h3>먼저 알아 둘 것 · 젬(Gems)이 스킬(Skills)로 바뀌었습니다</h3>' + '<p>제미나이에서 자주 쓰는 지시를 저장해 두던 <b>젬</b>이 <b>스킬</b>로 바뀌는 중입니다. 쓰던 젬이 있다면 아래 일정에 맞춰 스킬로 옮깁니다.</p>' +
       '<div class="step-grid cols-2">' + FP.gemsNews.map(function (r) {
         return '<div class="start-item"><b>' + esc(r[0]) + '</b><p>' + esc(r[1]) + '</p></div>';
-      }).join('') + '</div><div class="local-note">' + esc(FP.gemsSource) + '</div>', '젬 → 스킬');
-    add('practiceC', '실습 C · 제미나이에 일정 비서 스킬 등록하기',
+      }).join('') + '</div><div class="local-note">' + esc(FP.gemsSource) + '</div>' +
+      '<h3>일정 비서 스킬 만들기</h3>' +
       '<p>강사 자료의 캘린더 실습 규칙을 <b>일정 비서</b> 스킬 하나로 묶어 등록합니다. 한 번 등록하면 다음부터는 입력창에서 @ 로 불러 씁니다. 아래 세 방법 가운데 하나로 만듭니다.<br>직접 입력하기와 Gemini로 만들기를 둘 다 해 보면 차이를 알 수 있습니다.</p>' +
       '<div class="way-list">' + Bx.ways.map(function (w, i) {
         return '<div class="way-card"><div class="way-head"><span class="way-no">' + (i + 1) + '</span><div><strong>' + esc(w[0]) + '</strong><em>' + esc(w[1]) + '</em></div></div><p>' + w[2] + '</p></div>';
