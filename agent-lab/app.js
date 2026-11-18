@@ -13,6 +13,9 @@
   var $ = function (id) { return document.getElementById(id); };
   /* 설정 파일의 주소는 claude.ai 만 허용한다 */
   var safeUrl = function (u) { return /^https:\/\/claude\.ai\//.test(u || '') ? u : 'https://claude.ai/'; };
+  /* 무료플랜 파트의 바깥 링크는 정해진 주소만 허용한다 */
+  var EXT = ['https://chatgpt.com/g/', 'https://www.perplexity.ai/', 'https://gemini.google.com/'];
+  var extUrl = function (u) { return EXT.some(function (p) { return (u || '').indexOf(p) === 0; }) ? u : '#freeplan'; };
   var fileUrl = function (p) { return 'files/' + p.split('/').map(encodeURIComponent).join('/'); };
   var byId = {};
   D.lessons.forEach(function (l, i) { byId[l.id] = l; l.index = i; });
@@ -90,7 +93,7 @@
     return '<a class="g-btn ghost" href="' + esc(fileUrl(f.path)) + '" download="' + esc(f.name) + '">' + esc(label || '받기') + '</a>';
   };
 
-  var G = D.guide, P = D.project, B = D.basics, K = D.apikey, T = D.think, L = D.projectlab, SK = D.skillintro, ST = D.selftest, QZ = {};
+  var G = D.guide, P = D.project, B = D.basics, K = D.apikey, T = D.think, L = D.projectlab, SK = D.skillintro, ST = D.selftest, FP = D.freeplan, QZ = {};
   ST.quizzes.forEach(function (q) { QZ[q.id] = q; });
   var fileList = function (files, label) {
     return '<div class="file-list">' + files.map(function (f) {
@@ -106,11 +109,11 @@
   var checklistHtml = function (id, items) {
     var c = checks[id] || [];
     return '<div class="checklist">' + items.map(function (t, i) {
-      return '<label class="check-item"><input type="checkbox" data-check="' + i + '"' + (c[i] ? ' checked' : '') + '><span>' + esc(t) + '</span></label>';
+      return '<label class="check-item"><input type="checkbox" data-cid="' + esc(id) + '" data-check="' + i + '"' + (c[i] ? ' checked' : '') + '><span>' + esc(t) + '</span></label>';
     }).join('') + '</div><div class="local-note">체크 상태는 지금 쓰는 기기에만 저장됩니다.</div>';
   };
   var bindChecks = function (id) {
-    $('lessonBody').querySelectorAll('[data-check]').forEach(function (el) {
+    $('lessonBody').querySelectorAll('[data-check][data-cid="' + id + '"]').forEach(function (el) {
       el.addEventListener('change', function () {
         var a = checks[id] || (checks[id] = []);
         a[+el.getAttribute('data-check')] = el.checked;
@@ -135,7 +138,7 @@
       return '<section class="level-section"><div class="level-head"><div><span class="level-kicker">' + esc(kicker) + '</span><h2>' + esc(title) +
         '</h2></div><p>' + esc(desc) + '</p></div><div class="lesson-grid">' + cards + '</div></section>';
     };
-    $('homeLevels').innerHTML = level(B.kicker, B.partTitle, B.partDesc, card(B, '기본 개념 보기') + card(SK, '스킬 알아보기') + card(K, '언제 쓰는지 보기') + card(T, '내 직무에 적용해 보기')) + level(G.kicker, G.partTitle, G.partDesc, card(G, '만드는 방법 보기') +
+    $('homeLevels').innerHTML = level(B.kicker, B.partTitle, B.partDesc, card(B, '기본 개념 보기') + card(SK, '스킬 알아보기') + card(K, '언제 쓰는지 보기') + card(T, '내 직무에 적용해 보기')) + level(G.kicker, G.partTitle, G.partDesc, card(G, '만드는 방법 보기') + card(FP, '나눠 쓰는 실습 보기') +
       '<a class="lesson-card" href="#help"><span class="lesson-code">모음 · 6가지 상황</span><h3>오류가 나는 대표 사유</h3>' +
       '<p>실행이 안 될 때, 파일이 안 들어갈 때, 파일로 못 받을 때의 원인과 할 일을 한 번에 모았습니다.</p>' +
       '<div class="lesson-output"><span>바로 찾기</span> · 화면에 나온 문구로 찾습니다</div><div class="lesson-arrow">사유 한 번에 보기 →</div></a>') +
@@ -164,7 +167,7 @@
     };
     var mGroup = function (title, links) { return '<div class="menu-group"><strong>' + esc(title) + '</strong>' + links + '</div>'; };
     $('quickPanel').innerHTML =
-      mGroup('시작 전', mLink(B.id, '기초', B.title) + mLink(SK.id, '기초', SK.title) + mLink(K.id, '기초', K.title) + mLink(T.id, '적용', T.title) + mLink(G.id, '준비', G.title)) +
+      mGroup('시작 전', mLink(B.id, '기초', B.title) + mLink(SK.id, '기초', SK.title) + mLink(K.id, '기초', K.title) + mLink(T.id, '적용', T.title) + mLink(G.id, '준비', G.title) + mLink(FP.id, '무료', FP.title)) +
       D.parts.map(function (p) {
         return mGroup(p.kicker + ' · ' + p.title, p.lessons.map(function (id) { return mLink(id, byId[id].code, byId[id].title); }).join(''));
       }).join('') +
@@ -185,7 +188,7 @@
     $('pgBar').style.width = Math.round(n / t * 100) + '%';
     document.querySelectorAll('.lesson-card').forEach(function (el) {
       var id = el.getAttribute('data-lesson');
-      el.classList.toggle('is-done', isDone(id === G.id ? G : id === P.id ? P : id === B.id ? B : id === K.id ? K : id === T.id ? T : id === SK.id ? SK : QZ[id] ? QZ[id] : byId[id]));
+      el.classList.toggle('is-done', isDone(id === G.id ? G : id === P.id ? P : id === B.id ? B : id === K.id ? K : id === T.id ? T : id === SK.id ? SK : id === FP.id ? FP : QZ[id] ? QZ[id] : byId[id]));
     });
   };
 
@@ -354,7 +357,7 @@
     add('errors', '오류가 나는 대표 사유', '<p>화면에 나온 문구로 찾습니다. 붉은 상자가 나오면 그 안의 안내를 먼저 따릅니다.</p>' + errorsHtml(), '오류 사유');
     $('lessonBody').innerHTML = parts.join('') + '<nav class="lesson-navigation" aria-label="이전 · 다음">' +
       '<a class="lesson-prev" href="#s8"><span>← 이전</span><strong>실습 8 · ' + esc(byId.s8.title) + '</strong></a>' +
-      '<a class="lesson-next" href="#home"><span>다음 →</span><strong>전체 실습으로</strong></a></nav>';
+      '<a class="lesson-next" href="#' + FP.id + '"><span>다음 →</span><strong>' + esc(FP.title) + '</strong></a></nav>';
     $('toc').innerHTML = '<strong>목차</strong>' + toc.map(function (t) { return '<a href="#' + t[0] + '" data-jump="' + t[0] + '">' + esc(t[1]) + '</a>'; }).join('');
     bindChecks(G.id);
   };
@@ -707,6 +710,90 @@
     bindChecks(SK.id);
   };
 
+  /* ---------- 무료플랜이라면? ---------- */
+  var renderFreePlan = function () {
+    store = {}; keySeq = 0;
+    $('bcPart').textContent = G.kicker + ' ' + G.partTitle;
+    $('bcCode').textContent = '무료플랜';
+    $('lhEyebrow').textContent = FP.code + ' · ' + FP.time;
+    $('lhTitle').textContent = FP.title;
+    $('lhSum').textContent = FP.sum;
+    $('lhMeta').innerHTML = '<span class="meta-chip active">무료 플랜에서 끝까지</span><span class="meta-chip">결과물 · ' + esc(FP.out) + '</span><span class="meta-chip">AI 네 가지 나눠 쓰기</span>';
+    var chat = safeUrl(C.chatUrl), parts = [], toc = [], n = 0;
+    var add = function (id, title, body, tocLabel) {
+      n++; var no = (n < 10 ? '0' : '') + n;
+      parts.push(sec(no, id, title, body)); toc.push([id, tocLabel || title]);
+    };
+    var go = function (url, text, label, ghost) {
+      return '<div class="go-studio"><p>' + text + '</p><a class="g-btn' + (ghost ? ' ghost' : '') + '" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">' + esc(label) + '</a></div>';
+    };
+    var box = function (label, text) {
+      return '<div class="prompt-box' + (text.length > 300 ? ' tall' : '') + '"><span class="box-label">' + esc(label) + '</span>' + copyBtn(text, '복사') + '<pre>' + esc(text) + '</pre></div>';
+    };
+    var cards = function (rows, cols, label) {
+      return '<div class="step-grid cols-' + cols + '">' + rows.map(function (r, i) {
+        return '<div class="start-item"><b>' + esc(label ? label + ' ' + (i + 1) : r[1]) + '</b><strong>' + esc(r[0]) + '</strong><p>' + (label ? esc(r[1]) : r[2]) + '</p></div>';
+      }).join('') + '</div>';
+    };
+    var g = FP.gpt, A = FP.a, Bx = FP.b, Cx = FP.c;
+    add('why', '왜 나눠 쓰나', '<p>' + esc(FP.why) + '</p>' +
+      '<div class="g-table sp"><table><thead><tr><th>AI</th><th>잘하는 일</th><th>여기서 맡기는 일</th><th>실습</th></tr></thead><tbody>' +
+      FP.roles.map(function (r) { return '<tr><td>' + esc(r[0]) + '</td><td>' + esc(r[1]) + '</td><td>' + esc(r[2]) + '</td><td>' + esc(r[3]) + '</td></tr>'; }).join('') + '</tbody></table></div>' +
+      '<div class="local-note">' + esc(FP.limitNote) + '</div>', '왜 나눠 쓰나');
+    add('save', '한도를 아끼는 습관 여섯 가지', cards(FP.save, 3, '습관'), '아끼는 습관');
+    add('gpt', '보내기 전에 · 질문 구조 연습 챗봇',
+      '<div class="result-card"><strong>' + esc(g.name) + '</strong><p>' + esc(g.what) + '</p></div>' + olist(g.how.map(esc)) +
+      box('챗봇에 넣어 볼 짧은 지시문 (예)', g.sample) +
+      go(extUrl(g.url), '<b>다듬은 지시문</b>을 복사해 두었다가 아래 실습에서 씁니다.', '질문 구조 연습 챗봇 열기'), '질문 구조 연습');
+    add('practiceA', '실습 A · 퍼플렉시티로 찾고 Claude로 보고서 쓰기',
+      '<p>주제는 <b>경력단절여성 · 중장년 재취업 지원 제도</b>입니다. 퍼플렉시티는 출처를 붙여 찾는 일만, Claude는 받은 자료를 한 장으로 정리하는 일만 맡습니다.</p>' +
+      olist(A.steps) +
+      box('1번 지시문 · 퍼플렉시티에 보낼 것', FP.a1) +
+      go(extUrl('https://www.perplexity.ai/'), '<b>1번 지시문을 복사한 뒤</b> 퍼플렉시티를 엽니다.', '퍼플렉시티 열기') +
+      '<div class="attach-box"><div class="attach-h">보내기 전 확인 · Claude에 넣을 것</div>' +
+      '<div class="att-row att-must"><span class="att-tag">꼭 붙여넣기</span><div class="att-b"><strong>퍼플렉시티 답 전체(링크 포함)</strong><p>2번 지시문 맨 아래 [자료] 칸의 괄호 문장을 지우고 그 자리에 붙여넣습니다.</p></div></div>' +
+      '<ul class="attach-ask"><li><b>[자료] 칸에 퍼플렉시티 답을 붙였습니까?</b> 괄호 문장이 남아 있으면 Claude가 자료 없이 씁니다.</li></ul></div>' +
+      box('2번 지시문 · Claude에 보낼 것', FP.a2) +
+      go(chat, '<b>2번 지시문과 자료를 함께</b> 붙여넣어 한 번에 보냅니다.', 'Claude 새 채팅 열기') +
+      '<h3>확인</h3>' + checklistHtml(FP.id + '-a', A.checks), '실습 A');
+    add('gems', '제미나이 · 젬(Gems)이 스킬(Skills)로 바뀌었습니다',
+      '<p>제미나이에서 자주 쓰는 지시를 저장해 두던 <b>젬</b>이 <b>스킬</b>로 바뀌는 중입니다. 쓰던 젬이 있다면 아래 일정에 맞춰 스킬로 옮깁니다.</p>' +
+      '<div class="step-grid cols-2">' + FP.gemsNews.map(function (r) {
+        return '<div class="start-item"><b>' + esc(r[0]) + '</b><p>' + esc(r[1]) + '</p></div>';
+      }).join('') + '</div><div class="local-note">' + esc(FP.gemsSource) + '</div>', '젬 → 스킬');
+    add('practiceB', '실습 B · 제미나이에 일정 비서 스킬 등록하기',
+      '<p>강사 자료의 캘린더 실습 규칙을 <b>일정 비서</b> 스킬 하나로 묶어 등록합니다. 한 번 등록하면 다음부터는 / 로 불러 씁니다.</p>' +
+      '<div class="way-list">' + Bx.ways.map(function (w, i) {
+        return '<div class="way-card"><div class="way-head"><span class="way-no">' + (i + 1) + '</span><div><strong>' + esc(w[0]) + '</strong><em>' + esc(w[1]) + '</em></div></div><p>' + w[2] + '</p></div>';
+      }).join('') + '</div>' +
+      '<h3>직접 입력하기 순서</h3>' + olist(Bx.steps) +
+      box('설명 칸에 넣을 문장', Bx.desc) +
+      box('지침 칸에 넣을 것', FP.skill) +
+      '<h3>파일로 올릴 때 받을 것</h3>' + fileList(FP.files.slice(0, 2), '받기') +
+      go(extUrl('https://gemini.google.com/'), '<b>개인 Google 계정</b>으로 로그인한 뒤 스킬 메뉴를 엽니다.', '제미나이 열기') +
+      '<h3>확인</h3>' + checklistHtml(FP.id + '-b', Bx.checks), '실습 B');
+    add('practiceC', '실습 C · 스킬로 캘린더 일정 넣고 브리핑 받기',
+      '<h3>시작 전 준비</h3>' + cards(Cx.prep, 3, '준비') +
+      '<h3>1. 안내문으로 일정 등록하기 (5~7분)</h3>' + olist(Cx.one) +
+      box('일정 등록 지시문 (가상 안내문 포함)', FP.g1) +
+      fileList(FP.files.slice(2), '받기') +
+      '<h3>2. 이번 주 일정 브리핑 받기 (5~7분)</h3>' + olist(Cx.two) +
+      box('주간 브리핑 지시문', FP.g2) + box('이어서 보낼 문장 (선택)', FP.g3) +
+      '<div class="safety-box sp"><strong>스킬을 켰을 때와 껐을 때 비교</strong><p>' + esc(Cx.compare) + '</p></div>' +
+      '<div class="local-note">' + esc(Cx.fallback) + '</div>' +
+      '<h3>확인</h3>' + checklistHtml(FP.id + '-c', Cx.checks) +
+      '<div class="local-note">' + esc(Cx.source) + '</div>', '실습 C');
+    add('trouble', '막혔을 때',
+      '<div class="g-table sp"><table><thead><tr><th>화면에 나온 것</th><th>왜 그런가</th><th>할 일</th></tr></thead><tbody>' +
+      FP.trouble.map(function (r) { return '<tr><td>' + esc(r[0]) + '</td><td>' + esc(r[1]) + '</td><td>' + esc(r[2]) + '</td></tr>'; }).join('') + '</tbody></table></div>', '막혔을 때');
+    add('review', '마무리 확인', '<p>아래 항목을 모두 확인하면 이 파트가 끝납니다.</p>' + checklistHtml(FP.id, FP.checks), '마무리 확인');
+    $('lessonBody').innerHTML = parts.join('') + '<nav class="lesson-navigation" aria-label="이전 · 다음">' +
+      '<a class="lesson-prev" href="#' + G.id + '"><span>← 이전</span><strong>' + esc(G.title) + '</strong></a>' +
+      '<a class="lesson-next" href="#home"><span>다음 →</span><strong>전체 실습으로</strong></a></nav>';
+    $('toc').innerHTML = '<strong>목차</strong>' + toc.map(function (t) { return '<a href="#' + t[0] + '" data-jump="' + t[0] + '">' + esc(t[1]) + '</a>'; }).join('');
+    bindChecks(FP.id); bindChecks(FP.id + '-a'); bindChecks(FP.id + '-b'); bindChecks(FP.id + '-c');
+  };
+
   /* ---------- 스스로 해 보기 ---------- */
   var scoreHtml = function (q) {
     var c = checks[q.id] || [];
@@ -809,14 +896,14 @@
   var shown = null;
   var route = function () {
     var h = (location.hash || '').slice(1);
-    var l = Object.prototype.hasOwnProperty.call(byId, h) ? byId[h] : (h === G.id ? G : h === P.id ? P : h === B.id ? B : h === K.id ? K : h === T.id ? T : h === SK.id ? SK : h === L.id ? P : h === ST.id || QZ[h] ? ST : null);
+    var l = Object.prototype.hasOwnProperty.call(byId, h) ? byId[h] : (h === G.id ? G : h === P.id ? P : h === B.id ? B : h === K.id ? K : h === T.id ? T : h === SK.id ? SK : h === FP.id ? FP : h === L.id ? P : h === ST.id || QZ[h] ? ST : null);
     $('viewHome').hidden = !!l;
     $('viewLesson').hidden = !l;
     if (l) {
-      if (shown !== l.id) { if (l === G) renderGuide(); else if (l === P) renderProject(); else if (l === B) renderBasics(); else if (l === K) renderApiKey(); else if (l === T) renderThink(); else if (l === SK) renderSkillIntro(); else if (l === ST) renderSelfTest(); else renderLesson(l); shown = l.id; }
+      if (shown !== l.id) { if (l === G) renderGuide(); else if (l === P) renderProject(); else if (l === B) renderBasics(); else if (l === K) renderApiKey(); else if (l === T) renderThink(); else if (l === SK) renderSkillIntro(); else if (l === ST) renderSelfTest(); else if (l === FP) renderFreePlan(); else renderLesson(l); shown = l.id; }
       var labEl = h === L.id ? $('lab') : QZ[h] ? $(QZ[h].sec) : null;
       if (labEl) labEl.scrollIntoView({ block: 'start' }); else window.scrollTo(0, 0);
-      document.title = (l === G || l === P || l === B || l === K || l === T || l === SK || l === ST ? l.title : l.code + ' ' + l.title) + ' | 업무 에이전트 실습실';
+      document.title = (l === G || l === P || l === B || l === K || l === T || l === SK || l === ST || l === FP ? l.title : l.code + ' ' + l.title) + ' | 업무 에이전트 실습실';
     } else {
       shown = null;
       updateProgress();
