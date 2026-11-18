@@ -125,6 +125,17 @@
     });
   };
 
+  /* ---------- 단계 목록: 한 항목 안의 문장을 한 줄씩 ----------
+     "~다." "~요." 로 끝나는 문장 뒤에서 줄을 바꾼다. 태그 안(속성)은 건드리지 않는다. */
+  var splitLines = function (root) {
+    if (!root) return;
+    root.querySelectorAll('ol.plain > li, ul.plain > li, .plain-ol > li, .attach-ask > li, .flow-list li p').forEach(function (li) {
+      if (li.getAttribute('data-split')) return;
+      li.innerHTML = li.innerHTML.replace(/([다요]\.)\s+(?=[^<>]*(?:<|$))(?!$)/g, '$1<br>');
+      li.setAttribute('data-split', '1');
+    });
+  };
+
   /* ---------- 시작 화면 ---------- */
   var renderHome = function () {
     $('studioLink').href = safeUrl(C.studioUrl);
@@ -184,6 +195,7 @@
     }).join('');
     $('rulesText').textContent = D.rulesText;
     updateProgress();
+    splitLines($('viewHome'));
   };
 
   var updateProgress = function () {
@@ -772,7 +784,7 @@
         return '<div class="start-item"><b>' + esc(r[0]) + '</b><p>' + esc(r[1]) + '</p></div>';
       }).join('') + '</div><div class="local-note">' + esc(FP.gemsSource) + '</div>', '젬 → 스킬');
     add('practiceB', '실습 B · 제미나이에 일정 비서 스킬 등록하기',
-      '<p>강사 자료의 캘린더 실습 규칙을 <b>일정 비서</b> 스킬 하나로 묶어 등록합니다. 한 번 등록하면 다음부터는 입력창에서 @ 로 불러 씁니다. 아래 세 방법 가운데 하나로 만듭니다. 직접 입력하기와 Gemini로 만들기를 둘 다 해 보면 차이를 알 수 있습니다.</p>' +
+      '<p>강사 자료의 캘린더 실습 규칙을 <b>일정 비서</b> 스킬 하나로 묶어 등록합니다. 한 번 등록하면 다음부터는 입력창에서 @ 로 불러 씁니다. 아래 세 방법 가운데 하나로 만듭니다.<br>직접 입력하기와 Gemini로 만들기를 둘 다 해 보면 차이를 알 수 있습니다.</p>' +
       '<div class="way-list">' + Bx.ways.map(function (w, i) {
         return '<div class="way-card"><div class="way-head"><span class="way-no">' + (i + 1) + '</span><div><strong>' + esc(w[0]) + '</strong><em>' + esc(w[1]) + '</em></div></div><p>' + w[2] + '</p></div>';
       }).join('') + '</div>' +
@@ -918,7 +930,7 @@
     $('viewHome').hidden = !!l;
     $('viewLesson').hidden = !l;
     if (l) {
-      if (shown !== l.id) { if (l === G) renderGuide(); else if (l === P) renderProject(); else if (l === B) renderBasics(); else if (l === K) renderApiKey(); else if (l === T) renderThink(); else if (l === SK) renderSkillIntro(); else if (l === ST) renderSelfTest(); else if (l === FP) renderFreePlan(); else renderLesson(l); shown = l.id; }
+      if (shown !== l.id) { if (l === G) renderGuide(); else if (l === P) renderProject(); else if (l === B) renderBasics(); else if (l === K) renderApiKey(); else if (l === T) renderThink(); else if (l === SK) renderSkillIntro(); else if (l === ST) renderSelfTest(); else if (l === FP) renderFreePlan(); else renderLesson(l); shown = l.id; splitLines($('lessonBody')); }
       var labEl = h === L.id ? $('lab') : isFPS(h) ? $(FPS[h][0]) : QZ[h] ? $(QZ[h].sec) : null;
       if (labEl) labEl.scrollIntoView({ block: 'start' }); else window.scrollTo(0, 0);
       document.title = (l === G || l === P || l === B || l === K || l === T || l === SK || l === ST || l === FP ? l.title : l.code + ' ' + l.title) + ' | 업무 에이전트 실습실';
