@@ -559,3 +559,7 @@ body{letter-spacing:-.005em}
 a.start-item.quiz-link{display:block;transition:border-color .2s}
 a.start-item.quiz-link:hover{border-color:var(--ink)}
 .custom-fold{margin-top:14px}
+
+/* 무료플랜 실습 C 연습 포스터 */
+.fig-poster img{max-width:400px;width:100%;margin:0 auto;display:block}
+.fig-poster figcaption{text-align:center}
