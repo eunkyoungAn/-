@@ -5,7 +5,7 @@
 - 주소: `https://eunkyoungan.github.io/-/prompt-practice/` (실제 배포는 `gh-pages` 브랜치. main에 합친 뒤 `prompt-practice/index.html`을 `gh-pages`에 그대로 올려야 반영된다)
 - `index.html` 하나로 동작한다. 스타일과 스크립트가 파일 안에 들어 있어, 파일만 보내도 받는 사람이 두 번 눌러 브라우저에서 쓸 수 있다.
 - 구성과 스타일은 면접 리허설(`interview/`)을 따랐다.
-- 업무 에이전트 실습실 `#fpgpt`(질문 구조 연습 챗봇)에서 "로그인 없이 연습하기" 단추로 연결된다.
+- 업무 에이전트 실습실 무료플랜 파트 `#fpgpt`(질문 구조 연습)의 "질문 구조 연습 열기" 단추로 연결된다.
 
 ## 동작
 
