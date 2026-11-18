@@ -784,9 +784,11 @@
       '<h3>확인</h3>' + checklistHtml(FP.id + '-b', Bx.checks), '실습 B');
     add('practiceC', '실습 C · 스킬로 캘린더 일정 넣고 브리핑 받기',
       '<h3>시작 전 준비</h3>' + cards(Cx.prep, 3, '준비') +
-      '<h3>1. 포스터로 일정 등록하기 (5~7분)</h3>' + olist(Cx.one) +
+      '<h3>1. 포스터로 일정 등록하기 (5~7분)</h3>' +
+      '<figure class="fig fig-poster"><img src="img/freeplan/poster.jpg" alt="연습 포스터: 서울커리업 단기과정 A28 여행기록 앱 과정. 일정 12.4(금)~12.11(금), 시간 금 10:00~13:00, 수강료 30,000원, 장소 교육관 102호 강의실, 신청 9.7(월)~12.3(목) 온라인접수"><figcaption>연습 포스터 · 아래 받기 단추로 원본 이미지를 받아 제미나이에 첨부합니다.</figcaption></figure>' +
+      fileList(FP.files.slice(2, 3), '포스터 받기') + olist(Cx.one) +
       box('일정 등록 지시문 (포스터 글 포함) · @ 로 일정 비서를 고른 뒤 붙여넣기', FP.g1) +
-      fileList(FP.files.slice(2), '받기') +
+      fileList(FP.files.slice(3), '받기') +
       '<h3>2. 이번 주 일정 브리핑 받기 (5~7분)</h3>' + olist(Cx.two) +
       box('주간 브리핑 지시문 · @ 로 일정 비서를 고른 뒤 붙여넣기', FP.g2) + box('이어서 보낼 문장 (선택)', FP.g3) +
       '<div class="safety-box sp"><strong>스킬을 켰을 때와 껐을 때 비교</strong><p>' + esc(Cx.compare) + '</p></div>' +
