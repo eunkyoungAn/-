@@ -94,6 +94,9 @@
   };
 
   var G = D.guide, P = D.project, B = D.basics, K = D.apikey, T = D.think, L = D.projectlab, SK = D.skillintro, ST = D.selftest, FP = D.freeplan, QZ = {};
+  /* 무료플랜 파트 안의 실습으로 바로 가는 주소 */
+  var FPS = { fpgpt: ['gpt', '챗봇', '질문 구조 연습 챗봇'], fpa: ['practiceA', '실습 A', '퍼플렉시티로 찾고 Claude로 보고서'], fpb: ['practiceB', '실습 B', '제미나이 일정 비서 스킬 등록'], fpc: ['practiceC', '실습 C', '스킬로 캘린더 일정 · 브리핑'] };
+  var isFPS = function (h) { return Object.prototype.hasOwnProperty.call(FPS, h); };
   ST.quizzes.forEach(function (q) { QZ[q.id] = q; });
   var fileList = function (files, label) {
     return '<div class="file-list">' + files.map(function (f) {
@@ -167,7 +170,8 @@
     };
     var mGroup = function (title, links) { return '<div class="menu-group"><strong>' + esc(title) + '</strong>' + links + '</div>'; };
     $('quickPanel').innerHTML =
-      mGroup('시작 전', mLink(B.id, '기초', B.title) + mLink(SK.id, '기초', SK.title) + mLink(K.id, '기초', K.title) + mLink(T.id, '적용', T.title) + mLink(G.id, '준비', G.title) + mLink(FP.id, '무료', FP.title)) +
+      mGroup('시작 전', mLink(B.id, '기초', B.title) + mLink(SK.id, '기초', SK.title) + mLink(K.id, '기초', K.title) + mLink(T.id, '적용', T.title) + mLink(G.id, '준비', G.title)) +
+      mGroup('무료플랜이라면?', mLink(FP.id, '무료', '무료플랜 안내 · 나눠 쓰기') + Object.keys(FPS).map(function (k) { return mLink(k, FPS[k][1], FPS[k][2]); }).join('')) +
       D.parts.map(function (p) {
         return mGroup(p.kicker + ' · ' + p.title, p.lessons.map(function (id) { return mLink(id, byId[id].code, byId[id].title); }).join(''));
       }).join('') +
@@ -896,12 +900,12 @@
   var shown = null;
   var route = function () {
     var h = (location.hash || '').slice(1);
-    var l = Object.prototype.hasOwnProperty.call(byId, h) ? byId[h] : (h === G.id ? G : h === P.id ? P : h === B.id ? B : h === K.id ? K : h === T.id ? T : h === SK.id ? SK : h === FP.id ? FP : h === L.id ? P : h === ST.id || QZ[h] ? ST : null);
+    var l = Object.prototype.hasOwnProperty.call(byId, h) ? byId[h] : (h === G.id ? G : h === P.id ? P : h === B.id ? B : h === K.id ? K : h === T.id ? T : h === SK.id ? SK : h === FP.id || isFPS(h) ? FP : h === L.id ? P : h === ST.id || QZ[h] ? ST : null);
     $('viewHome').hidden = !!l;
     $('viewLesson').hidden = !l;
     if (l) {
       if (shown !== l.id) { if (l === G) renderGuide(); else if (l === P) renderProject(); else if (l === B) renderBasics(); else if (l === K) renderApiKey(); else if (l === T) renderThink(); else if (l === SK) renderSkillIntro(); else if (l === ST) renderSelfTest(); else if (l === FP) renderFreePlan(); else renderLesson(l); shown = l.id; }
-      var labEl = h === L.id ? $('lab') : QZ[h] ? $(QZ[h].sec) : null;
+      var labEl = h === L.id ? $('lab') : isFPS(h) ? $(FPS[h][0]) : QZ[h] ? $(QZ[h].sec) : null;
       if (labEl) labEl.scrollIntoView({ block: 'start' }); else window.scrollTo(0, 0);
       document.title = (l === G || l === P || l === B || l === K || l === T || l === SK || l === ST || l === FP ? l.title : l.code + ' ' + l.title) + ' | 업무 에이전트 실습실';
     } else {
