@@ -754,10 +754,16 @@
       olist(A.steps) +
       box('1번 지시문 · 퍼플렉시티에 보낼 것', FP.a1) +
       go(extUrl('https://www.perplexity.ai/'), '<b>1번 지시문을 복사한 뒤</b> 퍼플렉시티를 엽니다.', '퍼플렉시티 열기') +
+      '<h3>Claude에 보고서 스킬이 있는지 확인</h3>' + olist(A.skillSteps) +
+      box('스킬 확인 문장 · Claude 새 채팅에 보낼 것', A.skillAsk) +
+      fileList(D.reportSkills.filter(function (x) { return x.name === 'one-page-report-docx'; }).map(function (x) { return { path: x.path, name: x.name + '.zip', label: '한 장 보고서(워드) 스킬 · 압축을 풀지 않고 그대로 올림', role: '없을 때만' }; }), '스킬 받기') +
+      '<div class="local-note">' + esc(A.skillSource) + '</div>' +
       '<div class="attach-box"><div class="attach-h">보내기 전 확인 · Claude에 넣을 것</div>' +
       '<div class="att-row att-must"><span class="att-tag">꼭 붙여넣기</span><div class="att-b"><strong>퍼플렉시티 답 전체(링크 포함)</strong><p>2번 지시문 맨 아래 [자료] 칸의 괄호 문장을 지우고 그 자리에 붙여넣습니다.</p></div></div>' +
       '<ul class="attach-ask"><li><b>[자료] 칸에 퍼플렉시티 답을 붙였습니까?</b> 괄호 문장이 남아 있으면 Claude가 자료 없이 씁니다.</li></ul></div>' +
       box('2번 지시문 · Claude에 보낼 것', FP.a2) +
+      box('덧붙일 문장 · 보고서 스킬이 있을 때만 2번 지시문의 [자료] 줄 바로 위에', A.skillAdd) +
+      '<div class="local-note">' + esc(A.skillNote) + '</div>' +
       go(chat, '<b>2번 지시문과 자료를 함께</b> 붙여넣어 한 번에 보냅니다.', 'Claude 새 채팅 열기') +
       '<h3>확인</h3>' + checklistHtml(FP.id + '-a', A.checks), '실습 A');
     add('gems', '제미나이 · 젬(Gems)이 스킬(Skills)로 바뀌었습니다',
