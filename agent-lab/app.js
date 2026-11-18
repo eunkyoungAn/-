@@ -95,7 +95,7 @@
 
   var G = D.guide, P = D.project, B = D.basics, K = D.apikey, T = D.think, L = D.projectlab, SK = D.skillintro, ST = D.selftest, FP = D.freeplan, QZ = {};
   /* 무료플랜 파트 안의 실습으로 바로 가는 주소 */
-  var FPS = { fpgpt: ['gpt', '연습', '질문 구조 연습'], fpa: ['practiceA', '실습 A', '퍼플렉시티로 찾고 Claude로 보고서'], fpb: ['practiceB', '실습 B', '제미나이 일정 비서 스킬 등록'], fpc: ['practiceC', '실습 C', '스킬로 캘린더 일정 · 브리핑'], fpd: ['practiceD', '실습 D', '혼자 해 보기 · 여행지 자료 모으기'] };
+  var FPS = { fpgpt: ['gpt', '연습', '질문 구조 연습'], fpa: ['practiceA', '실습 A', '퍼플렉시티로 찾고 Claude로 보고서'], fpd: ['practiceD', '실습 D', '혼자 해 보기 · 여행지 자료 모으기'], fpb: ['practiceB', '실습 B', '제미나이 일정 비서 스킬 등록'], fpc: ['practiceC', '실습 C', '스킬로 캘린더 일정 · 브리핑'] };
   var isFPS = function (h) { return Object.prototype.hasOwnProperty.call(FPS, h); };
   ST.quizzes.forEach(function (q) { QZ[q.id] = q; });
   var fileList = function (files, label) {
@@ -779,6 +779,23 @@
       '<div class="local-note">' + esc(A.skillNote) + '</div>' +
       go(chat, '<b>2번 지시문과 자료를 함께</b> 붙여넣어 한 번에 보냅니다.', 'Claude 새 채팅 열기') +
       '<h3>확인</h3>' + checklistHtml(FP.id + '-a', A.checks), '실습 A');
+    var Dx = FP.d;
+    add('practiceD', '실습 D · 혼자 해 보기 · 퍼플렉시티로 여행지 분석 자료 모으기',
+      '<p>' + esc(Dx.intro) + '</p>' +
+      '<div class="result-card"><strong>상황</strong><p>' + esc(Dx.situation) + '</p><p>' + esc(Dx.ask) + '</p></div>' +
+      '<div class="g-table sp"><table><tbody>' + Dx.deliver.map(function (r) { return '<tr><td>' + esc(r[0]) + '</td><td>' + esc(r[1]) + '</td></tr>'; }).join('') + '</tbody></table></div>' +
+      '<h3>퍼플렉시티 쓰는 요령 세 가지</h3>' + cards(Dx.tips, 3, '요령') +
+      '<h3>진행 순서</h3>' + olist(Dx.steps) +
+      fileList(FP.files.slice(0, 1), '양식 받기') +
+      '<h3>지시문 두 개 · 이 두 번으로 끝냅니다</h3>' + FP.dPrompts.map(function (x) { return box(x[0], x[1]); }).join('') +
+      go(extUrl('https://www.perplexity.ai/'), '<b>1회차 지시문을 복사한 뒤</b> 퍼플렉시티 새 대화를 엽니다.', '퍼플렉시티 열기') +
+      '<h3>자주 빠지는 함정 다섯 가지</h3>' +
+      '<div class="g-table sp"><table><thead><tr><th>함정</th><th>이렇게 확인합니다</th></tr></thead><tbody>' +
+      Dx.traps.map(function (r) { return '<tr><td>' + esc(r[0]) + '</td><td>' + esc(r[1]) + '</td></tr>'; }).join('') + '</tbody></table></div>' +
+      '<h3>점검표 · 스스로 채점</h3><p>표를 다 채운 뒤 해당하는 항목에 체크합니다. 70점 이상이면 통과입니다.</p>' + scoreHtml(Dx) +
+      '<h3>한 번 더 · 내 여행지로</h3><p>' + esc(Dx.more) + '</p>' +
+      '<div class="safety-box sp"><strong>다음 단계</strong><p>' + esc(Dx.next) + '</p></div>' +
+      '<div class="local-note">' + esc(Dx.source) + '</div>', '실습 D');
     add('gems', '제미나이 · 젬(Gems)이 스킬(Skills)로 바뀌었습니다',
       '<p>제미나이에서 자주 쓰는 지시를 저장해 두던 <b>젬</b>이 <b>스킬</b>로 바뀌는 중입니다. 쓰던 젬이 있다면 아래 일정에 맞춰 스킬로 옮깁니다.</p>' +
       '<div class="step-grid cols-2">' + FP.gemsNews.map(function (r) {
@@ -814,23 +831,6 @@
       '<div class="local-note">' + esc(Cx.fallback) + '</div>' +
       '<h3>확인</h3>' + checklistHtml(FP.id + '-c', Cx.checks) +
       '<div class="local-note">' + esc(Cx.source) + '</div>', '실습 C');
-    var Dx = FP.d;
-    add('practiceD', '실습 D · 혼자 해 보기 · 퍼플렉시티로 여행지 분석 자료 모으기',
-      '<p>' + esc(Dx.intro) + '</p>' +
-      '<div class="result-card"><strong>상황</strong><p>' + esc(Dx.situation) + '</p><p>' + esc(Dx.ask) + '</p></div>' +
-      '<div class="g-table sp"><table><tbody>' + Dx.deliver.map(function (r) { return '<tr><td>' + esc(r[0]) + '</td><td>' + esc(r[1]) + '</td></tr>'; }).join('') + '</tbody></table></div>' +
-      '<h3>퍼플렉시티 쓰는 요령 세 가지</h3>' + cards(Dx.tips, 3, '요령') +
-      '<h3>진행 순서</h3>' + olist(Dx.steps) +
-      fileList(FP.files.slice(0, 1), '양식 받기') +
-      '<h3>회차별 지시문</h3>' + FP.dPrompts.map(function (x) { return box(x[0], x[1]); }).join('') +
-      go(extUrl('https://www.perplexity.ai/'), '<b>1회차 지시문을 복사한 뒤</b> 퍼플렉시티 새 대화를 엽니다.', '퍼플렉시티 열기') +
-      '<h3>자주 빠지는 함정 다섯 가지</h3>' +
-      '<div class="g-table sp"><table><thead><tr><th>함정</th><th>이렇게 확인합니다</th></tr></thead><tbody>' +
-      Dx.traps.map(function (r) { return '<tr><td>' + esc(r[0]) + '</td><td>' + esc(r[1]) + '</td></tr>'; }).join('') + '</tbody></table></div>' +
-      '<h3>점검표 · 스스로 채점</h3><p>표를 다 채운 뒤 해당하는 항목에 체크합니다. 70점 이상이면 통과입니다.</p>' + scoreHtml(Dx) +
-      '<h3>한 번 더 · 내 여행지로</h3><p>' + esc(Dx.more) + '</p>' +
-      '<div class="safety-box sp"><strong>다음 단계</strong><p>' + esc(Dx.next) + '</p></div>' +
-      '<div class="local-note">' + esc(Dx.source) + '</div>', '실습 D');
     add('trouble', '막혔을 때',
       '<div class="g-table sp"><table><thead><tr><th>화면에 나온 것</th><th>왜 그런가</th><th>할 일</th></tr></thead><tbody>' +
       FP.trouble.map(function (r) { return '<tr><td>' + esc(r[0]) + '</td><td>' + esc(r[1]) + '</td><td>' + esc(r[2]) + '</td></tr>'; }).join('') + '</tbody></table></div>', '막혔을 때');
