@@ -612,3 +612,21 @@ body{word-break:keep-all;overflow-wrap:break-word;line-break:strict}
   .lesson-content > section,.lesson-content > div > section{padding-bottom:44px;margin-bottom:44px}
   .lesson-content section > h3{margin-top:34px;font-size:18px}
 }
+
+/* ===== 첫 화면도 같은 형식 (2026-11-18)
+   파트 머리말은 배지, 파트 사이는 굵은 구분선, 소제목은 왼쪽 막대, 본문 줄간격은 실습 화면과 같게 ===== */
+.level-section,.info-section{padding-top:48px;margin-bottom:56px;border-top:2px solid var(--rule-strong);scroll-margin-top:90px}
+#homeLevels .level-section:first-child{border-top:0;padding-top:0}
+.level-kicker,.info-section > .level-kicker{display:inline-block;padding:3px 11px;border-radius:999px;background:var(--accent);color:#fff;
+  font-size:12.5px;font-weight:700;letter-spacing:.04em;margin-bottom:12px}
+.level-head h2,.info-section > h2{line-height:1.35;text-wrap:balance}
+.level-head p,.info-section > p.lead{font-size:15.5px;line-height:1.85;color:var(--ink-soft)}
+.info-section > p.lead{margin-top:6px;margin-bottom:22px;max-width:760px}
+.dl-h,.info-section .dl-h{margin:36px 0 12px;padding:2px 0 2px 13px;border-left:4px solid var(--accent);font-size:18px;line-height:1.4}
+.plain-ol{line-height:1.85}
+.plain-ol li + li{margin-top:12px}
+.plain-ol li::marker{font-weight:700;color:var(--accent)}
+.rule-card p,.funnel-step p,.lesson-card p,.quiz-card p{line-height:1.75}
+.rule-card strong{line-height:1.45}
+.lesson-card p{text-wrap:pretty}
+@media (max-width:640px){.level-section,.info-section{padding-top:36px;margin-bottom:40px}}
