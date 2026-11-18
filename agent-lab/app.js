@@ -766,7 +766,7 @@
         return '<div class="start-item"><b>' + esc(r[0]) + '</b><p>' + esc(r[1]) + '</p></div>';
       }).join('') + '</div><div class="local-note">' + esc(FP.gemsSource) + '</div>', '젬 → 스킬');
     add('practiceB', '실습 B · 제미나이에 일정 비서 스킬 등록하기',
-      '<p>강사 자료의 캘린더 실습 규칙을 <b>일정 비서</b> 스킬 하나로 묶어 등록합니다. 한 번 등록하면 다음부터는 / 로 불러 씁니다.</p>' +
+      '<p>강사 자료의 캘린더 실습 규칙을 <b>일정 비서</b> 스킬 하나로 묶어 등록합니다. 한 번 등록하면 다음부터는 입력창에서 @ 로 불러 씁니다. 아래 세 방법 가운데 하나로 만듭니다. 직접 입력하기와 Gemini로 만들기를 둘 다 해 보면 차이를 알 수 있습니다.</p>' +
       '<div class="way-list">' + Bx.ways.map(function (w, i) {
         return '<div class="way-card"><div class="way-head"><span class="way-no">' + (i + 1) + '</span><div><strong>' + esc(w[0]) + '</strong><em>' + esc(w[1]) + '</em></div></div><p>' + w[2] + '</p></div>';
       }).join('') + '</div>' +
@@ -774,15 +774,21 @@
       box('설명 칸에 넣을 문장', Bx.desc) +
       box('지침 칸에 넣을 것', FP.skill) +
       '<h3>파일로 올릴 때 받을 것</h3>' + fileList(FP.files.slice(0, 2), '받기') +
+      '<h3>Gemini로 만들기 순서</h3>' + olist(Bx.chatSteps) +
+      box('스킬 만들기 요청문 · Gemini로 만들기 창에 보낼 것', Bx.chatPrompt) +
+      '<div class="attach-box"><div class="attach-h">저장 전 확인 · 지침에 들어 있어야 할 규칙 아홉 가지</div><ul class="attach-ask">' +
+      Bx.chatRules.map(function (r) { return '<li><b>' + esc(r) + '</b></li>'; }).join('') + '</ul></div>' +
+      box('고칠 때 보낼 문장', Bx.chatFix) +
+      '<div class="safety-box sp"><strong>두 방법 비교</strong><p>' + esc(Bx.chatCompare) + '</p></div>' +
       go(extUrl('https://gemini.google.com/'), '<b>개인 Google 계정</b>으로 로그인한 뒤 스킬 메뉴를 엽니다.', '제미나이 열기') +
       '<h3>확인</h3>' + checklistHtml(FP.id + '-b', Bx.checks), '실습 B');
     add('practiceC', '실습 C · 스킬로 캘린더 일정 넣고 브리핑 받기',
       '<h3>시작 전 준비</h3>' + cards(Cx.prep, 3, '준비') +
-      '<h3>1. 안내문으로 일정 등록하기 (5~7분)</h3>' + olist(Cx.one) +
-      box('일정 등록 지시문 (가상 안내문 포함) · / 로 일정 비서를 고른 뒤 붙여넣기', FP.g1) +
+      '<h3>1. 포스터로 일정 등록하기 (5~7분)</h3>' + olist(Cx.one) +
+      box('일정 등록 지시문 (포스터 글 포함) · @ 로 일정 비서를 고른 뒤 붙여넣기', FP.g1) +
       fileList(FP.files.slice(2), '받기') +
       '<h3>2. 이번 주 일정 브리핑 받기 (5~7분)</h3>' + olist(Cx.two) +
-      box('주간 브리핑 지시문 · / 로 일정 비서를 고른 뒤 붙여넣기', FP.g2) + box('이어서 보낼 문장 (선택)', FP.g3) +
+      box('주간 브리핑 지시문 · @ 로 일정 비서를 고른 뒤 붙여넣기', FP.g2) + box('이어서 보낼 문장 (선택)', FP.g3) +
       '<div class="safety-box sp"><strong>스킬을 켰을 때와 껐을 때 비교</strong><p>' + esc(Cx.compare) + '</p></div>' +
       '<div class="local-note">' + esc(Cx.fallback) + '</div>' +
       '<h3>확인</h3>' + checklistHtml(FP.id + '-c', Cx.checks) +
