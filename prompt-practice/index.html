@@ -8,10 +8,10 @@
 <meta name="referrer" content="no-referrer">
 <!-- 바깥으로 아무것도 보내지 않는다(connect-src 'none'). 파일 하나로 배포하려고 스타일과 스크립트를 이 안에 넣었다. -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'">
-<meta name="description" content="짧게 쓴 지시문을 역할·자료·할 일·형식·조건 다섯 가지로 점검하고 다듬어 보는 초급자용 프롬프트 연습. 회원가입 없음, 무료.">
+<meta name="description" content="객관식·주관식으로 연습하는 초급자용 프롬프트 연습. 레시피 만들기와 마케팅 자료조사 상황에서 역할·자료·할 일·형식·조건 다섯 가지를 익힙니다. 회원가입 없음, 무료.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="커리어캐쳐 질문 구조 연습 · 초급자용 프롬프트 연습">
-<meta property="og:description" content="짧은 지시문을 넣으면 빠진 부분을 짚고 다섯 가지 구조로 다듬습니다. 회원가입 없음, 무료.">
+<meta property="og:description" content="객관식으로 고르고, 주관식으로 직접 써 보고, 내 지시문을 다듬습니다. 회원가입 없음, 무료.">
 <title>커리어캐쳐 질문 구조 연습</title>
 <style>
 /* 커리어캐쳐 질문 구조 연습: 면접 리허설과 같은 구성. 모바일 우선, 큰 글씨, 화면당 주요 버튼 하나 */
@@ -72,7 +72,7 @@ h1, h2, h3, p { margin: 0; }
 .flow i { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; background: #fff; color: var(--band); box-shadow: 0 6px 16px rgba(0,0,0,.15); }
 .flow svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .flow b { font-size: 12.5px; line-height: 1.35; font-weight: 800; }
-.flow em { display: block; font-style: normal; color: #8ff0d2; }
+.flow em { display: block; font-style: normal; color: #8ff0d2; font-size: 11.5px; }
 
 .card { background: var(--panel); border: 1px solid var(--line); border-radius: 20px; padding: 20px 18px; box-shadow: var(--shadow); }
 .card h2 { margin-bottom: 10px; font-size: 19px; font-weight: 800; letter-spacing: -0.03em; }
@@ -83,6 +83,7 @@ ul.plain, ol.plain { margin: 0; padding-left: 20px; display: grid; gap: 6px; fon
 ol.plain li::marker { color: var(--accent); font-weight: 800; }
 .notice { background: var(--soft); border-radius: 16px; padding: 14px 16px; font-size: 16px; }
 .notice.mint { background: var(--mint-soft); box-shadow: inset 4px 0 0 var(--mint); }
+.notice.warn { background: var(--warn-soft); box-shadow: inset 4px 0 0 var(--warn); }
 .notice b.lab { display: block; font-size: 14px; color: var(--muted); }
 
 .btn {
@@ -107,9 +108,16 @@ ol.plain li::marker { color: var(--accent); font-weight: 800; }
   width: 100%; text-align: left; display: flex; gap: 12px; align-items: flex-start; padding: 14px;
   border: 1px solid var(--line); border-radius: 16px; background: var(--panel); cursor: pointer; font-size: 17px; box-shadow: var(--shadow);
 }
-.qlist button:hover { outline: 2px solid var(--accent); outline-offset: -2px; }
+.qlist button:hover:not(:disabled) { outline: 2px solid var(--accent); outline-offset: -2px; }
 .qlist button.sel { outline: 2px solid var(--accent); outline-offset: -2px; background: var(--soft); }
+.qlist button.right { outline: 2px solid var(--ok); outline-offset: -2px; background: var(--mint-soft); }
+.qlist button.wrong { outline: 2px solid var(--warn); outline-offset: -2px; background: var(--warn-soft); }
+.qlist button:disabled { cursor: default; box-shadow: none; }
+.qlist .two { display: grid; gap: 2px; }
+.qlist .two b { font-weight: 800; }
+.qlist .two span { font-size: 14px; color: var(--muted); line-height: 1.45; }
 .qn { flex: none; min-width: 28px; height: 28px; border-radius: 8px; background: var(--accent); color: #fff; font-size: 14px; font-weight: 700; display: grid; place-items: center; }
+.qn.circ { background: var(--soft); color: var(--accent); font-size: 15px; }
 .group { font-size: 15px; color: var(--muted); font-weight: 700; margin: 10px 0 6px; }
 
 textarea { display: block; width: 100%; min-height: 96px; padding: 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--field); font-size: 17px; line-height: 1.6; resize: vertical; }
@@ -118,6 +126,27 @@ textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-c
 .question { text-align: center; padding: 18px 4px 4px; }
 .question h1 { font-size: 24px; line-height: 1.4; margin-top: 10px; font-weight: 800; letter-spacing: -0.04em; }
 .qcat { display: inline-block; padding: 3px 12px; border-radius: 999px; background: var(--soft); color: var(--accent); font-weight: 800; font-size: 13px; }
+.passage { background: var(--soft); border-radius: 14px; padding: 14px 16px; font-size: 16px; }
+
+.timerbar { display: flex; align-items: center; gap: 12px; }
+.timerbar .bar { flex: 1; height: 8px; background: var(--soft); border-radius: 4px; overflow: hidden; }
+.timerbar .bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--accent), var(--mint)); transition: width 1s linear; }
+.timerbar.low .bar i { background: var(--warn); }
+.tleft { font-size: 21px; font-weight: 900; font-variant-numeric: tabular-nums; color: var(--accent); min-width: 58px; text-align: right; }
+.timerbar.low .tleft { color: var(--warn); }
+.verdict { font-weight: 800; padding: 11px 14px; border-radius: 12px; }
+.verdict.ok { background: var(--mint-soft); color: var(--ok); }
+.verdict.no { background: var(--warn-soft); color: var(--warn); }
+.exp dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 8px 14px; }
+.exp dt { font-weight: 800; color: var(--accent); white-space: nowrap; font-size: 15px; }
+.exp dd { margin: 0; min-width: 0; font-size: 16px; }
+
+.chat { display: flex; flex-direction: column; gap: 10px; }
+.msg { max-width: 88%; padding: 12px 14px; border-radius: 16px; white-space: pre-wrap; font-size: 16px; }
+.msg.them { background: var(--soft); align-self: flex-start; border-top-left-radius: 4px; }
+.msg.me { background: var(--accent); color: #fff; align-self: flex-end; border-top-right-radius: 4px; }
+.who { display: block; font-size: 12px; font-weight: 700; opacity: .75; margin-bottom: 4px; }
+.conds { margin: 8px 0 0; padding-left: 18px; display: grid; gap: 4px; font-size: 15px; }
 
 .total { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 20px; color: #fff; border-radius: 22px;
   background: linear-gradient(135deg, var(--accent), #4d7bff 60%, #3fc9b0); box-shadow: 0 12px 26px rgba(47, 95, 232, .25); }
@@ -135,6 +164,14 @@ textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-c
 .lv.weak { background: var(--focus); color: var(--amber); }
 .lv.no { background: var(--warn-soft); color: var(--warn); }
 
+.checks { list-style: none; padding: 0; margin: 0; display: grid; gap: 11px; }
+.checks li { display: grid; grid-template-columns: 22px 1fr auto; gap: 9px; align-items: start; }
+.checks .mk { font-weight: 900; text-align: center; }
+.mk.y { color: var(--ok); } .mk.p { color: var(--amber); } .mk.n { color: var(--warn); }
+.checks b { font-weight: 800; }
+.checks .tip { display: block; font-size: 14px; color: var(--muted); line-height: 1.5; margin-top: 2px; }
+.checks .pt { font-size: 14px; font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; }
+
 blockquote { margin: 0; padding: 10px 14px; border-left: 4px solid var(--mint); background: var(--mint-soft); border-radius: 0 10px 10px 0; white-space: pre-wrap; }
 blockquote.before { border-left-color: var(--line); background: var(--field); color: var(--muted); }
 .out { white-space: pre-wrap; margin: 0; padding: 14px; border-radius: 14px; background: var(--field); border: 1px solid var(--line); font: inherit; font-size: 16px; line-height: 1.7; }
@@ -145,6 +182,9 @@ blockquote.before { border-left-color: var(--line); background: var(--field); co
 .five li { display: grid; grid-template-columns: 28px 1fr; gap: 12px; align-items: start; }
 .five b { display: block; }
 .five span { display: block; font-size: 15px; color: var(--muted); line-height: 1.5; }
+details { border-top: 1px solid var(--line); padding-top: 10px; margin-top: 12px; }
+details summary { cursor: pointer; font-weight: 700; min-height: 36px; display: flex; align-items: center; }
+details .msg { max-width: 100%; margin-top: 8px; }
 
 #toast {
   position: fixed; left: 50%; bottom: max(20px, env(safe-area-inset-bottom)); transform: translate(-50%, 20px);
@@ -162,7 +202,7 @@ blockquote.before { border-left-color: var(--line); background: var(--field); co
   .home-hero h1 { font-size: 36px; }
 }
 @media (max-width: 380px) { .seg button { font-size: 14.5px; } .stats b { font-size: 30px; } }
-@media (prefers-reduced-motion: reduce) { #toast { transition: none; } }
+@media (prefers-reduced-motion: reduce) { #toast, .timerbar .bar i { transition: none; } }
 @media print { .no-print, #toast { display: none !important; } .card { box-shadow: none; } }
 </style>
 </head><body>
@@ -170,12 +210,17 @@ blockquote.before { border-left-color: var(--line); background: var(--field); co
 <div id="toast" role="status" aria-live="polite"></div>
 
 <script>
-/* 질문 구조 연습 — AI 없이 정해진 규칙으로 지시문을 점검한다.
-   역할 · 자료 · 할 일 · 형식 · 조건 다섯 가지를 낱말로 살핀다.
+/* 질문 구조 연습 — AI를 부르지 않고 정해진 규칙으로 동작한다.
+   역할 · 자료 · 할 일 · 형식 · 조건 다섯 가지를 세 가지 방식으로 연습한다.
+     1) 객관식: 상황을 읽고 네 지시문 가운데 가장 알맞은 것 고르기 (문항당 90초)
+     2) 주관식: 동료의 부탁과 조건을 보고 지시문을 직접 타자로 쓰기 → 요소별 채점
+     3) 내 지시문 다듬기: 내가 쓴 지시문을 점검하고 빠진 곳 채우기
    입력한 내용은 어디에도 보내지 않고, 화면을 닫으면 사라진다.
-   예시와 보기를 바꾸려면 아래 THEMES만 고치면 된다. */
+   내용을 바꾸려면 아래 THEMES(다듬기 보기), QUIZ(객관식), DRILL(주관식)만 고치면 된다. */
 (function () {
   'use strict';
+
+  var LIMIT = 90; // 객관식 한 문제 제한 시간(초)
 
   /* ---------- 다섯 가지 요소: 판별 규칙과 설명 ---------- */
   var ELEMENTS = [
@@ -209,7 +254,7 @@ blockquote.before { border-left-color: var(--line); background: var(--field); co
       blank: '[꼭 지킬 것, 하지 말 것 적기]' }
   ];
 
-  /* ---------- 연습 주제: 예시 지시문과 요소별 보기 ---------- */
+  /* ---------- 연습 주제: 다듬기용 예시 지시문과 요소별 보기 ---------- */
   var THEMES = {
     recipe: {
       label: '레시피 만들기', short: '레시피',
@@ -251,7 +296,149 @@ blockquote.before { border-left-color: var(--line); background: var(--field); co
       }
     }
   };
-  var THEME_ORDER = ['recipe', 'marketing', 'free'];
+  var THEME_ORDER = ['recipe', 'marketing'];
+
+  /* ---------- 객관식 문항 ---------- */
+  var QUIZ = {
+    recipe: [
+      { title: '[객관식 1] 자료 — AI는 내 냉장고를 모른다',
+        passage: '요리 초보인 김 씨가 AI에게 "김치찌개 레시피 알려줘"라고 보냈습니다. 돌아온 레시피에는 집에 없는 돼지고기 목살, 멸치 육수, 고추기름이 들어 있었습니다. 지금 집에는 두부, 달걀, 대파, 김치만 있습니다.',
+        q: '다시 보낼 지시문으로 가장 알맞은 것은 무엇인가요?',
+        opts: ['김치찌개 레시피를 맛있게 알려 줘.',
+               '집에 두부, 달걀, 대파, 김치만 있어. 이 재료로 만들 수 있는 김치찌개 레시피를 알려 줘.',
+               '왜 집에 없는 재료를 넣었어? 다시 알려 줘.',
+               '김치찌개 레시피를 아주 자세하고 길게 알려 줘.'],
+        ans: 1,
+        why: 'AI는 내 냉장고를 보지 못합니다. 가진 재료(자료)를 주면 그 범위 안에서 답을 만듭니다.',
+        trap: '③은 탓하기만 하고 새 정보가 없어 비슷한 답이 또 나옵니다. ①④는 양만 늘어납니다.',
+        work: '"집에 있는 재료만 쓴다: …"처럼 쓸 수 있는 범위를 먼저 적습니다.' },
+      { title: '[객관식 2] 형식 — "짧게"는 기준이 아니다',
+        passage: '레시피를 받았더니 설명이 A4 세 장 분량이라 조리하면서 보기 어려웠습니다. 휴대폰 한 화면에서 보고 따라 할 수 있게 받고 싶습니다.',
+        q: '형식을 정하는 지시문으로 가장 알맞은 것은 무엇인가요?',
+        opts: ['좀 더 짧고 간단하게 알려 줘.',
+               '전문가처럼 깔끔하게 정리해 줘.',
+               '재료 표 하나와 조리 순서 번호 목록 6단계 이내로, 한 화면에 보이게 정리해 줘.',
+               '사진과 설명을 넣어 더 자세히 알려 줘.'],
+        ans: 2,
+        why: '형식은 모양(표·번호 목록)과 분량(6단계, 한 화면)을 함께 정해야 합니다.',
+        trap: '"짧게", "깔끔하게"는 사람마다 기준이 달라 AI도 추측합니다. 추측한 결과는 또 고쳐야 합니다.',
+        work: '형식은 "무엇으로(표·목록) + 얼마나(몇 줄·몇 단계)" 두 가지를 붙여 적습니다.' },
+      { title: '[객관식 3] 조건 — 빼야 할 것을 분명히',
+        passage: '어린이집 간식 담당자가 만 5세 아이들의 간식 메뉴를 AI에게 부탁하려 합니다. 반에 견과류 알레르기가 있는 아이가 있어 견과류는 절대 쓸 수 없고, 메뉴는 3가지만 각각 짧게 받고 싶습니다.',
+        q: '① 역할 ② 견과류 제외 조건 ③ 개수와 분량을 모두 갖춘 지시문은 무엇인가요?',
+        opts: ['너는 아이 반찬을 연구하는 요리 연구가야. 아이 간식 레시피를 알려 줘.',
+               '아이 간식 레시피를 견과류 없이 3가지, 각 5줄 이내로 알려 줘.',
+               '너는 아이 반찬을 연구하는 요리 연구가야. 견과류는 절대 쓰지 말고, 만 5세 아이 간식 3가지를 각 5줄 이내로 알려 줘.',
+               '너는 아이 반찬을 연구하는 요리 연구가야. 몸에 좋은 간식을 많이 알려 줘.'],
+        ans: 2,
+        why: '역할 · 조건 · 분량 세 가지를 모두 담은 것은 ③뿐입니다.',
+        trap: '①은 조건과 분량이, ②는 역할이, ④는 조건과 분량이 빠졌습니다. 한 줄씩 대조해야 보입니다.',
+        work: '알레르기처럼 안전과 연결된 것은 "쓰지 마"로 분명히 적고, 결과도 사람이 다시 확인합니다.' }
+    ],
+    marketing: [
+      { title: '[객관식 1] 자료 — 출처 없는 수치는 못 쓴다',
+        passage: '마케팅팀 이 사원이 AI에게 "요즘 20대 소비 트렌드 조사해 줘"라고 했습니다. 그럴듯한 수치가 여럿 나왔지만 출처가 없어 광고주 제안서에는 넣을 수 없었습니다.',
+        q: '다시 보낼 지시문으로 가장 알맞은 것은 무엇인가요?',
+        opts: ['이번에는 더 정확하게 다시 조사해 줘.',
+               '아래에 붙여 넣는 기사와 보고서만 근거로 써 줘. 수치마다 출처와 기준 연도를 붙이고, 자료에 없는 내용은 "확인 필요"라고 적어 줘.',
+               '20대 소비 트렌드를 더 많이 찾아 줘.',
+               '믿을 수 있는 자료로 알려 줘.'],
+        ans: 1,
+        why: '근거로 쓸 범위를 정하고(자료), 출처 표기와 모를 때 처리 방법(조건)을 함께 줘야 합니다.',
+        trap: '"정확하게", "믿을 수 있는"은 기준이 없는 말이라 결과가 그대로입니다.',
+        work: '밖으로 나가는 자료일수록 "자료에 없으면 확인 필요로 적어" 한 줄이 중요합니다.' },
+      { title: '[객관식 2] 할 일 — 누가 어디에 쓰는지',
+        passage: '회의 10분 전, 팀장이 "경쟁사 세 곳 비교 좀 해 줘"라고 했습니다. 손에는 경쟁사 세 곳의 자료가 있고, 회의에서 팀장이 빠르게 보고 판단할 수 있어야 합니다.',
+        q: '가장 알맞은 지시문은 무엇인가요?',
+        opts: ['경쟁사를 분석해 줘.',
+               '경쟁사 A · B · C를 아주 자세히 비교해 줘.',
+               '경쟁사 비교를 표로 만들어 줘.',
+               '아래 경쟁사 세 곳 자료를 회의에서 팀장이 10분 안에 볼 수 있게 비교표 하나와 시사점 3줄로 정리해 줘.'],
+        ans: 3,
+        why: '누가(팀장) 어디에(회의) 쓰는지 적으면 분량과 깊이가 저절로 정해집니다.',
+        trap: '③은 형식은 있지만 몇 줄인지, 누가 읽는지가 없어 길어집니다. ②의 "자세히"는 회의용과 반대 방향입니다.',
+        work: '쓰임 한 줄이 분량 · 말투 · 깊이를 한 번에 정해 줍니다.' },
+      { title: '[객관식 3] 역할 — 읽는 사람에 맞춘다',
+        passage: '이번 주 입사한 신입에게 비건 간편식 시장을 설명해야 합니다. 지난번 AI 요약은 전문 용어가 많아 신입이 다시 질문했고, 결국 하나하나 풀어 설명해야 했습니다.',
+        q: '① 역할 ② 쉬운 말 조건 ③ 분량을 모두 갖춘 지시문은 무엇인가요?',
+        opts: ['너는 시장조사 보고서를 쓰는 애널리스트야. 비건 간편식 시장을 요약해 줘.',
+               '비건 간편식 시장을 신입도 알 수 있게 쉬운 말로 요약해 줘.',
+               '너는 신입 마케터에게 설명하는 팀 선배야. 비건 간편식 시장에서 전문 용어는 풀어 쓰고, 핵심 5개를 각 2줄 이내로 정리해 줘.',
+               '너는 신입 마케터에게 설명하는 팀 선배야. 비건 간편식 시장을 길고 자세하게 설명해 줘.'],
+        ans: 2,
+        why: '역할을 "설명하는 선배"로 정하면 말투가 바뀌고, 용어 조건과 분량까지 있어야 다시 쓰는 일이 없습니다.',
+        trap: '①의 애널리스트 역할은 오히려 전문 용어를 늘립니다. ④는 분량 조건이 없어 신입이 더 어려워집니다.',
+        work: '읽는 사람이 초보라면 역할도 "가르치는 사람"으로 바꾸는 것이 효과가 큽니다.' }
+    ]
+  };
+
+  /* ---------- 주관식 문항 (직접 타자로 지시문 쓰기) ---------- */
+  var DRILL = {
+    recipe: [
+      { from: '룸메이트 지수',
+        ask: '오늘 저녁 뭐 해 먹지? 냉장고에 두부, 달걀, 대파, 김치밖에 없어. 나 요리 진짜 처음이야.',
+        conds: ['역할: 요리 초보를 가르치는 요리 강사', '재료: 두부, 달걀, 대파, 김치 (장은 보러 가지 않음)', '도구: 프라이팬과 냄비만 있음', '형식: 재료 표 하나와 조리 순서 번호 목록 6단계 이내', '조건: 조리 시간 30분 이내'],
+        checks: [
+          { k: '역할', pt: 15, re: /(너는|당신은|역할|강사|요리사|셰프|연구가|선생|가르치)/, tip: '"너는 요리 초보를 가르치는 요리 강사야"처럼 역할을 정해 주세요.' },
+          { k: '자료(가진 재료)', pt: 25, re: [/(두부)/, /(달걀|계란)/, /(대파|파)/, /(김치)/], tip: 'AI는 냉장고를 못 봅니다. 가진 재료 네 가지를 그대로 적어 주세요.' },
+          { k: '할 일 · 쓰임', pt: 15, re: /(저녁|오늘|초보|처음|해 먹|만들|요리할)/, tip: '"오늘 저녁에 요리가 처음인 내가 만든다"처럼 쓰임을 밝혀 주세요.' },
+          { k: '형식', pt: 25, re: [/(표|목록|번호|단계|순서)/, /(\d+\s*(단계|줄|가지)|이내|한 화면)/], tip: '"재료 표 하나와 조리 순서 6단계 이내"처럼 모양과 분량을 함께 적으세요.' },
+          { k: '조건', pt: 20, re: /(30분|시간|이내|프라이팬|냄비|도구|사지|추가 재료|없이)/, tip: '"30분 안에", "프라이팬과 냄비만 쓴다"처럼 지킬 것을 적으세요.' }],
+        sample: '너는 요리 초보를 가르치는 요리 강사야. 오늘 저녁에 내가 직접 만들 메뉴를 알려 줘.\n집에 있는 재료는 두부, 달걀, 대파, 김치뿐이고 조리 도구는 프라이팬과 냄비만 있어. 재료를 더 사지 않는 선에서 골라 줘.\n재료 표 하나와 조리 순서를 번호 목록 6단계 이내로 정리하고, 조리 시간은 30분을 넘지 않게 해 줘.' },
+      { from: '어린이집 간식 담당 박 선생님',
+        ask: '다음 주 아이 간식 메뉴를 짜야 하는데, AI한테 어떻게 부탁해야 할지 모르겠어요.',
+        conds: ['대상: 만 5세 아이 20명', '제외: 견과류와 우유(알레르기)', '분량: 5일치, 하루 1가지', '형식: 요일 · 메뉴 · 재료가 들어간 표', '조건: 조리 20분 이내, 손으로 집어 먹을 수 있는 것'],
+        checks: [
+          { k: '역할', pt: 10, re: /(너는|당신은|역할|영양사|요리|교사|선생|담당|연구가)/, tip: '"너는 어린이 식단을 짜는 영양사야"처럼 관점을 정해 주세요.' },
+          { k: '대상', pt: 20, re: /(5세|다섯|아이|유아|어린이|원아|20명)/, tip: '누가 먹는지(만 5세 아이 20명)를 적어야 양과 난이도가 맞춰집니다.' },
+          { k: '제외 조건', pt: 25, re: [/(견과|땅콩|호두|아몬드)/, /(우유|유제품|유당)/], tip: '알레르기 재료는 "견과류와 우유는 쓰지 마"처럼 분명히 빼 달라고 적으세요.' },
+          { k: '분량 · 형식', pt: 25, re: [/(5일|닷새|일주일|주간|요일)/, /(표|목록|칸|정리)/], tip: '"5일치를 요일 · 메뉴 · 재료 표로"처럼 분량과 모양을 함께 적으세요.' },
+          { k: '추가 조건', pt: 20, re: /(20분|시간|이내|손|집어|핑거|간편|조리)/, tip: '"조리 20분 이내", "손으로 집어 먹을 수 있는 것"도 조건입니다.' }],
+        sample: '너는 어린이집 식단을 짜는 영양사야. 만 5세 아이 20명이 먹을 다음 주 간식 메뉴를 짜 줘.\n견과류와 우유는 알레르기 때문에 절대 쓰지 마.\n5일치를 하루 한 가지씩, 요일 · 메뉴 · 재료가 들어간 표로 정리해 줘.\n조리는 20분 안에 끝나고 아이가 손으로 집어 먹을 수 있는 것으로 골라 줘.' },
+      { from: '친구 민호',
+        ask: '이번 주말에 집들이 하는데 메뉴를 못 정하겠어. AI한테 물어보려는데 뭐라고 쓰지?',
+        conds: ['손님: 6명 (그중 1명은 매운 음식을 못 먹음)', '준비 시간: 2시간', '미리 만들어 둘 수 있는 메뉴 위주', '형식: 메뉴 4가지와 장보기 목록', '조건: 1인분 재료 양을 함께 적기'],
+        checks: [
+          { k: '역할', pt: 10, re: /(너는|당신은|역할|요리사|셰프|강사|연구가|케이터링)/, tip: '"너는 집들이 상을 차려 본 요리사야"처럼 역할을 주세요.' },
+          { k: '인원 · 대상', pt: 20, re: /(6명|여섯|손님|집들이|인원)/, tip: '몇 명이 먹는지 적어야 양이 맞습니다.' },
+          { k: '제한 조건', pt: 25, re: [/(맵|매운|맵지)/, /(2시간|두 시간|시간 안|미리|만들어 둘|준비 시간)/], tip: '"매운 음식을 못 먹는 사람이 있다", "준비 시간은 2시간"을 함께 적으세요.' },
+          { k: '형식', pt: 25, re: [/(메뉴|목록|표|정리)/, /(\d+\s*(가지|개|품)|장보기|재료 목록)/], tip: '"메뉴 4가지와 장보기 목록"처럼 무엇을 몇 개 받을지 적으세요.' },
+          { k: '추가 조건', pt: 20, re: /(1인분|인분|양|분량|계량|기준)/, tip: '"1인분 재료 양도 함께 적어 줘"처럼 빠뜨리기 쉬운 조건을 넣으세요.' }],
+        sample: '너는 집들이 상을 자주 차려 본 요리사야. 이번 주말 집들이 메뉴를 짜 줘.\n손님은 모두 6명이고 그중 한 명은 매운 음식을 못 먹어. 준비 시간은 2시간이라 미리 만들어 둘 수 있는 메뉴 위주로 골라 줘.\n메뉴 4가지와 장보기 목록을 각각 정리하고, 재료는 1인분 기준 양도 함께 적어 줘.' }
+    ],
+    marketing: [
+      { from: '선배 마케터 한 과장',
+        ask: '신제품 타깃을 잡아야 해요. 20대 소비 트렌드 좀 정리해 줄래요? 광고주 제안서에 들어갈 거예요.',
+        conds: ['역할: 소비재 브랜드의 마케팅 리서처', '자료: 아래에 붙여 넣는 기사와 보고서만 근거로', '쓰임: 광고주 제안서의 시장 현황 부분', '형식: 핵심 5개 번호 목록, 각 2줄 이내', '조건: 수치마다 출처와 기준 연도, 자료에 없으면 "확인 필요"'],
+        checks: [
+          { k: '역할', pt: 15, re: /(너는|당신은|역할|리서처|마케터|애널리스트|기획자|분석가|조사)/, tip: '"너는 소비재 브랜드의 마케팅 리서처야"처럼 관점을 정해 주세요.' },
+          { k: '자료 범위', pt: 20, re: /(아래|붙여|첨부|자료|기사|보고서|원문|만 (쓰|근거))/, tip: '"아래에 붙여 넣는 기사와 보고서만 근거로"처럼 범위를 묶어 주세요.' },
+          { k: '쓰임 · 독자', pt: 15, re: /(제안서|광고주|보고|회의|공유|팀장|고객사|클라이언트)/, tip: '"광고주 제안서의 시장 현황 부분에 넣는다"를 밝히면 깊이가 맞춰집니다.' },
+          { k: '형식', pt: 25, re: [/(목록|번호|표|정리|항목)/, /(\d+\s*(개|줄|가지)|이내)/], tip: '"핵심 5개를 각 2줄 이내"처럼 개수와 길이를 함께 적으세요.' },
+          { k: '출처 · 검증', pt: 25, re: [/(출처|근거|링크)/, /(연도|기준|확인 필요|추측|지어내|없으면|없는)/], tip: '"수치마다 출처와 기준 연도", "자료에 없으면 확인 필요로"를 넣으세요.' }],
+        sample: '너는 소비재 브랜드의 마케팅 리서처야. 아래에 붙여 넣는 기사와 보고서만 근거로 20대 소비 트렌드를 정리해 줘.\n광고주 제안서의 시장 현황 부분에 넣을 거야.\n핵심 5개를 번호 목록으로, 각 2줄 이내로 써 줘.\n수치마다 출처와 기준 연도를 붙이고, 자료에 없는 내용은 "확인 필요"라고 적어 줘.' },
+      { from: '팀장',
+        ask: '경쟁사 세 곳 인스타그램 운영을 비교해 주세요. 내일 회의 전까지면 됩니다.',
+        conds: ['자료: 내가 캡처한 경쟁사 A · B · C 계정 자료', '비교 항목: 게시 주기, 콘텐츠 유형, 반응(좋아요 · 댓글)', '쓰임: 내일 회의에서 팀장이 10분 안에 보기', '형식: 비교표 하나와 시사점 3줄', '조건: 캡처에 없는 내용은 추측하지 않기'],
+        checks: [
+          { k: '역할', pt: 10, re: /(너는|당신은|역할|마케터|기획자|분석가|운영|리서처)/, tip: '"너는 SNS 운영을 분석하는 마케터야"처럼 역할을 주세요.' },
+          { k: '자료 범위', pt: 20, re: /(캡처|첨부|아래|붙여|자료|원문|계정 자료)/, tip: '"첨부한 캡처 자료만 근거로"처럼 무엇을 보고 쓸지 적으세요.' },
+          { k: '비교 항목', pt: 25, re: [/(주기|빈도|횟수|업로드)/, /(유형|형식|콘텐츠|종류)/, /(반응|좋아요|댓글|참여)/], tip: '게시 주기 · 콘텐츠 유형 · 반응 세 가지를 짚어 주세요. 안 적으면 AI가 임의로 고릅니다.' },
+          { k: '형식 · 쓰임', pt: 25, re: [/(표|비교표|정리)/, /(\d+\s*(줄|개|가지)|회의|팀장|10분|이내)/], tip: '"비교표 하나와 시사점 3줄", "회의에서 10분 안에 본다"를 함께 적으세요.' },
+          { k: '조건', pt: 20, re: /(추측|지어내|없는|모르|확인 필요|빈칸|자료에 없)/, tip: '"캡처에 없는 내용은 추측하지 마"를 넣어야 없는 수치가 생기지 않습니다.' }],
+        sample: '너는 SNS 운영을 분석하는 마케터야. 첨부한 경쟁사 A · B · C 인스타그램 캡처 자료만 근거로 세 곳을 비교해 줘.\n비교 항목은 게시 주기, 콘텐츠 유형, 반응(좋아요 · 댓글) 세 가지야.\n내일 회의에서 팀장이 10분 안에 볼 수 있게 비교표 하나와 시사점 3줄로 정리해 줘.\n캡처에 없는 내용은 추측하지 말고 "확인 필요"로 적어 줘.' },
+      { from: '신입 사원 유 사원',
+        ask: '비건 간편식 시장을 공부해야 하는데요, 지난번 AI 요약은 용어가 어려워서 거의 못 읽었어요.',
+        conds: ['역할: 신입에게 설명하는 팀 선배', '대상: 이 분야를 처음 보는 신입', '조건: 전문 용어는 괄호 안에 쉬운 말로 풀어 쓰기', '범위: 최근 2년 자료, 국내 시장만', '형식: 핵심 5개, 각 2줄 이내'],
+        checks: [
+          { k: '역할', pt: 15, re: /(너는|당신은|역할|선배|강사|가르치|설명하는|멘토)/, tip: '"너는 신입에게 설명하는 팀 선배야"로 바꾸면 말투부터 달라집니다.' },
+          { k: '대상', pt: 20, re: /(신입|처음|초보|입문|모르는 사람|비전공)/, tip: '"이 분야를 처음 보는 신입이 읽는다"를 적어 주세요.' },
+          { k: '말투 조건', pt: 20, re: /(쉬운 말|쉽게|풀어|용어|괄호|전문 용어|어려운 말)/, tip: '"전문 용어는 괄호 안에 쉬운 말로 풀어 줘"처럼 적으세요.' },
+          { k: '범위 조건', pt: 20, re: [/(2년|최근|20\d\d)/, /(국내|한국|해외는|국내만)/], tip: '"최근 2년", "국내 시장만"처럼 범위를 좁히면 헛도는 내용이 줄어듭니다.' },
+          { k: '형식', pt: 25, re: [/(목록|번호|표|항목|정리)/, /(\d+\s*(개|줄|가지)|이내)/], tip: '"핵심 5개, 각 2줄 이내"처럼 개수와 길이를 정해 주세요.' }],
+        sample: '너는 신입에게 설명하는 팀 선배야. 이 분야를 처음 보는 신입이 읽을 수 있게 비건 간편식 시장을 정리해 줘.\n전문 용어는 괄호 안에 쉬운 말로 풀어 써 줘.\n최근 2년 자료, 국내 시장만 다루고, 핵심 5개를 각 2줄 이내로 정리해 줘.' }
+    ]
+  };
 
   /* ---------- 도구 ---------- */
   function stripEnd(v) { return String(v).trim().replace(/[.。\s]+$/, ''); }
@@ -265,15 +452,19 @@ blockquote.before { border-left-color: var(--line); background: var(--field); co
     var t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show');
     clearTimeout(toast.t); toast.t = setTimeout(function () { t.classList.remove('show'); }, 2200);
   }
+  function josa(v, withB, withoutB) { return v + (endsWithBatchim(stripEnd(v)) ? withB : withoutB); } // 받침에 따라 조사 고르기
+  var CIRC = ['①', '②', '③', '④'];
+  function fmt(s) { s = Math.max(s, 0); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
+  function tierOf(s) { return s >= 80 ? ['상', 'ok'] : s >= 50 ? ['중', 'weak'] : ['하', 'no']; }
 
   /* 직접 쓰기일 때 지시문 낱말로 주제를 짐작해 알맞은 보기를 낸다 */
   function guessTheme(text) {
     if (/(레시피|요리|반찬|메뉴|식단|도시락|간식|찌개|볶음|재료|저녁|점심|아침밥)/.test(text)) return 'recipe';
-    if (/(마케팅|시장|경쟁사|트렌드|소비자|타깃|고객|브랜드|광고|캠페인|매출|SNS|인스타)/i.test(text)) return 'marketing';
+    if (/(마케팅|시장|경쟁사|트렌드|소비자|타깃|고객|브랜드|광고|캠페인|매출|SNS|인스타|여행|관광)/i.test(text)) return 'marketing';
     return 'free';
   }
 
-  /* ---------- 점검 ---------- */
+  /* ---------- 점검 (다듬기) ---------- */
   function diagnose(text) {
     var out = {};
     ELEMENTS.forEach(function (E) {
@@ -296,6 +487,19 @@ blockquote.before { border-left-color: var(--line); background: var(--field); co
   }
   function countOk(d) { return ELEMENTS.filter(function (E) { return d[E.key].state === 'ok'; }).length; }
 
+  /* ---------- 주관식 채점 (낱말 규칙) ---------- */
+  function gradeDrill(item, text) {
+    var t = text.replace(/\s+/g, ' ');
+    return item.checks.map(function (c) {
+      if (Array.isArray(c.re)) {
+        var hit = c.re.filter(function (r) { return r.test(t); }).length;
+        return { k: c.k, pt: c.pt, tip: c.tip, got: Math.round(c.pt * hit / c.re.length), hit: hit, of: c.re.length };
+      }
+      var ok = c.re.test(t);
+      return { k: c.k, pt: c.pt, tip: c.tip, got: ok ? c.pt : 0, hit: ok ? 1 : 0, of: 1 };
+    });
+  }
+
   /* ---------- 다듬은 지시문 조립 ---------- */
   function lineFor(key, v) {
     v = stripEnd(v);
@@ -303,7 +507,6 @@ blockquote.before { border-left-color: var(--line); background: var(--field); co
     if (key === 'task') return '쓰임: ' + v + '.';
     return v + '.';
   }
-  // answers[key]: 받은 답(문자열) 또는 없음. useBlanks면 비어 있는 곳을 [ ]로 남긴다.
   function build(original, d, answers, useBlanks) {
     var parts = [];
     ELEMENTS.forEach(function (E) {
@@ -324,16 +527,21 @@ blockquote.before { border-left-color: var(--line); background: var(--field); co
     return parts.join('\n\n');
   }
 
-  /* ---------- 상태와 화면 ---------- */
-  var S = { view: 'home', theme: 'recipe', mode: 'ask', original: '', diag: null, queue: [], total: 0, answers: {}, result: '', usedTheme: 'recipe' };
+  /* ---------- 상태 ---------- */
+  var S = {
+    view: 'home', theme: 'recipe', mode: 'ask',
+    qi: 0, qPick: null, qShown: false, qScore: 0, qLeft: LIMIT, timer: null,
+    drills: [], di: 0, dScores: [], dGraded: null, dText: '',
+    original: '', diag: null, queue: [], total: 0, answers: {}, result: '', usedTheme: 'recipe'
+  };
   var app = document.getElementById('app');
 
   var ICON = {
-    pen: '<path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/>',
-    check: '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 9l1.5 1.5L13 8M9 15l1.5 1.5L13 14M15 9h1M15 15h1"/>',
-    chat: '<path d="M4 5h16v11H9l-5 4V5z"/><path d="M9 10h6"/>',
-    doc: '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/>',
-    send: '<path d="M4 12l16-8-6 16-3-7-7-1z"/>'
+    role: '<circle cx="12" cy="8" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/>',
+    data: '<rect x="5" y="4" width="13" height="16" rx="2"/><path d="M9 9h5M9 13h5M9 17h3"/>',
+    task: '<path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/>',
+    format: '<rect x="4" y="5" width="16" height="14" rx="2"/><path d="M4 10h16M10 10v9"/>',
+    rule: '<path d="M12 3l7 3v6c0 4-3 6.5-7 9-4-2.5-7-5-7-9V6z"/><path d="M9 12l2 2 4-4"/>'
   };
   function icon(n) { return '<svg viewBox="0 0 24 24" aria-hidden="true">' + ICON[n] + '</svg>'; }
   function top(step) {
@@ -345,44 +553,145 @@ blockquote.before { border-left-color: var(--line); background: var(--field); co
       return '<li><span class="qn">' + (i + 1) + '</span><div><b>' + E.name + '</b><span>' + E.desc + '</span></div></li>';
     }).join('') + '</ol>';
   }
+  function promptBox(text) {
+    return '<pre class="out">' + esc(text) + '</pre>';
+  }
 
+  /* ---------- 화면 ---------- */
   var VIEWS = {
     home: function () {
+      var T = THEMES[S.theme];
       return top('') + '<main class="wrap">' +
         '<section class="hero home-hero"><p class="kicker">프롬프트 연습 · 무료</p>' +
         '<h1>짧은 지시문을,<br><span class="hl">다섯 가지</span>로 다듬어 다시.</h1>' +
-        '<p>평소처럼 짧게 쓴 지시문을 넣으면 역할 · 자료 · 할 일 · 형식 · 조건 가운데 빠진 것을 짚어 줍니다. 빠진 부분을 채워 완성한 지시문을 복사해 쓰는 AI에 그대로 보냅니다.</p></section>' +
-        '<section class="stats" aria-label="연습 방식 요약">' +
+        '<p>AI에게 일을 맡길 때 빠지기 쉬운 다섯 가지를 객관식으로 고르고, 주관식으로 직접 써 봅니다. 마지막에는 내가 쓰려던 지시문을 다듬습니다.</p></section>' +
+        '<section class="stats" aria-label="연습 구성 요약">' +
         '<div><span class="badge">01</span><b>5<small>가지</small></b><p>지시문을 살피는 구조</p></div>' +
-        '<div><span class="badge mint">02</span><b class="mint">2<small>가지</small></b><p>고를 수 있는 다듬는 방식</p></div>' +
-        '<div><span class="badge">03</span><b>3<small>분</small></b><p>지시문 하나를 다듬는 시간</p></div></section>' +
-        '<section class="flow" aria-label="연습 순서"><h2>따라 하면 되는 <span>5단계 연습</span></h2><ol>' +
-        '<li><i>' + icon('pen') + '</i><b>지시문 <em>입력</em></b></li>' +
-        '<li><i>' + icon('check') + '</i><b>구조 <em>점검</em></b></li>' +
-        '<li><i>' + icon('chat') + '</i><b>빠진 것 <em>채우기</em></b></li>' +
-        '<li><i>' + icon('doc') + '</i><b>지시문 <em>완성</em></b></li>' +
-        '<li><i>' + icon('send') + '</i><b>복사해 <em>보내기</em></b></li></ol></section>' +
-        '<div class="row2"><button class="btn" data-act="go" data-v="five">다섯 가지란?</button><button class="btn" data-act="go" data-v="guide">이용 방법 보기</button></div>' +
-        '<section class="card"><h2>시작 전에 확인해 주세요</h2><ul class="plain">' +
-        '<li>AI가 아니라 정해진 규칙으로 낱말을 살펴 점검합니다. 있는 내용을 없다고 하거나 그 반대로 볼 수 있으니 표시는 참고로 삼습니다.</li>' +
-        '<li>입력한 내용은 이 기기 밖으로 보내지 않으며, 화면을 닫으면 사라집니다.</li>' +
-        '<li>회원가입 없이 이용합니다. 실제 이름, 연락처, 회사 내부 자료는 넣지 않아도 연습할 수 있습니다.</li></ul></section>' +
-        '<section class="card"><h2>연습 주제</h2><div class="seg three" role="radiogroup" aria-label="연습 주제">' +
+        '<div><span class="badge mint">02</span><b class="mint">12<small>문항</small></b><p>객관식 6 · 주관식 6</p></div>' +
+        '<div><span class="badge">03</span><b>3<small>가지</small></b><p>고를 수 있는 연습</p></div></section>' +
+        '<section class="flow" aria-label="지시문의 다섯 가지"><h2>지시문을 만드는 <span>다섯 가지</span></h2><ol>' +
+        ELEMENTS.map(function (E) { return '<li><i>' + icon(E.key) + '</i><b>' + E.name + '<em>' + (E.key === 'role' ? '누구의 눈' : E.key === 'data' ? '무엇을 근거로' : E.key === 'task' ? '누가 어디에' : E.key === 'format' ? '모양 · 분량' : '지킬 것') + '</em></b></li>'; }).join('') +
+        '</ol></section>' +
+        '<section class="card"><h2>연습 주제</h2><div class="seg" role="radiogroup" aria-label="연습 주제">' +
         THEME_ORDER.map(function (k) { var on = S.theme === k; return '<button role="radio" aria-checked="' + on + '" class="' + (on ? 'on' : '') + '" data-act="theme" data-v="' + k + '">' + THEMES[k].short + '</button>'; }).join('') +
-        '</div><p class="muted small">' + THEMES[S.theme].intro + '</p></section>' +
-        '<section class="card"><h2>다듬는 방식</h2><div class="seg" role="radiogroup" aria-label="다듬는 방식">' +
-        '<button role="radio" aria-checked="' + (S.mode === 'ask') + '" class="' + (S.mode === 'ask' ? 'on' : '') + '" data-act="mode" data-v="ask">질문 받으며</button>' +
-        '<button role="radio" aria-checked="' + (S.mode === 'direct') + '" class="' + (S.mode === 'direct' ? 'on' : '') + '" data-act="mode" data-v="direct">바로 다듬기</button></div>' +
-        '<p class="muted small">' + (S.mode === 'ask' ? '빠진 부분을 하나씩 물어봅니다. 보기를 고르거나 직접 적어 채웁니다. 처음 연습할 때 권장합니다.' : '빠진 부분을 빈칸 [ ]으로 넣은 틀을 바로 받습니다. 빈칸은 내가 직접 고쳐 씁니다.') + '</p></section>' +
-        '<button class="btn primary big" data-act="go" data-v="input">지시문 넣기</button>' +
+        '</div><p class="muted small">' + T.intro + ' 객관식과 주관식 문항이 이 주제로 바뀝니다.</p></section>' +
+        '<section><p class="group">연습 고르기</p><ul class="qlist">' +
+        '<li><button data-act="startQuiz"><span class="qn">01</span><span class="two"><b>객관식 연습 · 3문항</b><span>상황을 읽고 네 지시문 가운데 가장 알맞은 것을 고릅니다. 문항당 90초, 해설이 따라옵니다.</span></span></button></li>' +
+        '<li><button data-act="startDrill"><span class="qn">02</span><span class="two"><b>주관식 연습 · 3문항</b><span>동료의 부탁과 조건을 보고 지시문을 직접 타자로 씁니다. 다섯 가지 요소로 100점 채점합니다.</span></span></button></li>' +
+        '<li><button data-act="go" data-v="input"><span class="qn">03</span><span class="two"><b>내 지시문 다듬기</b><span>지금 쓰려던 지시문을 넣으면 빠진 것을 짚고 채워 줍니다.</span></span></button></li>' +
+        '</ul></section>' +
+        '<section class="card"><h2>시작 전에 확인해 주세요</h2><ul class="plain">' +
+        '<li>이 화면은 AI가 아니라 정해진 규칙으로 낱말을 살펴 점검합니다. 있는 내용을 없다고 하거나 그 반대로 볼 수 있으니 점수는 참고로 삼습니다.</li>' +
+        '<li>입력한 내용은 이 기기 밖으로 보내지 않으며, 화면을 닫으면 사라집니다.</li>' +
+        '<li>회원가입 없이 이용합니다. 실제 이름, 연락처, 회사 내부 자료는 넣지 않아도 연습할 수 있습니다.</li>' +
+        '<li>문항에 나오는 상황과 인물은 모두 교육용 가상 설정입니다.</li></ul></section>' +
+        '<div class="row2"><button class="btn" data-act="go" data-v="five">다섯 가지란?</button><button class="btn" data-act="go" data-v="guide">이용 방법 보기</button></div>' +
         '<p class="disclaimer">커리어캐쳐 · 교육 · 실습용 연습 도구</p></main>';
+    },
+
+    quiz: function () {
+      var set = QUIZ[S.theme], q = set[S.qi], last = S.qi === set.length - 1;
+      var body = top('객관식 ' + (S.qi + 1) + ' / ' + set.length) + '<main class="wrap">' +
+        (S.qShown ? '' : '<div class="timerbar' + (S.qLeft <= 15 ? ' low' : '') + '" id="tb"><div class="bar"><i id="tbar" style="width:' + (S.qLeft / LIMIT * 100) + '%"></i></div><span class="tleft" id="tleft">' + fmt(S.qLeft) + '</span></div>') +
+        '<section class="hero small"><p class="kicker">객관식 연습</p><h1>' + esc(q.title) + '</h1></section>' +
+        '<div class="passage">' + esc(q.passage) + '</div>' +
+        '<section class="card"><h2>' + esc(q.q) + '</h2><ul class="qlist">' +
+        q.opts.map(function (o, i) {
+          var cls = '';
+          if (S.qShown) cls = i === q.ans ? ' right' : (i === S.qPick ? ' wrong' : '');
+          else if (i === S.qPick) cls = ' sel';
+          return '<li><button class="' + cls.trim() + '"' + (S.qShown ? ' disabled' : '') + ' data-act="pickOpt" data-v="' + i + '"><span class="qn circ">' + CIRC[i] + '</span><span>' + esc(o) + '</span></button></li>';
+        }).join('') + '</ul></section>';
+      if (!S.qShown) {
+        body += '<button class="btn primary big" data-act="reveal"' + (S.qPick === null ? ' disabled' : '') + '>정답 확인</button>';
+      } else {
+        var ok = S.qPick === q.ans;
+        body += '<section class="card exp"><div class="verdict ' + (ok ? 'ok' : 'no') + '">' +
+          (S.qPick === null ? '시간 종료' : ok ? '정답입니다' : '아쉬워요') + ' · 정답 ' + CIRC[q.ans] + '</div>' +
+          '<dl><dt>정답 이유</dt><dd>' + esc(q.why) + '</dd><dt>오답 함정</dt><dd>' + esc(q.trap) + '</dd><dt>실무에서는</dt><dd>' + esc(q.work) + '</dd></dl></section>' +
+          '<button class="btn primary big" data-act="nextQuiz">' + (last ? '객관식 결과 보기' : '다음 문항') + '</button>';
+      }
+      return body + '<button class="btn" data-act="home">그만두고 처음으로</button></main>';
+    },
+
+    quizEnd: function () {
+      var set = QUIZ[S.theme];
+      return top('객관식 결과') + '<main class="wrap">' +
+        '<section class="total"><div><p>' + THEMES[S.theme].label + ' 객관식</p><strong>' + set.length + '문항 중 ' + S.qScore + '문항 정답</strong></div><div class="tnum2">' + S.qScore + '<small> / ' + set.length + '</small></div></section>' +
+        '<section class="card"><h2>세 문항의 공통점</h2><p>정답은 모두 <b>AI가 알 수 없는 것을 내가 적어 준</b> 보기였습니다. 재료, 쓰임, 모양, 분량, 지킬 것은 AI가 추측할 수밖에 없는 자리입니다.</p>' +
+        '<h3>문항별로 챙긴 것</h3><ul class="plain">' + set.map(function (q) { return '<li>' + esc(q.title.replace(/^\[[^\]]+\]\s*/, '')) + '</li>'; }).join('') + '</ul></section>' +
+        '<section class="notice mint"><b class="lab">다음 단계</b>이번에는 보기 없이 직접 써 봅니다. 동료의 부탁과 조건을 보고 AI에게 보낼 지시문을 타자로 적으면, 다섯 가지 요소로 채점해 드립니다.</section>' +
+        '<button class="btn primary big" data-act="startDrill">주관식 연습 시작</button>' +
+        '<div class="row2"><button class="btn" data-act="startQuiz">객관식 다시 풀기</button><button class="btn" data-act="home">처음으로</button></div></main>';
+    },
+
+    drill: function () {
+      var item = S.drills[S.di], many = true;
+      var head = '주관식 ' + (S.di + 1) + ' / ' + S.drills.length;
+      var body = top(head) + '<main class="wrap">' +
+        '<section class="hero small"><p class="kicker">주관식 연습</p><h1>AI에게 보낼 지시문을 직접 써 보세요</h1>' +
+        '<p>동료의 부탁과 조건을 읽고, 내가 AI에게 보낼 말을 그대로 적습니다. 정답 문장은 없습니다.</p></section>' +
+        '<section class="card"><div class="chat">' +
+        '<div class="msg them"><span class="who">' + esc(item.from) + '</span>' + esc(item.ask) + '</div>' +
+        '<div class="msg them"><span class="who">' + esc(item.from) + '</span>참고할 조건이에요.<ul class="conds">' +
+        item.conds.map(function (c) { return '<li>' + esc(c) + '</li>'; }).join('') + '</ul></div>' +
+        (S.dGraded ? '<div class="msg me"><span class="who">나 → AI</span>' + esc(S.dText) + '</div>' : '') +
+        '</div></section>';
+      if (!S.dGraded) {
+        body += '<section class="card"><h2>AI에게 보낼 지시문</h2>' +
+          '<textarea id="pr" rows="6" placeholder="예) 너는 … 야. … 자료를 바탕으로 … 을 … 형식으로 만들어 줘. … 은 하지 마." aria-label="AI에게 보낼 지시문">' + esc(S.dText) + '</textarea>' +
+          '<p class="muted small">다섯 가지(역할 · 자료 · 할 일 · 형식 · 조건)를 떠올리며 적어 보세요. 조건에 없는 내용을 지어내지 않아도 됩니다.</p>' +
+          '<div class="savebtns"><button class="btn" data-act="hint">힌트 보기</button><button class="btn primary" data-act="sendDrill">채점하기</button></div></section>';
+      } else {
+        var r = S.dGraded, score = r.reduce(function (a, c) { return a + c.got; }, 0), t = tierOf(score);
+        var missing = r.filter(function (c) { return c.got < c.pt; });
+        body += '<section class="total"><div><p>' + (missing.length ? '빠진 항목 ' + missing.length + '개' : '다섯 항목을 모두 챙겼습니다') + '</p><strong>' + (missing.length ? josa(missing.map(function (c) { return c.k; }).join(', '), '을', '를') + ' 보완해 보세요' : '그대로 보내도 좋은 지시문입니다') + '</strong></div><div class="tnum2">' + score + '<small> / 100</small></div></section>' +
+          '<section class="card"><h2>요소별 채점 <span class="lv ' + t[1] + '">' + t[0] + '</span></h2><ul class="checks">' +
+          r.map(function (c) {
+            var mk = c.got === c.pt ? ['y', '✓'] : c.got ? ['p', '△'] : ['n', '✕'];
+            return '<li><span class="mk ' + mk[0] + '">' + mk[1] + '</span><span><b>' + esc(c.k) + '</b>' +
+              (c.of > 1 ? ' <span class="small muted">' + c.hit + '/' + c.of + ' 항목</span>' : '') +
+              (c.got < c.pt ? '<span class="tip">' + esc(c.tip) + '</span>' : '') + '</span><span class="pt">' + c.got + '/' + c.pt + '</span></li>';
+          }).join('') + '</ul>' +
+          '<p class="muted small" style="margin-top:12px">낱말로 판별하므로 뜻이 같아도 다르게 적으면 못 알아볼 수 있습니다. 점수보다 빠진 항목을 보세요.</p>' +
+          '<details><summary>모범 지시문 예시 보기</summary><div class="msg them" style="max-width:100%">' + esc(item.sample) + '</div></details></section>' +
+          '<div class="row2"><button class="btn" data-act="retryDrill">다시 써 보기</button>' +
+          '<button class="btn primary" data-act="nextDrill">' + (S.di === S.drills.length - 1 ? '결과 보기' : '다음 부탁') + '</button></div>';
+      }
+      return body + (many ? '<button class="btn" data-act="home">그만두고 처음으로</button>' : '') + '</main>';
+    },
+
+    drillEnd: function () {
+      var n = S.dScores.length, avg = n ? Math.round(S.dScores.reduce(function (a, c) { return a + c.score; }, 0) / n) : 0;
+      var t = tierOf(avg), cnt = {};
+      S.dScores.forEach(function (g) { g.miss.forEach(function (m) { cnt[m] = (cnt[m] || 0) + 1; }); });
+      var top2 = Object.keys(cnt).sort(function (a, b) { return cnt[b] - cnt[a]; }).slice(0, 2);
+      var ADVICE = {
+        '상': ['필요한 정보를 고르는 힘이 있습니다.', '다음 단계: "부족한 정보가 있으면 먼저 물어봐 줘" 한 줄을 붙여 보세요. 결과가 한 번 더 좋아집니다.', '숫자와 고유명사는 그래도 원문과 대조합니다.'],
+        '중': ['뼈대는 갖췄지만 한두 가지를 자주 빠뜨립니다.', '보내기 전 10초 점검: 역할 · 자료 · 할 일 · 형식 · 조건 가운데 빠진 것이 있나요?', '특히 AI가 절대 알 수 없는 것(가진 재료, 날짜, 수치, 처리 기준)은 직접 적어야 합니다.'],
+        '하': ['지금은 "알아서 해 줘"에 가깝게 묻고 있습니다.', '한 줄 공식부터 시작하세요: "너는 ○○야. ○○을 위해 ○○을 ○○ 형식으로 만들어 줘."', '결과가 이상하면 AI를 탓하기 전에 "내가 무엇을 안 줬지?"부터 찾아보세요.']
+      };
+      return top('주관식 결과') + '<main class="wrap">' +
+        '<section class="total"><div><p>주관식 ' + n + '문항 평균</p><strong>' + t[0] + ' 수준입니다</strong></div><div class="tnum2">' + avg + '<small> / 100</small></div></section>' +
+        '<section class="card"><h2>개선점</h2><ul class="plain">' + ADVICE[t[0]].map(function (a) { return '<li>' + esc(a) + '</li>'; }).join('') + '</ul>' +
+        (top2.length ? '<p style="margin-top:12px"><b>자주 빠뜨린 요소:</b> ' + top2.join(', ') + '</p>' : '<p style="margin-top:12px"><b>모든 요소를 챙겼습니다.</b></p>') +
+        '<p class="muted small">문항별 점수: ' + S.dScores.map(function (g) { return g.score; }).join(' · ') + '점 · 상 80점 이상, 중 50~79점, 하 50점 미만</p></section>' +
+        '<section class="card"><h2>보내기 전 체크리스트</h2><ul class="checks">' +
+        ELEMENTS.map(function (E) { return '<li><span class="mk y">□</span><span><b>' + E.name + '</b><span class="tip">' + E.desc + '</span></span><span></span></li>'; }).join('') + '</ul></section>' +
+        '<section class="notice mint"><b class="lab">다음 단계</b>이제 내 일에 써 봅니다. 지금 AI에게 보내려던 지시문을 넣으면 빠진 것을 짚고 채워 드립니다.</section>' +
+        '<button class="btn primary big" data-act="go" data-v="input">내 지시문 다듬기</button>' +
+        '<div class="row2"><button class="btn" data-act="startDrill">주관식 다시 풀기</button><button class="btn" data-act="home">처음으로</button></div></main>';
     },
 
     input: function () {
       var T = THEMES[S.theme];
-      return top('1 / 4 · 입력') + '<main class="wrap">' +
-        '<section class="hero small"><h1>평소처럼 짧게 써 보세요</h1><p>' + T.intro + ' 잘 쓰려고 하지 않아도 됩니다. 짧을수록 연습이 됩니다.</p></section>' +
+      return top('다듬기 1 / 4 · 입력') + '<main class="wrap">' +
+        '<section class="hero small"><h1>평소처럼 짧게 써 보세요</h1><p>지금 AI에게 보내려던 지시문을 그대로 넣어도 됩니다. 잘 쓰려고 하지 않아도 됩니다. 짧을수록 연습이 됩니다.</p></section>' +
         '<section class="card"><h2>내 지시문</h2><textarea id="prompt" rows="4" placeholder="' + esc(T.samples[0] || '예) 회의 내용 요약해 줘') + '" aria-label="내 지시문">' + esc(S.original) + '</textarea></section>' +
+        '<section class="card"><h2>다듬는 방식</h2><div class="seg" role="radiogroup" aria-label="다듬는 방식">' +
+        '<button role="radio" aria-checked="' + (S.mode === 'ask') + '" class="' + (S.mode === 'ask' ? 'on' : '') + '" data-act="mode" data-v="ask">질문 받으며</button>' +
+        '<button role="radio" aria-checked="' + (S.mode === 'direct') + '" class="' + (S.mode === 'direct' ? 'on' : '') + '" data-act="mode" data-v="direct">바로 다듬기</button></div>' +
+        '<p class="muted small">' + (S.mode === 'ask' ? '빠진 부분을 하나씩 물어봅니다. 보기를 고르거나 직접 적어 채웁니다.' : '빠진 부분을 빈칸 [ ]으로 넣은 틀을 바로 받습니다.') + '</p></section>' +
         (T.samples.length ? '<section><p class="group">예시로 시작하기 · ' + T.label + '</p><ul class="qlist">' +
           T.samples.map(function (s, i) { return '<li><button data-act="sample" data-v="' + esc(s) + '"><span class="qn">' + (i + 1) + '</span><span>' + esc(s) + '</span></button></li>'; }).join('') + '</ul></section>' : '') +
         '<button class="btn primary big" data-act="check">점검하기</button>' +
@@ -391,7 +700,7 @@ blockquote.before { border-left-color: var(--line); background: var(--field); co
 
     diag: function () {
       var d = S.diag, n = countOk(d), miss = 5 - n;
-      return top('2 / 4 · 점검') + '<main class="wrap">' +
+      return top('다듬기 2 / 4 · 점검') + '<main class="wrap">' +
         '<section class="total"><div><p>다섯 가지 가운데</p><strong>' + (miss ? miss + '가지를 더 채우면 됩니다' : '모두 갖춰져 있습니다') + '</strong></div><div class="tnum2">' + n + '<small> / 5</small></div></section>' +
         '<section class="card"><h2>넣은 지시문</h2><blockquote class="before">' + esc(S.original) + '</blockquote></section>' +
         '<section class="card"><h2>구조 점검</h2><ul class="scores">' + ELEMENTS.map(function (E) {
@@ -407,7 +716,7 @@ blockquote.before { border-left-color: var(--line); background: var(--field); co
       var key = S.queue[0], E = byKey(key), noTask = key === 'task' && S.diag.task.state === 'no';
       var P = THEMES[S.usedTheme].picks, picks = noTask ? P.taskNo : P[key];
       var idx = S.total - S.queue.length + 1;
-      return top('3 / 4 · 채우기') + '<main class="wrap">' +
+      return top('다듬기 3 / 4 · 채우기') + '<main class="wrap">' +
         '<section class="question"><span class="qcat">질문 ' + idx + ' / ' + S.total + ' · ' + E.name + '</span><h1>' + (noTask ? E.qNo : E.q) + '</h1></section>' +
         '<section><p class="group">보기에서 고르기</p><ul class="qlist">' +
         picks.map(function (p, i) { return '<li><button data-act="pick" data-v="' + esc(p) + '"><span class="qn">' + (i + 1) + '</span><span>' + esc(p) + '</span></button></li>'; }).join('') + '</ul></section>' +
@@ -420,7 +729,7 @@ blockquote.before { border-left-color: var(--line); background: var(--field); co
       var d = S.diag, a = S.answers, direct = S.mode === 'direct';
       var after = ELEMENTS.filter(function (E) { return d[E.key].state === 'ok' || a[E.key]; }).length;
       var left = ELEMENTS.filter(function (E) { return d[E.key].state !== 'ok' && !a[E.key]; }).map(function (E) { return E.name; });
-      return top('4 / 4 · 완성') + '<main class="wrap">' +
+      return top('다듬기 4 / 4 · 완성') + '<main class="wrap">' +
         (direct
           ? '<section class="total"><div><p>빈칸 틀이 나왔습니다</p><strong>대괄호 [ ] 안을 내 상황에 맞게 고쳐 씁니다</strong></div><div class="tnum2">' + left.length + '<small> 칸</small></div></section>'
           : '<section class="total"><div><p>처음 ' + countOk(d) + '가지에서</p><strong>' + (left.length ? '아직 비어 있는 것: ' + left.join(', ') : '다섯 가지를 모두 채웠습니다') + '</strong></div><div class="tnum2">' + after + '<small> / 5</small></div></section>') +
@@ -442,41 +751,79 @@ blockquote.before { border-left-color: var(--line); background: var(--field); co
         '<section class="card"><h2>레시피로 보면</h2><div class="compare"><div><h3>처음</h3><blockquote class="before">김치찌개 레시피 알려줘</blockquote></div><div><h3>다듬은 뒤</h3><blockquote>' +
         esc('# 역할\n너는 요리 초보를 가르치는 요리 강사다.\n\n# 자료\n집에 있는 재료만 쓴다: 두부, 달걀, 대파, 김치.\n\n# 할 일\n김치찌개 레시피를 알려 줘.\n쓰임: 요리 초보인 내가 오늘 저녁에 만든다.\n\n# 형식\n재료 표 하나와 조리 순서 번호 목록 6단계 이내.\n\n# 조건\n조리 시간은 30분 이내로 한다.') + '</blockquote></div></div></section>' +
         '<section class="card"><h2>마케팅 자료조사로 보면</h2><div class="compare"><div><h3>처음</h3><blockquote class="before">요즘 20대 소비 트렌드 조사해 줘</blockquote></div><div><h3>다듬은 뒤</h3><blockquote>' +
-        esc('# 역할\n너는 소비재 브랜드의 마케팅 리서처다.\n\n# 자료\n아래에 붙여 넣는 기사와 보고서만 근거로 쓴다.\n\n# 할 일\n요즘 20대 소비 트렌드를 조사해 줘.\n쓰임: 팀 회의에서 공유한다.\n\n# 형식\n핵심 발견 5개 번호 목록, 각 2줄 이내.\n\n# 조건\n수치마다 출처와 기준 연도를 붙인다.') + '</blockquote></div></div></section>' +
-        '<button class="btn primary big" data-act="go" data-v="input">지시문 넣기</button><button class="btn" data-act="home">처음으로</button></main>';
+        esc('# 역할\n너는 소비재 브랜드의 마케팅 리서처다.\n\n# 자료\n아래에 붙여 넣는 기사와 보고서만 근거로 쓴다.\n\n# 할 일\n요즘 20대 소비 트렌드를 조사해 줘.\n쓰임: 광고주 제안서의 시장 현황 부분에 넣는다.\n\n# 형식\n핵심 발견 5개 번호 목록, 각 2줄 이내.\n\n# 조건\n수치마다 출처와 기준 연도를 붙인다.') + '</blockquote></div></div></section>' +
+        '<button class="btn primary big" data-act="home">연습 고르러 가기</button></main>';
     },
 
     guide: function () {
-      return top('') + '<main class="wrap guidepage"><section class="hero small"><h1>이용 방법</h1><p>지시문 하나를 다듬는 데 3분쯤 걸립니다.</p></section>' +
-        '<section class="card"><h2>순서</h2><ol class="plain">' +
-        '<li>첫 화면에서 <b>연습 주제</b>와 <b>다듬는 방식</b>을 고르고 "지시문 넣기"를 누릅니다.</li>' +
-        '<li>평소처럼 짧게 쓴 지시문을 적거나 예시를 누른 뒤 "점검하기"를 누릅니다.</li>' +
-        '<li>다섯 가지 가운데 무엇이 있고 없는지 확인합니다.</li>' +
-        '<li>질문에 보기를 고르거나 직접 적어 답합니다. 정하지 못한 것은 건너뜁니다.</li>' +
-        '<li>완성된 지시문을 복사해 쓰는 AI에 보냅니다.</li></ol></section>' +
-        '<section class="card"><h2>두 가지 방식</h2><ul class="plain">' +
-        '<li><b>질문 받으며</b> 빠진 부분을 하나씩 묻습니다. 무엇을 적어야 할지 감을 잡는 연습에 맞습니다.</li>' +
-        '<li><b>바로 다듬기</b> 빈칸이 있는 틀을 바로 받습니다. 다섯 가지에 익숙해진 뒤 빠르게 쓸 때 맞습니다.</li></ul></section>' +
+      return top('') + '<main class="wrap"><section class="hero small"><h1>이용 방법</h1><p>세 가지 연습이 있습니다. 순서대로 하면 15분쯤 걸립니다.</p></section>' +
+        '<section class="card"><h2>연습 순서</h2><ol class="plain">' +
+        '<li><b>객관식</b> — 상황을 읽고 네 지시문 가운데 가장 알맞은 것을 고릅니다. 문항당 90초, 시간이 끝나면 해설이 열립니다.</li>' +
+        '<li><b>주관식</b> — 동료의 부탁과 조건을 보고 지시문을 직접 씁니다. 다섯 가지 요소로 100점을 매기고 빠진 것을 알려 줍니다.</li>' +
+        '<li><b>내 지시문 다듬기</b> — 지금 쓰려던 지시문을 넣어 점검하고 채웁니다.</li></ol></section>' +
         '<section class="card"><h2>알아 둘 점</h2><ul class="plain">' +
-        '<li>이 화면은 AI가 아닙니다. 낱말을 보고 판별하므로 틀리게 표시할 수 있습니다.</li>' +
-        '<li>원래 지시문의 문장은 고치지 않고, 빠진 부분만 덧붙입니다.</li>' +
-        '<li>입력한 내용은 저장하지 않습니다. 남기려면 "글 파일로 저장"을 누릅니다.</li></ul></section>' +
-        '<button class="btn primary big" data-act="go" data-v="input">지시문 넣기</button><button class="btn" data-act="home">처음으로</button></main>';
+        '<li>이 화면은 AI가 아닙니다. 낱말을 보고 판별하므로 뜻이 같아도 다르게 적으면 못 알아볼 수 있습니다. 점수보다 빠진 항목을 보세요.</li>' +
+        '<li>객관식 정답과 주관식 모범 예시는 하나의 보기일 뿐, 그 문장만 정답인 것은 아닙니다.</li>' +
+        '<li>입력한 내용은 저장하지 않습니다. 남기려면 다듬기 결과에서 "글 파일로 저장"을 누릅니다.</li>' +
+        '<li>문항 상황과 인물은 교육용 가상 설정입니다.</li></ul></section>' +
+        '<button class="btn primary big" data-act="home">연습 고르러 가기</button></main>';
     }
   };
 
   function render(view) {
     if (view) S.view = view;
+    clearInterval(S.timer); S.timer = null;
     app.innerHTML = VIEWS[S.view]();
+    if (S.view === 'quiz' && !S.qShown) startTimer();
     window.scrollTo(0, 0);
   }
 
+  function startTimer() {
+    S.timer = setInterval(function () {
+      S.qLeft--;
+      var tl = document.getElementById('tleft'), tb = document.getElementById('tbar'), box = document.getElementById('tb');
+      if (!tl) { clearInterval(S.timer); return; }
+      tl.textContent = fmt(S.qLeft);
+      tb.style.width = Math.max(S.qLeft, 0) / LIMIT * 100 + '%';
+      box.classList.toggle('low', S.qLeft <= 15);
+      if (S.qLeft <= 0) { clearInterval(S.timer); reveal(); }
+    }, 1000);
+  }
+
   /* ---------- 흐름 ---------- */
+  function startQuiz() { S.qi = 0; S.qScore = 0; S.qPick = null; S.qShown = false; S.qLeft = LIMIT; render('quiz'); }
+  function reveal() {
+    if (S.qShown) return;
+    S.qShown = true; clearInterval(S.timer);
+    if (S.qPick === QUIZ[S.theme][S.qi].ans) S.qScore++;
+    render();
+  }
+  function nextQuiz() {
+    if (S.qi === QUIZ[S.theme].length - 1) { render('quizEnd'); return; }
+    S.qi++; S.qPick = null; S.qShown = false; S.qLeft = LIMIT; render();
+  }
+
+  function startDrill() { S.drills = DRILL[S.theme]; S.di = 0; S.dScores = []; S.dGraded = null; S.dText = ''; render('drill'); }
+  function sendDrill() {
+    var el = document.getElementById('pr'), text = el ? el.value.trim() : '';
+    if (text.length < 5) { toast('지시문을 조금 더 적어 주세요.'); return; }
+    S.dText = text;
+    S.dGraded = gradeDrill(S.drills[S.di], text);
+    var score = S.dGraded.reduce(function (a, c) { return a + c.got; }, 0);
+    S.dScores[S.di] = { score: score, miss: S.dGraded.filter(function (c) { return c.got < c.pt; }).map(function (c) { return c.k; }) };
+    render();
+  }
+  function nextDrill() {
+    if (S.di === S.drills.length - 1) { render('drillEnd'); return; }
+    S.di++; S.dGraded = null; S.dText = ''; render();
+  }
+
   function check(text) {
     text = String(text || '').trim();
     if (text.length < 4) { toast('지시문을 조금 더 길게 적어 주세요.'); return; }
     S.original = text; S.diag = diagnose(text); S.answers = {};
-    S.usedTheme = S.theme === 'free' ? guessTheme(text) : S.theme;
+    var g = guessTheme(text);
+    S.usedTheme = g === 'free' ? S.theme : g;
     render('diag');
   }
   function start() {
@@ -521,6 +868,15 @@ blockquote.before { border-left-color: var(--line); background: var(--field); co
     else if (act === 'go') render(v);
     else if (act === 'theme') { S.theme = v; S.original = ''; render(); }
     else if (act === 'mode') { S.mode = v; render(); }
+    else if (act === 'startQuiz') startQuiz();
+    else if (act === 'pickOpt') { S.qPick = +v; render(); }
+    else if (act === 'reveal') reveal();
+    else if (act === 'nextQuiz') nextQuiz();
+    else if (act === 'startDrill') startDrill();
+    else if (act === 'sendDrill') sendDrill();
+    else if (act === 'hint') { var h = document.getElementById('pr'); if (h && !h.value.trim()) { h.value = '너는 '; h.focus(); } toast('다섯 가지: 역할 · 자료 · 할 일 · 형식 · 조건'); }
+    else if (act === 'retryDrill') { S.dGraded = null; render(); }
+    else if (act === 'nextDrill') nextDrill();
     else if (act === 'sample') check(v);
     else if (act === 'check') check(document.getElementById('prompt').value);
     else if (act === 'start') start();
