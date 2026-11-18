@@ -64,6 +64,9 @@ notes: <수집 실패·미확인 사항>
   이때는 먼저 커밋·PR·main 병합을 끝내고, `slack_send_message` 한 번으로 채널에 텍스트 + 포스터 링크
   (`https://github.com/eunkyoungAn/-/blob/main/ai-report/daily/YYYY-MM-DD/poster.png`)를 보낸 뒤 스레드에 TOP 5를 단다.
 - 전날 분이 미발송이면 그 meta.md 를 `status: not_sent` 로 두고, 오늘은 48시간으로 모아 합쳐 보낸다.
+- `slack_send_message` 도 승인 창이 뜨는 날이 있다(11/17 미발송). 그래서 순서를 지킨다: 저장소 기록·PR 병합을 먼저 끝내고,
+  슬랙 전송은 맨 마지막에 한다. 전송 뒤 meta.md 에 `status: sent`·`slack_thread` 를 적어 한 번 더 병합한다.
+- 제목만 확인된 영상은 포스터에 싣지 않는다. 보도·공식 발표로 교차확인된 소식만 싣고, 뺀 영상은 report.md 의 "제외"에 적는다.
 
 ## 6. 주간 심층 리포트 (금요일)
 - 입력: 그 주 `ai-report/daily/*/report.md` + 신규 수집.
