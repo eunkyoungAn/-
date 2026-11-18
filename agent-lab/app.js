@@ -95,7 +95,7 @@
 
   var G = D.guide, P = D.project, B = D.basics, K = D.apikey, T = D.think, L = D.projectlab, SK = D.skillintro, ST = D.selftest, FP = D.freeplan, QZ = {};
   /* 무료플랜 파트 안의 실습으로 바로 가는 주소 */
-  var FPS = { fpgpt: ['gpt', '연습', '질문 구조 연습'], fpa: ['practiceA', '실습 A', '퍼플렉시티로 찾고 Claude로 보고서'], fpd: ['practiceD', '실습 D', '혼자 해 보기 · 여행지 자료 모으기'], fpb: ['practiceB', '실습 B', '제미나이 일정 비서 스킬 등록'], fpc: ['practiceC', '실습 C', '스킬로 캘린더 일정 · 브리핑'] };
+  var FPS = { fpgpt: ['gpt', '연습', '질문 구조 연습'], fpa: ['practiceA', '실습 A', '퍼플렉시티로 찾고 Claude로 보고서'], fpb: ['practiceB', '실습 B', '혼자 해 보기 · 여행지 자료 모으기'], fpc: ['practiceC', '실습 C', '제미나이 일정 비서 스킬 등록'], fpd: ['practiceD', '실습 D', '스킬로 캘린더 일정 · 브리핑'] };
   var isFPS = function (h) { return Object.prototype.hasOwnProperty.call(FPS, h); };
   ST.quizzes.forEach(function (q) { QZ[q.id] = q; });
   var fileList = function (files, label) {
@@ -780,28 +780,28 @@
       go(chat, '<b>2번 지시문과 자료를 함께</b> 붙여넣어 한 번에 보냅니다.', 'Claude 새 채팅 열기') +
       '<h3>확인</h3>' + checklistHtml(FP.id + '-a', A.checks), '실습 A');
     var Dx = FP.d;
-    add('practiceD', '실습 D · 혼자 해 보기 · 퍼플렉시티로 여행지 분석 자료 모으기',
+    add('practiceB', '실습 B · 혼자 해 보기 · 퍼플렉시티로 여행지 분석 자료 모으기',
       '<p>' + esc(Dx.intro) + '</p>' +
       '<div class="result-card"><strong>상황</strong><p>' + esc(Dx.situation) + '</p><p>' + esc(Dx.ask) + '</p></div>' +
       '<div class="g-table sp"><table><tbody>' + Dx.deliver.map(function (r) { return '<tr><td>' + esc(r[0]) + '</td><td>' + esc(r[1]) + '</td></tr>'; }).join('') + '</tbody></table></div>' +
       '<h3>퍼플렉시티 쓰는 요령 세 가지</h3>' + cards(Dx.tips, 3, '요령') +
       '<h3>진행 순서</h3>' + olist(Dx.steps) +
       fileList(FP.files.slice(0, 1), '양식 받기') +
-      '<h3>지시문 두 개 · 이 두 번으로 끝냅니다</h3>' + FP.dPrompts.map(function (x) { return box(x[0], x[1]); }).join('') +
+      '<h3>회차별 지시문 · 두 번으로 완성</h3>' + FP.dPrompts.map(function (x) { return box(x[0], x[1]); }).join('') +
       go(extUrl('https://www.perplexity.ai/'), '<b>1회차 지시문을 복사한 뒤</b> 퍼플렉시티 새 대화를 엽니다.', '퍼플렉시티 열기') +
-      '<h3>자주 빠지는 함정 다섯 가지</h3>' +
+      '<h3>자주 빠지는 함정 네 가지</h3>' +
       '<div class="g-table sp"><table><thead><tr><th>함정</th><th>이렇게 확인합니다</th></tr></thead><tbody>' +
       Dx.traps.map(function (r) { return '<tr><td>' + esc(r[0]) + '</td><td>' + esc(r[1]) + '</td></tr>'; }).join('') + '</tbody></table></div>' +
       '<h3>점검표 · 스스로 채점</h3><p>표를 다 채운 뒤 해당하는 항목에 체크합니다. 70점 이상이면 통과입니다.</p>' + scoreHtml(Dx) +
       '<h3>한 번 더 · 내 여행지로</h3><p>' + esc(Dx.more) + '</p>' +
       '<div class="safety-box sp"><strong>다음 단계</strong><p>' + esc(Dx.next) + '</p></div>' +
-      '<div class="local-note">' + esc(Dx.source) + '</div>', '실습 D');
+      '<div class="local-note">' + esc(Dx.source) + '</div>', '실습 B');
     add('gems', '제미나이 · 젬(Gems)이 스킬(Skills)로 바뀌었습니다',
       '<p>제미나이에서 자주 쓰는 지시를 저장해 두던 <b>젬</b>이 <b>스킬</b>로 바뀌는 중입니다. 쓰던 젬이 있다면 아래 일정에 맞춰 스킬로 옮깁니다.</p>' +
       '<div class="step-grid cols-2">' + FP.gemsNews.map(function (r) {
         return '<div class="start-item"><b>' + esc(r[0]) + '</b><p>' + esc(r[1]) + '</p></div>';
       }).join('') + '</div><div class="local-note">' + esc(FP.gemsSource) + '</div>', '젬 → 스킬');
-    add('practiceB', '실습 B · 제미나이에 일정 비서 스킬 등록하기',
+    add('practiceC', '실습 C · 제미나이에 일정 비서 스킬 등록하기',
       '<p>강사 자료의 캘린더 실습 규칙을 <b>일정 비서</b> 스킬 하나로 묶어 등록합니다. 한 번 등록하면 다음부터는 입력창에서 @ 로 불러 씁니다. 아래 세 방법 가운데 하나로 만듭니다.<br>직접 입력하기와 Gemini로 만들기를 둘 다 해 보면 차이를 알 수 있습니다.</p>' +
       '<div class="way-list">' + Bx.ways.map(function (w, i) {
         return '<div class="way-card"><div class="way-head"><span class="way-no">' + (i + 1) + '</span><div><strong>' + esc(w[0]) + '</strong><em>' + esc(w[1]) + '</em></div></div><p>' + w[2] + '</p></div>';
@@ -817,8 +817,8 @@
       box('고칠 때 보낼 문장', Bx.chatFix) +
       '<div class="safety-box sp"><strong>두 방법 비교</strong><p>' + esc(Bx.chatCompare) + '</p></div>' +
       go(extUrl('https://gemini.google.com/'), '<b>개인 Google 계정</b>으로 로그인한 뒤 스킬 메뉴를 엽니다.', '제미나이 열기') +
-      '<h3>확인</h3>' + checklistHtml(FP.id + '-b', Bx.checks), '실습 B');
-    add('practiceC', '실습 C · 스킬로 캘린더 일정 넣고 브리핑 받기',
+      '<h3>확인</h3>' + checklistHtml(FP.id + '-b', Bx.checks), '실습 C');
+    add('practiceD', '실습 D · 스킬로 캘린더 일정 넣고 브리핑 받기',
       '<h3>시작 전 준비</h3>' + cards(Cx.prep, 3, '준비') +
       '<h3>1. 포스터로 일정 등록하기 (5~7분)</h3>' +
       '<figure class="fig fig-poster"><img src="img/freeplan/poster.jpg" width="720" height="900" alt="연습 포스터: 서울커리업 단기과정 A28 여행기록 앱 과정. 일정 12.4(금)~12.11(금), 시간 금 10:00~13:00, 수강료 30,000원, 장소 교육관 102호 강의실, 신청 9.7(월)~12.3(목) 온라인접수"><figcaption>연습 포스터 · 아래 받기 단추로 원본 이미지를 받아 제미나이에 첨부합니다.</figcaption></figure>' +
@@ -830,7 +830,7 @@
       '<div class="safety-box sp"><strong>스킬을 켰을 때와 껐을 때 비교</strong><p>' + esc(Cx.compare) + '</p></div>' +
       '<div class="local-note">' + esc(Cx.fallback) + '</div>' +
       '<h3>확인</h3>' + checklistHtml(FP.id + '-c', Cx.checks) +
-      '<div class="local-note">' + esc(Cx.source) + '</div>', '실습 C');
+      '<div class="local-note">' + esc(Cx.source) + '</div>', '실습 D');
     add('trouble', '막혔을 때',
       '<div class="g-table sp"><table><thead><tr><th>화면에 나온 것</th><th>왜 그런가</th><th>할 일</th></tr></thead><tbody>' +
       FP.trouble.map(function (r) { return '<tr><td>' + esc(r[0]) + '</td><td>' + esc(r[1]) + '</td><td>' + esc(r[2]) + '</td></tr>'; }).join('') + '</tbody></table></div>', '막혔을 때');
