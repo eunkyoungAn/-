@@ -760,7 +760,8 @@
     add('gpt', '보내기 전에 · 질문 구조 연습 챗봇',
       '<div class="result-card"><strong>' + esc(g.name) + '</strong><p>' + esc(g.what) + '</p></div>' + olist(g.how.map(esc)) +
       box('챗봇에 넣어 볼 짧은 지시문 (예)', g.sample) +
-      go(extUrl(g.url), '<b>다듬은 지시문</b>을 복사해 두었다가 아래 실습에서 씁니다.', '질문 구조 연습 챗봇 열기'), '질문 구조 연습');
+      go(extUrl(g.url), '<b>다듬은 지시문</b>을 복사해 두었다가 아래 실습에서 씁니다.', '질문 구조 연습 챗봇 열기') +
+      go('../prompt-practice/', 'ChatGPT 로그인이 어렵다면 <b>로그인 없이</b> 같은 연습을 할 수 있습니다. 예시는 레시피 만들기와 마케팅 자료조사입니다.', '로그인 없이 연습하기', true), '질문 구조 연습');
     add('practiceA', '실습 A · 퍼플렉시티로 찾고 Claude로 보고서 쓰기',
       '<p>주제는 <b>경력단절여성 · 중장년 재취업 지원 제도</b>입니다. 퍼플렉시티는 출처를 붙여 찾는 일만, Claude는 받은 자료를 한 장으로 정리하는 일만 맡습니다.</p>' +
       olist(A.steps) +
