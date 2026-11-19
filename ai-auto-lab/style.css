@@ -1017,3 +1017,11 @@ details.cn-fold{max-width:none;margin-top:12px}
 #sec-ai .go-studio{margin-top:16px}
 #sec-practice .progress-card{margin-top:16px}
 .dl-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+
+/* ===== 누를 수 있는 곳에 [클릭] 표시 (글자만 파란색) ===== */
+main p a:not(.g-btn)::after,main li a:not(.g-btn)::after,
+.lesson-arrow::after,.cn-order a strong::after,.kw3 a b::after,
+.lesson-navigation a span::after,.breadcrumb a::after,.toc a::after,
+.text-link::after,.g-contact a::after{content:" [클릭]";color:var(--accent);font-weight:700;letter-spacing:0;white-space:nowrap}
+.toc a::after{font-size:11.5px}
+main p a:not(.g-btn),main li a:not(.g-btn){color:inherit;font-weight:700;text-decoration:underline;text-underline-offset:3px}
