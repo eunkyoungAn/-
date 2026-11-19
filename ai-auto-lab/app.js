@@ -185,8 +185,12 @@
     const ORDER = [[2, 0], [1, 0], [3, 1], [2, 2], [1, 1], [3, 0], [2, 1], [3, 2]];
     secs.push(['quiz', '해당하는 것에 체크', `<p>평소 내 모습에 해당하는 것만 체크하세요. 몇 개를 체크해도 괜찮습니다.</p>
       <div class="checklist">${ORDER.map(([lv, i]) => `<label class="check-item"><input type="checkbox" data-k="chk.${lv}.${i}" ${S.checks[`chk.${lv}.${i}`] ? 'checked' : ''}><span>${esc(C.levels[lv - 1].items[i])}</span></label>`).join('')}</div>`]);
-    secs.push(['split', '내 업무 하나를 네 칸으로 나눠 보기', `<p>AI 전환의 핵심은 "AI 도입"이 아니라 일을 네 가지로 나누고 다시 합치는 것입니다. 내 업무 하나를 골라 적어 보세요. 오늘 G-mail 자동화는 "위임", 카드뉴스 자동화의 원고 쓰기는 "증강"에 해당합니다.</p>` +
-      noteBox('split.task', '내가 고른 업무', '예: 교육생에게 회의 안내 메일 보내기') + C.split.map(x => noteBox('split.' + x[0], `${x[1]} — ${x[2]}`, x[3])).join('')]);
+    secs.push(['apply', '프롬프트로 적용 시작하기', `<p>체크만 하고 끝내지 말고 지금 바로 AI에게 맡겨 봅니다. <b>업무가 아니어도 됩니다.</b> 가족 여행 일정 짜기, 모임 공지 쓰기, 장보기 목록처럼 일상의 일도 좋습니다.</p>
+      <ol class="plain"><li>해 보고 싶은 일 하나를 아래에 적습니다.</li><li>요청문을 복사해 <a href="https://gemini.google.com" target="_blank" rel="noopener noreferrer">gemini.google.com</a>에 붙여 넣고, 대괄호 안을 내 일로 바꿔 보냅니다.</li><li>AI가 나눠 준 표에서 "AI에게 맡길 일" 하나를 골라 바로 시켜 봅니다.</li></ol>` +
+      noteBox('apply.task', '내가 해 보고 싶은 일 (업무, 일상 모두 좋습니다)', '예: 교육생 20명에게 회의 안내 메일 보내기 / 가족 여행 2박 3일 일정 짜기') +
+      promptBox(C.applyPrompt, '적용 시작 요청문 (gemini.google.com)') +
+      noteBox('apply.result', 'AI에게 맡겨 본 일과 결과 한 줄', '예: 여행 일정 초안을 맡김. 이동 시간은 내가 지도에서 다시 확인함')]);
+    secs.push(['tips', 'AI를 쓰기 전에 기억할 세 가지', `<div class="two-col">${C.tips.map(f => `<div class="result-card"><strong>${esc(f[0])}</strong><p>${esc(f[1])}</p></div>`).join('')}</div>`]);
     secs.push(['result', '나의 단계 확인', `<div id="cnResult"></div>`]);
     paint('check', secs);
     const box = $('#cnResult');
