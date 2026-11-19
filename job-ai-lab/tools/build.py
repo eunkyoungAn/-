@@ -160,6 +160,7 @@ TIMELINE = [
     ['16:45~17:00', '구현', '사례 검토·적용', 'AI 초안과 내 판단이 달랐던 곳 검토, 내 상담 절차에 넣을 한 가지', '적용 계획'],
 ]
 
+# 참고 자료 목록: 사이트에는 싣지 않고 기록용으로만 둔다. 장표의 카드별 출처는 START 안에 있다.
 SOURCES = [
     'Beane, M. (2024). The skill code: How to save human ability in an age of intelligent machines. Harper Business.',
     'Davis, J. (2025). [Review of the book The skill code: How to save human ability in an age of intelligent machines, by M. Beane]. Administrative Science Quarterly, 70(4), NP98–NP102. https://doi.org/10.1177/00018392251344917',
@@ -266,7 +267,7 @@ def build_files():
 
 
 def build_data():
-    data = {'links': LINKS, 'start': START, 'flow': FLOW, 'timeline': TIMELINE, 'sources': SOURCES, 'files': FILES, 'zip': ZIP_NAME}
+    data = {'links': LINKS, 'start': START, 'flow': FLOW, 'timeline': TIMELINE, 'files': FILES, 'zip': ZIP_NAME}
     js = '/* tools/build.py 가 만든 파일. 직접 고치지 말고 build.py 를 고친 뒤 다시 실행한다. */\nwindow.LAB = ' + \
          json.dumps(data, ensure_ascii=False, indent=1) + ';\n'
     open(os.path.join(ROOT, 'data.js'), 'w', encoding='utf-8').write(js)
