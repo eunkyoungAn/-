@@ -15,7 +15,7 @@
 | `data.js` | 화면 데이터. `tools/build.py`가 만든다 |
 | `src/*.md` | 연습용 가상 채용공고와 가상 구직자 서류 원본 |
 | `files/` | 수강생이 내려받는 PDF·DOCX와 전체 압축 파일. build.py가 만든다 |
-| `tools/build.py` | 내용 원본. 연결 주소(`LINKS`), START 장표(`START`), 워크플로우(`FLOW`), 시간표(`TIMELINE`), 참고 자료(`SOURCES`) |
+| `tools/build.py` | 내용 원본. 연결 주소(`LINKS`), START 장표(`START`), 워크플로우(`FLOW`), 시간표(`TIMELINE`). 참고 자료 목록(`SOURCES`)은 기록용이며 사이트에 싣지 않는다 |
 | `sheet/Code.gs` | 이전 시안(구인기업·직무 분석 전용 시트)의 Apps Script. 현재 사이트가 연결하는 최종본 시트의 코드는 그 시트 안에 있다 |
 
 ## 내용 고치기

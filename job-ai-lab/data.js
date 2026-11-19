@@ -536,19 +536,6 @@ window.LAB = {
    "적용 계획"
   ]
  ],
- "sources": [
-  "Beane, M. (2024). The skill code: How to save human ability in an age of intelligent machines. Harper Business.",
-  "Davis, J. (2025). [Review of the book The skill code: How to save human ability in an age of intelligent machines, by M. Beane]. Administrative Science Quarterly, 70(4), NP98–NP102. https://doi.org/10.1177/00018392251344917",
-  "한국경영자총협회. (2026. 3. 13.). 2026년 신규채용 실태조사 결과. https://eiec.kdi.re.kr/policy/domesticView.do?ac=0000203504&pg=&pp=&issus=S",
-  "고용노동부·한국고용정보원. (2025. 11. 28.). 인공지능(AI) 활용한 채용도 똑똑하고 공정하게!: 2025년 기업 채용동향조사 결과 2차 발표 [보도자료]. https://www.moel.go.kr/news/enews/report/enewsView.do?news_seq=18662",
-  "헤럴드경제. (2026. 10. 16.). Z세대 구직자 70% “AI에 고민 털어놨다” [데이터로 본 세상]. https://biz.heraldcorp.com/article/10904834",
-  "뉴스서울. (2026. 3. 20.). 고용노동부, '인공지능(AI)이 하루 57명 취업 연결' 청년·기업이 직접 고른 인공지능(AI) 고용서비스 확대. https://newsseoul.co.kr/news/view/1065583818469225",
-  "데일리안. (2026. 6. 29.). AI가 취업확률 분석한다…고용24 맞춤형 고용서비스 공개. https://www.dailian.co.kr/news/view/1661004",
-  "한국사회복지저널. (2026. 10. 28.). [신간] 채용 트렌드 2027. https://www.ksw-news.com/news/articleView.html?idxno=3053312",
-  "윤영돈. (2025). 채용 트렌드 2026. 경향미디어.",
-  "안은경. (2026). AI 시대 '인재를 돕는 인재'의 경력전략: 고용서비스업 종사자의 프로티언 경력태도와 직무열의(경력성장기회의 조절효과를 중심으로) [원고].",
-  "윤영돈. (2026). 채용 트렌드 2027. 경향미디어."
- ],
  "files": [
   {
    "group": "연습용 가상 사례",
