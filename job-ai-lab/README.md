@@ -2,7 +2,7 @@
 
 「AI 활용 취업지원 실무 3종」(구인기업·직무 분석 → 구직역량·직무 적합도 진단 → 취업전략 설계·지원) 통합 특강 3시간용 수강생 실습 사이트. `agent-lab/`과 같은 틀이며 사용하는 AI만 다르다(Gemini 무료 수준 기본, ChatGPT 대체).
 
-- 주소: `https://eunkyoungan.github.io/-/job-ai-lab/` (실제 배포는 `gh-pages` 브랜치. main에 합친 뒤 `job-ai-lab/` 폴더를 `tools/`, `src/`만 빼고 `gh-pages`에 올린다)
+- 주소: `https://eunkyoungan.github.io/-/job-ai-lab/` (실제 배포는 `gh-pages` 브랜치. main에 합친 뒤 `job-ai-lab/` 폴더를 `tools/`, `src/`만 빼고 `gh-pages`에 올린다. `instructor/`도 올리지 않는다)
 - 설계 근거: AI 활용 취업지원 강의설계서(2026-11-19)
 - 빌드·설치 없이 GitHub Pages에서 바로 동작한다. AI 실행은 이 사이트가 아니라 Gemini·ChatGPT에서 하고, 사이트는 요청문을 만들어 주고 결과 표를 받아 다음 단계로 넘긴다.
 
@@ -16,6 +16,7 @@
 | `data.js` | 실습 데이터. `tools/build.py`가 만든다 |
 | `src/*.md` | 가상 채용공고와 내담자 서류 원본. 04, 05는 build.py가 만든다 |
 | `files/` | 수강생이 내려받는 PDF·DOCX, 스킬 zip, 전체 압축 파일. build.py가 만든다 |
+| `instructor/` | 강사용 예시 답안. build.py가 만들며 저장소와 사이트에 올리지 않는다(.gitignore) |
 | `tools/build.py` | 내용 원본. START 장표(`START`: 변화·트렌드·역할의 수치·인용·출처), 직업공통능력 목록, 가상 응답, 요청문, 검수 항목, 예시 답안, 지원 제도 |
 
 ## 내용 고치기
@@ -23,6 +24,11 @@
 1. 공고·서류는 `src/01~03`을, 그 밖의 내용은 `tools/build.py`를 고친다.
 2. `python3 job-ai-lab/tools/build.py` 실행(python-docx, LibreOffice 필요).
 3. `index.html`의 `?v=` 값을 바꾸고 함께 커밋한다.
+
+## 자기진단 양식 바꾸기
+
+- 수강생·기관이 직접: 사이트의 `#form`(바로가기 → 자기진단 양식 바꾸기)에서 평가 항목과 척도를 바꾼다. 그 기기 브라우저에만 저장된다.
+- 모든 수강생의 기본 양식: `tools/build.py`의 `COMPETENCIES`(항목)와 `CLIENTS`의 `self`(가상 응답)를 고치고 다시 빌드한다.
 
 ## 강의 전 확인
 
