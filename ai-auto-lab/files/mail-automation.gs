@@ -1,108 +1,198 @@
-/**
- * 이메일 자동화 참고 코드 (강사 백업용)
- * Gemini가 만든 코드가 동작하지 않을 때 이 코드를 붙여 넣어 실습을 이어갑니다.
- *
- * 시트 구성 (1행은 제목)
- *   A열: 이메일 주소 / B열: 받는 사람 이름 / C열: 발송 결과
- */
+// ==========================================
+// [설정 영역] 여기만 수정해서 사용하세요!
+// ==========================================
+const SENDER_NAME = "홍길동"; // 보내는 사람 이름
+const EMAIL_SUBJECT = "안녕하세요, {이름}님! 안내 메일 드립니다."; // 메일 제목 ({이름} 사용 가능)
+const EMAIL_BODY = `안녕하세요, {이름}님.
 
-// ===== 여기만 고치세요 (따옴표 ' ' 는 지우지 않습니다) =====
-const SUBJECT = '취업 준비 모임 회의 안내';
-const BODY =
-  '{이름}님, 안녕하세요.\n\n' +
-  '다음 주 취업 준비 활동을 논의하기 위해 회의를 엽니다.\n\n' +
-  '- 일시: 7월 24일 오후 2시\n' +
-  '- 장소: 교육장 2층 회의실\n' +
-  '- 준비사항: 이력서 초안 지참\n\n' +
-  '참석 여부를 회신해 주시면 감사하겠습니다.';
-const SENDER_NAME = '취업 준비 모임';
-// ==========================================================
+준비된 안내 내용을 여기에 적어주세요.
+여러 줄로 편하게 작성할 수 있습니다.
 
-// 시트를 열면 '메일 자동화' 메뉴를 만듭니다.
+감사합니다.
+${SENDER_NAME} 드림`;
+
+// 시트 열 위치 설정 (1행은 제목이므로 데이터는 2행부터 시작)
+const SHEET_NAME = ""; // 비워두면 현재 활성화된 첫 번째 시트 사용
+const COL_EMAIL = 1;  // A열: 이메일 주소
+const COL_NAME = 2;   // B열: 받는 사람 이름
+const COL_CHECK = 3;  // C열: 체크박스
+const COL_STATUS = 4; // D열: 발송 결과
+
+// ==========================================
+// 아래 코드는 수정하지 않아도 됩니다.
+// ==========================================
+
 function onOpen() {
   SpreadsheetApp.getUi()
-    .createMenu('메일 자동화')
-    .addItem('1. 테스트 발송 (2행 한 명)', 'sendTest')
-    .addItem('2. 전체 발송', 'sendAll')
+    .createMenu("메일 자동화")
+    .addItem("체크박스 추가/정리", "setupCheckboxes")
+    .addItem("전체 체크", "checkAllRows")
+    .addItem("전체 체크 해제", "uncheckAllRows")
+    .addSeparator()
+    .addItem("테스트 발송", "sendTestEmail")
+    .addItem("전체 발송", "sendAllEmails")
     .addToUi();
 }
 
-// 2행 한 사람에게만 [테스트] 메일을 보냅니다.
-function sendTest() {
-  const ui = SpreadsheetApp.getUi();
-  const sheet = SpreadsheetApp.getActiveSheet();
-  const email = String(sheet.getRange(2, 1).getValue()).trim();
-  const name = String(sheet.getRange(2, 2).getValue()).trim();
+function getTargetSheet() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  if (SHEET_NAME && SHEET_NAME.trim() !== "") {
+    const sheet = ss.getSheetByName(SHEET_NAME.trim());
+    if (!sheet) {
+      throw new Error(`'${SHEET_NAME}' 시트를 찾을 수 없습니다.`);
+    }
+    return sheet;
+  }
+  return ss.getActiveSheet();
+}
 
-  if (!isValidEmail(email)) {
-    ui.alert('2행의 이메일 주소 형식을 확인해 주세요.');
+function setupCheckboxes() {
+  const sheet = getTargetSheet();
+  const ui = SpreadsheetApp.getUi();
+
+  // 1행 제목 정리
+  sheet.getRange(1, COL_EMAIL).setValue("이메일 주소");
+  sheet.getRange(1, COL_NAME).setValue("받는 사람 이름");
+  sheet.getRange(1, COL_CHECK).setValue("발송 선택");
+  sheet.getRange(1, COL_STATUS).setValue("발송 결과");
+
+  const lastRow = Math.max(sheet.getLastRow(), 2);
+  const checkRange = sheet.getRange(2, COL_CHECK, lastRow - 1, 1);
+  checkRange.insertCheckboxes();
+
+  ui.alert(`2행부터 ${lastRow}행까지 C열에 체크박스를 생성했습니다.`);
+}
+
+function setAllCheckboxes(checked) {
+  const sheet = getTargetSheet();
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return;
+
+  const checkRange = sheet.getRange(2, COL_CHECK, lastRow - 1, 1);
+  checkRange.insertCheckboxes();
+  checkRange.setValue(checked);
+}
+
+function checkAllRows() {
+  setAllCheckboxes(true);
+}
+
+function uncheckAllRows() {
+  setAllCheckboxes(false);
+}
+
+function personalizeText(template, name) {
+  const safeName = name ? String(name).trim() : "고객";
+  return template.replace(/\{이름\}/g, safeName);
+}
+
+function sendSingleRowEmail(sheet, rowIndex, isTest) {
+  const email = String(sheet.getRange(rowIndex, COL_EMAIL).getValue() || "").trim();
+  const name = String(sheet.getRange(rowIndex, COL_NAME).getValue() || "").trim();
+
+  if (!email) {
+    return false;
+  }
+
+  const personalizedSubject = personalizeText(EMAIL_SUBJECT, name);
+  const finalSubject = isTest ? `[테스트] ${personalizedSubject}` : personalizedSubject;
+  const finalBody = personalizeText(EMAIL_BODY, name);
+
+  GmailApp.sendEmail(email, finalSubject, finalBody, {
+    name: SENDER_NAME
+  });
+
+  const formattedDate = Utilities.formatDate(
+    new Date(),
+    Session.getScriptTimeZone(),
+    "yyyy-MM-dd HH:mm"
+  );
+
+  sheet.getRange(rowIndex, COL_STATUS).setValue(
+    isTest ? `테스트 발송 완료 (${formattedDate})` : `발송 완료 (${formattedDate})`
+  );
+
+  // 발송 후 체크박스 자동 해제 (중복 발송 방지)
+  sheet.getRange(rowIndex, COL_CHECK).setValue(false);
+
+  return true;
+}
+
+function sendTestEmail() {
+  const ui = SpreadsheetApp.getUi();
+  const sheet = getTargetSheet();
+  const testRow = 2; // 1행은 제목이므로 첫 번째 수신자는 2행
+
+  const email = String(sheet.getRange(testRow, COL_EMAIL).getValue() || "").trim();
+  if (!email) {
+    ui.alert("2행에 이메일 주소가 없습니다. 확인 후 다시 시도해 주세요.");
     return;
   }
 
   try {
-    sendOne(email, name, '[테스트] ');
-    ui.alert(email + ' 주소로 테스트 메일을 보냈습니다.');
-  } catch (error) {
-    ui.alert('테스트 발송 실패\n\n' + error.message);
+    sendSingleRowEmail(sheet, testRow, true);
+    ui.alert(`2행(${email})으로 테스트 메일을 발송했습니다.\nD열에 테스트 발송 결과가 기록되었습니다.`);
+  } catch (err) {
+    ui.alert(`테스트 발송 중 오류가 발생했습니다:\n${err.message}`);
   }
 }
 
-// C열(발송 결과)이 비어 있는 사람에게만 보냅니다.
-function sendAll() {
+function sendAllEmails() {
   const ui = SpreadsheetApp.getUi();
-  const sheet = SpreadsheetApp.getActiveSheet();
+  const sheet = getTargetSheet();
   const lastRow = sheet.getLastRow();
 
   if (lastRow < 2) {
-    ui.alert('2행부터 받는 사람 정보를 입력해 주세요.');
+    ui.alert("발송할 대상(2행 이상)이 없습니다.");
     return;
   }
 
-  const answer = ui.alert(
-    '전체 발송',
-    'C열이 비어 있는 사람에게 메일을 보냅니다. 계속할까요?',
+  // 조건: A열 이메일이 있고, C열 체크박스가 체크(true)되어 있으며, D열 발송 결과가 비어 있는 행
+  const targetRows = [];
+  for (let row = 2; row <= lastRow; row++) {
+    const email = String(sheet.getRange(row, COL_EMAIL).getValue() || "").trim();
+    const isChecked = sheet.getRange(row, COL_CHECK).getValue() === true;
+    const status = String(sheet.getRange(row, COL_STATUS).getValue() || "").trim();
+
+    if (email && isChecked && status === "") {
+      targetRows.push(row);
+    }
+  }
+
+  if (targetRows.length === 0) {
+    ui.alert(
+      "발송할 대상이 없습니다.\n(C열 체크박스가 선택되고, D열이 비어 있는 수신자를 확인해 주세요.)"
+    );
+    return;
+  }
+
+  const response = ui.alert(
+    "전체 발송 확인",
+    `선택된 총 ${targetRows.length}명에게 메일을 발송하시겠습니까?`,
     ui.ButtonSet.YES_NO
   );
-  if (answer !== ui.Button.YES) return;
 
-  const rows = sheet.getRange(2, 1, lastRow - 1, 3).getValues();
-  let sent = 0;
+  if (response !== ui.Button.YES) {
+    ui.alert("전체 발송이 취소되었습니다.");
+    return;
+  }
 
-  rows.forEach(function (row, i) {
-    const email = String(row[0]).trim();
-    const name = String(row[1]).trim();
-    const result = String(row[2]).trim();
-    const resultCell = sheet.getRange(i + 2, 3);
+  let sentCount = 0;
+  let failedCount = 0;
 
-    if (result !== '' || email === '') return; // 이미 보냈거나 빈 행은 건너뜁니다.
-
-    if (!isValidEmail(email)) {
-      resultCell.setValue('주소 확인 필요');
-      return;
-    }
-
+  for (const row of targetRows) {
     try {
-      sendOne(email, name, '');
-      resultCell.setValue('발송 완료 ' + Utilities.formatDate(new Date(), 'Asia/Seoul', 'yyyy-MM-dd HH:mm'));
-      sent++;
-    } catch (error) {
-      resultCell.setValue('발송 실패: ' + error.message);
+      const sent = sendSingleRowEmail(sheet, row, false);
+      if (sent) {
+        sentCount++;
+      }
+    } catch (err) {
+      failedCount++;
+      sheet.getRange(row, COL_STATUS).setValue(`발송 실패: ${err.message}`);
     }
-  });
+  }
 
-  ui.alert(sent + '명에게 메일을 보냈습니다. C열 결과를 확인해 주세요.');
-}
-
-// 메일 한 통을 보냅니다.
-function sendOne(email, name, prefix) {
-  const body = BODY.split('{이름}').join(name);
-  GmailApp.sendEmail(email, prefix + SUBJECT, body, {
-    name: SENDER_NAME,
-    htmlBody: body.replace(/\n/g, '<br>')
-  });
-}
-
-// 이메일 주소 형식을 간단히 확인합니다.
-function isValidEmail(email) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  ui.alert(
+    `전체 발송이 완료되었습니다.\n- 성공: ${sentCount}건\n- 실패: ${failedCount}건`
+  );
 }
