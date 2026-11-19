@@ -1,0 +1,289 @@
+/* AI 업무 자동화 실습실 — 공통 START 장표, 실습 1(메일 자동화) · 실습 2(카드뉴스), 메모·검수 표시.
+   입력한 내용은 어디에도 보내지 않으며 이 기기의 localStorage에만 저장한다. */
+(function () {
+  'use strict';
+  const D = window.LAB;
+  const $ = (s, el) => (el || document).querySelector(s);
+  const KEY = 'aiAutoLab.v1';
+
+  let S;
+  try { S = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) { S = {}; }
+  S.checks = S.checks || {};
+  S.notes = S.notes || {};
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* 저장 불가 시 무시 */ } };
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const ul = a => `<ul class="plain">${a.map(x => `<li>${x}</li>`).join('')}</ul>`;
+  const CODE = window.MAIL_CODE || '';
+
+  /* 실습 순서: m1~m4 → mr → c1~c3 → cr */
+  const SEQ = [];
+  D.parts.forEach(p => { p.stages.forEach(s => SEQ.push({ id: s.id, part: p, stage: s })); SEQ.push({ id: p.review.id, part: p, review: p.review }); });
+  const find = id => SEQ.find(x => x.id === id);
+  const label = x => x.stage ? `실습 ${x.part.no} · ${x.stage.no}단계 ${x.stage.title}` : `실습 ${x.part.no} · 마무리 ${x.review.title}`;
+
+  /* ---------- 공용 ---------- */
+  async function copyText(text, btn) {
+    try { await navigator.clipboard.writeText(text); flash(btn, '복사됨'); }
+    catch (e) {
+      const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); flash(btn, '복사됨'); } catch (_) { flash(btn, 'Ctrl+C로 복사'); }
+      document.body.removeChild(ta);
+    }
+  }
+  function flash(btn, msg) { if (!btn) return; const o = btn.textContent; btn.textContent = msg; setTimeout(() => { btn.textContent = o; }, 1400); }
+  function promptBox(text, lbl, cls) {
+    return `<div class="prompt-box tall${cls ? ' ' + cls : ''}"><span class="box-label">${esc(lbl || '요청문')}</span><button class="copy-button" type="button">복사</button><pre>${esc(text)}</pre></div>`;
+  }
+  function noteBox(id, lbl, ph) {
+    return `<div class="paste-box"><label for="n-${id}">${esc(lbl)}</label><textarea id="n-${id}" data-note="${id}" placeholder="${esc(ph)}">${esc(S.notes[id] || '')}</textarea></div>`;
+  }
+  function checklist(key, items) {
+    return `<div class="checklist">${items.map((x, i) => `<label class="check-item"><input type="checkbox" data-k="${key}.${i}" ${S.checks[`${key}.${i}`] ? 'checked' : ''}><span>${esc(x)}</span></label>`).join('')}</div>`;
+  }
+  function bindAll(root) {
+    root.querySelectorAll('.copy-button').forEach(b => b.addEventListener('click', () => copyText(b.parentElement.querySelector('pre').textContent, b)));
+    root.querySelectorAll('[data-note]').forEach(t => t.addEventListener('input', () => { S.notes[t.dataset.note] = t.value; save(); }));
+    root.querySelectorAll('.check-item input').forEach(i => i.addEventListener('change', () => { S.checks[i.dataset.k] = i.checked; save(); }));
+  }
+  function table(head, rows) {
+    return `<div class="g-table"><table><thead><tr>${head.map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr>${r.map(c => `<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+  }
+  function tableBlock(t) { return t ? `<h3>${esc(t.title)}</h3>${table(t.head, t.rows)}` : ''; }
+  function codeBlock() {
+    return `<div class="go-studio mt16"><p><b>참고 코드</b> — Gemini 코드가 계속 맞지 않을 때 이 코드를 그대로 붙여 넣습니다. 메뉴 이름과 기능이 요청문과 같습니다.</p><a class="g-btn ghost" href="${esc(D.codeFile)}" download>파일 받기</a></div>
+      ${CODE ? promptBox(CODE, '참고 코드 (Code.gs)', 'cn-code') : ''}`;
+  }
+
+  /* ---------- 진행 ---------- */
+  function done(x) {
+    const items = x.stage ? x.stage.checks : x.review.checks;
+    return items.every((_, i) => S.checks[`${x.id}.${i}`]);
+  }
+  function renderProgress() {
+    const all = SEQ.filter(x => x.stage);
+    const n = all.filter(done).length;
+    $('#pgNum').textContent = `${n} / ${all.length}`;
+    $('#pgBar').style.width = (n / all.length * 100) + '%';
+  }
+
+  /* ---------- 시작 화면 ---------- */
+  const FLOW_MAIL = [
+    ['Google Sheets', '목록 만들기', '이메일 주소 · 이름 · 발송 결과'],
+    ['Gemini', '코드 받기', '기능을 번호로 나눠 요청'],
+    ['Apps Script', '붙여 넣고 저장', '제목·본문만 내 내용으로'],
+    ['Gmail', '테스트 → 전체 발송', '나에게 먼저']
+  ];
+  const FLOW_CARD = [
+    ['Google Sheets', '기획 입력', '타깃·주제·장수 (B~I열)'],
+    ['Gemini API', '원고 자동 생성', '표지 훅, 1~6장 (J~Q열)'],
+    ['사람', '검토와 수정', '사실·과장·길이 확인'],
+    ['ChatGPT 프로젝트', '디자인 초안', '게시 문구, Canva 디자인'],
+    ['Google Sheets', '기록·관리', '결과 링크, 상태, 성과']
+  ];
+  function flowHtml(f, cls) {
+    return `<ol class="cn-flow${cls ? ' ' + cls : ''}">${f.map((x, i) => `<li><b>${i + 1}</b><div><strong>${esc(x[1])}</strong><span>${esc(x[0])} · ${esc(x[2])}</span></div></li>`).join('')}</ol>`;
+  }
+  function renderHome() {
+    $('#homeParts').innerHTML = D.parts.map(p => `<section class="level-section" id="sec-${p.id}">
+      <div class="level-head"><div><span class="level-kicker">PRACTICE ${esc(p.no)} · ${esc(p.time)}</span><h2>실습 ${esc(p.no)}. ${esc(p.title)}</h2></div><p>${esc(p.desc)}</p></div>
+      <div class="lesson-grid">${p.stages.map(s => { const x = find(s.id); return `<a class="lesson-card ${done(x) ? 'is-done' : ''}" href="#${s.id}">
+        <span class="lesson-code">${esc(s.kicker)} · ${esc(s.time)}</span><h3>${esc(s.title)}</h3><p>${esc(s.goal[0])}</p>
+        <div class="lesson-output">산출물 <span>${esc(s.output)}</span></div><div class="lesson-arrow">${esc(s.role)} →</div></a>`; }).join('')}
+      <a class="lesson-card ${done(find(p.review.id)) ? 'is-done' : ''}" href="#${p.review.id}"><span class="lesson-code">WRAP-UP · ${esc(p.review.time)}</span><h3>${esc(p.review.title)}</h3><p>${p.id === 'mail' ? 'AI가 만든 메일을 바로 보내지 않고 체크리스트로 다시 읽습니다.' : '결과 링크와 상태를 시트에 기록하고 오늘 한 일을 돌아봅니다.'}</p><div class="lesson-output">산출물 <span>${p.id === 'mail' ? '체크 완료' : '카드뉴스 1편과 링크'}</span></div><div class="lesson-arrow">마무리 →</div></a>
+      </div></section>`).join('');
+    renderProgress();
+  }
+  function renderStatic() {
+    $('#copyLink').href = D.sheetCopy;
+    $('#homeFlowMail').innerHTML = FLOW_MAIL.map((f, i) => `<li><b>${i + 1}</b><div><strong>${esc(f[1])}</strong><span>${esc(f[0])}</span></div></li>`).join('');
+    $('#homeFlowCard').innerHTML = FLOW_CARD.map((f, i) => `<li><b>${i + 1}</b><div><strong>${esc(f[1])}</strong><span>${esc(f[0])}</span></div></li>`).join('');
+    $('#timelineTable').innerHTML = '<thead><tr><th>시간</th><th>구분</th><th>단계</th><th>내용</th><th>산출물</th></tr></thead><tbody>' +
+      D.timeline.map(r => `<tr${r[1] === '휴식' ? ' class="cn-break"' : ''}>${r.map(c => `<td>${esc(c)}</td>`).join('')}</tr>`).join('') + '</tbody>';
+    const mailPrompt = D.parts[0].stages.find(s => s.prompt);
+    $('#materialBox').innerHTML = `<h3 class="dl-h">실습 1 · 메일 자동화</h3>${promptBox(mailPrompt.prompt.text, '코드 요청문 (gemini.google.com)')}${codeBlock()}
+      <h3 class="dl-h">실습 2 · 카드뉴스</h3>${[['guide', 'ChatGPT 프로젝트 지침'], ['request', '카드뉴스 제작 요청문 (주소와 ID만 바꿔 사용)'], ['cover', '표지 이미지 요청문'], ['fix', '디자인 수정 요청문']].map(([k, l]) => promptBox(D.texts[k], l)).join('')}`;
+    bindAll($('#materialBox'));
+    $('#helpList').innerHTML = ['메일', '카드뉴스', '공통'].map(g => `<h3 class="dl-h">${g === '공통' ? '공통' : (g === '메일' ? '실습 1 · 메일 자동화' : '실습 2 · 카드뉴스')}</h3><div class="two-col">${D.help.filter(h => h[0] === g).map(h => `<div class="result-card"><strong>${esc(h[1])}</strong><p>${esc(h[2])}</p></div>`).join('')}</div>`).join('');
+    $('#sourceList').innerHTML = D.sources.map(s => `<li>${esc(s).replace(/(https?:\/\/\S+)/, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>')}</li>`).join('');
+    $('#sourceList').classList.add('sources-ol');
+  }
+
+  /* ---------- 단계 화면 ---------- */
+  function navPair(id) {
+    const i = SEQ.findIndex(x => x.id === id);
+    const prev = i === 0 ? ['#start', 'START · AI, 자동화, 카드뉴스, 안전'] : ['#' + SEQ[i - 1].id, label(SEQ[i - 1])];
+    const next = i === SEQ.length - 1 ? ['#home', '처음 화면'] : ['#' + SEQ[i + 1].id, label(SEQ[i + 1])];
+    return [prev, next];
+  }
+  function renderStage(x) {
+    const st = x.stage, p = x.part;
+    $('#bcStage').textContent = `실습 ${p.no} ${p.short} › ${st.no}단계 ${st.title}`;
+    $('#shEyebrow').textContent = `실습 ${p.no} · ${p.short} · ${st.kicker} · ${st.role}`;
+    $('#shTitle').textContent = st.title;
+    $('#shSum').textContent = st.goal.join(' ');
+    $('#shMeta').innerHTML = `<span class="meta-chip active">${esc(st.time)}</span><span class="meta-chip">산출물 · ${esc(st.output)}</span>`;
+    const secs = [];
+    let goal = `<ul class="plain">${st.goal.map(g => `<li>${esc(g)}</li>`).join('')}</ul><h3>이 단계에 필요한 것</h3>${ul(st.input)}`;
+    if (st.copyButton) goal += `<div class="go-studio mt16"><p><b>운영 시트 사본 만들기</b> — 내 드라이브에 복사됩니다. 자동화 코드도 함께 복사됩니다.</p><a class="g-btn" href="${esc(D.sheetCopy)}" target="_blank" rel="noopener noreferrer">시트 사본 만들기</a></div>`;
+    if (st.warn) goal += `<div class="safety-box mt16"><strong>꼭 지킬 것</strong><p>${esc(st.warn)}</p></div>`;
+    secs.push(['goal', '학습 목표와 준비', goal]);
+    let steps = `<ol class="plain">${st.steps.map(s => `<li>${s}</li>`).join('')}</ol>`;
+    if (st.table && !st.table.after) steps += tableBlock(st.table);
+    steps += tableBlock(st.table2);
+    if (st.snippet) steps += `<h3>코드 맨 위, 이 세 줄만 고칩니다</h3>${promptBox(st.snippet, '고칠 곳 예시 (변수 이름은 코드마다 다를 수 있음)', 'cn-code')}`;
+    if (st.tip) steps += `<div class="result-card mt14"><strong>요청문 주소 바꾸는 법</strong><p>주소의 <code>/d/</code>와 <code>/edit</code> 사이 긴 문자열이 시트 고유번호입니다. 원본 번호 <code>${esc(D.sheetId)}</code> 자리에 내 사본 주소창의 번호를 넣습니다.</p></div>`;
+    secs.push(['steps', '순서', steps]);
+    if (st.prompt) secs.push(['prompt', '요청문 (복사해서 붙여 넣기)', promptBox(st.prompt.text, st.prompt.label)]);
+    if (st.prompts) secs.push(['prompt', '요청문 (복사해서 붙여 넣기)', st.prompts.map(q => promptBox(D.texts[q.key], q.label)).join('')]);
+    if (st.code) secs.push(['code', '참고 코드 (막힐 때)', codeBlock()]);
+    secs.push(['note', '내 기록', st.fields.map(f => noteBox(`${st.id}.${f[0]}`, f[1], f[2])).join('') + '<p class="local-note">이 칸은 이 기기 브라우저에만 저장됩니다.</p>']);
+    let chk = checklist(st.id, st.checks) + `<h3>성찰 질문</h3><p>${esc(st.reflect)}</p>`;
+    if (st.table && st.table.after) chk += tableBlock(st.table);
+    secs.push(['check', '검수', chk]);
+    paint(st.id, secs);
+  }
+  function renderReview(x) {
+    const r = x.review, p = x.part;
+    $('#bcStage').textContent = `실습 ${p.no} ${p.short} › 마무리`;
+    $('#shEyebrow').textContent = `실습 ${p.no} · ${p.short} · WRAP-UP`;
+    $('#shTitle').textContent = r.title;
+    $('#shSum').textContent = p.id === 'mail' ? 'AI가 작성하고, 사람이 확인합니다. 보내기 전에 마지막으로 읽는 기준입니다. (원본 PPT 17번)' : '결과를 시트에 기록하고, 오늘 AI가 한 일과 내가 한 일을 나눠 봅니다.';
+    $('#shMeta').innerHTML = `<span class="meta-chip active">${esc(r.time)}</span>`;
+    const secs = [];
+    const chk = ['check', p.id === 'mail' ? '발송 전 체크' : '검수', checklist(r.id, r.checks)];
+    if (r.checkFirst) secs.push(chk);
+    secs.push(['steps', p.id === 'mail' ? '정리하기' : '시트에 기록하기', `<ol class="plain">${r.steps.map(s => `<li>${s}</li>`).join('')}</ol>`]);
+    secs.push(['reflect', '성찰 질문', r.reflect.map((q, i) => noteBox(`${r.id}.q${i}`, q, '내 생각을 짧게 적어 보세요')).join('')]);
+    if (r.homework) secs.push(['homework', '다음 시간 전 과제', ul(r.homework.map(esc))]);
+    if (!r.checkFirst) secs.push(chk);
+    paint(r.id, secs);
+  }
+  function paint(id, secs) {
+    const [prev, next] = navPair(id);
+    $('#stageToc').innerHTML = '<strong>목차</strong>' + secs.map(s => `<a href="#${id}-${s[0]}" class="${s[0] === 'prompt' ? 'toc-run' : ''}">${esc(s[1])}</a>`).join('');
+    const body = $('#stageBody');
+    body.innerHTML = secs.map((s, i) => `<section id="${id}-${s[0]}"><span class="section-number">${i + 1}</span><h2>${esc(s[1])}</h2>${s[2]}</section>`).join('') +
+      `<div class="lesson-navigation"><a href="${prev[0]}"><span>이전</span><strong>${esc(prev[1])}</strong></a><a class="lesson-next" href="${next[0]}"><span>다음</span><strong>${esc(next[1])}</strong></a></div>`;
+    bindAll(body);
+  }
+
+  /* ---------- START 장표 ---------- */
+  const SRC_AI = '출처: 과학기술정보통신부, 「2025 인터넷이용실태조사」 결과 발표(2026. 3. 31.) · 전국 22,671가구, 만 3세 이상 50,750명';
+  const SIX = [['1장', '표지', '시선을 끄는 훅', '질문형·숫자형으로 3초 안에 멈추게'], ['2장', '문제', '독자의 불편', '"이런 적 있으시죠?"로 공감'], ['3장', '정보①', '핵심 정보', '비교나 개념 하나'], ['4장', '정보②', '핵심 정보', '3장과 짝이 되는 두 번째 정보'], ['5장', '선택 기준', '실천 방법', '독자가 바로 쓸 수 있는 기준'], ['6장', 'CTA', '행동 유도', '저장·댓글·공유 중 하나']];
+  const KB1 = [['표지 훅', '청축·적축·갈축, 내 귀에는 뭐가 맞을까?'], ['1장', '청축·적축·갈축 / 3초 만에 고르기'], ['2장', '키감만 보고 샀다가 / 소음 때문에 후회할 수 있어요'], ['3장', '청축: 경쾌한 클릭음 / 타건 피드백이 분명해요'], ['4장', '적축: 조용하고 부드러움 / 갈축: 소리와 구분감의 중간'], ['5장', '사용 장소와 원하는 키감을 / 먼저 정하세요'], ['6장', '저장해 두고 매장에서 비교하세요']];
+  const gi = g => SLIDES.findIndex(s => s.g === g);
+  const SLIDES = [
+    { g: 0, nav: '시작', title: '네 가지 키워드', html: () => `<span class="slide-kicker">START · Gemini 업무 자동화</span><h1>AI, 자동화, 카드뉴스, 안전</h1>
+      <p class="slide-lead">실습 전에 보는 키워드. 실습 1은 메일 자동화, 실습 2는 카드뉴스 만들기입니다.</p>
+      <div class="kw3 cn-kw4"><a href="#start-${gi(1)}"><b>KEYWORD 1</b><strong>AI</strong><span>생성형 AI 이용 현황 · 오늘 쓰는 AI · API 키</span></a>
+      <a href="#start-${gi(2)}"><b>KEYWORD 2</b><strong>자동화</strong><span>Apps Script · 코드는 Gemini가 · 실습 1 흐름</span></a>
+      <a href="#start-${gi(3)}"><b>KEYWORD 3</b><strong>카드뉴스</strong><span>6장 구조 · 표지 훅 · 실습 2 흐름</span></a>
+      <a href="#start-${gi(4)}"><b>KEYWORD 4</b><strong>안전</strong><span>발송 한도 · 권한 승인 · 사람이 확인</span></a></div>` },
+    { g: 1, nav: '1-1', title: '생성형 AI 이용 현황', html: () => `<span class="slide-kicker">1. AI · 1) 우리나라 생성형 AI 이용 현황</span><h1>국민 절반 가까이가 써 봤습니다</h1>
+      <div class="stat3">
+        <div class="stat"><em>생성형 AI 경험률</em><strong>44.5%</strong><div class="cap">2024년 33.3% → 2025년 44.5%</div><p>1년 사이 11.2%p 늘었습니다.</p></div>
+        <div class="stat"><em>사무직 경험률</em><strong>71.9%</strong><div class="cap">직업별로 가장 높음</div><p>문서·메일·홍보물을 다루는 일에서 AI를 가장 먼저 쓰고 있습니다.</p></div>
+        <div class="stat"><em>정보·결과물을 믿는다</em><strong>54.7%</strong><div class="cap">절반 남짓만 결과를 신뢰</div><p>AI가 만든 메일·코드·원고는 사람이 확인하고 써야 합니다.</p></div>
+      </div><p class="src">${esc(SRC_AI)}</p>` },
+    { g: 1, nav: '1-2', title: '서비스별 이용과 안 쓰는 이유', html: () => `<span class="slide-kicker">1. AI · 2) 어떤 AI를 쓰고, 왜 안 쓰나</span><h1>ChatGPT 41.8%, Gemini 9.8%</h1>
+      <p class="slide-lead">서비스별 경험률(복수응답). 유료 구독 비율은 7.9%로 대부분 무료로 씁니다.</p>
+      <div class="pts"><div class="pt"><b>안 쓰는 이유 ①</b><strong>필요를 못 느낀다</strong><p>미이용자 55.5% 중 49.5%가 "관심 또는 필요가 없어서"라고 답했습니다.</p></div>
+      <div class="pt"><b>안 쓰는 이유 ②</b><strong>방법을 모른다</strong><p>"이용 방법을 몰라서"가 60대 25.3%, 70대 이상 26.1%로 상대적으로 높았습니다.</p></div></div>
+      <div class="note">오늘은 "내 일에 필요한 곳"(메일, 홍보 카드뉴스)과 "쓰는 방법"을 함께 해결합니다.</div><p class="src">${esc(SRC_AI)}</p>` },
+    { g: 1, nav: '1-3', title: '오늘 쓰는 AI', html: () => `<span class="slide-kicker">1. AI · 3) 오늘 쓰는 AI</span><h1>도구마다 맡는 일이 다릅니다</h1>
+      <div class="stat3 cn-tools">
+        <div class="stat"><em>실습 1 · 2</em><strong>Gemini</strong><div class="cap">코드 작성, 원고 자동 생성</div><p>실습 1에서는 메일 발송 코드를 받고, 실습 2에서는 시트 버튼으로 카드뉴스 원고를 만듭니다.</p></div>
+        <div class="stat"><em>실습 2</em><strong>ChatGPT</strong><div class="cap">프로젝트에 지침을 한 번 저장</div><p>지침과 시트를 넣어 두면 요청문 한 번으로 게시 문구와 이미지 구성을 받습니다.</p></div>
+        <div class="stat"><em>실습 2</em><strong>Canva</strong><div class="cap">편집할 수 있는 디자인</div><p>4:5 세로 카드 6장을 받습니다. 연결이 안 되면 표지 이미지 한 장으로 대신합니다.</p></div>
+      </div><p class="src">요금제에 따라 ChatGPT 프로젝트·앱 연결과 Canva 기능이 다를 수 있습니다.</p>` },
+    { g: 1, nav: '1-4', title: 'API 키란', html: () => `<span class="slide-kicker">1. AI · 4) API와 API 키 (실습 2)</span><h1>API 키는 내 AI 출입증입니다</h1>
+      <div class="pts cn-pts3"><div class="pt"><b>API</b><strong>프로그램끼리 대화하는 창구</strong><p>사람이 채팅창에 쓰는 대신, 시트가 Gemini에게 직접 요청하고 답을 받아 옵니다.</p></div>
+      <div class="pt"><b>API 키</b><strong>"내가 보낸 요청"이라는 증명</strong><p>Google AI Studio에서 발급합니다. 이 키로 쓴 사용량은 내 계정에 쌓입니다.</p></div>
+      <div class="pt"><b>지킬 것</b><strong>비밀번호처럼 나만 보관</strong><p>채팅방·시트 셀·메신저에 붙여 넣지 않습니다.</p></div></div>` },
+    { g: 2, nav: '2-1', title: 'Apps Script란', html: () => `<span class="slide-kicker">2. 자동화 · 1) Apps Script</span><h1>시트에 붙이는 작은 프로그램</h1>
+      <div class="pts cn-pts3"><div class="pt"><b>무엇</b><strong>Google 서비스용 코드</strong><p>시트, Gmail, 캘린더를 이어 반복하는 일을 대신하게 하는 Google의 스크립트입니다.</p></div>
+      <div class="pt"><b>어디서</b><strong>[확장 프로그램] → [Apps Script]</strong><p>시트 안에서 바로 열립니다. 설치할 것이 없습니다.</p></div>
+      <div class="pt"><b>오늘</b><strong>메일 발송 · 원고 생성</strong><p>실습 1은 목록대로 메일을 보내고, 실습 2는 이미 들어 있는 코드로 Gemini 원고를 받습니다.</p></div></div>` },
+    { g: 2, nav: '2-2', title: '코드는 Gemini가', html: () => `<span class="slide-kicker">2. 자동화 · 2) 코드를 몰라도</span><h1>코드는 Gemini가, 판단은 내가</h1>
+      <div class="recap"><div class="recap-col"><b>Gemini가 하는 일</b><span>요청한 기능대로 코드 쓰기</span><span>오류 문장을 보고 고치기</span><span>코드 설명하기</span></div>
+      <div class="recap-col"><b>내가 하는 일</b><span>원하는 기능을 번호로 나눠 말하기</span><span>제목·본문·받는 사람 확인</span><span>테스트를 보고 전체 실행 결정</span></div></div>
+      <div class="note">좋은 요청 = 정보의 구체성. 시트 구성과 기능을 빠짐없이 적을수록 고칠 일이 줄어듭니다.</div>` },
+    { g: 2, nav: '2-3', title: '실습 1 흐름', html: () => `<span class="slide-kicker">2. 자동화 · 3) 실습 1 · 메일 자동화</span><h1>시트 목록에서 Gmail까지 네 단계</h1>
+      <p class="slide-lead">원본 3회차 PPT 14~16번의 순서에 Gemini 요청과 권한 승인을 더했습니다.</p>${flowHtml(FLOW_MAIL, 'wide4')}` },
+    { g: 3, nav: '3-1', title: '카드뉴스 6장 구조', html: () => `<span class="slide-kicker">3. 카드뉴스 · 1) 6장의 역할</span><h1>장마다 맡은 일이 있습니다</h1>
+      <p class="slide-lead">규칙: 장마다 제목 1줄 + 본문 2줄 이내. 확인되지 않은 사양·가격·건강 정보는 단정하지 않습니다.</p>
+      <div class="cn-six">${SIX.map(x => `<div><b>${esc(x[0])} · ${esc(x[1])}</b><strong>${esc(x[2])}</strong><span>${esc(x[3])}</span></div>`).join('')}</div>
+      <p class="src">출처: 운영 시트 'GPT 프로젝트 설정' 탭의 프로젝트 지침</p>` },
+    { g: 3, nav: '3-2', title: '예시로 읽기', html: () => `<span class="slide-kicker">3. 카드뉴스 · 2) 예시로 읽기</span><h1>KB-001 · 스위치 소리 비교</h1>
+      <p class="slide-lead">타깃: 기계식 키보드 입문자. 각 장이 여섯 역할 중 무엇인지 맞혀 보세요.</p>${table(['장', '원고 (제목 / 본문)'], KB1)}
+      <p class="src">출처: 운영 시트 '카드뉴스 관리' 탭 KB-001 행</p>` },
+    { g: 3, nav: '3-3', title: '좋은 표지 훅', html: () => `<span class="slide-kicker">3. 카드뉴스 · 3) 표지 훅</span><h1>표지 훅 세 가지 유형</h1>
+      <div class="pts cn-pts3"><div class="pt"><b>01 · 질문형</b><strong>업무용 키보드, 예쁜 것보다 먼저 볼 5가지</strong><p>독자가 스스로 답을 떠올리게 합니다. (KB-003)</p></div>
+      <div class="pt"><b>02 · 숫자형</b><strong>5만·10만·20만 원대, 어디서 차이가 날까?</strong><p>범위가 분명해 끝까지 볼 이유가 생깁니다. (KB-006)</p></div>
+      <div class="pt"><b>03 · 공감형</b><strong>손목이 아프다면 키보드 높이부터 확인하세요</strong><p>불편을 먼저 짚어 "내 얘기"로 느끼게 합니다. (KB-005)</p></div></div>` },
+    { g: 3, nav: '3-4', title: '실습 2 흐름', html: () => `<span class="slide-kicker">3. 카드뉴스 · 4) 실습 2 · 카드뉴스</span><h1>시트 한 줄에서 디자인까지</h1>
+      <p class="slide-lead">모든 결과가 내 시트 한 줄에 모입니다. 내가 직접 쓰는 칸은 B~I열 여덟 개뿐입니다.</p>${flowHtml(FLOW_CARD, 'wide')}` },
+    { g: 4, nav: '4-1', title: '한도와 권한', html: () => `<span class="slide-kicker">4. 안전 · 1) 알아 둘 것</span><h1>한도와 권한을 먼저 압니다</h1>
+      <div class="stat3"><div class="stat"><em>개인 Gmail 계정</em><strong>100명</strong><div class="cap">Apps Script 하루 발송 받는 사람 수</div><p>Google Workspace 계정은 1,500명입니다. 한도는 바뀔 수 있습니다.</p><p class="src">출처: Google Apps Script, Quotas for Google Services</p></div>
+      <div class="stat"><em>처음 한 번</em><strong>권한 승인</strong><div class="cap">"확인되지 않은 앱" 화면</div><p>내가 만든 코드라 Google 심사를 받지 않았다는 뜻입니다. 출처를 아는 코드일 때만 허용합니다.</p></div>
+      <div class="stat"><em>되돌릴 수 없음</em><strong>테스트 먼저</strong><div class="cap">나에게 먼저 보내기</div><p>메일은 2행의 내 주소로 테스트한 뒤 전체 발송합니다.</p></div></div>` },
+    { g: 4, nav: '4-2', title: '실습 전 약속', html: () => `<span class="slide-kicker">4. 안전 · 2) 실습 전 약속</span><h1>AI가 작성하고, 사람이 확인합니다</h1>
+      <div class="recap"><div class="recap-col"><b>AI가 하는 일</b><span>메일 발송 코드 쓰기</span><span>카드뉴스 원고·표지 훅 제안</span><span>게시 문구와 이미지 구성</span></div>
+      <div class="recap-col"><b>사람이 하는 일</b><span>받는 사람과 주제 정하기</span><span>날짜·가격·건강 정보 확인</span><span>보낼지, 게시할지 최종 결정</span></div></div>
+      <div class="note">예시 주소만 씁니다. API 키는 나만 봅니다. 모르는 코드는 허용하지 않습니다.</div>` }
+  ];
+  const GROUPS = ['시작', 'AI', '자동화', '카드뉴스', '안전'];
+  let deckIdx = 0;
+  function renderStart(i) {
+    deckIdx = Math.max(0, Math.min(SLIDES.length - 1, i || 0));
+    const sl = SLIDES[deckIdx];
+    $('#deckWhere').textContent = sl.title;
+    $('#deckSlide').innerHTML = sl.html();
+    $('#deckTabs').innerHTML = GROUPS.map((g, k) => `<button type="button" role="tab" data-i="${gi(k)}" class="${sl.g === k ? 'on' : ''}">${k ? `<b>${k}</b>` : ''}${esc(g)}</button>`).join('');
+    $('#deckDots').innerHTML = SLIDES.map((s, k) => `<button type="button" data-i="${k}" class="${k === deckIdx ? 'on' : ''}" aria-label="${esc(s.title)}" title="${esc(s.title)}"></button>`).join('');
+    $('#viewStart').querySelectorAll('[data-i]').forEach(b => b.addEventListener('click', () => { location.hash = '#start-' + b.dataset.i; }));
+    $('#deckPrev').disabled = deckIdx === 0;
+    $('#deckNext').textContent = deckIdx === SLIDES.length - 1 ? '실습 1로 →' : '다음 →';
+  }
+  $('#deckPrev').addEventListener('click', () => { if (deckIdx > 0) location.hash = '#start-' + (deckIdx - 1); });
+  $('#deckNext').addEventListener('click', () => { location.hash = deckIdx === SLIDES.length - 1 ? '#' + SEQ[0].id : '#start-' + (deckIdx + 1); });
+  document.addEventListener('keydown', e => {
+    if ($('#viewStart').hidden || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+    if (e.key === 'ArrowRight' && deckIdx < SLIDES.length - 1) location.hash = '#start-' + (deckIdx + 1);
+    if (e.key === 'ArrowLeft' && deckIdx > 0) location.hash = '#start-' + (deckIdx - 1);
+  });
+
+  /* ---------- 바로가기 ---------- */
+  function renderQuick() {
+    const groups = [
+      ['START · 네 가지 키워드', SLIDES.map((s, i) => ['#start-' + i, s.nav, s.title])],
+      ...D.parts.map(p => [`실습 ${p.no} · ${p.short}`, [...p.stages.map(s => ['#' + s.id, s.no + '단계', s.title]), ['#' + p.review.id, '마무리', p.review.title]]]),
+      ['자료와 안내', [['#timeline', '시간표', '시간표'], ['#materials', '자료', '요청문과 참고 코드'], ['#safety', '유의', '실제 업무에 쓸 때'], ['#help', '도움', '막힐 때'], ['#sources', '출처', '참고 자료']]]
+    ];
+    $('#quickPanel').innerHTML = groups.map(g => `<div class="menu-group"><strong>${esc(g[0])}</strong>${g[1].map(x => `<a href="${x[0]}"><span>${esc(x[1])}</span>${esc(x[2])}</a>`).join('')}</div>`).join('');
+    $('#quickPanel').addEventListener('click', e => { if (e.target.closest('a')) $('#quickMenu').open = false; });
+    document.addEventListener('click', e => { if (!e.target.closest('#quickMenu')) $('#quickMenu').open = false; });
+  }
+
+  /* ---------- 라우팅 ---------- */
+  const HOME_SECS = ['timeline', 'mail', 'card', 'materials', 'safety', 'help', 'sources'];
+  function route() {
+    const h = (location.hash || '#home').replace('#', '');
+    const [view, sub] = h.split('-');
+    ['#viewHome', '#viewStart', '#viewStage'].forEach(v => { $(v).hidden = true; });
+    let target = null;
+    $('#quickMenu').open = false;
+    const x = find(view);
+    if (view === 'start') { $('#viewStart').hidden = false; renderStart(Number(sub) || 0); }
+    else if (x && x.stage) { $('#viewStage').hidden = false; renderStage(x); }
+    else if (x && x.review) { $('#viewStage').hidden = false; renderReview(x); }
+    else { $('#viewHome').hidden = false; renderHome(); if (HOME_SECS.includes(view)) target = document.getElementById('sec-' + view); }
+    if (sub && view !== 'start') target = document.getElementById(h);
+    requestAnimationFrame(() => { if (target) target.scrollIntoView({ block: 'start' }); else window.scrollTo(0, 0); });
+  }
+
+  renderStatic();
+  renderQuick();
+  window.addEventListener('hashchange', route);
+  route();
+})();
