@@ -509,33 +509,34 @@
   /* ---------- START 장표 ---------- */
   const ST = D.start;
   const srcLine = (t, u) => `<p class="src">출처: ${esc(t)}${u ? ` · <a href="${esc(u)}" target="_blank" rel="noopener noreferrer">원문 보기</a>` : ''}</p>`;
+  const ul = arr => `<ul class="bl">${arr.map(t => `<li>${esc(t)}</li>`).join('')}</ul>`;
   const HL = ['AI 네이티브', '오케스트라 인재', '커리어 민첩성', '롱제비티'];
   const SLIDES = [
     { g: 0, nav: '시작', title: '세 가지 키워드', html: () => `<span class="slide-kicker">START · AI 활용 취업지원 실무</span><h1>변화, 트렌드, 역할</h1>
-      <p class="slide-lead">실습 전에 세 가지 키워드로 배경을 살펴봅니다. 채용시장에서 달라진 점, 2027년 채용 트렌드, 취업지원 실무자의 역할 순서입니다.</p>
-      <div class="kw3"><a href="#start-1"><b>KEYWORD 1</b><strong>변화</strong><span>구직자가 맞이하는 변화, 고용서비스업 종사자가 맞이하는 변화</span></a>
-      <a href="#start-3"><b>KEYWORD 2</b><strong>트렌드</strong><span>2027년 채용 트렌드 10가지, 2026년과 달라진 네 가지</span></a>
-      <a href="#start-5"><b>KEYWORD 3</b><strong>역할</strong><span>사례로 보는 구직자의 마음, 우리의 역할 3S</span></a></div>` },
+      <p class="slide-lead">실습 전에 보는 세 가지 키워드</p>
+      <div class="kw3"><a href="#start-1"><b>KEYWORD 1</b><strong>변화</strong><span>구직자의 변화 · 고용서비스업 종사자의 변화</span></a>
+      <a href="#start-3"><b>KEYWORD 2</b><strong>트렌드</strong><span>2027년 채용 트렌드 10가지 · 2026년과 달라진 4가지</span></a>
+      <a href="#start-5"><b>KEYWORD 3</b><strong>역할</strong><span>사례로 보는 구직자의 마음 · 우리의 역할 3S</span></a></div>` },
     { g: 1, nav: '1-1', title: '구직자가 맞이하는 변화', html: () => `<span class="slide-kicker">1. 변화 · 1) 구직자</span><h1>구직자가 맞이하는 변화</h1>
-      <div class="stat3">${ST.seeker.map(x => `<div class="stat"><em>${esc(x.tag)}</em><strong>${esc(x.num)}</strong><div class="cap">${esc(x.cap)}</div><p>${esc(x.more)}</p>${srcLine(x.src, x.url)}</div>`).join('')}</div>
-      <div class="note">${esc(ST.seeker_note)}</div>` },
+      <div class="stat3">${ST.seeker.map(x => `<div class="stat"><em>${esc(x.tag)}</em><strong>${esc(x.num)}</strong><div class="cap">${esc(x.cap)}</div>${ul(x.pts)}${srcLine(x.src, x.url)}</div>`).join('')}</div>
+      <div class="note"><b>정리</b>${ul(ST.seeker_note)}</div>` },
     { g: 1, nav: '1-2', title: '고용서비스업 종사자가 맞이하는 변화', html: () => `<span class="slide-kicker">1. 변화 · 2) 고용서비스업 종사자</span><h1>종사자가 맞이하는 변화</h1>
-      <div class="pts">${ST.worker.map((x, i) => `<div class="pt"><b>0${i + 1}</b><strong>${esc(x.h)}</strong><p>${esc(x.p)}</p>${srcLine(x.src)}</div>`).join('')}</div>` },
+      <div class="pts">${ST.worker.map((x, i) => `<div class="pt"><b>0${i + 1}</b><strong>${esc(x.h)}</strong>${ul(x.pts)}${srcLine(x.src)}</div>`).join('')}</div>` },
     { g: 2, nav: '2-1', title: '2027년 채용 트렌드', html: () => `<span class="slide-kicker">2. 트렌드 · 3) 2027년 채용 트렌드</span><h1>2027년 채용 트렌드 10가지</h1>
-      <p class="slide-lead">키워드를 누르면 설명이 펼쳐집니다. 파란 테두리 네 개는 다음 장에서 2026년과 비교합니다.</p>
-      <div class="t10">${ST.trend27.map((k, i) => `<details class="${HL.includes(k[0]) ? 'hl' : ''}"><summary><b>${String(i + 1).padStart(2, '0')}</b><strong>${esc(k[0])}</strong><span>${esc(k[1])}</span></summary><p>${esc(k[2])}</p></details>`).join('')}</div>
+      <p class="slide-lead">키워드를 누르면 요점이 펼쳐집니다. 파란 테두리 네 개는 다음 장에서 2026년과 비교합니다.</p>
+      <div class="t10">${ST.trend27.map((k, i) => `<details class="${HL.includes(k[0]) ? 'hl' : ''}"><summary><b>${String(i + 1).padStart(2, '0')}</b><strong>${esc(k[0])}</strong><span>${esc(k[1])}</span></summary>${ul(k[2])}</details>`).join('')}</div>
       ${srcLine(ST.trend27_src, ST.trend27_url)}` },
     { g: 2, nav: '2-2', title: '2026년과 달라진 점', html: () => `<span class="slide-kicker">2. 트렌드 · 4) 2026년과 달라진 점</span><h1>2026년과 달라진 점</h1>
-      <p class="slide-lead">2027년 키워드 가운데 네 가지를 2026년 키워드와 나란히 놓았습니다.</p>
+      <p class="slide-lead">2027년 키워드 네 가지 · 2026년 키워드와 비교</p>
       <div class="shift">${ST.shift.map(r => `<div class="shift-row"><div class="y26"><small>2026</small>${esc(r[0])}</div><div class="arr">→</div><div class="y27"><small>2027</small>${esc(r[1])}</div><p>${esc(r[2])}<i>${esc(r[3])}</i></p></div>`).join('')}</div>
       <div class="chips26">${ST.trend26.map(k => `<span>2026 · ${esc(k)}</span>`).join('')}</div>
       ${srcLine(ST.trend26_src, ST.trend26_url)}<p class="src">${esc(ST.shift_note)}</p>` },
     ...ST.cases.map((cs, i) => ({ g: 3, nav: `3-1${i ? 'b' : 'a'}`, title: `${cs.no} · 구직자의 마음`, html: () => `<span class="slide-kicker">3. 역할 · 1) 사례로 알아보는 구직자의 마음 · ${esc(cs.no)}</span><h1>${esc(cs.title)}</h1>
-      <div class="case"><div class="case-what"><b>현장에서 자주 보는 장면</b><p>${esc(cs.what)}</p></div>
+      <div class="case"><div class="case-what"><b>현장에서 자주 보는 장면</b>${ul(cs.what)}</div>
       <div class="bubbles"><b>구직자의 마음</b>${cs.mind.map(m => `<div class="bubble">${esc(m)}</div>`).join('')}</div></div>
       <div class="note">${esc(cs.lack)}</div><p class="src">${esc(ST.cases_note)}</p>` })),
     { g: 3, nav: '3-2', title: '우리의 역할 3S', html: () => `<span class="slide-kicker">3. 역할 · 2) 그렇다면 우리의 역할은?</span><h1>3S: Simple, Specific, Skill</h1>
-      <div class="s3">${ST.s3.map(x => `<a href="${esc(x.href)}"><strong><i>S</i>${esc(x.k.slice(1))}</strong><em>${esc(x.ko)}</em><p>${esc(x.p)}</p><span>${esc(x.do)} →</span></a>`).join('')}</div>
+      <div class="s3">${ST.s3.map(x => `<a href="${esc(x.href)}"><strong><i>S</i>${esc(x.k.slice(1))}</strong><em>${esc(x.ko)}</em>${ul(x.pts)}<span>${esc(x.do)} →</span></a>`).join('')}</div>
       <p class="src">${esc(ST.s3_note)}</p>` },
   ];
   const GROUPS = ['시작', '변화', '트렌드', '역할'];

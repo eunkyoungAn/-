@@ -17,6 +17,7 @@
 | `src/*.md` | 가상 채용공고와 내담자 서류 원본. 04, 05는 build.py가 만든다 |
 | `files/` | 수강생이 내려받는 PDF·DOCX, 스킬 zip, 전체 압축 파일. build.py가 만든다 |
 | `instructor/` | 강사용 예시 답안. build.py가 만들며 저장소와 사이트에 올리지 않는다(.gitignore) |
+| `sheet/Code.gs` | 구인기업·직무 분석 자동화 구글 시트의 Apps Script 원본. 시트의 'Apps Script 코드' 탭 A2와 같은 내용. 사이트에는 올리지 않는다 |
 | `tools/build.py` | 내용 원본. START 장표(`START`: 변화·트렌드·역할의 수치·인용·출처), 직업공통능력 목록, 가상 응답, 요청문, 검수 항목, 예시 답안, 지원 제도 |
 
 ## 내용 고치기

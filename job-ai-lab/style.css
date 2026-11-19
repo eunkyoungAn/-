@@ -829,3 +829,17 @@ body{word-break:keep-all;overflow-wrap:break-word;line-break:strict}
 .edit-table td input.score-in{width:64px;min-width:0;text-align:center;font-weight:700}
 .lesson-content code{background:var(--surface-2);padding:1px 6px;border-radius:5px;font-size:13.5px}
 @media print{.form-note{display:none}}
+
+/* 장표: 개조식 목록 */
+.bl{margin:10px 0 0;padding-left:18px;color:var(--ink-soft);font-size:15px;line-height:1.65}
+.bl li + li{margin-top:5px}
+.bl li::marker{color:var(--ink-mute)}
+.stat .bl{font-size:14.5px}
+.stat strong{font-size:clamp(34px,4.2vw,52px)}
+.pt .bl{font-size:15.5px}
+.t10 details .bl{margin:0;padding:0 16px 14px 76px;font-size:14.5px}
+.case-what .bl{font-size:17px;color:var(--ink);line-height:1.7}
+.s3 .bl{margin-top:0}
+.slide .note b{display:block;font-size:12.5px;letter-spacing:.1em;color:var(--ink-mute)}
+.slide .note .bl{margin-top:4px;color:var(--ink);font-size:15.5px}
+.slide .slide-lead{color:var(--ink-mute)}
