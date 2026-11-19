@@ -176,10 +176,10 @@
   function renderCheck() {
     const C = D.selfcheck;
     $('#bcStage').textContent = 'START 전 · 나는 어떤 AI 사용자?';
-    $('#shEyebrow').textContent = 'SELF-CHECK · 8분';
+    $('#shEyebrow').textContent = 'SELF-CHECK · 7분';
     $('#shTitle').textContent = 'AI 사용 전, 나는 어떤 사용자?';
     $('#shSum').textContent = '실습 전에 지금 내가 AI를 어떻게 쓰고 있는지 점검합니다. 해당하는 것만 솔직하게 체크하세요. 결과는 이 기기에만 저장됩니다.';
-    $('#shMeta').innerHTML = '<span class="meta-chip active">8분</span><span class="meta-chip">AI 활용 3레벨 · 장현민(팀제이커브)</span>';
+    $('#shMeta').innerHTML = '<span class="meta-chip active">7분</span><span class="meta-chip">AI 활용 3레벨 · 장현민(팀제이커브)</span>';
     const secs = [];
     secs.push(['quiz', '해당하는 것에 체크', C.levels.map(L => `<h3>${esc(L.name)}</h3><p class="local-note">${esc(L.short)}</p>` +
       `<div class="checklist">${L.items.map((x, i) => `<label class="check-item"><input type="checkbox" data-k="chk.${L.lv}.${i}" ${S.checks[`chk.${L.lv}.${i}`] ? 'checked' : ''}><span>${esc(x)}</span></label>`).join('')}</div>`).join('')]);
@@ -202,6 +202,7 @@
   }
 
   /* ---------- START 장표 ---------- */
+  const SRC_YOZM = '출처: 요즘IT, 「AI vs 사람 맡길 일 고르는 기준 4가지」(위시켓 요즘IT 매거진) · 2026년 5~10월 요즘IT 사례 9편 분석';
   const SRC_AI = '출처: 과학기술정보통신부, 「2025 인터넷이용실태조사」 결과 발표(2026. 3. 31.) · 전국 22,671가구, 만 3세 이상 50,750명';
   const SIX = [['1장', '표지', '시선을 끄는 훅', '질문형·숫자형으로 3초 안에 멈추게'], ['2장', '문제', '독자의 불편', '"이런 적 있으시죠?"로 공감'], ['3장', '정보①', '핵심 정보', '비교나 개념 하나'], ['4장', '정보②', '핵심 정보', '3장과 짝이 되는 두 번째 정보'], ['5장', '선택 기준', '실천 방법', '독자가 바로 쓸 수 있는 기준'], ['6장', 'CTA', '행동 유도', '저장·댓글·공유 중 하나']];
   const KB1 = [['표지 훅', '청축·적축·갈축, 내 귀에는 뭐가 맞을까?'], ['1장', '청축·적축·갈축 / 3초 만에 고르기'], ['2장', '키감만 보고 샀다가 / 소음 때문에 후회할 수 있어요'], ['3장', '청축: 경쾌한 클릭음 / 타건 피드백이 분명해요'], ['4장', '적축: 조용하고 부드러움 / 갈축: 소리와 구분감의 중간'], ['5장', '사용 장소와 원하는 키감을 / 먼저 정하세요'], ['6장', '저장해 두고 매장에서 비교하세요']];
@@ -210,7 +211,7 @@
     { g: 0, nav: '시작', title: '네 가지 키워드', html: () => `<span class="slide-kicker">START · Gemini 업무 자동화</span><h1>AI, 자동화, 카드뉴스, 안전</h1>
       <p class="slide-lead">실습 전에 보는 키워드. 실습 1은 메일 자동화, 실습 2는 카드뉴스 만들기입니다.</p>
       <div class="kw3 cn-kw4"><a href="#start-${gi(1)}"><b>KEYWORD 1</b><strong>AI</strong><span>생성형 AI 이용 현황 · 오늘 쓰는 AI · API 키</span></a>
-      <a href="#start-${gi(2)}"><b>KEYWORD 2</b><strong>자동화</strong><span>Apps Script · 코드는 Gemini가 · 실습 1 흐름</span></a>
+      <a href="#start-${gi(2)}"><b>KEYWORD 2</b><strong>자동화</strong><span>Apps Script · 맡길 일 고르는 기준 4가지 · 실습 1 흐름</span></a>
       <a href="#start-${gi(3)}"><b>KEYWORD 3</b><strong>카드뉴스</strong><span>6장 구조 · 표지 훅 · 실습 2 흐름</span></a>
       <a href="#start-${gi(4)}"><b>KEYWORD 4</b><strong>안전</strong><span>발송 한도 · 권한 승인 · 사람이 확인</span></a></div>` },
     { g: 1, nav: '1-1', title: '생성형 AI 이용 현황', html: () => `<span class="slide-kicker">1. AI · 1) 우리나라 생성형 AI 이용 현황</span><h1>국민 절반 가까이가 써 봤습니다</h1>
@@ -242,7 +243,21 @@
       <div class="recap"><div class="recap-col"><b>Gemini가 하는 일</b><span>요청한 기능대로 코드 쓰기</span><span>오류 문장을 보고 고치기</span><span>코드 설명하기</span></div>
       <div class="recap-col"><b>내가 하는 일</b><span>원하는 기능을 번호로 나눠 말하기</span><span>제목·본문·받는 사람 확인</span><span>테스트를 보고 전체 실행 결정</span></div></div>
       <div class="note">좋은 요청 = 정보의 구체성. 시트 구성과 기능을 빠짐없이 적을수록 고칠 일이 줄어듭니다.</div>` },
-    { g: 2, nav: '2-3', title: '실습 1 흐름', html: () => `<span class="slide-kicker">2. 자동화 · 3) 실습 1 · 메일 자동화</span><h1>시트 목록에서 Gmail까지 네 단계</h1>
+    { g: 2, nav: '2-3', title: '맡길 일 고르는 기준 4가지', html: () => `<span class="slide-kicker">2. 자동화 · 3) AI에게 무엇을 맡길까</span><h1>AI vs 사람, 맡길 일 고르는 기준 4가지</h1>
+      <p class="slide-lead">요즘IT가 2026년 5~10월에 실린 AI 활용 사례 9편을 분석해 정리한 기준입니다. 파란 글씨는 오늘 실습 1에 적용한 곳입니다.</p>
+      <div class="pts"><div class="pt"><b>기준 1</b><strong>맡길 가치가 있는 일인가</strong><p>자주, 오래, 틀리면 위험하게 반복되는 일부터 맡깁니다. 1년에 한두 번 하는 일은 도구를 만들고 관리하는 품이 더 클 수 있습니다.</p><p class="cn-apply">오늘: 여러 사람에게 같은 안내 메일 보내기</p></div>
+      <div class="pt"><b>기준 2</b><strong>정해진 답이 있는 일인가</strong><p>답이 정해진 일은 AI가 매번 판단하게 두지 않고 규칙으로 고정합니다. 그 규칙은 AI와 함께 만들어도 됩니다.</p><p class="cn-apply">오늘: "C열이 비어 있으면 보낸다"는 규칙을 Gemini와 코드로 만듦</p></div>
+      <div class="pt"><b>기준 3</b><strong>틀리면 되돌릴 수 있는 일인가</strong><p>되돌리기 어려운 결정과 승인은 사람에게 남깁니다. "경계선을 정하는 건 AI의 성능이 아니라 오류의 비용"입니다.</p><p class="cn-apply">오늘: 보낸 메일은 되돌릴 수 없으니 전체 발송은 내가 결정</p></div>
+      <div class="pt"><b>기준 4</b><strong>어디서 확인할 것인가</strong><p>"완료" 보고만 믿지 말고, 결과를 언제 어디서 확인할지 맡기기 전에 정해 둡니다.</p><p class="cn-apply">오늘: 2행 내 주소로 테스트 발송, 발송 전 체크리스트</p></div></div>
+      <p class="src">${esc(SRC_YOZM)}</p>` },
+    { g: 2, nav: '2-4', title: '먼저 해 본 사람들의 숫자', html: () => `<span class="slide-kicker">2. 자동화 · 4) 사례로 보는 기준</span><h1>먼저 맡겨 본 사람들이 겪은 일</h1>
+      <div class="pts"><div class="pt"><b>기준 1 · 사업관리 담당자</b><strong>400쪽 · 매달 30분~1시간</strong><p>점검철 스캔본에서 서명 누락을 찾는 일을 가장 먼저 자동화했습니다. 1년에 한두 번 하는 일은 만들 수 있어도 만들지 않았습니다.</p></div>
+      <div class="pt"><b>기준 2 · AI 진단 서비스 팀</b><strong>72점, 85점, 61점</strong><p>같은 페이지를 세 번 AI에게 진단시키자 점수가 매번 달랐습니다. 정해진 사실은 코드가, 판단만 AI가 맡도록 나눴습니다.</p></div>
+      <div class="pt"><b>기준 3 · 법률 AI 서비스</b><strong>쟁점은 AI, 소송 결정은 사람</strong><p>틀려도 상담에서 바로잡을 수 있는 쟁점 정리는 AI가, 되돌리기 어려운 소송 여부는 끝까지 사람이 정하게 했습니다.</p></div>
+      <div class="pt"><b>기준 4 · 개발 도구</b><strong>요구사항 40개 중 25개</strong><p>AI가 "개발 완료"라고 보고했지만 실제로 들어간 건 25개였습니다. 이후 추적표를 만들어 사람이 빠진 곳을 확인합니다.</p></div></div>
+      <div class="note">AI에게 맡긴다는 것은 사람의 일이 사라지는 것이 아니라, 사람이 봐야 할 곳이 좁고 분명해지는 것입니다.</div>
+      <p class="src">${esc(SRC_YOZM)}</p>` },
+    { g: 2, nav: '2-5', title: '실습 1 흐름', html: () => `<span class="slide-kicker">2. 자동화 · 5) 실습 1 · 메일 자동화</span><h1>시트 목록에서 Gmail까지 네 단계</h1>
       <p class="slide-lead">원본 3회차 PPT 14~16번의 순서에 Gemini 요청과 권한 승인을 더했습니다.</p>${flowHtml(FLOW_MAIL, 'wide4')}` },
     { g: 3, nav: '3-1', title: '카드뉴스 6장 구조', html: () => `<span class="slide-kicker">3. 카드뉴스 · 1) 6장의 역할</span><h1>장마다 맡은 일이 있습니다</h1>
       <p class="slide-lead">규칙: 장마다 제목 1줄 + 본문 2줄 이내. 확인되지 않은 사양·가격·건강 정보는 단정하지 않습니다.</p>
