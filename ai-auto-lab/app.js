@@ -178,19 +178,23 @@
     $('#bcStage').textContent = 'START 전 · 나는 어떤 AI 사용자?';
     $('#shEyebrow').textContent = 'SELF-CHECK · 7분';
     $('#shTitle').textContent = 'AI 사용 전, 나는 어떤 사용자?';
-    $('#shSum').textContent = '실습 전에 지금 내가 AI를 어떻게 쓰고 있는지 점검합니다. 해당하는 것만 솔직하게 체크하세요. 결과는 이 기기에만 저장됩니다.';
-    $('#shMeta').innerHTML = '<span class="meta-chip active">7분</span><span class="meta-chip">AI 활용 3레벨 · 장현민(팀제이커브)</span>';
+    $('#shSum').textContent = '실습 전에 지금 내가 AI를 어떻게 쓰고 있는지 점검합니다. 해당하는 것만 솔직하게 체크하세요. 나의 단계는 맨 마지막에 확인합니다. 결과는 이 기기에만 저장됩니다.';
+    $('#shMeta').innerHTML = '<span class="meta-chip active">7분</span><span class="meta-chip">단계는 마지막에 확인</span>';
     const secs = [];
-    secs.push(['quiz', '해당하는 것에 체크', C.levels.map(L => `<h3>${esc(L.name)}</h3><p class="local-note">${esc(L.short)}</p>` +
-      `<div class="checklist">${L.items.map((x, i) => `<label class="check-item"><input type="checkbox" data-k="chk.${L.lv}.${i}" ${S.checks[`chk.${L.lv}.${i}`] ? 'checked' : ''}><span>${esc(x)}</span></label>`).join('')}</div>`).join('')]);
-    secs.push(['result', '나의 레벨', `<div id="cnResult">${resultHtml()}</div>
-      ${table(['레벨', '기준'], C.levels.map(L => [L.name, L.short]))}
-      <p class="local-note">판정: 3레벨 문항 2개 이상 → 3레벨, 2레벨 문항 2개 이상 → 2레벨, 1레벨 문항 1개 이상 → 1레벨. ${esc(C.src)}</p>`]);
-    secs.push(['facts', '영상에서 짚은 세 가지', `<div class="two-col">${C.facts.map(f => `<div class="result-card"><strong>${esc(f[0])}</strong><p>${esc(f[1])}</p></div>`).join('')}</div>`]);
-    secs.push(['split', '내 업무 하나를 네 칸으로 나눠 보기', `<p>영상은 AI 전환의 핵심을 "AI 도입"이 아니라 일을 네 가지로 나누고 다시 합치는 것이라고 말합니다. 내 업무 하나를 골라 적어 보세요. 오늘 G-mail 자동화는 "위임", 카드뉴스 자동화의 원고 쓰기는 "증강"에 해당합니다.</p>` +
+    /* 단계가 드러나지 않도록 문항을 섞어 한 목록으로 보여 준다. 단계는 맨 아래에서 단추를 눌러야 열린다. */
+    const ORDER = [[2, 0], [1, 0], [3, 1], [2, 2], [1, 1], [3, 0], [2, 1], [3, 2]];
+    secs.push(['quiz', '해당하는 것에 체크', `<p>평소 내 모습에 해당하는 것만 체크하세요. 몇 개를 체크해도 괜찮습니다.</p>
+      <div class="checklist">${ORDER.map(([lv, i]) => `<label class="check-item"><input type="checkbox" data-k="chk.${lv}.${i}" ${S.checks[`chk.${lv}.${i}`] ? 'checked' : ''}><span>${esc(C.levels[lv - 1].items[i])}</span></label>`).join('')}</div>`]);
+    secs.push(['split', '내 업무 하나를 네 칸으로 나눠 보기', `<p>AI 전환의 핵심은 "AI 도입"이 아니라 일을 네 가지로 나누고 다시 합치는 것입니다. 내 업무 하나를 골라 적어 보세요. 오늘 G-mail 자동화는 "위임", 카드뉴스 자동화의 원고 쓰기는 "증강"에 해당합니다.</p>` +
       noteBox('split.task', '내가 고른 업무', '예: 교육생에게 회의 안내 메일 보내기') + C.split.map(x => noteBox('split.' + x[0], `${x[1]} — ${x[2]}`, x[3])).join('')]);
+    secs.push(['result', '나의 단계 확인', `<div id="cnResult"></div>`]);
     paint('check', secs);
-    $('#stageBody').querySelectorAll('[data-k^="chk."]').forEach(i => i.addEventListener('change', () => { $('#cnResult').innerHTML = resultHtml(); }));
+    const box = $('#cnResult');
+    const closed = () => { box.innerHTML = `<div class="go-studio"><p><b>체크를 모두 마쳤나요?</b> 단추를 누르면 나의 단계가 열립니다.</p><button class="g-btn" type="button" id="cnReveal">나의 단계 확인하기</button></div>`;
+      $('#cnReveal').addEventListener('click', () => { box.innerHTML = resultHtml() + table(['단계', '기준'], C.levels.map(L => [L.name, L.short])) +
+        `<p class="local-note">판정: 3레벨 문항 2개 이상 → 3레벨, 2레벨 문항 2개 이상 → 2레벨, 1레벨 문항 1개 이상 → 1레벨. ${esc(C.src)}</p>`; }); };
+    closed();
+    $('#stageBody').querySelectorAll('[data-k^="chk."]').forEach(i => i.addEventListener('change', closed));
   }
   function paint(id, secs) {
     const [prev, next] = navPair(id);
