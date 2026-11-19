@@ -1,4 +1,4 @@
-/* AI 업무 자동화 실습실 — 공통 START 장표, G-mail 자동화 · 카드뉴스 자동화, 메모·검수 표시.
+/* AI 업무 자동화 실습실 — 공통 START 장표, 제미나이 메일 자동화 · 카드뉴스 만들기, 메모·검수 표시.
    입력한 내용은 어디에도 보내지 않으며 이 기기의 localStorage에만 저장한다. */
 (function () {
   'use strict';
@@ -17,7 +17,7 @@
 
   /* 실습 순서: m1~m4 → mr → c1~c3 → cr */
   const SEQ = [];
-  D.parts.forEach(p => { p.stages.forEach(s => SEQ.push({ id: s.id, part: p, stage: s })); SEQ.push({ id: p.review.id, part: p, review: p.review }); });
+  D.parts.forEach(p => { p.stages.forEach(s => SEQ.push({ id: s.id, part: p, stage: s })); if (p.review) SEQ.push({ id: p.review.id, part: p, review: p.review }); });
   const find = id => SEQ.find(x => x.id === id);
   const label = x => x.stage ? `${x.part.short} · ${x.stage.no}단계 ${x.stage.title}` : `${x.part.short} · 마무리 ${x.review.title}`;
 
@@ -85,32 +85,35 @@
   }
   function renderHome() {
     $('#homeParts').innerHTML = D.parts.map(p => `<section class="level-section" id="sec-${p.id}">
-      <div class="level-head"><div><span class="level-kicker">${Number(p.no) + 1} · ${esc(p.time)}</span><h2>${esc(p.title)}</h2></div><p>${esc(p.desc)}</p></div>
+      <div class="level-head"><div><span class="level-kicker">${esc(p.no)} · ${esc(p.time)}</span><h2>${esc(p.title)}</h2></div><p>${esc(p.desc)}</p></div>
       <div class="lesson-grid">${p.stages.map(s => { const x = find(s.id); return `<a class="lesson-card ${done(x) ? 'is-done' : ''}" href="#${s.id}">
         <span class="lesson-code">${esc(s.kicker)} · ${esc(s.time)}</span><h3>${esc(s.title)}</h3><p>${esc(s.goal[0])}</p>
         <div class="lesson-output">산출물 <span>${esc(s.output)}</span></div><div class="lesson-arrow">${esc(s.role)} →</div></a>`; }).join('')}
-      <a class="lesson-card ${done(find(p.review.id)) ? 'is-done' : ''}" href="#${p.review.id}"><span class="lesson-code">WRAP-UP · ${esc(p.review.time)}</span><h3>${esc(p.review.title)}</h3><p>${p.id === 'mail' ? 'AI가 만든 메일을 바로 보내지 않고 체크리스트로 다시 읽습니다.' : '결과 링크와 상태를 시트에 기록하고 오늘 한 일을 돌아봅니다.'}</p><div class="lesson-output">산출물 <span>${p.id === 'mail' ? '체크 완료' : '카드뉴스 1편과 링크'}</span></div><div class="lesson-arrow">마무리 →</div></a>
+      ${p.review ? `<a class="lesson-card ${done(find(p.review.id)) ? 'is-done' : ''}" href="#${p.review.id}"><span class="lesson-code">WRAP-UP · ${esc(p.review.time)}</span><h3>${esc(p.review.title)}</h3><p>${p.id === 'mail' ? 'AI가 만든 메일을 바로 보내지 않고 체크리스트로 다시 읽습니다.' : '결과 링크와 상태를 시트에 기록하고 오늘 한 일을 돌아봅니다.'}</p><div class="lesson-output">산출물 <span>${p.id === 'mail' ? '체크 완료' : '카드뉴스 1편과 링크'}</span></div><div class="lesson-arrow">마무리 →</div></a>` : ''}
       </div></section>`).join('');
     renderProgress();
   }
   function renderStatic() {
-    $('#copyLink').href = D.sheetCopy;
+    document.querySelectorAll('[data-copylink]').forEach(a => { a.href = D.sheetCopy; });
     if ($('#homeFlowMail')) $('#homeFlowMail').innerHTML = FLOW_MAIL.map((f, i) => `<li><b>${i + 1}</b><div><strong>${esc(f[1])}</strong><span>${esc(f[0])}</span></div></li>`).join('');
     if ($('#homeFlowCard')) $('#homeFlowCard').innerHTML = FLOW_CARD.map((f, i) => `<li><b>${i + 1}</b><div><strong>${esc(f[1])}</strong><span>${esc(f[0])}</span></div></li>`).join('');
     $('#timelineTable').innerHTML = '<thead><tr><th>시간</th><th>구분</th><th>단계</th><th>내용</th><th>산출물</th></tr></thead><tbody>' +
       D.timeline.map(r => `<tr${r[1] === '휴식' ? ' class="cn-break"' : ''}>${r.map(c => `<td>${esc(c)}</td>`).join('')}</tr>`).join('') + '</tbody>';
     const mailPrompt = D.parts[0].stages.find(s => s.prompt);
-    $('#materialBox').innerHTML = `<h3 class="dl-h">G-mail 자동화</h3>${promptBox(mailPrompt.prompt.text, '코드 요청문 (gemini.google.com)')}${codeBlock()}
-      <h3 class="dl-h">카드뉴스 자동화</h3>${[['guide', 'ChatGPT 프로젝트 지침'], ['request', '카드뉴스 제작 요청문 (주소와 ID만 바꿔 사용)'], ['cover', '표지 이미지 요청문'], ['fix', '디자인 수정 요청문']].map(([k, l]) => promptBox(D.texts[k], l)).join('')}`;
+    $('#materialBox').innerHTML = `<h3 class="dl-h">내려받는 파일</h3><div class="dl-grid">${D.downloads.map(f => `<div class="dl-item"><div><strong>${esc(f[0])}</strong><span>${esc(f[1])}</span></div><a class="g-btn ghost" href="${esc(f[2])}" ${f[3] ? 'download' : 'target="_blank" rel="noopener noreferrer"'}>${f[3] ? '받기' : '열기'}</a></div>`).join('')}</div>
+      <h3 class="dl-h">3 · 제미나이 메일 자동화</h3>${promptBox(mailPrompt.prompt.text, '코드 요청문 (gemini.google.com)')}${CODE ? promptBox(CODE, '참고 코드 (Code.gs)', 'cn-code') : ''}
+      <h3 class="dl-h">4 · ChatGPT 프로젝트 활용하기</h3>${promptBox(D.texts.guide, 'ChatGPT 프로젝트 지침')}${promptBox(D.texts.verify, '확인 요청문')}
+      <h3 class="dl-h">5 · 카드뉴스 만들기</h3>${[['request', '카드뉴스 제작 요청문 (주소와 ID만 바꿔 사용)'], ['cover', '표지 이미지 요청문'], ['fix', '디자인 수정 요청문']].map(([k, l]) => promptBox(D.texts[k], l)).join('')}
+      <h3 class="dl-h">7 · 개인 연습실</h3>${promptBox(D.selfcheck.applyPrompt, '적용 시작 요청문')}`;
     bindAll($('#materialBox'));
-    $('#helpList').innerHTML = ['메일', '카드뉴스', '공통'].map(g => `<h3 class="dl-h">${g === '공통' ? '공통' : (g === '메일' ? 'G-mail 자동화' : '카드뉴스 자동화')}</h3><div class="two-col">${D.help.filter(h => h[0] === g).map(h => `<div class="result-card"><strong>${esc(h[1])}</strong><p>${esc(h[2])}</p></div>`).join('')}</div>`).join('');
+    $('#helpList').innerHTML = ['메일', 'ChatGPT', '카드뉴스', '공통'].map(g => `<h3 class="dl-h">${({ 메일: '제미나이 메일 자동화', ChatGPT: 'ChatGPT 프로젝트 활용하기', 카드뉴스: '카드뉴스 만들기', 공통: '공통' })[g]}</h3><div class="two-col">${D.help.filter(h => h[0] === g).map(h => `<div class="result-card"><strong>${esc(h[1])}</strong><p>${esc(h[2])}</p></div>`).join('')}</div>`).join('');
     $('#sourceList').innerHTML = D.sources.map(s => `<li>${esc(s).replace(/(https?:\/\/\S+)/, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>')}</li>`).join('');
     $('#sourceList').classList.add('sources-ol');
   }
 
   /* ---------- 단계 화면 ---------- */
   function navPair(id) {
-    if (id === 'check') return [['#before', '시작하기 전에'], ['#start', 'START · AI, 자동화, 카드뉴스, 안전']];
+    if (id === 'check') return [['#practice', '개인 연습실'], ['#home', '처음 화면']];
     const i = SEQ.findIndex(x => x.id === id);
     const prev = i === 0 ? ['#start', 'START · AI, 자동화, 카드뉴스, 안전'] : ['#' + SEQ[i - 1].id, label(SEQ[i - 1])];
     const next = i === SEQ.length - 1 ? ['#home', '처음 화면'] : ['#' + SEQ[i + 1].id, label(SEQ[i + 1])];
@@ -175,11 +178,11 @@
   }
   function renderCheck() {
     const C = D.selfcheck;
-    $('#bcStage').textContent = 'START 전 · 나는 어떤 AI 사용자?';
-    $('#shEyebrow').textContent = 'SELF-CHECK · 7분';
-    $('#shTitle').textContent = 'AI 사용 전, 나는 어떤 사용자?';
+    $('#bcStage').textContent = '개인 연습실 · 체크하고 적용 시작하기';
+    $('#shEyebrow').textContent = '7 · 개인 연습실';
+    $('#shTitle').textContent = '체크하고 프롬프트로 적용 시작하기';
     $('#shSum').textContent = '실습 전에 지금 내가 AI를 어떻게 쓰고 있는지 점검합니다. 해당하는 것만 솔직하게 체크하세요. 나의 단계는 맨 마지막에 확인합니다. 결과는 이 기기에만 저장됩니다.';
-    $('#shMeta').innerHTML = '<span class="meta-chip active">7분</span><span class="meta-chip">단계는 마지막에 확인</span>';
+    $('#shMeta').innerHTML = '<span class="meta-chip active">혼자 해 보기</span><span class="meta-chip">단계는 마지막에 확인</span>';
     const secs = [];
     /* 단계가 드러나지 않도록 문항을 섞어 한 목록으로 보여 준다. 단계는 맨 아래에서 단추를 눌러야 열린다. */
     const ORDER = [[2, 0], [1, 0], [3, 1], [2, 2], [1, 1], [3, 0], [2, 1], [3, 2]];
@@ -217,10 +220,10 @@
   const gi = g => SLIDES.findIndex(s => s.g === g);
   const SLIDES = [
     { g: 0, nav: '시작', title: '네 가지 키워드', html: () => `<span class="slide-kicker">START · Gemini 업무 자동화</span><h1>AI, 자동화, 카드뉴스, 안전</h1>
-      <p class="slide-lead">실습 전에 보는 키워드. 먼저 G-mail 자동화, 다음에 카드뉴스 자동화를 실습합니다.</p>
+      <p class="slide-lead">실습 전에 보는 키워드. 먼저 제미나이 메일 자동화, 다음에 카드뉴스 만들기를 실습합니다.</p>
       <div class="kw3 cn-kw4"><a href="#start-${gi(1)}"><b>KEYWORD 1</b><strong>AI</strong><span>생성형 AI 이용 현황 · 오늘 쓰는 AI · API 키</span></a>
-      <a href="#start-${gi(2)}"><b>KEYWORD 2</b><strong>자동화</strong><span>Apps Script · 맡길 일 고르는 기준 4가지 · G-mail 자동화 흐름</span></a>
-      <a href="#start-${gi(3)}"><b>KEYWORD 3</b><strong>카드뉴스</strong><span>6장 구조 · 표지 훅 · 카드뉴스 자동화 흐름</span></a>
+      <a href="#start-${gi(2)}"><b>KEYWORD 2</b><strong>자동화</strong><span>Apps Script · 맡길 일 고르는 기준 4가지 · 제미나이 메일 자동화 흐름</span></a>
+      <a href="#start-${gi(3)}"><b>KEYWORD 3</b><strong>카드뉴스</strong><span>6장 구조 · 표지 훅 · 카드뉴스 만들기 흐름</span></a>
       <a href="#start-${gi(4)}"><b>KEYWORD 4</b><strong>안전</strong><span>발송 한도 · 권한 승인 · 사람이 확인</span></a></div>` },
     { g: 1, nav: '1-1', title: '생성형 AI 이용 현황', html: () => `<span class="slide-kicker">1. AI · 1) 우리나라 생성형 AI 이용 현황</span><h1>국민 절반 가까이가 써 봤습니다</h1>
       <div class="stat3">
@@ -235,24 +238,24 @@
       <div class="note">오늘은 "내 일에 필요한 곳"(메일, 홍보 카드뉴스)과 "쓰는 방법"을 함께 해결합니다.</div><p class="src">${esc(SRC_AI)}</p>` },
     { g: 1, nav: '1-3', title: '오늘 쓰는 AI', html: () => `<span class="slide-kicker">1. AI · 3) 오늘 쓰는 AI</span><h1>도구마다 맡는 일이 다릅니다</h1>
       <div class="stat3 cn-tools">
-        <div class="stat"><em>G-mail · 카드뉴스</em><strong>Gemini</strong><div class="cap">코드 작성, 원고 자동 생성</div><p>G-mail 자동화에서는 메일 발송 코드를 받고, 카드뉴스 자동화에서는 시트 버튼으로 카드뉴스 원고를 만듭니다.</p></div>
-        <div class="stat"><em>카드뉴스 자동화</em><strong>ChatGPT</strong><div class="cap">프로젝트에 지침을 한 번 저장</div><p>지침과 시트를 넣어 두면 요청문 한 번으로 게시 문구와 이미지 구성을 받습니다.</p></div>
-        <div class="stat"><em>카드뉴스 자동화</em><strong>Canva</strong><div class="cap">편집할 수 있는 디자인</div><p>4:5 세로 카드 6장을 받습니다. 연결이 안 되면 표지 이미지 한 장으로 대신합니다.</p></div>
+        <div class="stat"><em>G-mail · 카드뉴스</em><strong>Gemini</strong><div class="cap">코드 작성, 원고 자동 생성</div><p>제미나이 메일 자동화에서는 메일 발송 코드를 받고, 카드뉴스 만들기에서는 시트 버튼으로 카드뉴스 원고를 만듭니다.</p></div>
+        <div class="stat"><em>카드뉴스 만들기</em><strong>ChatGPT</strong><div class="cap">프로젝트에 지침을 한 번 저장</div><p>지침과 시트를 넣어 두면 요청문 한 번으로 게시 문구와 이미지 구성을 받습니다.</p></div>
+        <div class="stat"><em>카드뉴스 만들기</em><strong>Canva</strong><div class="cap">편집할 수 있는 디자인</div><p>4:5 세로 카드 6장을 받습니다. 연결이 안 되면 표지 이미지 한 장으로 대신합니다.</p></div>
       </div><p class="src">요금제에 따라 ChatGPT 프로젝트·앱 연결과 Canva 기능이 다를 수 있습니다.</p>` },
-    { g: 1, nav: '1-4', title: 'API 키란', html: () => `<span class="slide-kicker">1. AI · 4) API와 API 키 (카드뉴스 자동화)</span><h1>API 키는 내 AI 출입증입니다</h1>
+    { g: 1, nav: '1-4', title: 'API 키란', html: () => `<span class="slide-kicker">1. AI · 4) API와 API 키 (카드뉴스 만들기)</span><h1>API 키는 내 AI 출입증입니다</h1>
       <div class="pts cn-pts3"><div class="pt"><b>API</b><strong>프로그램끼리 대화하는 창구</strong><p>사람이 채팅창에 쓰는 대신, 시트가 Gemini에게 직접 요청하고 답을 받아 옵니다.</p></div>
       <div class="pt"><b>API 키</b><strong>"내가 보낸 요청"이라는 증명</strong><p>Google AI Studio에서 발급합니다. 이 키로 쓴 사용량은 내 계정에 쌓입니다.</p></div>
       <div class="pt"><b>지킬 것</b><strong>비밀번호처럼 나만 보관</strong><p>채팅방·시트 셀·메신저에 붙여 넣지 않습니다.</p></div></div>` },
     { g: 2, nav: '2-1', title: 'Apps Script란', html: () => `<span class="slide-kicker">2. 자동화 · 1) Apps Script</span><h1>시트에 붙이는 작은 프로그램</h1>
       <div class="pts cn-pts3"><div class="pt"><b>무엇</b><strong>Google 서비스용 코드</strong><p>시트, Gmail, 캘린더를 이어 반복하는 일을 대신하게 하는 Google의 스크립트입니다.</p></div>
       <div class="pt"><b>어디서</b><strong>[확장 프로그램] → [Apps Script]</strong><p>시트 안에서 바로 열립니다. 설치할 것이 없습니다.</p></div>
-      <div class="pt"><b>오늘</b><strong>메일 발송 · 원고 생성</strong><p>G-mail 자동화는 목록대로 메일을 보내고, 카드뉴스 자동화는 이미 들어 있는 코드로 Gemini 원고를 받습니다.</p></div></div>` },
+      <div class="pt"><b>오늘</b><strong>메일 발송 · 원고 생성</strong><p>제미나이 메일 자동화는 목록대로 메일을 보내고, 카드뉴스 만들기는 이미 들어 있는 코드로 Gemini 원고를 받습니다.</p></div></div>` },
     { g: 2, nav: '2-2', title: '코드는 Gemini가', html: () => `<span class="slide-kicker">2. 자동화 · 2) 코드를 몰라도</span><h1>코드는 Gemini가, 판단은 내가</h1>
       <div class="recap"><div class="recap-col"><b>Gemini가 하는 일</b><span>요청한 기능대로 코드 쓰기</span><span>오류 문장을 보고 고치기</span><span>코드 설명하기</span></div>
       <div class="recap-col"><b>내가 하는 일</b><span>원하는 기능을 번호로 나눠 말하기</span><span>제목·본문·받는 사람 확인</span><span>테스트를 보고 전체 실행 결정</span></div></div>
       <div class="note">좋은 요청 = 정보의 구체성. 시트 구성과 기능을 빠짐없이 적을수록 고칠 일이 줄어듭니다.</div>` },
     { g: 2, nav: '2-3', title: '맡길 일 고르는 기준 4가지', html: () => `<span class="slide-kicker">2. 자동화 · 3) AI에게 무엇을 맡길까</span><h1>AI vs 사람, 맡길 일 고르는 기준 4가지</h1>
-      <p class="slide-lead">요즘IT가 2026년 5~10월에 실린 AI 활용 사례 9편을 분석해 정리한 기준입니다. 파란 글씨는 오늘 G-mail 자동화에 적용한 곳입니다.</p>
+      <p class="slide-lead">요즘IT가 2026년 5~10월에 실린 AI 활용 사례 9편을 분석해 정리한 기준입니다. 파란 글씨는 오늘 제미나이 메일 자동화에 적용한 곳입니다.</p>
       <div class="pts"><div class="pt"><b>기준 1</b><strong>맡길 가치가 있는 일인가</strong><p>자주, 오래, 틀리면 위험하게 반복되는 일부터 맡깁니다. 1년에 한두 번 하는 일은 도구를 만들고 관리하는 품이 더 클 수 있습니다.</p><p class="cn-apply">오늘: 여러 사람에게 같은 안내 메일 보내기</p></div>
       <div class="pt"><b>기준 2</b><strong>정해진 답이 있는 일인가</strong><p>답이 정해진 일은 AI가 매번 판단하게 두지 않고 규칙으로 고정합니다. 그 규칙은 AI와 함께 만들어도 됩니다.</p><p class="cn-apply">오늘: "C열이 비어 있으면 보낸다"는 규칙을 Gemini와 코드로 만듦</p></div>
       <div class="pt"><b>기준 3</b><strong>틀리면 되돌릴 수 있는 일인가</strong><p>되돌리기 어려운 결정과 승인은 사람에게 남깁니다. "경계선을 정하는 건 AI의 성능이 아니라 오류의 비용"입니다.</p><p class="cn-apply">오늘: 보낸 메일은 되돌릴 수 없으니 전체 발송은 내가 결정</p></div>
@@ -265,7 +268,7 @@
       <div class="pt"><b>기준 4 · 개발 도구</b><strong>요구사항 40개 중 25개</strong><p>AI가 "개발 완료"라고 보고했지만 실제로 들어간 건 25개였습니다. 이후 추적표를 만들어 사람이 빠진 곳을 확인합니다.</p></div></div>
       <div class="note">AI에게 맡긴다는 것은 사람의 일이 사라지는 것이 아니라, 사람이 봐야 할 곳이 좁고 분명해지는 것입니다.</div>
       <p class="src">${esc(SRC_YOZM)}</p>` },
-    { g: 2, nav: '2-5', title: 'G-mail 자동화 흐름', html: () => `<span class="slide-kicker">2. 자동화 · 5) G-mail 자동화</span><h1>시트 목록에서 Gmail까지 네 단계</h1>
+    { g: 2, nav: '2-5', title: '제미나이 메일 자동화 흐름', html: () => `<span class="slide-kicker">2. 자동화 · 5) 제미나이 메일 자동화</span><h1>시트 목록에서 Gmail까지 네 단계</h1>
       <p class="slide-lead">원본 3회차 PPT 14~16번의 순서에 Gemini 요청과 권한 승인을 더했습니다.</p>${flowHtml(FLOW_MAIL, 'wide4')}` },
     { g: 3, nav: '3-1', title: '카드뉴스 6장 구조', html: () => `<span class="slide-kicker">3. 카드뉴스 · 1) 6장의 역할</span><h1>장마다 맡은 일이 있습니다</h1>
       <p class="slide-lead">규칙: 장마다 제목 1줄 + 본문 2줄 이내. 확인되지 않은 사양·가격·건강 정보는 단정하지 않습니다.</p>
@@ -278,7 +281,7 @@
       <div class="pts cn-pts3"><div class="pt"><b>01 · 질문형</b><strong>업무용 키보드, 예쁜 것보다 먼저 볼 5가지</strong><p>독자가 스스로 답을 떠올리게 합니다. (KB-003)</p></div>
       <div class="pt"><b>02 · 숫자형</b><strong>5만·10만·20만 원대, 어디서 차이가 날까?</strong><p>범위가 분명해 끝까지 볼 이유가 생깁니다. (KB-006)</p></div>
       <div class="pt"><b>03 · 공감형</b><strong>손목이 아프다면 키보드 높이부터 확인하세요</strong><p>불편을 먼저 짚어 "내 얘기"로 느끼게 합니다. (KB-005)</p></div></div>` },
-    { g: 3, nav: '3-4', title: '카드뉴스 자동화 흐름', html: () => `<span class="slide-kicker">3. 카드뉴스 · 4) 카드뉴스 자동화</span><h1>시트 한 줄에서 디자인까지</h1>
+    { g: 3, nav: '3-4', title: '카드뉴스 만들기 흐름', html: () => `<span class="slide-kicker">3. 카드뉴스 · 4) 카드뉴스 만들기</span><h1>시트 한 줄에서 디자인까지</h1>
       <p class="slide-lead">모든 결과가 내 시트 한 줄에 모입니다. 내가 직접 쓰는 칸은 B~I열 여덟 개뿐입니다.</p>${flowHtml(FLOW_CARD, 'wide')}` },
     { g: 4, nav: '4-1', title: '한도와 권한', html: () => `<span class="slide-kicker">4. 안전 · 1) 알아 둘 것</span><h1>한도와 권한을 먼저 압니다</h1>
       <div class="stat3"><div class="stat"><em>개인 Gmail 계정</em><strong>100명</strong><div class="cap">Apps Script 하루 발송 받는 사람 수</div><p>Google Workspace 계정은 1,500명입니다. 한도는 바뀔 수 있습니다.</p><p class="src">출처: Google Apps Script, Quotas for Google Services</p></div>
@@ -300,10 +303,10 @@
     $('#deckDots').innerHTML = SLIDES.map((s, k) => `<button type="button" data-i="${k}" class="${k === deckIdx ? 'on' : ''}" aria-label="${esc(s.title)}" title="${esc(s.title)}"></button>`).join('');
     $('#viewStart').querySelectorAll('[data-i]').forEach(b => b.addEventListener('click', () => { location.hash = '#start-' + b.dataset.i; }));
     $('#deckPrev').disabled = false;
-    $('#deckPrev').textContent = deckIdx === 0 ? '← 나는 어떤 사용자?' : '← 이전';
-    $('#deckNext').textContent = deckIdx === SLIDES.length - 1 ? 'G-mail 자동화로 →' : '다음 →';
+    $('#deckPrev').textContent = deckIdx === 0 ? '← 처음 화면' : '← 이전';
+    $('#deckNext').textContent = deckIdx === SLIDES.length - 1 ? '메일 자동화로 →' : '다음 →';
   }
-  $('#deckPrev').addEventListener('click', () => { if (deckIdx > 0) location.hash = '#start-' + (deckIdx - 1); else location.href = 'who/'; });
+  $('#deckPrev').addEventListener('click', () => { if (deckIdx > 0) location.hash = '#start-' + (deckIdx - 1); else location.hash = '#ai'; });
   $('#deckNext').addEventListener('click', () => { location.hash = deckIdx === SLIDES.length - 1 ? '#' + SEQ[0].id : '#start-' + (deckIdx + 1); });
   document.addEventListener('keydown', e => {
     if ($('#viewStart').hidden || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
@@ -314,10 +317,12 @@
   /* ---------- 바로가기 ---------- */
   function renderQuick() {
     const groups = [
-      ['소개', [['#home', '소개', '과정 소개'], ['#timeline', '시간표', '시간표 (10:00~13:00)']]],
-      ['시작하기 전에', [['#before', '준비', '시작하기 전에'], ['ai-test/', '맨 처음', 'AI 역량검사'], ['who/', '그다음', '나는 어떤 AI 사용자? 맞춰 보기'], ['#check', '체크', '체크리스트와 내 업무 나눠 보기'], ...SLIDES.map((s, i) => ['#start-' + i, s.nav, s.title])]],
-      ...D.parts.map(p => [p.short, [...p.stages.map(s => ['#' + s.id, s.no + '단계', s.title]), ['#' + p.review.id, '마무리', p.review.title]]]),
-      ['자료와 안내', [['#materials', '자료', '요청문과 참고 코드'], ['#safety', '유의', '실제 업무에 쓸 때'], ['#help', '도움', '막힐 때'], ['#sources', '출처', '참고 자료']]]
+      ['1 · AI 사용 현황 안내', [['#ai', '현황', 'AI 사용 현황 안내'], ...SLIDES.map((s, i) => ['#start-' + i, s.nav, s.title])]],
+      ['2 · 시작하기 전에', [['ai-test/', '맨 처음', 'AI 역량검사'], ['who/', '그다음', '나는 어떤 AI 사용자? 맞춰 보기']]],
+      ...D.parts.map(p => [`${p.no} · ${p.title}`, [...p.stages.map(s => ['#' + s.id, s.no + '단계', s.title]), ...(p.review ? [['#' + p.review.id, '마무리', p.review.title]] : [])]]),
+      ['6 · 다운로드 자료 모아보기', [['#materials', '자료', '파일, 요청문, 참고 코드']]],
+      ['7 · 개인 연습실', [['#check', '연습', '체크하고 프롬프트로 적용 시작하기'], ['../prompt-practice/', '연습', '질문 구조 연습']]],
+      ['안내', [['#timeline', '시간표', '시간표 (10:00~13:00)'], ['#safety', '유의', '실제 업무에 쓸 때'], ['#help', '도움', '막힐 때'], ['#sources', '출처', '참고 자료']]]
     ];
     $('#quickPanel').innerHTML = groups.map(g => `<div class="menu-group"><strong>${esc(g[0])}</strong>${g[1].map(x => `<a href="${x[0]}"><span>${esc(x[1])}</span>${esc(x[2])}</a>`).join('')}</div>`).join('');
     $('#quickPanel').addEventListener('click', e => { if (e.target.closest('a')) $('#quickMenu').open = false; });
@@ -325,7 +330,7 @@
   }
 
   /* ---------- 라우팅 ---------- */
-  const HOME_SECS = ['intro', 'before', 'timeline', 'mail', 'card', 'materials', 'safety', 'help', 'sources'];
+  const HOME_SECS = ['ai', 'gpt', 'practice', 'intro', 'before', 'timeline', 'mail', 'card', 'materials', 'safety', 'help', 'sources'];
   function route() {
     const h = (location.hash || '#home').replace('#', '');
     const [view, sub] = h.split('-');
@@ -339,7 +344,7 @@
     else if (x && x.review) { $('#viewStage').hidden = false; renderReview(x); }
     else { $('#viewHome').hidden = false; renderHome(); if (HOME_SECS.includes(view)) target = document.getElementById('sec-' + view); }
     if (sub && view !== 'start') target = document.getElementById(h);
-    requestAnimationFrame(() => { if (target) target.scrollIntoView({ block: 'start' }); else window.scrollTo(0, 0); });
+    requestAnimationFrame(() => { if (target) { const dt = target.closest('details'); if (dt) dt.open = true; target.scrollIntoView({ block: 'start' }); } else window.scrollTo(0, 0); });
   }
 
   renderStatic();
