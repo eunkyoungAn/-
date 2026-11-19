@@ -49,9 +49,9 @@
     return `<div class="g-table"><table><thead><tr>${head.map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr>${r.map(c => `<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
   }
   function tableBlock(t) { return t ? `<h3>${esc(t.title)}</h3>${table(t.head, t.rows)}` : ''; }
-  function codeBlock() {
+  function codeBlock(no) {
     return `<div class="go-studio mt16"><p><b>참고 코드</b> — Gemini 코드가 계속 맞지 않을 때 이 코드를 그대로 붙여 넣습니다. 메뉴 이름과 기능이 요청문과 같습니다.</p><a class="g-btn ghost" href="${esc(D.codeFile)}" download>파일 받기</a></div>
-      ${CODE ? promptBox(CODE, '참고 코드 (Code.gs)', 'cn-code') : ''}`;
+      ${CODE ? promptBox(CODE, (no || '') + '참고 코드 (Code.gs)', 'cn-code') : ''}`;
   }
 
   /* ---------- 진행 ---------- */
@@ -101,9 +101,9 @@
       D.timeline.map(r => `<tr${r[1] === '휴식' ? ' class="cn-break"' : ''}>${r.map(c => `<td>${esc(c)}</td>`).join('')}</tr>`).join('') + '</tbody>';
     const mailPrompt = D.parts[0].stages.find(s => s.prompt);
     $('#materialBox').innerHTML = `<h3 class="dl-h">내려받는 파일</h3><div class="dl-grid">${D.downloads.map(f => `<div class="dl-item"><div><strong>${esc(f[0])}</strong><span>${esc(f[1])}</span></div><a class="g-btn ghost" href="${esc(f[2])}" ${f[3] ? 'download' : 'target="_blank" rel="noopener noreferrer"'}>${f[3] ? '받기' : '열기'}</a></div>`).join('')}</div>
-      <h3 class="dl-h">3 · 제미나이 메일 자동화</h3>${promptBox(mailPrompt.prompt.text, '코드 요청문 (gemini.google.com)')}${CODE ? promptBox(CODE, '참고 코드 (Code.gs)', 'cn-code') : ''}
-      <h3 class="dl-h">4 · ChatGPT 프로젝트 활용하기</h3>${promptBox(D.texts.travelGuide, '프로젝트 지침 · 여행지 분석실')}<p class="local-note">무료 ChatGPT 계정은 스킬을 만들 수 없어 수업에서는 프로젝트만 구성합니다. 아래 스킬 문서는 스킬 메뉴가 있는 유료 계정에서 수업 뒤에 써 볼 수 있습니다.</p>${promptBox(D.texts.skill, '스킬 문서 · 여행지 분석 (유료 계정용 SKILL.md)')}
-      <h3 class="dl-h">5 · 카드뉴스 만들기</h3>${[['guide', '카드뉴스 프로젝트 지침'], ['requestFree', '카드뉴스 제작 요청문 · 무료 계정용 (엑셀 파일 첨부)'], ['request', '카드뉴스 제작 요청문 · 유료 계정용 (Google Drive 연결)'], ['cover', '표지 이미지 요청문'], ['fix', '디자인 수정 요청문']].map(([k, l]) => promptBox(D.texts[k], l)).join('')}
+      <h3 class="dl-h">3 · 제미나이 메일 자동화</h3>${promptBox(mailPrompt.prompt.text, '1. 코드 요청문 (gemini.google.com)')}${CODE ? promptBox(CODE, '2. 참고 코드 (Code.gs)', 'cn-code') : ''}
+      <h3 class="dl-h">4 · ChatGPT 프로젝트 활용하기</h3>${promptBox(D.texts.travelGuide, '프로젝트 지침 · 여행지 분석실')}
+      <h3 class="dl-h">5 · 카드뉴스 만들기</h3>${[['guide', '1. 카드뉴스 프로젝트 지침'], ['requestFree', '2. 무료 계정용 요청문 (엑셀 파일 첨부)'], ['request', '3. 유료 계정용 요청문 (Google Drive 연결)'], ['cover', '4. 표지 이미지 요청문']].map(([k, l]) => promptBox(D.texts[k], l)).join('')}
       <h3 class="dl-h">7 · 개인 연습실</h3>${promptBox(D.selfcheck.applyPrompt, '적용 시작 요청문')}`;
     bindAll($('#materialBox'));
     $('#helpList').innerHTML = ['메일', 'ChatGPT', '카드뉴스', '공통'].map(g => `<h3 class="dl-h">${({ 메일: '제미나이 메일 자동화', ChatGPT: 'ChatGPT 프로젝트 활용하기', 카드뉴스: '카드뉴스 만들기', 공통: '공통' })[g]}</h3><div class="two-col">${D.help.filter(h => h[0] === g).map(h => `<div class="result-card"><strong>${esc(h[1])}</strong><p>${esc(h[2])}</p></div>`).join('')}</div>`).join('');
@@ -138,9 +138,9 @@
     if (st.snippet) steps += `<h3>코드 맨 위 설정 영역만 고칩니다</h3>${promptBox(st.snippet, '설정 영역 예시 (Gemini 코드는 변수 이름이 다를 수 있음)', 'cn-code')}`;
     if (st.tip) steps += `<div class="result-card mt14"><strong>유료 계정 · 요청문 주소 바꾸는 법</strong><p>주소의 <code>/d/</code>와 <code>/edit</code> 사이 긴 문자열이 시트 고유번호입니다. 원본 번호 <code>${esc(D.sheetId)}</code> 자리에 내 사본 주소창의 번호를 넣습니다.</p></div>`;
     secs.push(['steps', '순서', steps]);
-    if (st.prompt) secs.push(['prompt', '요청문 (복사해서 붙여 넣기)', promptBox(st.prompt.text, st.prompt.label)]);
-    if (st.prompts) secs.push(['prompt', '요청문 (복사해서 붙여 넣기)', st.prompts.map(q => promptBox(D.texts[q.key], q.label)).join('')]);
-    if (st.code) secs.push(['code', '참고 코드 (막힐 때)', codeBlock()]);
+    if (st.prompt) secs.push(['prompt', '요청문 (복사해서 붙여 넣기)', promptBox(st.prompt.text, (st.code ? '1. ' : '') + st.prompt.label)]);
+    if (st.prompts) secs.push(['prompt', st.prompts.length > 1 ? '복사할 것 (번호 순서대로)' : '요청문 (복사해서 붙여 넣기)', st.prompts.map((q, i) => promptBox(D.texts[q.key], (st.prompts.length > 1 ? (i + 1) + '. ' : '') + q.label)).join('')]);
+    if (st.code) secs.push(['code', '참고 코드 (막힐 때)', codeBlock('2. ')]);
     if (st.extra) secs.push(['extra', st.extra.title, st.extra.html]);
     let chk = checklist(st.id, st.checks) + `<h3>성찰 질문</h3><p>${esc(st.reflect)}</p>`;
     if (st.table && st.table.after) chk += tableBlock(st.table);
