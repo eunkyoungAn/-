@@ -1,42 +1,37 @@
 # AI 취업지원 실습실
 
-「AI 활용 취업지원 실무 3종」(구인기업·직무 분석 → 구직역량·직무 적합도 진단 → 취업전략 설계·지원) 통합 특강 3시간용 수강생 실습 사이트. `agent-lab/`과 같은 틀이며 사용하는 AI만 다르다(Gemini 무료 수준 기본, ChatGPT 대체).
+「AI 활용 취업지원 실무」 통합 특강 3시간용 수강생 사이트. 이론은 START 장표(변화·트렌드·역할), 실습은 구글 시트와 구글 폼으로 진행하는 취업상담 워크플로우 5단계다.
 
-- 주소: `https://eunkyoungan.github.io/-/job-ai-lab/` (실제 배포는 `gh-pages` 브랜치. main에 합친 뒤 `job-ai-lab/` 폴더를 `tools/`, `src/`만 빼고 `gh-pages`에 올린다. `instructor/`도 올리지 않는다)
-- 설계 근거: AI 활용 취업지원 강의설계서(2026-11-19)
-- 빌드·설치 없이 GitHub Pages에서 바로 동작한다. AI 실행은 이 사이트가 아니라 Gemini·ChatGPT에서 하고, 사이트는 요청문을 만들어 주고 결과 표를 받아 다음 단계로 넘긴다.
+- 주소: `https://eunkyoungan.github.io/-/job-ai-lab/` (실제 배포는 `gh-pages` 브랜치. main에 합친 뒤 `job-ai-lab/` 폴더를 `tools/`, `src/`, `sheet/`만 빼고 `gh-pages`에 올린다)
+- 빌드·설치 없이 GitHub Pages에서 바로 동작한다. 이 사이트는 입력을 받지 않으며, 실습은 연결된 구글 시트(상담자용)와 구글 폼(구직자용 사전 질문지)에서 한다.
 
 ## 파일 구성
 
 | 파일 | 쓰임 |
 |---|---|
-| `index.html` | 화면 뼈대(첫 화면, START 장표, 단계 화면) |
-| `style.css` | `agent-lab/style.css` 복사본 + 맨 아래 전용 스타일 |
-| `app.js` | START 장표(`#start`), 바로가기 메뉴, 화면 전환(`#s1`~`#s3`, `#review`, `#form`), 내담자 유형, 표 3종, AI 표 붙여 넣기, 검수 표시 |
-| `data.js` | 실습 데이터. `tools/build.py`가 만든다 |
-| `src/*.md` | 가상 채용공고와 내담자 서류 원본. 04, 05는 build.py가 만든다 |
-| `files/` | 수강생이 내려받는 PDF·DOCX, 스킬 zip, 전체 압축 파일. build.py가 만든다 |
-| `instructor/` | 강사용 예시 답안. build.py가 만들며 저장소와 사이트에 올리지 않는다(.gitignore) |
-| `sheet/Code.gs` | 구인기업·직무 분석 자동화 구글 시트의 Apps Script 원본. 시트의 'Apps Script 코드' 탭 A2와 같은 내용. 사이트에는 올리지 않는다 |
-| `tools/build.py` | 내용 원본. START 장표(`START`: 변화·트렌드·역할의 수치·인용·출처), 직업공통능력 목록, 가상 응답, 요청문, 검수 항목, 예시 답안, 지원 제도 |
+| `index.html` | 화면 뼈대(첫 화면, START 장표, 취업상담 워크플로우) |
+| `style.css` | `agent-lab/style.css` 복사본 + 아래쪽 전용 스타일 |
+| `app.js` | START 장표(`#start`), 워크플로우 안내(`#flow`, `#flow-1`~`#flow-5`), 바로가기 메뉴 |
+| `data.js` | 화면 데이터. `tools/build.py`가 만든다 |
+| `src/*.md` | 연습용 가상 채용공고와 가상 구직자 서류 원본 |
+| `files/` | 수강생이 내려받는 PDF·DOCX와 전체 압축 파일. build.py가 만든다 |
+| `tools/build.py` | 내용 원본. 연결 주소(`LINKS`), START 장표(`START`), 워크플로우(`FLOW`), 시간표(`TIMELINE`), 참고 자료(`SOURCES`) |
+| `sheet/Code.gs` | 이전 시안(구인기업·직무 분석 전용 시트)의 Apps Script. 현재 사이트가 연결하는 최종본 시트의 코드는 그 시트 안에 있다 |
 
 ## 내용 고치기
 
-1. 공고·서류는 `src/01~03`을, 그 밖의 내용은 `tools/build.py`를 고친다.
-2. `python3 job-ai-lab/tools/build.py` 실행(python-docx, LibreOffice 필요).
-3. `index.html`의 `?v=` 값을 바꾸고 함께 커밋한다.
-
-## 자기진단 양식 바꾸기
-
-- 수강생·기관이 직접: 사이트의 `#form`(바로가기 → 자기진단 양식 바꾸기)에서 평가 항목과 척도를 바꾼다. 그 기기 브라우저에만 저장된다.
-- 모든 수강생의 기본 양식: `tools/build.py`의 `COMPETENCIES`(항목)와 `CLIENTS`의 `self`(가상 응답)를 고치고 다시 빌드한다.
+1. 시트나 질문지 주소가 바뀌면 `tools/build.py`의 `SHEET_ID`, `LINKS`를 고친다.
+2. 워크플로우 단계 설명은 `FLOW`, 장표는 `START`, 가상 사례는 `src/`를 고친다.
+3. `python3 job-ai-lab/tools/build.py` 실행(python-docx, LibreOffice 필요).
+4. `index.html`의 `?v=` 값을 바꾸고 함께 커밋한다.
 
 ## 강의 전 확인
 
-- 지원 제도의 금액·요건(`SUPPORTS`)과 `[확인 필요]` 항목을 공식 페이지에서 다시 확인한다.
-- 강사 계정으로 Gemini 무료 수준에서 세 단계를 끝까지 실행해 한도에 걸리는 지점을 확인한다.
-- 직업공통능력 "판정 단서"는 커리어캐쳐 요약이다. 표준 원문의 수행기준·평가준거로 바꾸려면 `COMPETENCIES`의 세 번째 값을 고친다.
+- 상담자용 시트의 공유 범위. 링크가 있는 누구나 볼 수 있는 상태라면 구직자 정보 탭에 실제 정보가 없는지 확인한다.
+- 사본을 만든 계정에서 실행 단추가 동작하는지(권한 승인, Gemini API 키 유무).
+- START 장표의 통계와 제도 일정(`[확인 필요]` 표시)을 공식 자료에서 다시 확인한다.
+- 시간표의 구현 100분 배분은 가정이다.
 
 ## 보안
 
-`agent-lab`과 같다. CSP `default-src 'none'`, 스크립트·스타일은 같은 폴더 파일만, `connect-src 'none'`. 입력한 표와 검수 표시는 그 기기 브라우저(localStorage)에만 남는다. `files/`의 자료는 모두 가상 자료다.
+CSP `default-src 'none'`, 스크립트·스타일은 같은 폴더 파일만, `connect-src 'none'`. 이 사이트는 아무것도 저장하거나 보내지 않는다. `files/`의 자료는 모두 가상 자료다.
