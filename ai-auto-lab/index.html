@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex">
+<title>AI 업무 자동화 실습실 | 커리어캐쳐</title>
+<meta name="description" content="Gemini와 Apps Script로 메일을 한 번에 보내고, 시트 한 줄로 카드뉴스를 만드는 실습실.">
+<link rel="stylesheet" href="fonts/pretendard.css">
+<link rel="stylesheet" href="style.css?v=20261120a">
+</head>
+<body>
+<header class="g-header">
+  <div class="wrap">
+    <a class="g-brand" href="#home" aria-label="실습실 처음 화면">
+      <div class="g-mark">C</div>
+      <div><strong>AI 업무 자동화 실습실</strong><span>커리어캐쳐 · 메일 자동화 + 카드뉴스</span></div>
+    </a>
+    <nav class="g-nav" aria-label="실습실 메뉴">
+      <a class="g-start" href="#start">START</a>
+      <a href="#m1">실습 1 메일</a>
+      <a href="#c1">실습 2 카드뉴스</a>
+      <a href="#materials">자료</a>
+      <a href="#help">막힐 때</a>
+      <details class="menu" id="quickMenu">
+        <summary class="g-home">바로가기</summary>
+        <div class="menu-panel" id="quickPanel"></div>
+      </details>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <!-- ================= 시작 화면 ================= -->
+  <div id="viewHome">
+    <section class="g-hero wrap">
+      <div>
+        <span class="eyebrow">커리어캐쳐 AI 업무 활용 과정</span>
+        <h1>메일은 한 번에 보내고, 카드뉴스는 시트 한 줄로</h1>
+        <p class="hero-copy">반복하는 업무 두 가지를 AI로 자동화합니다. 실습 1에서는 Gemini가 만든 Apps Script 코드로 이름을 넣은 메일을 한 번에 보내고, 실습 2에서는 시트에 기획 한 줄을 쓰면 Gemini·ChatGPT·Canva가 카드뉴스를 만듭니다. 코딩을 몰라도 됩니다. AI가 만들고, 여러분이 확인하고 결정합니다.</p>
+        <div class="hero-actions">
+          <a class="g-btn" href="#start">START</a>
+          <a class="text-link" href="#m1">실습 1 바로 가기</a>
+          <a class="text-link" href="#c1">실습 2 바로 가기</a>
+        </div>
+        <div class="hero-meta" aria-label="실습실 특징">
+          <span class="meta-chip active">약 3시간 30분</span>
+          <span class="meta-chip">실습 2개 · 7단계</span>
+          <span class="meta-chip">Gemini · ChatGPT · Canva</span>
+          <span class="meta-chip">AI 초급</span>
+        </div>
+      </div>
+      <div>
+        <span class="demo-label">오늘의 두 실습</span>
+        <div class="demo-card">
+          <div class="cn-two">
+            <div><b>실습 1 · 메일 자동화</b><ol class="cn-flow" id="homeFlowMail"></ol></div>
+            <div><b>실습 2 · 카드뉴스</b><ol class="cn-flow" id="homeFlowCard"></ol></div>
+          </div>
+          <div class="demo-foot"><i></i><span>두 실습 모두 구글 시트에서 시작해 결과를 시트에 남깁니다. 실습 1에서 익힌 Apps Script가 실습 2의 자동 생성 버튼으로 이어집니다.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="wrap">
+      <div class="progress-card" aria-label="내 진행 상황">
+        <div class="progress-number"><span id="pgNum">0 / 7</span><small>검수까지 마친 단계</small></div>
+        <div class="progress-track"><span id="pgBar"></span></div>
+        <div class="progress-copy">실습 1의 4단계와 실습 2의 3단계 가운데 검수 항목을 모두 확인한 단계를 셉니다. 메모와 검수 표시는 이 기기에만 저장됩니다.</div>
+      </div>
+
+      <div class="start-row">
+        <div class="start-item"><b>시작 전 1</b><strong>계정 로그인</strong><p>크롬에서 Google 계정으로 로그인합니다. 실습 2에서는 ChatGPT와 Canva도 씁니다. 요금제에 따라 연결 기능이 다를 수 있습니다.</p></div>
+        <div class="start-item"><b>시작 전 2</b><strong>보낼 메일과 시트</strong><p>3회차 실습 1의 회의 안내 메일을 열어 둡니다. 실습 2에서 쓸 <a id="copyLink" target="_blank" rel="noopener noreferrer">카드뉴스 운영 시트 사본</a>을 미리 만들어도 됩니다.</p></div>
+        <div class="start-item"><b>시작 전 3</b><strong>예시 정보만 사용</strong><p>메일은 내 주소와 동의를 받은 주소만, 카드뉴스는 예시 주제로 연습합니다. API 키는 비밀번호처럼 나만 봅니다.</p></div>
+      </div>
+
+      <section class="info-section" id="sec-timeline">
+        <span class="level-kicker">TIMELINE</span>
+        <h2>시간표 (약 3시간 30분)</h2>
+        <p class="lead">개념 40분, 실습 150분, 휴식 20분. 실습은 실습 1(메일 자동화 40분)과 실습 2(카드뉴스 110분)입니다.</p>
+        <div class="g-table"><table id="timelineTable"></table></div>
+      </section>
+
+      <div id="homeParts"></div>
+
+      <section class="info-section" id="sec-materials">
+        <span class="level-kicker">MATERIALS</span>
+        <h2>요청문과 참고 코드</h2>
+        <p class="lead">두 실습에서 쓰는 요청문, 프로젝트 지침, 참고 코드를 모았습니다. 각 단계 화면에도 같은 내용이 있습니다.</p>
+        <div id="materialBox"></div>
+      </section>
+
+      <section class="info-section" id="sec-safety">
+        <span class="level-kicker">SAFETY</span>
+        <h2>실제 업무에 쓸 때</h2>
+        <div class="safety-box wide"><strong>AI가 작성하고, 사람이 확인합니다.</strong>
+          <p>메일은 받는 사람에게 보내도 되는지(수신 동의) 먼저 확인하고, 개인 Gmail 계정은 Apps Script로 하루 100명까지 보낼 수 있으므로 인원이 많으면 나눠 보냅니다. 카드뉴스의 가격·제품 사양·건강 효과는 공식 자료로 직접 확인합니다. 주민등록번호, 계좌번호, 고객 명단, 회사 내부자료는 요청문에 넣지 않습니다. 다른 사람이 보낸 시트나 코드에서 "확인되지 않은 앱" 승인 화면이 뜨면 출처를 모를 때는 허용하지 않습니다.</p></div>
+      </section>
+
+      <section class="info-section" id="sec-help">
+        <span class="level-kicker">TROUBLESHOOTING</span>
+        <h2>막힐 때</h2>
+        <div id="helpList"></div>
+      </section>
+
+      <section class="info-section" id="sec-sources">
+        <span class="level-kicker">SOURCES</span>
+        <h2>참고 자료</h2>
+        <ol class="plain-ol" id="sourceList"></ol>
+        <p class="local-note">Gemini·ChatGPT·Apps Script 화면의 버튼 이름과 무료 한도, 발송 한도는 바뀔 수 있습니다.</p>
+      </section>
+    </div>
+  </div>
+
+  <!-- ================= START 장표 ================= -->
+  <div id="viewStart" class="deck-shell wrap" hidden>
+    <div class="deck-top">
+      <nav class="breadcrumb" aria-label="현재 위치"><a href="#home">처음</a><span>›</span><span>START</span><span>›</span><span id="deckWhere"></span></nav>
+      <div class="deck-tabs" id="deckTabs" role="tablist" aria-label="네 가지 키워드"></div>
+    </div>
+    <article class="slide" id="deckSlide" aria-live="polite"></article>
+    <div class="deck-ctrl">
+      <button class="g-btn ghost" type="button" id="deckPrev">← 이전</button>
+      <div class="deck-dots" id="deckDots"></div>
+      <button class="g-btn" type="button" id="deckNext">다음 →</button>
+    </div>
+    <p class="local-note deck-hint">키보드 ← → 로도 넘길 수 있습니다.</p>
+  </div>
+
+  <!-- ================= 단계 화면 ================= -->
+  <div id="viewStage" class="lesson-shell wrap" hidden>
+    <nav class="breadcrumb" aria-label="현재 위치"><a href="#home">처음</a><span>›</span><span id="bcStage"></span></nav>
+    <header class="lesson-hero">
+      <span class="eyebrow" id="shEyebrow"></span>
+      <h1 id="shTitle"></h1>
+      <p id="shSum"></p>
+      <div class="hero-meta" id="shMeta"></div>
+    </header>
+    <div class="lesson-layout">
+      <aside class="toc" aria-label="단계 목차" id="stageToc"></aside>
+      <article class="lesson-content" id="stageBody"></article>
+    </div>
+  </div>
+</main>
+
+<footer class="g-footer"><div class="wrap">
+  <span>커리어캐쳐 AI 업무 자동화 실습 · 실습 주소와 예시 카드뉴스는 교육·실습용 자료입니다.</span>
+  <span>이 화면은 입력한 내용을 어디에도 보내지 않습니다. 메모와 검수 표시는 이 기기에만 저장됩니다.</span>
+  <span class="g-contact"><strong>CareerCatcher</strong> 안은경 · <a href="mailto:dms5147@gmail.com">dms5147@gmail.com</a></span>
+</div></footer>
+
+<script src="data.js?v=20261120a"></script>
+<script src="code.js?v=20261120a"></script>
+<script src="app.js?v=20261120a"></script>
+</body>
+</html>
