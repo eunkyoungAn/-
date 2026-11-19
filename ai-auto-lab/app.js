@@ -102,8 +102,8 @@
     const mailPrompt = D.parts[0].stages.find(s => s.prompt);
     $('#materialBox').innerHTML = `<h3 class="dl-h">내려받는 파일</h3><div class="dl-grid">${D.downloads.map(f => `<div class="dl-item"><div><strong>${esc(f[0])}</strong><span>${esc(f[1])}</span></div><a class="g-btn ghost" href="${esc(f[2])}" ${f[3] ? 'download' : 'target="_blank" rel="noopener noreferrer"'}>${f[3] ? '받기' : '열기'}</a></div>`).join('')}</div>
       <h3 class="dl-h">3 · 제미나이 메일 자동화</h3>${promptBox(mailPrompt.prompt.text, '코드 요청문 (gemini.google.com)')}${CODE ? promptBox(CODE, '참고 코드 (Code.gs)', 'cn-code') : ''}
-      <h3 class="dl-h">4 · ChatGPT 프로젝트 활용하기</h3>${promptBox(D.texts.guide, 'ChatGPT 프로젝트 지침')}${promptBox(D.texts.verify, '확인 요청문')}
-      <h3 class="dl-h">5 · 카드뉴스 만들기</h3>${[['request', '카드뉴스 제작 요청문 (주소와 ID만 바꿔 사용)'], ['cover', '표지 이미지 요청문'], ['fix', '디자인 수정 요청문']].map(([k, l]) => promptBox(D.texts[k], l)).join('')}
+      <h3 class="dl-h">4 · ChatGPT 프로젝트 활용하기</h3>${promptBox(D.texts.travelGuide, '프로젝트 지침 · 여행지 분석실')}${promptBox(D.texts.skill, '스킬 문서 · 여행지 분석 (SKILL.md)')}${promptBox(D.texts.skillAsk, '스킬 만들기 요청문')}
+      <h3 class="dl-h">5 · 카드뉴스 만들기</h3>${[['guide', '카드뉴스 프로젝트 지침'], ['request', '카드뉴스 제작 요청문 (주소와 ID만 바꿔 사용)'], ['cover', '표지 이미지 요청문'], ['fix', '디자인 수정 요청문']].map(([k, l]) => promptBox(D.texts[k], l)).join('')}
       <h3 class="dl-h">7 · 개인 연습실</h3>${promptBox(D.selfcheck.applyPrompt, '적용 시작 요청문')}`;
     bindAll($('#materialBox'));
     $('#helpList').innerHTML = ['메일', 'ChatGPT', '카드뉴스', '공통'].map(g => `<h3 class="dl-h">${({ 메일: '제미나이 메일 자동화', ChatGPT: 'ChatGPT 프로젝트 활용하기', 카드뉴스: '카드뉴스 만들기', 공통: '공통' })[g]}</h3><div class="two-col">${D.help.filter(h => h[0] === g).map(h => `<div class="result-card"><strong>${esc(h[1])}</strong><p>${esc(h[2])}</p></div>`).join('')}</div>`).join('');
@@ -140,7 +140,7 @@
     if (st.prompt) secs.push(['prompt', '요청문 (복사해서 붙여 넣기)', promptBox(st.prompt.text, st.prompt.label)]);
     if (st.prompts) secs.push(['prompt', '요청문 (복사해서 붙여 넣기)', st.prompts.map(q => promptBox(D.texts[q.key], q.label)).join('')]);
     if (st.code) secs.push(['code', '참고 코드 (막힐 때)', codeBlock()]);
-    secs.push(['note', '내 기록', st.fields.map(f => noteBox(`${st.id}.${f[0]}`, f[1], f[2])).join('') + '<p class="local-note">이 칸은 이 기기 브라우저에만 저장됩니다.</p>']);
+    if (st.extra) secs.push(['extra', st.extra.title, st.extra.html]);
     let chk = checklist(st.id, st.checks) + `<h3>성찰 질문</h3><p>${esc(st.reflect)}</p>`;
     if (st.table && st.table.after) chk += tableBlock(st.table);
     secs.push(['check', '검수', chk]);
