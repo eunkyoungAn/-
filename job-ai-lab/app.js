@@ -172,6 +172,7 @@
   /* ---------- 바로가기 ---------- */
   function renderQuick() {
     const groups = [
+      ['시작하기 전에', [['ai-test/', '검사', 'AI 역량검사'], ['who/', '레벨', '나는 어떤 AI 사용자?']]],
       ['START · 세 가지 키워드', SLIDES.map((s, i) => ['#start-' + i, s.nav, s.title])],
       ['취업상담 워크플로우', [['#flow', '안내', '전체 과정'], ...F.steps.map(s => ['#flow-' + s.no, s.no + '단계', s.title]), ['#flow-form', '질문지', '내가 쓸 사전 질문지 미리 만들기'], ['#flow-why', '의미', '이 워크플로우의 의미'], ['#flow-tabs', '탭', '시트 탭 구성']]],
       ['개별 실습', [['#mine', '안내', M.title], ['#mine-plan', '양식', '기획서 빈칸 양식'], ['#mine-prompt', '지시문', '지시문'], ['#mine-safe', '점검', '안전 사용 체크리스트'], ['#mine-after', '계획', '교육 뒤 직접 활용 계획']]],
@@ -183,7 +184,7 @@
   }
 
   /* ---------- 라우팅 ---------- */
-  const HOME_SECS = ['timeline', 'downloads', 'privacy', 'help'];
+  const HOME_SECS = ['before', 'timeline', 'downloads', 'privacy', 'help'];
   function route() {
     const h = (location.hash || '#home').replace('#', '');
     const [view, sub] = h.split('-');

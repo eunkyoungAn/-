@@ -1012,3 +1012,9 @@ body{word-break:keep-all;overflow-wrap:break-word;line-break:strict}
 .lesson-content .prompt-box pre{font-size:13.5px;line-height:1.65}
 .lesson-content details.fold{max-width:none}
 @media (max-width:640px){.make-cols{grid-template-columns:minmax(0,1fr)}}
+
+/* 시작하기 전에 */
+.before-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.before-grid .lesson-card{min-height:230px}
+#sec-before .local-note{margin-top:12px}
+@media (max-width:640px){.before-grid{grid-template-columns:minmax(0,1fr)}}
