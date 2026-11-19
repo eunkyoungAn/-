@@ -843,3 +843,15 @@ body{word-break:keep-all;overflow-wrap:break-word;line-break:strict}
 .slide .note b{display:block;font-size:12.5px;letter-spacing:.1em;color:var(--ink-mute)}
 .slide .note .bl{margin-top:4px;color:var(--ink);font-size:15.5px}
 .slide .slide-lead{color:var(--ink-mute)}
+
+/* 장표: 의미 줄 */
+.so{margin-top:12px;padding:10px 12px;border-left:3px solid var(--accent);border-radius:0 10px 10px 0;background:rgba(11,100,244,.05);color:var(--ink);font-size:14.5px;line-height:1.65}
+.so b{display:block;font-size:11.5px;letter-spacing:.1em;color:var(--accent);font-weight:700}
+.pt .so{font-size:15px}
+.stat .so{margin-bottom:4px}
+.t10 details .so{margin:0 16px 14px 58px}
+.shift-row .shift-txt p{color:var(--ink-soft);font-size:14.5px;line-height:1.65}
+.shift-row .shift-txt i{display:block;margin-top:6px;font-style:normal;color:var(--ink-mute);font-size:12px}
+.shift-row .so{margin-top:8px}
+.s3 .so{margin-top:12px}
+@media (max-width:980px){.shift-row .shift-txt{grid-column:1 / -1}}
