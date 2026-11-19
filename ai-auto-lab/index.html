@@ -6,23 +6,26 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex">
-<title>AI 업무 자동화 실습실 | 커리어캐쳐</title>
+<title>AI 활용 스마트 문서작성 | 커리어캐쳐</title>
 <meta name="description" content="Gemini와 Apps Script로 메일을 한 번에 보내고, 시트 한 줄로 카드뉴스를 만드는 실습실.">
 <link rel="stylesheet" href="fonts/pretendard.css">
-<link rel="stylesheet" href="style.css?v=20261120j">
+<link rel="stylesheet" href="style.css?v=20261120k">
 </head>
 <body>
 <header class="g-header">
   <div class="wrap">
-    <a class="g-brand" href="#home" aria-label="실습실 처음 화면">
+    <a class="g-brand" href="#home" aria-label="처음 화면">
       <div class="g-mark">C</div>
-      <div><strong>AI 업무 자동화 실습실</strong><span>커리어캐쳐 · G-mail 자동화 + 카드뉴스 자동화</span></div>
+      <div><strong>AI 활용 스마트 문서작성</strong><span>커리어캐쳐 · 메일 자동화, ChatGPT 프로젝트, 카드뉴스</span></div>
     </a>
-    <nav class="g-nav" aria-label="실습실 메뉴">
-      <a href="#home">소개</a>
-      <a href="#before">시작하기 전에</a>
-      <a href="#mail">G-mail 자동화</a>
-      <a href="#card">카드뉴스 자동화</a>
+    <nav class="g-nav" aria-label="메뉴">
+      <a href="#ai">1 AI 현황</a>
+      <a href="#before">2 시작 전</a>
+      <a href="#mail">3 메일 자동화</a>
+      <a href="#gpt">4 GPT 프로젝트</a>
+      <a href="#card">5 카드뉴스</a>
+      <a href="#materials">6 자료</a>
+      <a href="#practice">7 연습실</a>
       <details class="menu" id="quickMenu">
         <summary class="g-home">바로가기</summary>
         <div class="menu-panel" id="quickPanel"></div>
@@ -36,15 +39,12 @@
   <div id="viewHome">
     <section class="g-hero wrap">
       <div>
-        <span class="eyebrow">과정 소개 · 커리어캐쳐 AI 업무 활용 과정</span>
-        <h1>메일은 한 번에 보내고, 카드뉴스는 시트 한 줄로</h1>
-        <p class="hero-copy">반복하는 업무 두 가지를 AI로 자동화하는 3시간 실습 과정입니다. Gemini가 만든 Apps Script 코드로 이름을 넣은 메일을 한 번에 보내고, 시트에 기획 한 줄을 쓰면 Gemini·ChatGPT·Canva가 카드뉴스를 만듭니다. 코딩을 몰라도 됩니다. AI가 만들고, 여러분이 확인하고 결정합니다.</p>
+        <span class="eyebrow">커리어캐쳐 AI 업무 활용 과정</span>
+        <h1>AI 활용 스마트 문서작성</h1>
+        <p class="hero-copy">반복하는 문서 업무를 AI로 줄이는 3시간 실습 과정입니다. 제미나이가 만든 코드로 메일을 한 번에 보내고, ChatGPT 프로젝트에 내 업무 지침을 저장하고, 시트 한 줄로 카드뉴스를 만듭니다. 코딩을 몰라도 됩니다. AI가 만들고, 여러분이 확인하고 결정합니다.</p>
         <div class="hero-actions">
-          <a class="g-btn" href="ai-test/">AI 역량검사로 시작하기</a>
-          <a class="g-btn ghost" href="who/">나는 어떤 AI 사용자?</a>
-          <a class="text-link" href="#before">시작하기 전에</a>
-          <a class="text-link" href="#mail">G-mail 자동화</a>
-          <a class="text-link" href="#card">카드뉴스 자동화</a>
+          <a class="g-btn" href="#ai">시작하기</a>
+          <a class="text-link" href="#timeline">시간표 보기</a>
         </div>
         <div class="hero-meta" aria-label="과정 정보">
           <span class="meta-chip active">10:00~13:00 · 3시간</span>
@@ -56,88 +56,91 @@
       <div>
         <span class="demo-label">오늘의 순서</span>
         <div class="demo-card">
-          <div class="cn-order">
-            <a href="#before"><b>1</b><div><strong>시작하기 전에</strong><span>AI 역량검사 → 나는 어떤 AI 사용자? 맞춰 보기 → AI 정보 장표</span></div></a>
-            <a href="#mail"><b>2</b><div><strong>G-mail 자동화</strong><span>시트 목록 → Gemini 코드 → Apps Script → 테스트·전체 발송</span></div></a>
-            <a href="#card"><b>3</b><div><strong>카드뉴스 자동화</strong><span>시트 기획 → Gemini 원고 → ChatGPT 프로젝트·Canva 디자인</span></div></a>
+          <div class="cn-order compact">
+            <a href="#ai"><b>1</b><div><strong>AI 사용 현황 안내</strong></div></a>
+            <a href="#before"><b>2</b><div><strong>시작하기 전에</strong><span>AI 역량검사 · 나는 어떤 AI 사용자?</span></div></a>
+            <a href="#mail"><b>3</b><div><strong>제미나이 메일 자동화</strong></div></a>
+            <a href="#gpt"><b>4</b><div><strong>ChatGPT 프로젝트 활용하기</strong></div></a>
+            <a href="#card"><b>5</b><div><strong>카드뉴스 만들기</strong></div></a>
+            <a href="#materials"><b>6</b><div><strong>다운로드 자료 모아보기</strong></div></a>
+            <a href="#practice"><b>7</b><div><strong>개인 연습실</strong></div></a>
           </div>
-          <div class="demo-foot"><i></i><span>두 실습 모두 구글 시트에서 시작해 결과를 시트에 남깁니다. G-mail 자동화에서 익힌 Apps Script가 카드뉴스 자동화의 자동 생성 버튼으로 이어집니다.</span></div>
         </div>
       </div>
     </section>
 
     <div class="wrap">
-      <section class="info-section" id="sec-intro">
-        <span class="level-kicker">ABOUT</span>
-        <h2>이 과정에서 하는 일</h2>
-        <div class="two-col">
-          <div class="result-card"><strong>학습 목표</strong><ol class="plain">
-            <li>내가 AI를 어떤 수준으로 쓰고 있는지 점검하고, AI에게 맡길 일과 사람이 할 일을 나눌 수 있다.</li>
-            <li>Gemini에게 Apps Script 코드를 받아, 시트 목록대로 메일을 테스트한 뒤 발송할 수 있다.</li>
-            <li>운영 시트와 Gemini·ChatGPT·Canva로 카드뉴스 한 편을 만들고 직접 검토할 수 있다.</li></ol></div>
-          <div class="result-card"><strong>수업이 끝나면 남는 것</strong><ul class="plain">
-            <li>내 받은편지함의 테스트 메일과, 다시 쓸 수 있는 메일 자동화 시트</li>
-            <li>인스타그램용 카드뉴스 1편(4:5, 6장)과 결과 링크</li>
-            <li>단계마다 스스로 확인한 검수 체크 (평가는 결과물과 체크로 합니다)</li></ul></div>
+      <!-- 1 -->
+      <section class="level-section" id="sec-ai">
+        <div class="level-head"><div><span class="level-kicker">1 · 15분</span><h2>AI 사용 현황 안내</h2></div>
+        <p>우리나라에서 생성형 AI를 얼마나, 어떻게 쓰고 있는지 먼저 봅니다. 자세한 내용은 장표로 이어집니다.</p></div>
+        <div class="stat3">
+          <div class="stat"><em>생성형 AI 경험률</em><strong>44.5%</strong><div class="cap">2024년 33.3% → 2025년 44.5%</div><p>1년 사이 11.2%p 늘었습니다.</p></div>
+          <div class="stat"><em>사무직 경험률</em><strong>71.9%</strong><div class="cap">직업별로 가장 높음</div><p>문서·메일·홍보물을 다루는 일에서 AI를 가장 먼저 쓰고 있습니다.</p></div>
+          <div class="stat"><em>정보·결과물을 믿는다</em><strong>54.7%</strong><div class="cap">절반 남짓만 결과를 신뢰</div><p>AI가 만든 메일·코드·원고는 사람이 확인하고 써야 합니다.</p></div>
         </div>
+        <p class="local-note">출처: 과학기술정보통신부, 「2025 인터넷이용실태조사」 결과 발표(2026. 3. 31.)</p>
+        <div class="go-studio"><p><b>장표 16장</b> — 서비스별 이용, 오늘 쓰는 AI, Apps Script와 API 키, 맡길 일 고르는 기준 4가지, 카드뉴스 6장 구조, 안전.</p><a class="g-btn" href="#start">장표로 보기</a></div>
       </section>
 
-      <section class="info-section" id="sec-timeline">
-        <span class="level-kicker">TIMELINE</span>
-        <h2>시간표 (10:00~13:00, 3시간)</h2>
-        <p class="lead">맨 처음 22분은 진단 활동(AI 역량검사 15분, 나는 어떤 AI 사용자? 7분)입니다. 진단 22분, 개념 30분, 실습 108분(60%), 휴식 20분. 실습은 G-mail 자동화(30분)와 카드뉴스 자동화(78분)입니다.</p>
-        <div class="g-table"><table id="timelineTable"></table></div>
-      </section>
-
-      <div class="progress-card" aria-label="내 진행 상황">
-        <div class="progress-number"><span id="pgNum">0 / 7</span><small>검수까지 마친 단계</small></div>
-        <div class="progress-track"><span id="pgBar"></span></div>
-        <div class="progress-copy">G-mail 자동화 4단계와 카드뉴스 자동화 3단계 가운데 검수 항목을 모두 확인한 단계를 셉니다. 메모와 검수 표시는 이 기기에만 저장됩니다.</div>
-      </div>
-
+      <!-- 2 -->
       <section class="level-section" id="sec-before">
-        <div class="level-head"><div><span class="level-kicker">1 · 37분</span><h2>시작하기 전에</h2></div>
-        <p>맨 처음에 AI 역량검사를 하고, 이어서 "나는 어떤 AI 사용자일까?"를 맞춰 봅니다. 그다음 오늘 알아야 할 AI 정보를 장표로 봅니다. 계정 준비도 여기서 마칩니다.</p></div>
+        <div class="level-head"><div><span class="level-kicker">2 · 22분</span><h2>시작하기 전에</h2></div>
+        <p>맨 처음에 AI 역량검사를 하고, 이어서 "나는 어떤 AI 사용자일까?"를 맞춰 봅니다. 계정 준비도 여기서 마칩니다.</p></div>
         <div class="lesson-grid">
           <a class="lesson-card" href="ai-test/"><span class="lesson-code">맨 처음 · 15분</span><h3>AI 역량검사</h3><p>AI 활용평가 연습문제 3개를 풀고, AI에게 보낼 질문을 직접 써서 채점받습니다.</p><div class="lesson-output">산출물 <span>내 질문 습관 점수</span></div><div class="lesson-arrow">검사 →</div></a>
-          <a class="lesson-card" href="who/"><span class="lesson-code">그다음 · 7분</span><h3>나는 어떤 AI 사용자?</h3><p>다른 사람의 이야기를 읽고 몇 레벨인지 맞춰 본 뒤, 마지막에 내 레벨을 확인합니다. 맞춰 보기 5문제, 내 모습 고르기 4문제.</p><div class="lesson-output">산출물 <span>내 AI 레벨</span></div><div class="lesson-arrow">맞춰 보기 →</div></a>
-          <a class="lesson-card" href="#start"><span class="lesson-code">세 번째 · 장표 16장</span><h3>AI, 자동화, 카드뉴스, 안전</h3><p>생성형 AI 이용 현황, 맡길 일 고르는 기준 4가지, 카드뉴스 6장 구조, 한도와 권한.</p><div class="lesson-output">산출물 <span>오늘 흐름 이해</span></div><div class="lesson-arrow">장표 →</div></a>
+          <a class="lesson-card" href="who/"><span class="lesson-code">그다음 · 7분</span><h3>나는 어떤 AI 사용자?</h3><p>다른 사람의 이야기를 읽고 몇 레벨인지 맞춰 본 뒤, 마지막에 내 레벨을 확인합니다.</p><div class="lesson-output">산출물 <span>내 AI 레벨</span></div><div class="lesson-arrow">맞춰 보기 →</div></a>
         </div>
         <div class="start-row">
-          <div class="start-item"><b>준비 1</b><strong>계정 로그인</strong><p>크롬에서 Google 계정으로 로그인합니다. 카드뉴스 자동화에서는 ChatGPT와 Canva도 씁니다. 요금제에 따라 연결 기능이 다를 수 있습니다.</p></div>
-          <div class="start-item"><b>준비 2</b><strong>보낼 메일과 시트</strong><p>보낼 메일 내용을 열어 둡니다. 카드뉴스 자동화에서 쓸 <a id="copyLink" target="_blank" rel="noopener noreferrer">카드뉴스 운영 시트 사본</a>을 미리 만들어 둡니다.</p></div>
+          <div class="start-item"><b>준비 1</b><strong>계정 로그인</strong><p>크롬에서 Google 계정으로 로그인합니다. ChatGPT와 Canva도 씁니다. 요금제에 따라 연결 기능이 다를 수 있습니다.</p></div>
+          <div class="start-item"><b>준비 2</b><strong>보낼 메일과 시트</strong><p>보낼 메일 내용을 열어 둡니다. <a data-copylink target="_blank" rel="noopener noreferrer">카드뉴스 운영 시트 사본</a>을 미리 만들어 둡니다.</p></div>
           <div class="start-item"><b>준비 3</b><strong>예시 정보만 사용</strong><p>메일은 내 주소와 동의를 받은 주소만, 카드뉴스는 예시 주제로 연습합니다. API 키는 비밀번호처럼 나만 봅니다.</p></div>
         </div>
       </section>
 
+      <!-- 3 · 4 · 5 -->
       <div id="homeParts"></div>
 
-      <section class="info-section" id="sec-materials">
-        <span class="level-kicker">MATERIALS</span>
-        <h2>요청문과 참고 코드</h2>
-        <p class="lead">두 실습에서 쓰는 요청문, 프로젝트 지침, 참고 코드를 모았습니다. 각 단계 화면에도 같은 내용이 있습니다.</p>
+      <!-- 6 -->
+      <section class="level-section" id="sec-materials">
+        <div class="level-head"><div><span class="level-kicker">6</span><h2>다운로드 자료 모아보기</h2></div>
+        <p>내려받는 파일과, 복사해서 쓰는 요청문·지침·참고 코드를 한곳에 모았습니다. 각 단계 화면에도 같은 내용이 있습니다.</p></div>
         <div id="materialBox"></div>
       </section>
 
-      <section class="info-section" id="sec-safety">
-        <span class="level-kicker">SAFETY</span>
-        <h2>실제 업무에 쓸 때</h2>
+      <!-- 7 -->
+      <section class="level-section" id="sec-practice">
+        <div class="level-head"><div><span class="level-kicker">7</span><h2>개인 연습실</h2></div>
+        <p>수업이 끝난 뒤 혼자 이어서 연습하는 곳입니다. 업무가 아닌 일상의 일로 해 봐도 좋습니다.</p></div>
+        <div class="lesson-grid">
+          <a class="lesson-card" href="#check"><span class="lesson-code">혼자 해 보기</span><h3>체크하고 프롬프트로 적용 시작하기</h3><p>내 AI 사용 습관을 체크하고, 요청문을 복사해 내 일 하나를 AI에게 바로 맡겨 봅니다.</p><div class="lesson-output">산출물 <span>내가 맡겨 본 일 한 줄</span></div><div class="lesson-arrow">연습 →</div></a>
+          <a class="lesson-card" href="../prompt-practice/"><span class="lesson-code">질문 연습</span><h3>질문 구조 연습</h3><p>AI에게 보내는 질문을 구조에 맞춰 써 보는 초급자용 연습 페이지입니다.</p><div class="lesson-output">산출물 <span>내 질문문</span></div><div class="lesson-arrow">연습 →</div></a>
+          <a class="lesson-card" href="ai-test/"><span class="lesson-code">다시 풀기</span><h3>AI 역량검사</h3><p>수업 뒤에 다시 풀어 보고 점수가 어떻게 달라졌는지 확인합니다.</p><div class="lesson-output">산출물 <span>내 질문 습관 점수</span></div><div class="lesson-arrow">검사 →</div></a>
+        </div>
+        <div class="progress-card" aria-label="내 진행 상황">
+          <div class="progress-number"><span id="pgNum">0 / 8</span><small>검수까지 마친 단계</small></div>
+          <div class="progress-track"><span id="pgBar"></span></div>
+          <div class="progress-copy">메일 자동화 4단계, ChatGPT 프로젝트 1단계, 카드뉴스 만들기 3단계 가운데 검수 항목을 모두 확인한 단계를 셉니다. 메모와 검수 표시는 이 기기에만 저장됩니다.</div>
+        </div>
+      </section>
+
+      <!-- 안내 (접어 둠) -->
+      <details class="fold cn-fold" id="sec-timeline"><summary>시간표 (10:00~13:00)와 학습 목표</summary><div class="fold-b">
+        <p class="local-note">진단 22분(AI 역량검사 15분, 나는 어떤 AI 사용자? 7분), 개념 30분, 실습 108분(60%), 휴식 20분.</p>
+        <div class="g-table"><table id="timelineTable"></table></div>
+        <h3 class="dl-h">학습 목표</h3>
+        <ol class="plain">
+          <li>내가 AI를 어떤 수준으로 쓰고 있는지 점검하고, AI에게 맡길 일과 사람이 할 일을 나눌 수 있다.</li>
+          <li>제미나이에게 Apps Script 코드를 받아, 시트 목록대로 메일을 테스트한 뒤 발송할 수 있다.</li>
+          <li>ChatGPT 프로젝트에 지침을 등록하고, 운영 시트와 Gemini·Canva로 카드뉴스 한 편을 만들어 직접 검토할 수 있다.</li>
+        </ol></div></details>
+      <details class="fold cn-fold" id="sec-safety"><summary>실제 업무에 쓸 때</summary><div class="fold-b">
         <div class="safety-box wide"><strong>AI가 작성하고, 사람이 확인합니다.</strong>
-          <p>메일은 받는 사람에게 보내도 되는지(수신 동의) 먼저 확인하고, 개인 Gmail 계정은 Apps Script로 하루 100명까지 보낼 수 있으므로 인원이 많으면 나눠 보냅니다. 카드뉴스의 가격·제품 사양·건강 효과는 공식 자료로 직접 확인합니다. 주민등록번호, 계좌번호, 고객 명단, 회사 내부자료는 요청문에 넣지 않습니다. 다른 사람이 보낸 시트나 코드에서 "확인되지 않은 앱" 승인 화면이 뜨면 출처를 모를 때는 허용하지 않습니다.</p></div>
-      </section>
-
-      <section class="info-section" id="sec-help">
-        <span class="level-kicker">TROUBLESHOOTING</span>
-        <h2>막힐 때</h2>
-        <div id="helpList"></div>
-      </section>
-
-      <section class="info-section" id="sec-sources">
-        <span class="level-kicker">SOURCES</span>
-        <h2>참고 자료</h2>
+          <p>메일은 받는 사람에게 보내도 되는지(수신 동의) 먼저 확인하고, 개인 Gmail 계정은 Apps Script로 하루 100명까지 보낼 수 있으므로 인원이 많으면 나눠 보냅니다. 카드뉴스의 가격·제품 사양·건강 효과는 공식 자료로 직접 확인합니다. 주민등록번호, 계좌번호, 고객 명단, 회사 내부자료는 요청문에 넣지 않습니다. 다른 사람이 보낸 시트나 코드에서 "확인되지 않은 앱" 승인 화면이 뜨면 출처를 모를 때는 허용하지 않습니다.</p></div></div></details>
+      <details class="fold cn-fold" id="sec-help"><summary>막힐 때</summary><div class="fold-b"><div id="helpList"></div></div></details>
+      <details class="fold cn-fold" id="sec-sources"><summary>참고 자료</summary><div class="fold-b">
         <ol class="plain-ol" id="sourceList"></ol>
-        <p class="local-note">Gemini·ChatGPT·Apps Script 화면의 버튼 이름과 무료 한도, 발송 한도는 바뀔 수 있습니다.</p>
-      </section>
+        <p class="local-note">Gemini·ChatGPT·Apps Script 화면의 버튼 이름과 무료 한도, 발송 한도는 바뀔 수 있습니다.</p></div></details>
     </div>
   </div>
 
@@ -173,13 +176,13 @@
 </main>
 
 <footer class="g-footer"><div class="wrap">
-  <span>커리어캐쳐 AI 업무 자동화 실습 · 실습 주소와 예시 카드뉴스는 교육·실습용 자료입니다.</span>
+  <span>커리어캐쳐 AI 활용 스마트 문서작성 · 실습 주소와 예시 카드뉴스는 교육·실습용 자료입니다.</span>
   <span>이 화면은 입력한 내용을 어디에도 보내지 않습니다. 메모와 검수 표시는 이 기기에만 저장됩니다.</span>
   <span class="g-contact"><strong>CareerCatcher</strong> 안은경 · <a href="mailto:dms5147@gmail.com">dms5147@gmail.com</a></span>
 </div></footer>
 
-<script src="data.js?v=20261120j"></script>
-<script src="code.js?v=20261120j"></script>
-<script src="app.js?v=20261120j"></script>
+<script src="data.js?v=20261120k"></script>
+<script src="code.js?v=20261120k"></script>
+<script src="app.js?v=20261120k"></script>
 </body>
 </html>
