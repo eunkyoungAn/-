@@ -10,9 +10,9 @@
 
 | 파일 | 쓰임 |
 |---|---|
-| `index.html` | 화면 뼈대(첫 화면, 먼저 알기, 단계 화면) |
+| `index.html` | 화면 뼈대(첫 화면, START 장표, 단계 화면) |
 | `style.css` | `agent-lab/style.css` 복사본 + 맨 아래 전용 스타일 |
-| `app.js` | START 장표(`#start`), 바로가기 메뉴, 화면 전환(`#basics`, `#s1`~`#s3`, `#review`), 내담자 유형, 표 3종, AI 표 붙여 넣기, 검수 표시 |
+| `app.js` | START 장표(`#start`), 바로가기 메뉴, 화면 전환(`#s1`~`#s3`, `#review`, `#form`), 내담자 유형, 표 3종, AI 표 붙여 넣기, 검수 표시 |
 | `data.js` | 실습 데이터. `tools/build.py`가 만든다 |
 | `src/*.md` | 가상 채용공고와 내담자 서류 원본. 04, 05는 build.py가 만든다 |
 | `files/` | 수강생이 내려받는 PDF·DOCX, 스킬 zip, 전체 압축 파일. build.py가 만든다 |
