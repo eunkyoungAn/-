@@ -131,32 +131,6 @@
       <div class="result-card"><strong>처음부터 다시 하고 싶다</strong><p>각 단계 표 위의 [표 비우기]를 누릅니다. 이 기기에 저장된 내용만 지워집니다.</p></div></div>`;
   }
 
-  /* ---------- 먼저 알기 ---------- */
-  function renderBasics() {
-    const areas = [...new Set(D.competencies.map(c => c.area))];
-    const secs = [
-      ['b1', '취업시장의 변화 3가지와 고용서비스의 역할 3가지', `<p>생성형 AI가 자료 탐색과 문서 초안 작성에 쓰이면서 같은 직무에서도 요구 역량의 조합이 달라지고, 구직자는 이전 과업 가운데 새 직무에 쓸 수 있는 경험을 설명해야 하며, 고용서비스에는 AI 매칭이 들어왔습니다(안은경, 2026, 「AI 시대 '인재를 돕는 인재'의 경력전략: 고용서비스업 종사자의 프로티언 경력태도와 직무열의(경력성장기회의 조절효과를 중심으로)」 Ⅰ.1·Ⅴ.2). 이 실습실은 그 변화에 대응하는 실무자의 역할을 세 단계에 하나씩 두었습니다.</p>
-        <div class="g-table"><table><thead><tr><th>변화</th><th>역할</th><th>하는 일</th><th>단계</th></tr></thead><tbody>${D.roles.map(r => `<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td><td>${esc(r[2])}</td><td>${esc(r[3])}</td></tr>`).join('')}</tbody></table></div>
-        <p class="local-note">역할 이름 세 가지는 원고의 두 과제(공고 읽기와 연결, AI 추천 판단)를 세 단계에 맞춰 커리어캐쳐가 나눠 붙인 것입니다.</p>`],
-      ['b2', '채용 트렌드 2027 키워드가 들어가는 자리', `<p>윤영돈(2026)의 10대 키워드를 각 단계의 활동에 연결했습니다. 키워드 정의는 책 본문과 대조해 쓰며, 여기서는 어느 단계에서 무엇을 볼지만 적었습니다.</p>
-        <div class="kw-grid">${D.keywords.map(k => `<div class="kw-item"><strong>${esc(k[0])}<em>${esc(k[1])}</em></strong><span>${esc(k[2])}</span></div>`).join('')}</div>`],
-      ['b3', '판단 기준: 직업공통능력 7개 영역 21개 하위능력', `<p>직무와 상관없이 모든 직업인에게 공통으로 요구되는 능력입니다. 2026년 4월 28일 고용노동부가 직업기초능력(10개 영역 34개 하위능력)을 직업공통능력 7개 영역 21개 하위능력으로 개편하면서 인공지능(AI)활용능력, 디지털책임의식, 산업안전보건의식을 새로 넣었습니다(고용노동부, 2026). 직무별 전문 역량은 NCS 능력단위(ncs.go.kr)를 씁니다.</p>
-        <div class="comp-grid">${areas.map(a => `<div class="comp-area"><strong>${esc(a)}</strong>${D.competencies.filter(c => c.area === a).map(c => `<span>${esc(c.name)}</span>`).join('')}</div>`).join('')}</div>
-        <p class="local-note">이 실습실의 "판정 단서"는 커리어캐쳐가 쓴 요약입니다. 표준 원문의 수행기준·평가준거는 NCS 누리집의 직업공통능력 표준 파일에서 확인합니다.</p>`],
-      ['b4', '격차 유형 네 가지와 처방', `<p>2단계에서 자기진단(1~4점)과 AI 서류 판정(충족·부분·미흡)을 겹치면 격차 유형이 나옵니다. 유형이 다르면 처방이 다릅니다. 이 규칙은 커리어캐쳐의 제안이며 표준화 검사가 아닙니다.</p>
-        <div class="g-table"><table><thead><tr><th>유형</th><th>규칙</th><th>전략</th></tr></thead><tbody>${D.gapTypes.map(g => `<tr><td>${esc(g.id)}</td><td>${esc(g.rule)}</td><td>${esc(g.strategy)}</td></tr>`).join('')}</tbody></table></div>`],
-      ['b5', 'AI에 맡기는 일과 맡기지 않는 일', `<ul class="plain">
-        <li><b>맡기는 것</b>: 긴 글에서 문장 추출, 기준에 따른 분류, 표 초안 만들기, 문장 다듬기.</li>
-        <li><b>맡기지 않는 것</b>: 적합 여부 최종 판단, 제도의 금액·요건 확정, 내담자에게 전할 말의 최종 결정.</li>
-        <li><b>항상 하는 것</b>: AI 결과의 모든 행을 원문과 대조한다. 근거 문장이 원문에 없으면 그 행은 지운다.</li>
-        <li><b>절대 하지 않는 것</b>: 실제 내담자의 식별 정보를 가리지 않고 넣는 것. 나이·성별·학교로 판단하게 하는 것.</li></ul>
-        <h3>오늘 쓰는 도구</h3>${D.tools.map(t => `<div class="tool-row"><div><strong>${esc(t.name)}</strong><p>${esc(t.how)}</p><small>${esc(t.note)}</small></div><a class="g-btn ghost" href="${esc(t.url)}" target="_blank" rel="noopener noreferrer">열기</a></div>`).join('')}`],
-    ];
-    $('#basicsToc').innerHTML = '<strong>목차</strong>' + secs.map(s => `<a href="#basics-${s[0]}">${esc(s[1])}</a>`).join('');
-    $('#basicsBody').innerHTML = secs.map((s, i) => `<section id="basics-${s[0]}"><span class="section-number">${i + 1}</span><h2>${esc(s[1])}</h2>${s[2]}</section>`).join('') +
-      `<div class="lesson-navigation"><a href="#home"><span>처음</span><strong>실습 목록으로</strong></a><a class="lesson-next" href="#s1"><span>다음</span><strong>1단계 · 채용공고를 요구역량표로</strong></a></div>`;
-  }
-
   /* ---------- 단계 화면 ---------- */
   function renderStage(id) {
     const st = D.stages.find(s => s.id === id);
@@ -178,7 +152,7 @@
     secs.push(['sheet', ['요구역량표', '격차표', '취업지원 계획서'][Number(st.no) - 1], `<div id="sheetArea"></div>`]);
     secs.push(['check', '검수', `<div class="checklist">${st.checks.map((x, i) => `<label class="check-item"><input type="checkbox" data-k="${id}.${i}" ${S.checks[`${id}.${i}`] ? 'checked' : ''}><span>${esc(x)}</span></label>`).join('')}</div>
       <h3>성찰 질문</h3><p>${esc(st.reflect)}</p>${st.extra ? `<div class="result-card mt14"><strong>참고</strong><p>${esc(st.extra)}</p></div>` : ''}`]);
-    const prev = st.no === '1' ? ['#basics', '먼저 알기'] : [`#s${Number(st.no) - 1}`, `${Number(st.no) - 1}단계`];
+    const prev = st.no === '1' ? ['#start', 'START · 변화, 트렌드, 역할'] : [`#s${Number(st.no) - 1}`, `${Number(st.no) - 1}단계`];
     const next = st.no === '3' ? ['#review', '사례 검토와 적용'] : [`#s${Number(st.no) + 1}`, `${Number(st.no) + 1}단계 · ${D.stages[Number(st.no)].title}`];
     $('#stageToc').innerHTML = '<strong>목차</strong>' + secs.map(s => `<a href="#${id}-${s[0]}" class="${s[0] === 'sheet' ? 'toc-run' : ''}">${esc(s[1])}</a>`).join('');
     $('#stageBody').innerHTML = secs.map((s, i) => `<section id="${id}-${s[0]}"><span class="section-number">${i + 1}</span><h2>${esc(s[1])}</h2>${s[2]}</section>`).join('') +
@@ -511,34 +485,43 @@
   const srcLine = (t, u, u2) => `<p class="src">출처: ${esc(t)}${[u, u2].filter(Boolean).map((l, i, arr) => ` · <a href="${esc(l)}" target="_blank" rel="noopener noreferrer">원문 보기${arr.length > 1 ? ' ' + (i + 1) : ''}</a>`).join('')}</p>`;
   const ul = arr => `<ul class="bl">${arr.map(t => `<li>${esc(t)}</li>`).join('')}</ul>`;
   const so = (t, label) => (t ? `<p class="so"><b>${esc(label || '의미')}</b>${esc(t)}</p>` : '');
+  const srcFold = (t, u, u2) => `<details class="srcd"><summary>출처: ${esc(String(t).split(/, | \/ |; |「|『|\((?!\d{4})/)[0].trim())}</summary>${srcLine(t, u, u2)}</details>`;
+  const gi = g => SLIDES.findIndex(s => s.g === g);
   const HL = ['AI 네이티브', '오케스트라 인재', '커리어 민첩성', '롱제비티'];
   const SLIDES = [
     { g: 0, nav: '시작', title: '세 가지 키워드', html: () => `<span class="slide-kicker">START · AI 활용 취업지원 실무</span><h1>변화, 트렌드, 역할</h1>
       <p class="slide-lead">실습 전에 보는 세 가지 키워드</p>
-      <div class="kw3"><a href="#start-1"><b>KEYWORD 1</b><strong>변화</strong><span>구직자의 변화 · 고용서비스업 종사자의 변화</span></a>
-      <a href="#start-3"><b>KEYWORD 2</b><strong>트렌드</strong><span>2027년 채용 트렌드 10가지 · 2026년과 달라진 4가지</span></a>
-      <a href="#start-5"><b>KEYWORD 3</b><strong>역할</strong><span>사례로 보는 구직자의 마음 · 우리의 역할 3S</span></a></div>` },
+      <div class="kw3"><a href="#start-${gi(1)}"><b>KEYWORD 1</b><strong>변화</strong><span>구직자의 변화 · 고용서비스업 종사자의 변화</span></a>
+      <a href="#start-${gi(2)}"><b>KEYWORD 2</b><strong>트렌드</strong><span>2027년 채용 트렌드 10가지 · 2026년과 달라진 4가지</span></a>
+      <a href="#start-${gi(3)}"><b>KEYWORD 3</b><strong>역할</strong><span>사례로 보는 구직자의 마음 · 우리의 역할 3S</span></a></div>` },
     { g: 1, nav: '1-1', title: '구직자가 맞이하는 변화', html: () => `<span class="slide-kicker">1. 변화 · 1) 구직자</span><h1>구직자가 맞이하는 변화</h1>
-      <div class="stat3">${ST.seeker.map(x => `<div class="stat"><em>${esc(x.tag)}</em><strong>${esc(x.num)}</strong><div class="cap">${esc(x.cap)}</div>${ul(x.pts)}${so(x.so)}${srcLine(x.src, x.url, x.url2)}</div>`).join('')}</div>
-      <div class="note"><b>정리</b>${ul(ST.seeker_note)}</div>` },
-    { g: 1, nav: '1-2', title: '고용서비스업 종사자가 맞이하는 변화', html: () => `<span class="slide-kicker">1. 변화 · 2) 고용서비스업 종사자</span><h1>종사자가 맞이하는 변화</h1>
-      <div class="pts">${ST.worker.map((x, i) => `<div class="pt"><b>0${i + 1}</b><strong>${esc(x.h)}</strong>${ul(x.pts)}${so(x.so)}${srcLine(x.src)}</div>`).join('')}</div>` },
+      <div class="stat3">${ST.seeker.map(x => `<div class="stat"><em>${esc(x.tag)}</em><strong>${esc(x.num)}</strong><div class="cap">${esc(x.cap)}</div>${ul(x.pts)}${so(x.so)}${srcFold(x.src, x.url, x.url2)}</div>`).join('')}</div>` },
+    ...[['a', '새로운 과제', 0], ['b', '숙련과 전문성', 2]].map(([key, sub, from]) => ({ g: 1, nav: `1-2${key}`, title: `종사자가 맞이하는 변화 · ${sub}`, html: () => `<span class="slide-kicker">1. 변화 · 2) 고용서비스업 종사자 · ${from ? '②' : '①'} ${esc(sub)}</span><h1>종사자가 맞이하는 변화</h1>
+      <div class="pts">${ST.worker.slice(from, from + 2).map((x, i) => `<div class="pt"><b>0${from + i + 1}</b><strong>${esc(x.h)}</strong>${ul(x.pts)}${so(x.so)}${srcFold(x.src)}</div>`).join('')}</div>` })),
+    { g: 1, nav: '1-3', title: '변화 정리', html: () => `<span class="slide-kicker">1. 변화 · 정리</span><h1>구직자도 종사자도 AI와 함께 일하게 됨</h1>
+      <div class="recap"><div class="recap-col"><b>구직자</b>${ST.seeker_note.slice(0, 3).map(t => `<span>${esc(t)}</span>`).join('')}</div>
+      <div class="recap-col"><b>고용서비스업 종사자</b>${ST.worker_note.map(t => `<span>${esc(t)}</span>`).join('')}</div></div>
+      <div class="note">${esc(ST.seeker_note[3])}</div>` },
     { g: 2, nav: '2-1', title: '2027년 채용 트렌드', html: () => `<span class="slide-kicker">2. 트렌드 · 3) 2027년 채용 트렌드</span><h1>2027년 채용 트렌드 10가지</h1>
       <p class="slide-lead">키워드를 누르면 요점과 상담에서의 의미가 펼쳐집니다. 파란 테두리 네 개는 다음 장에서 2026년과 비교합니다.</p>
       <div class="t10">${ST.trend27.map((k, i) => `<details class="${HL.includes(k[0]) ? 'hl' : ''}"><summary><b>${String(i + 1).padStart(2, '0')}</b><strong>${esc(k[0])}</strong><span>${esc(k[1])}</span></summary>${ul(k[2])}${so(k[3], '상담에서')}</details>`).join('')}</div>
-      ${srcLine(ST.trend27_src, ST.trend27_url)}` },
+      ${srcFold(ST.trend27_src, ST.trend27_url)}` },
     { g: 2, nav: '2-2', title: '2026년과 달라진 점', html: () => `<span class="slide-kicker">2. 트렌드 · 4) 2026년과 달라진 점</span><h1>2026년과 달라진 점</h1>
       <p class="slide-lead">2027년 키워드 네 가지 · 2026년 키워드와 비교</p>
-      <div class="shift">${ST.shift.map(r => `<div class="shift-row"><div class="y26"><small>2026</small>${esc(r[0])}</div><div class="arr">→</div><div class="y27"><small>2027</small>${esc(r[1])}</div><div class="shift-txt"><p>${esc(r[2])}</p>${so(r[3])}<i>${esc(r[4])}</i></div></div>`).join('')}</div>
-      <div class="chips26">${ST.trend26.map(k => `<span>2026 · ${esc(k)}</span>`).join('')}</div>
-      ${srcLine(ST.trend26_src, ST.trend26_url)}<p class="src">${esc(ST.shift_note)}</p>` },
+      <div class="shift2">${ST.shift.map(r => `<div class="shift-card"><div class="shift-head"><span class="y26"><small>2026</small>${esc(r[0])}</span><span class="arr">→</span><span class="y27"><small>2027</small>${esc(r[1])}</span></div><p>${esc(r[2])}</p>${so(r[3])}<i>${esc(r[4])}</i></div>`).join('')}</div>
+      <details class="srcd"><summary>출처와 2026년 10대 키워드</summary><p class="src">2026년 10대 키워드: ${esc(ST.trend26.join(', '))}</p>${srcLine(ST.trend26_src, ST.trend26_url)}<p class="src">${esc(ST.shift_note)}</p></details>` },
     ...ST.cases.map((cs, i) => ({ g: 3, nav: `3-1${i ? 'b' : 'a'}`, title: `${cs.no} · 구직자의 마음`, html: () => `<span class="slide-kicker">3. 역할 · 1) 사례로 알아보는 구직자의 마음 · ${esc(cs.no)}</span><h1>${esc(cs.title)}</h1>
       <div class="case"><div class="case-what"><b>현장에서 자주 보는 장면</b>${ul(cs.what)}</div>
       <div class="bubbles"><b>구직자의 마음</b>${cs.mind.map(m => `<div class="bubble">${esc(m)}</div>`).join('')}</div></div>
       <div class="note">${esc(cs.lack)}</div><p class="src">${esc(ST.cases_note)}</p>` })),
-    { g: 3, nav: '3-2', title: '우리의 역할 3S', html: () => `<span class="slide-kicker">3. 역할 · 2) 그렇다면 우리의 역할은?</span><h1>3S: Simple, Specific, Skill</h1>
-      <div class="s3">${ST.s3.map(x => `<a href="${esc(x.href)}"><strong><i>S</i>${esc(x.k.slice(1))}</strong><em>${esc(x.ko)}</em>${ul(x.pts)}${so(x.so, '왜')}<span>${esc(x.do)} →</span></a>`).join('')}</div>
-      <p class="src">${esc(ST.s3_note)}</p>` },
+    { g: 3, nav: '3-2', title: '우리의 역할 3S', html: () => `<span class="slide-kicker">3. 역할 · 2) 그렇다면 우리의 역할은?</span><h1>우리의 역할 3S</h1>
+      <div class="s3g">${ST.s3.map((x, i) => `<section class="s3c">
+        <header><b>0${i + 1}</b><strong><i>S</i>${esc(x.k.slice(1))}</strong><em>${esc(x.ko)}</em></header>
+        <div class="s3r"><span class="lab">왜 필요한가</span><p>${esc(x.so)}</p></div>
+        <div class="s3r"><span class="lab">어떻게 하는가</span>${ul(x.pts)}</div>
+        <div class="s3r s3go"><span class="lab">오늘 실습</span><a class="g-btn ghost" href="${esc(x.href)}">${esc(x.do)} →</a></div>
+      </section>`).join('')}</div>
+      <details class="srcd"><summary>3S의 근거</summary><p class="src">${esc(ST.s3_note)}</p></details>` },
   ];
   const GROUPS = ['시작', '변화', '트렌드', '역할'];
   let deckIdx = 0;
@@ -551,10 +534,10 @@
     $('#deckDots').innerHTML = SLIDES.map((s, si) => `<button type="button" data-i="${si}" class="${si === deckIdx ? 'on' : ''}" aria-label="${esc(s.title)}" title="${esc(s.title)}"></button>`).join('');
     $('#viewStart').querySelectorAll('[data-i]').forEach(b => b.addEventListener('click', () => { location.hash = '#start-' + b.dataset.i; }));
     $('#deckPrev').disabled = deckIdx === 0;
-    $('#deckNext').textContent = deckIdx === SLIDES.length - 1 ? '먼저 알기로 →' : '다음 →';
+    $('#deckNext').textContent = deckIdx === SLIDES.length - 1 ? '1단계 실습으로 →' : '다음 →';
   }
   $('#deckPrev').addEventListener('click', () => { if (deckIdx > 0) location.hash = '#start-' + (deckIdx - 1); });
-  $('#deckNext').addEventListener('click', () => { location.hash = deckIdx === SLIDES.length - 1 ? '#basics' : '#start-' + (deckIdx + 1); });
+  $('#deckNext').addEventListener('click', () => { location.hash = deckIdx === SLIDES.length - 1 ? '#s1' : '#start-' + (deckIdx + 1); });
   document.addEventListener('keydown', e => {
     if ($('#viewStart').hidden || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
     if (e.key === 'ArrowRight' && deckIdx < SLIDES.length - 1) location.hash = '#start-' + (deckIdx + 1);
@@ -565,7 +548,6 @@
   function renderQuick() {
     const groups = [
       ['START · 세 가지 키워드', SLIDES.map((s, i) => ['#start-' + i, s.nav, s.title])],
-      ['먼저 알기', [['#basics-b1', '기준 1', '변화 3가지와 역할 3가지'], ['#basics-b2', '기준 2', '채용 트렌드 키워드가 들어가는 자리'], ['#basics-b3', '기준 3', '직업공통능력 21개 하위능력'], ['#basics-b4', '기준 4', '격차 유형 네 가지와 처방'], ['#basics-b5', '기준 5', 'AI에 맡기는 일과 맡기지 않는 일']]],
       ['실습', [...D.stages.map(s => ['#' + s.id, s.no + '단계', s.title]), ['#review', '검토', '사례 검토와 적용']]],
       ['자료와 안내', [['#timeline', '시간표', '시간표 (14:00~17:00)'], ['#downloads', '자료', '자료 파일 받기'], ['#after', '교육 뒤', '내 AI에 등록하기'], ['#form', '양식', '자기진단 양식 바꾸기'], ['#privacy', '유의', '실제 내담자 서류를 다룰 때'], ['#help', '도움', '막힐 때'], ['#sources', '출처', '참고 자료']]],
     ];
@@ -579,11 +561,10 @@
   function route() {
     const h = (location.hash || '#home').replace('#', '');
     const [view, sub] = h.split('-');
-    ['#viewHome', '#viewStart', '#viewBasics', '#viewStage'].forEach(v => { $(v).hidden = true; });
+    ['#viewHome', '#viewStart', '#viewStage'].forEach(v => { $(v).hidden = true; });
     let target = null;
     $('#quickMenu').open = false;
     if (view === 'start') { $('#viewStart').hidden = false; renderStart(Number(sub) || 0); }
-    else if (view === 'basics') { $('#viewBasics').hidden = false; renderBasics(); }
     else if (/^s[123]$/.test(view)) { $('#viewStage').hidden = false; renderStage(view); }
     else if (view === 'review') { $('#viewStage').hidden = false; renderReview(); }
     else if (view === 'form') { $('#viewStage').hidden = false; renderForm(); }
