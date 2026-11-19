@@ -12,6 +12,7 @@
 | `index.html` | 화면 뼈대(첫 화면, START 장표, 취업상담 워크플로우) |
 | `style.css` | `agent-lab/style.css` 복사본 + 아래쪽 전용 스타일 |
 | `app.js` | START 장표(`#start`), 워크플로우 안내(`#flow`, `#flow-1`~`#flow-5`, `#flow-form`), 개별 실습(`#mine`), 바로가기 메뉴 |
+| `ai-test/`, `who/` | 시작하기 전에: AI 역량검사, 나는 어떤 AI 사용자?(레벨 확인). `ai-auto-lab/`의 같은 폴더를 복사해 이 과정에 맞게 문구만 고친 것 |
 | `data.js` | 화면 데이터. `tools/build.py`가 만든다 |
 | `src/*.md` | 연습용 가상 채용공고와 가상 구직자 서류 원본 |
 | `files/` | 수강생이 내려받는 PDF·DOCX와 전체 압축 파일. build.py가 만든다 |
