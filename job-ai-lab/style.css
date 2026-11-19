@@ -818,3 +818,14 @@ body{word-break:keep-all;overflow-wrap:break-word;line-break:strict}
   .deck-hint{display:none}
 }
 @media print{.deck-top,.deck-ctrl,.deck-hint{display:none !important}.slide{border:0;box-shadow:none;min-height:0}}
+
+/* 자기진단 양식 */
+.form-note{margin-top:14px;padding:10px 14px;border:1px solid var(--rule);border-radius:10px;background:var(--surface);color:var(--ink-soft);font-size:13.5px;max-width:860px}
+.form-note b{color:var(--ink)}
+.form-note a{color:var(--accent);font-weight:700}
+.form-scale{display:flex;flex-wrap:wrap;gap:12px 24px;margin-top:12px;max-width:860px}
+.form-scale label{display:flex;align-items:center;gap:8px;color:var(--ink-soft);font-size:14.5px;font-weight:700}
+.form-scale input{width:84px;padding:8px 10px;border:1px solid var(--rule);border-radius:9px;background:var(--surface);font:inherit;font-size:15px;color:var(--ink)}
+.edit-table td input.score-in{width:64px;min-width:0;text-align:center;font-weight:700}
+.lesson-content code{background:var(--surface-2);padding:1px 6px;border-radius:5px;font-size:13.5px}
+@media print{.form-note{display:none}}
