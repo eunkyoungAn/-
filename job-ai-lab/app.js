@@ -29,8 +29,6 @@
     $('#heroLinks').innerHTML = `<div class="link-row"><div><b>상담자</b><strong>상담자용 시트 열기</strong><span>공고 분석, 구직자와 공고 비교, 상담 결과지까지 이 시트에서 진행</span></div>${ext(L.sheet, '시트 열기')}</div>
       <div class="link-row"><div><b>구직자</b><strong>사전 질문지 작성</strong><span>희망 직무, 경력·훈련, 직접 맡았던 일, 필요한 지원을 적으면 시트에 등록됨</span></div>${ext(L.form, '질문지 열기', 'g-btn ghost')}</div>`;
     $('#copyLink').href = L.copy;
-    $('#timelineTable').innerHTML = '<thead><tr><th>시간</th><th>구분</th><th>단계</th><th>내용</th><th>산출물</th></tr></thead><tbody>' +
-      D.timeline.map(r => `<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td><td>${esc(r[2])}</td><td>${esc(r[3])}</td><td>${esc(r[4])}</td></tr>`).join('') + '</tbody>';
     $('#homeFlow').innerHTML = `<section class="level-section">
       <div class="level-head"><div><span class="level-kicker">PRACTICE</span><h2>취업상담 워크플로우 5단계</h2></div>
       <p>구직자의 경험을 채용공고의 요구와 대조하고, 상담자와 구직자가 함께 다음 행동을 정합니다.</p></div>
@@ -176,7 +174,7 @@
       ['START · 세 가지 키워드', SLIDES.map((s, i) => ['#start-' + i, s.nav, s.title])],
       ['취업상담 워크플로우', [['#flow', '안내', '전체 과정'], ...F.steps.map(s => ['#flow-' + s.no, s.no + '단계', s.title]), ['#flow-form', '질문지', '내가 쓸 사전 질문지 미리 만들기'], ['#flow-why', '의미', '이 워크플로우의 의미'], ['#flow-tabs', '탭', '시트 탭 구성']]],
       ['개별 실습', [['#mine', '안내', M.title], ['#mine-plan', '양식', '기획서 빈칸 양식'], ['#mine-prompt', '지시문', '지시문'], ['#mine-safe', '점검', '안전 사용 체크리스트'], ['#mine-after', '계획', '교육 뒤 직접 활용 계획']]],
-      ['자료와 안내', [['#timeline', '시간표', '시간표 (14:00~17:00)'], ['#downloads', '자료', '자료 받기'], ['#privacy', '유의', '실제 구직자 정보를 다룰 때'], ['#help', '도움', '막힐 때']]],
+      ['자료와 안내', [['#downloads', '자료', '자료 받기'], ['#privacy', '유의', '실제 구직자 정보를 다룰 때'], ['#help', '도움', '막힐 때']]],
     ];
     $('#quickPanel').innerHTML = groups.map(g => `<div class="menu-group"><strong>${esc(g[0])}</strong>${g[1].map(x => `<a href="${x[0]}"><span>${esc(x[1])}</span>${esc(x[2])}</a>`).join('')}</div>`).join('');
     $('#quickPanel').addEventListener('click', e => { if (e.target.closest('a')) $('#quickMenu').open = false; });
@@ -184,7 +182,7 @@
   }
 
   /* ---------- 라우팅 ---------- */
-  const HOME_SECS = ['before', 'timeline', 'downloads', 'privacy', 'help'];
+  const HOME_SECS = ['before', 'downloads', 'privacy', 'help'];
   function route() {
     const h = (location.hash || '#home').replace('#', '');
     const [view, sub] = h.split('-');
