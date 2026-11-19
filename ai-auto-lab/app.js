@@ -110,6 +110,7 @@
 
   /* ---------- 단계 화면 ---------- */
   function navPair(id) {
+    if (id === 'check') return [['#home', '처음 화면'], ['#start', 'START · AI, 자동화, 카드뉴스, 안전']];
     const i = SEQ.findIndex(x => x.id === id);
     const prev = i === 0 ? ['#start', 'START · AI, 자동화, 카드뉴스, 안전'] : ['#' + SEQ[i - 1].id, label(SEQ[i - 1])];
     const next = i === SEQ.length - 1 ? ['#home', '처음 화면'] : ['#' + SEQ[i + 1].id, label(SEQ[i + 1])];
@@ -157,6 +158,39 @@
     if (r.homework) secs.push(['homework', '다음 시간 전 과제', ul(r.homework.map(esc))]);
     if (!r.checkFirst) secs.push(chk);
     paint(r.id, secs);
+  }
+  /* ---------- 점검: 나는 어떤 AI 사용자? ---------- */
+  function checkLevel() {
+    const C = D.selfcheck;
+    const n = lv => C.levels[lv - 1].items.filter((_, i) => S.checks[`chk.${lv}.${i}`]).length;
+    if (n(3) >= 2) return 3;
+    if (n(2) >= 2) return 2;
+    if (n(1) >= 1) return 1;
+    return 0;
+  }
+  function resultHtml() {
+    const lv = checkLevel(), r = D.selfcheck.result[String(lv)];
+    const bar = [1, 2, 3].map(k => `<span class="cn-lv${k <= lv ? ' on' : ''}">${k}레벨</span>`).join('');
+    return `<div class="cn-result"><div class="cn-lvbar">${bar}</div><strong>${esc(r[0])}</strong><p>${esc(r[1])}</p></div>`;
+  }
+  function renderCheck() {
+    const C = D.selfcheck;
+    $('#bcStage').textContent = 'START 전 · 나는 어떤 AI 사용자?';
+    $('#shEyebrow').textContent = 'SELF-CHECK · 8분';
+    $('#shTitle').textContent = 'AI 사용 전, 나는 어떤 사용자?';
+    $('#shSum').textContent = '실습 전에 지금 내가 AI를 어떻게 쓰고 있는지 점검합니다. 해당하는 것만 솔직하게 체크하세요. 결과는 이 기기에만 저장됩니다.';
+    $('#shMeta').innerHTML = '<span class="meta-chip active">8분</span><span class="meta-chip">AI 활용 3레벨 · 장현민(팀제이커브)</span>';
+    const secs = [];
+    secs.push(['quiz', '해당하는 것에 체크', C.levels.map(L => `<h3>${esc(L.name)}</h3><p class="local-note">${esc(L.short)}</p>` +
+      `<div class="checklist">${L.items.map((x, i) => `<label class="check-item"><input type="checkbox" data-k="chk.${L.lv}.${i}" ${S.checks[`chk.${L.lv}.${i}`] ? 'checked' : ''}><span>${esc(x)}</span></label>`).join('')}</div>`).join('')]);
+    secs.push(['result', '나의 레벨', `<div id="cnResult">${resultHtml()}</div>
+      ${table(['레벨', '기준'], C.levels.map(L => [L.name, L.short]))}
+      <p class="local-note">판정: 3레벨 문항 2개 이상 → 3레벨, 2레벨 문항 2개 이상 → 2레벨, 1레벨 문항 1개 이상 → 1레벨. ${esc(C.src)}</p>`]);
+    secs.push(['facts', '영상에서 짚은 세 가지', `<div class="two-col">${C.facts.map(f => `<div class="result-card"><strong>${esc(f[0])}</strong><p>${esc(f[1])}</p></div>`).join('')}</div>`]);
+    secs.push(['split', '내 업무 하나를 네 칸으로 나눠 보기', `<p>영상은 AI 전환의 핵심을 "AI 도입"이 아니라 일을 네 가지로 나누고 다시 합치는 것이라고 말합니다. 내 업무 하나를 골라 적어 보세요. 오늘 실습 1(메일 자동화)은 "위임", 실습 2(카드뉴스 원고)는 "증강"에 해당합니다.</p>` +
+      noteBox('split.task', '내가 고른 업무', '예: 교육생에게 회의 안내 메일 보내기') + C.split.map(x => noteBox('split.' + x[0], `${x[1]} — ${x[2]}`, x[3])).join('')]);
+    paint('check', secs);
+    $('#stageBody').querySelectorAll('[data-k^="chk."]').forEach(i => i.addEventListener('change', () => { $('#cnResult').innerHTML = resultHtml(); }));
   }
   function paint(id, secs) {
     const [prev, next] = navPair(id);
@@ -242,10 +276,11 @@
     $('#deckTabs').innerHTML = GROUPS.map((g, k) => `<button type="button" role="tab" data-i="${gi(k)}" class="${sl.g === k ? 'on' : ''}">${k ? `<b>${k}</b>` : ''}${esc(g)}</button>`).join('');
     $('#deckDots').innerHTML = SLIDES.map((s, k) => `<button type="button" data-i="${k}" class="${k === deckIdx ? 'on' : ''}" aria-label="${esc(s.title)}" title="${esc(s.title)}"></button>`).join('');
     $('#viewStart').querySelectorAll('[data-i]').forEach(b => b.addEventListener('click', () => { location.hash = '#start-' + b.dataset.i; }));
-    $('#deckPrev').disabled = deckIdx === 0;
+    $('#deckPrev').disabled = false;
+    $('#deckPrev').textContent = deckIdx === 0 ? '← 나는 어떤 사용자?' : '← 이전';
     $('#deckNext').textContent = deckIdx === SLIDES.length - 1 ? '실습 1로 →' : '다음 →';
   }
-  $('#deckPrev').addEventListener('click', () => { if (deckIdx > 0) location.hash = '#start-' + (deckIdx - 1); });
+  $('#deckPrev').addEventListener('click', () => { location.hash = deckIdx > 0 ? '#start-' + (deckIdx - 1) : '#check'; });
   $('#deckNext').addEventListener('click', () => { location.hash = deckIdx === SLIDES.length - 1 ? '#' + SEQ[0].id : '#start-' + (deckIdx + 1); });
   document.addEventListener('keydown', e => {
     if ($('#viewStart').hidden || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
@@ -256,6 +291,7 @@
   /* ---------- 바로가기 ---------- */
   function renderQuick() {
     const groups = [
+      ['START 전', [['#check', '점검', 'AI 사용 전, 나는 어떤 사용자?']]],
       ['START · 네 가지 키워드', SLIDES.map((s, i) => ['#start-' + i, s.nav, s.title])],
       ...D.parts.map(p => [`실습 ${p.no} · ${p.short}`, [...p.stages.map(s => ['#' + s.id, s.no + '단계', s.title]), ['#' + p.review.id, '마무리', p.review.title]]]),
       ['자료와 안내', [['#timeline', '시간표', '시간표'], ['#materials', '자료', '요청문과 참고 코드'], ['#safety', '유의', '실제 업무에 쓸 때'], ['#help', '도움', '막힐 때'], ['#sources', '출처', '참고 자료']]]
@@ -274,7 +310,8 @@
     let target = null;
     $('#quickMenu').open = false;
     const x = find(view);
-    if (view === 'start') { $('#viewStart').hidden = false; renderStart(Number(sub) || 0); }
+    if (view === 'check') { $('#viewStage').hidden = false; renderCheck(); }
+    else if (view === 'start') { $('#viewStart').hidden = false; renderStart(Number(sub) || 0); }
     else if (x && x.stage) { $('#viewStage').hidden = false; renderStage(x); }
     else if (x && x.review) { $('#viewStage').hidden = false; renderReview(x); }
     else { $('#viewHome').hidden = false; renderHome(); if (HOME_SECS.includes(view)) target = document.getElementById('sec-' + view); }
