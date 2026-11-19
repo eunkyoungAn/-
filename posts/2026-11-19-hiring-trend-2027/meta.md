@@ -1,5 +1,5 @@
 status: drafted
-slack_thread: (없음 — 대화창에서 직접 요청)
+slack_thread: https://cc-a-hq.slack.com/archives/C0C6ACW2ML7/p1795083494088149
 출처: 윤영돈 『채용 트렌드 2027』 소개 기사 2건 (ZDNet Korea 2026-11-02, 한국사회복지저널). 카드뉴스 office/20261119_채용트렌드2027_카드뉴스/ 와 같은 내용.
 제목 후보:
 1) 2027 채용 트렌드 핵심 요약, 선발에서 영입으로 | 커리어캐쳐
