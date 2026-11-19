@@ -8,6 +8,20 @@
   const FILE_BASE = 'files/';
   const F = D.flow;
   const L = D.links;
+  async function copyText(text, btn) {
+    const done = msg => { const o = btn.textContent; btn.textContent = msg; setTimeout(() => { btn.textContent = o; }, 1400); };
+    try { await navigator.clipboard.writeText(text); done('복사됨'); }
+    catch (e) {
+      const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); done('복사됨'); } catch (_) { done('Ctrl+C로 복사'); }
+      document.body.removeChild(ta);
+    }
+  }
+  const copyBox = (text, label, btn) => `<div class="prompt-box tall"><span class="box-label">${esc(label)}</span><button class="copy-button" type="button">${esc(btn)}</button><pre>${esc(text)}</pre></div>`;
+  const bindCopy = root => root.querySelectorAll('.copy-button').forEach(b => b.addEventListener('click', () => copyText(b.parentElement.querySelector('pre').textContent, b)));
+  const ol = arr => `<ol class="plain">${arr.map(t => `<li>${esc(t)}</li>`).join('')}</ol>`;
+  const M = D.mine;
+  const FM = D.formMake;
   const ext = (href, label, cls) => `<a class="${cls || 'g-btn'}" href="${esc(href)}" target="_blank" rel="noopener noreferrer">${esc(label)}</a>`;
 
   /* ---------- 시작 화면 ---------- */
@@ -21,7 +35,10 @@
       <div class="level-head"><div><span class="level-kicker">PRACTICE</span><h2>취업상담 워크플로우 5단계</h2></div>
       <p>구직자의 경험을 채용공고의 요구와 대조하고, 상담자와 구직자가 함께 다음 행동을 정합니다.</p></div>
       <div class="flow5">${F.steps.map(s => `<a class="flow-card" href="#flow-${s.no}"><span class="lesson-code">${s.no}단계</span><h3>${esc(s.title)}</h3><p>${esc(s.short)}</p><div class="flow-tab">${esc(s.tab)}</div></a>`).join('')}</div>
-      <div class="sheet-actions mt14"><a class="g-btn" href="#flow">워크플로우 안내 보기</a></div></section>`;
+      <div class="sheet-actions mt14"><a class="g-btn" href="#flow">워크플로우 안내 보기</a></div></section>
+      <section class="level-section"><div class="level-head"><div><span class="level-kicker">MY OWN</span><h2>개별 실습 · ${esc(M.title)}</h2></div>
+      <p>${esc(M.time)}</p></div>
+      <div class="go-studio"><p><b>같은 틀로 내 업무 하나를 설계</b> — 빈칸 양식 여덟 칸을 채우고 지시문을 실행하면 구글 시트·구글 폼 구성안과 Apps Script 초안이 나옵니다.</p><a class="g-btn" href="#mine">개별 실습 열기</a></div></section>`;
     $('#zipLink').href = FILE_BASE + D.zip;
     $('#downloadGroups').innerHTML = D.files.map(g => `<h3 class="dl-h">${esc(g.group)}</h3><div class="dl-grid">${g.items.map(([f, d]) =>
       `<div class="dl-item"><div><strong>${esc(f)}</strong><span>${esc(d)}</span></div><div class="btn-pair"><a class="g-btn ghost" href="${FILE_BASE}${encodeURIComponent(f)}.pdf" download>PDF</a><a class="g-btn ghost" href="${FILE_BASE}${encodeURIComponent(f)}.docx" download>DOCX</a></div></div>`).join('')}</div>`).join('');
@@ -94,7 +111,44 @@
 
 
   /* ---------- 취업상담 워크플로우 ---------- */
+  function formMakeHtml() {
+    return `<div class="make-form" id="flow-form"><h3>내가 쓸 사전 질문지 미리 만들기</h3><p>${esc(FM.why)}</p>
+      <div class="two-col make-cols">
+        <div class="result-card"><span class="way-tag">방법 1</span><strong>구글 폼에서 직접 만들기</strong>${ol(FM.manual)}<p class="local-note">${esc(FM.manual_note)}</p></div>
+        <div class="result-card"><span class="way-tag on">방법 2</span><strong>Apps Script로 만들기</strong>${ol(FM.script)}<p class="local-note">${esc(FM.script_note)}</p></div>
+      </div>
+      <details class="fold"><summary>질문 12개 (제목은 글자 그대로)</summary><div class="fold-b"><div class="g-table"><table><thead><tr><th>#</th><th>질문 제목</th><th>형식</th><th>필수</th></tr></thead><tbody>${FM.questions.map((q, i) => `<tr><td>${i + 1}</td><td>${esc(q[0])}</td><td>${esc(q[1])}</td><td>${esc(q[2])}</td></tr>`).join('')}</tbody></table></div></div></details>
+      <details class="fold"><summary>Apps Script 코드 (방법 2에서 붙여 넣는 코드)</summary><div class="fold-b">${copyBox(FM.code, 'createMyJobseekerForm', '코드 복사')}</div></details></div>`;
+  }
+  function renderMine() {
+    $('#flowCrumb').textContent = '개별 실습';
+    $('#flowEyebrow').textContent = 'MY OWN · 개별 실습';
+    $('#flowTitle').textContent = M.title;
+    $('#flowLead').textContent = M.lead;
+    $('#flowMeta').innerHTML = `<span class="meta-chip active">${esc(M.time)}</span>`;
+    const fileBtns = n => `<div class="btn-pair"><a class="g-btn ghost" href="${FILE_BASE}${encodeURIComponent(n)}.pdf" download>PDF</a><a class="g-btn ghost" href="${FILE_BASE}${encodeURIComponent(n)}.docx" download>DOCX</a></div>`;
+    const secs = [
+      ['out', '만드는 것', `${ul(M.out)}<div class="safety-box mt16"><strong>실명·연락처·내부 문서 원문은 넣지 않음</strong><p>업무의 순서와 자료 종류만 적습니다. 워크플로우 5단계에서 쓴 틀(입력 탭과 결과 탭, 체크한 행만 실행, 초안과 확정 구분)을 내 업무에 옮깁니다.</p></div>`],
+      ['plan', '기획서 빈칸 양식', `<p>여덟 칸을 먼저 채웁니다. 오른쪽 예시는 내 업무 내용으로 바꿉니다.</p>
+        <div class="g-table"><table><thead><tr><th>번호</th><th>칸</th><th>내가 적을 내용</th><th>예시</th></tr></thead><tbody>${M.boxes.map(b => `<tr><td>${esc(b[0])}</td><td>${esc(b[1])}</td><td class="blank"></td><td>${esc(b[2])}</td></tr>`).join('')}</tbody></table></div>
+        <div class="file-list"><div class="file-row"><div><strong>04_기획서_빈칸양식</strong><span>인쇄하거나 워드에서 채움</span></div>${fileBtns('04_기획서_빈칸양식')}</div></div>`],
+      ['steps', '순서', ol(M.steps)],
+      ['prompt', '지시문', `<p>전체를 복사한 뒤 [입력]의 여덟 줄만 내 내용으로 바꿉니다. 지금 들어 있는 값은 예시입니다.</p>${copyBox(M.prompt, '지시문', '지시문 복사')}
+        <h3>[입력] 칸에 고를 수 있는 값</h3><div class="g-table"><table><tbody>${M.options.map(o => `<tr><td>${esc(o[0])}</td><td>${esc(o[1])}</td></tr>`).join('')}</tbody></table></div>`],
+      ['check', '결과에서 볼 것', ul(M.checks)],
+      ['safe', '안전 사용 체크리스트', `<p>실제 자료를 넣기 전에 여덟 가지를 예·아니오로 답합니다. "아니오"가 하나라도 있으면 실제 자료를 넣지 않습니다.</p>${ol(M.safety)}
+        <div class="file-list"><div class="file-row"><div><strong>05_안전사용_체크리스트</strong><span>예·아니오 칸이 있는 인쇄용</span></div>${fileBtns('05_안전사용_체크리스트')}</div></div>`],
+      ['after', '교육 뒤 직접 활용 계획', `<div class="g-table"><table><thead><tr><th>회차</th><th>언제</th><th>어떤 자료로</th><th>확인할 것</th></tr></thead><tbody>${M.after.map(r => `<tr>${r.map(c => `<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
+        <div class="file-list"><div class="file-row"><div><strong>06_직접활용_계획표</strong><span>고칠 점 기록 칸이 있는 인쇄용</span></div>${fileBtns('06_직접활용_계획표')}</div></div>`],
+    ];
+    $('#flowToc').innerHTML = '<strong>목차</strong>' + secs.map(s => `<a href="#mine-${s[0]}">${esc(s[1])}</a>`).join('');
+    $('#flowBody').innerHTML = secs.map((s, i) => `<section id="mine-${s[0]}"><span class="section-number">${i + 1}</span><h2>${esc(s[1])}</h2>${s[2]}</section>`).join('') +
+      `<div class="lesson-navigation"><a href="#flow"><span>이전</span><strong>취업상담 워크플로우 5단계</strong></a><a class="lesson-next" href="#downloads"><span>다음</span><strong>자료 받기</strong></a></div>`;
+    bindCopy($('#flowBody'));
+  }
   function renderFlow() {
+    $('#flowCrumb').textContent = '취업상담 워크플로우';
+    $('#flowEyebrow').textContent = 'PRACTICE · 5단계';
     $('#flowTitle').textContent = F.title;
     $('#flowLead').textContent = F.lead;
     $('#flowMeta').innerHTML = `${ext(L.sheet, '상담자용 시트 열기')}${ext(L.form, '구직자용 사전 질문지', 'g-btn ghost')}${ext(L.copy, '내 사본 만들기', 'g-btn ghost')}`;
@@ -104,22 +158,24 @@
       ...F.steps.map(s => [s.no, `${s.no}단계 · ${s.title}`, `<div class="step-meta"><span><b>쓰는 탭</b>${esc(s.tab)}</span>${s.run ? `<span><b>실행 단추</b>${esc(s.run)}</span>` : ''}</div>
         <h3>시트에서 하는 일</h3>${ul(s.do)}
         <div class="out-box"><b>상담에 남는 결과</b><p>${esc(s.out)}</p></div>
-        ${s.no === '1' ? `<div class="sheet-actions mt14">${ext(L.form, '구직자용 사전 질문지 열기', 'g-btn ghost')}</div>` : ''}`]),
+        ${s.no === '1' ? `<div class="sheet-actions mt14">${ext(L.form, '구직자용 사전 질문지 열기', 'g-btn ghost')}</div>${formMakeHtml()}` : ''}`]),
       ['why', '이 워크플로우의 의미', `<div class="why3">${F.meaning.map((m, i) => `<div class="pt"><b>0${i + 1}</b><strong>${esc(m.h)}</strong>${ul(m.pts)}${so(m.so)}</div>`).join('')}</div>`],
       ['tabs', '시트 탭 구성', `<div class="g-table"><table><thead><tr><th>탭</th><th>쓰임</th></tr></thead><tbody>${F.tabs.map(t => `<tr><td>${esc(t[0])}</td><td>${esc(t[1])}</td></tr>`).join('')}</tbody></table></div>
         <p class="local-note">자세한 사용 순서는 시트의 "자동화 버튼" 탭에 있는 안내를 따릅니다.</p>`],
     ];
     $('#flowToc').innerHTML = '<strong>목차</strong>' + secs.map(s => `<a href="#flow-${s[0]}">${esc(s[1])}</a>`).join('');
     $('#flowBody').innerHTML = secs.map(s => `<section id="flow-${s[0]}">${/^\d$/.test(s[0]) ? `<span class="section-number">${s[0]}</span>` : ''}<h2>${esc(s[1])}</h2>${s[2]}</section>`).join('') +
-      `<div class="lesson-navigation"><a href="#start"><span>이전</span><strong>START · 변화, 트렌드, 역할</strong></a><a class="lesson-next" href="#downloads"><span>다음</span><strong>연습용 가상 사례 받기</strong></a></div>`;
+      `<div class="lesson-navigation"><a href="#start"><span>이전</span><strong>START · 변화, 트렌드, 역할</strong></a><a class="lesson-next" href="#mine"><span>다음</span><strong>개별 실습 · ${esc(M.title)}</strong></a></div>`;
+    bindCopy($('#flowBody'));
   }
 
   /* ---------- 바로가기 ---------- */
   function renderQuick() {
     const groups = [
       ['START · 세 가지 키워드', SLIDES.map((s, i) => ['#start-' + i, s.nav, s.title])],
-      ['취업상담 워크플로우', [['#flow', '안내', '전체 과정'], ...F.steps.map(s => ['#flow-' + s.no, s.no + '단계', s.title]), ['#flow-why', '의미', '이 워크플로우의 의미'], ['#flow-tabs', '탭', '시트 탭 구성']]],
-      ['자료와 안내', [['#timeline', '시간표', '시간표 (14:00~17:00)'], ['#downloads', '자료', '연습용 가상 사례 받기'], ['#privacy', '유의', '실제 구직자 정보를 다룰 때'], ['#help', '도움', '막힐 때']]],
+      ['취업상담 워크플로우', [['#flow', '안내', '전체 과정'], ...F.steps.map(s => ['#flow-' + s.no, s.no + '단계', s.title]), ['#flow-form', '질문지', '내가 쓸 사전 질문지 미리 만들기'], ['#flow-why', '의미', '이 워크플로우의 의미'], ['#flow-tabs', '탭', '시트 탭 구성']]],
+      ['개별 실습', [['#mine', '안내', M.title], ['#mine-plan', '양식', '기획서 빈칸 양식'], ['#mine-prompt', '지시문', '지시문'], ['#mine-safe', '점검', '안전 사용 체크리스트'], ['#mine-after', '계획', '교육 뒤 직접 활용 계획']]],
+      ['자료와 안내', [['#timeline', '시간표', '시간표 (14:00~17:00)'], ['#downloads', '자료', '자료 받기'], ['#privacy', '유의', '실제 구직자 정보를 다룰 때'], ['#help', '도움', '막힐 때']]],
     ];
     $('#quickPanel').innerHTML = groups.map(g => `<div class="menu-group"><strong>${esc(g[0])}</strong>${g[1].map(x => `<a href="${x[0]}"><span>${esc(x[1])}</span>${esc(x[2])}</a>`).join('')}</div>`).join('');
     $('#quickPanel').addEventListener('click', e => { if (e.target.closest('a')) $('#quickMenu').open = false; });
@@ -136,6 +192,7 @@
     let target = null;
     if (view === 'start') { $('#viewStart').hidden = false; renderStart(Number(sub) || 0); }
     else if (view === 'flow') { $('#viewFlow').hidden = false; renderFlow(); if (sub) target = document.getElementById(h); }
+    else if (view === 'mine') { $('#viewFlow').hidden = false; renderMine(); if (sub) target = document.getElementById(h); }
     else { $('#viewHome').hidden = false; if (HOME_SECS.includes(view)) target = document.getElementById('sec-' + view); }
     requestAnimationFrame(() => { if (target) target.scrollIntoView({ block: 'start' }); else window.scrollTo(0, 0); });
   }
