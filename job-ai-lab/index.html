@@ -9,7 +9,7 @@
 <title>AI 취업지원 실습실 | 커리어캐쳐</title>
 <meta name="description" content="구직자와 채용공고를 연결하는 취업상담 워크플로우. 구직자 정보 받기부터 공고 분석, 회차별 상담, 한 장 결과지까지 5단계.">
 <link rel="stylesheet" href="fonts/pretendard.css">
-<link rel="stylesheet" href="style.css?v=20261120k">
+<link rel="stylesheet" href="style.css?v=20261120m">
 </head>
 <body>
 <header class="g-header">
@@ -21,6 +21,7 @@
     <nav class="g-nav" aria-label="실습실 메뉴">
       <a class="g-start" href="#start">START</a>
       <a href="#flow">워크플로우 5단계</a>
+      <a href="#mine">개별 실습</a>
       <a href="#downloads">자료 받기</a>
       <details class="menu" id="quickMenu">
         <summary class="g-home">바로가기</summary>
@@ -76,10 +77,10 @@
 
       <section class="info-section" id="sec-downloads">
         <span class="level-kicker">DOWNLOADS</span>
-        <h2>연습용 가상 사례 받기</h2>
-        <p class="lead">워크플로우를 연습할 때 쓰는 가상 자료입니다. 가상 구직자 서류를 보고 사전 질문지를 작성하고, 가상 채용공고를 구인기업 리스트에 옮겨 적습니다.</p>
+        <h2>자료 받기</h2>
+        <p class="lead">워크플로우 연습에 쓰는 가상 사례와 개별 실습 양식입니다. 가상 구직자 서류를 보고 사전 질문지를 작성하고, 가상 채용공고를 구인기업 리스트에 옮겨 적습니다.</p>
         <div class="go-studio zip-bar">
-          <p><b>전체 자료 한 번에 받기</b> — 가상 채용공고 1건과 가상 구직자 서류 2종이 들어 있습니다.</p>
+          <p><b>전체 자료 한 번에 받기</b> — 가상 채용공고 1건, 가상 구직자 서류 2종, 개별 실습 양식 3종이 들어 있습니다.</p>
           <a class="g-btn" id="zipLink" download>전체 압축 파일 받기</a>
         </div>
         <div id="downloadGroups"></div>
@@ -117,9 +118,9 @@
 
   <!-- ================= 취업상담 워크플로우 ================= -->
   <div id="viewFlow" class="lesson-shell wrap" hidden>
-    <nav class="breadcrumb" aria-label="현재 위치"><a href="#home">처음</a><span>›</span><span>취업상담 워크플로우</span></nav>
+    <nav class="breadcrumb" aria-label="현재 위치"><a href="#home">처음</a><span>›</span><span id="flowCrumb">취업상담 워크플로우</span></nav>
     <header class="lesson-hero">
-      <span class="eyebrow">PRACTICE · 5단계</span>
+      <span class="eyebrow" id="flowEyebrow">PRACTICE · 5단계</span>
       <h1 id="flowTitle"></h1>
       <p id="flowLead"></p>
       <div class="hero-actions" id="flowMeta"></div>
@@ -137,7 +138,7 @@
   <span class="g-contact"><strong>CareerCatcher</strong> 안은경 · <a href="mailto:dms5147@gmail.com">dms5147@gmail.com</a></span>
 </div></footer>
 
-<script src="data.js?v=20261120k"></script>
-<script src="app.js?v=20261120k"></script>
+<script src="data.js?v=20261120m"></script>
+<script src="app.js?v=20261120m"></script>
 </body>
 </html>

@@ -464,6 +464,203 @@ window.LAB = {
    ]
   ]
  },
+ "formMake": {
+  "why": "함께 쓰는 질문지의 답변은 강사 시트에 쌓임. 내 기관에서 쓰려면 내 사본 시트에 연결된 내 질문지가 따로 필요함.",
+  "manual": [
+   "forms.google.com에서 새 양식을 만들고 제목을 \"취업상담 사전 질문지\"로 적음",
+   "아래 질문 12개를 순서대로 추가. 질문 제목은 표의 글자 그대로 적음",
+   "설명 칸에 \"연락처·주민등록번호·건강정보는 적지 마세요\"를 적고, 설정에서 이메일 주소 수집을 끔",
+   "응답 탭 → Sheets에 연결 → 기존 스프레드시트 선택 → 내 사본 시트를 고름",
+   "답변은 새로 생긴 \"설문지 응답\" 탭에 쌓임. \"구직자 정보\" 탭에는 상담자가 옮겨 적음"
+  ],
+  "manual_note": "직접 만든 질문지는 \"구직자 정보\" 탭에 자동으로 등록되지 않음. 자동 등록이 필요하면 오른쪽 방법을 씀.",
+  "script": [
+   "[내 사본 만들기]로 상담자용 시트를 복사",
+   "사본에서 확장 프로그램 → Apps Script를 엶",
+   "파일 옆 + → 스크립트를 눌러 새 파일을 만들고, 아래 코드를 붙여 넣은 뒤 저장",
+   "위쪽 함수 목록에서 createMyJobseekerForm을 고르고 실행. 처음에는 권한 승인 창이 뜸",
+   "완료 알림에 나온 주소를 구직자에게 전달. 주소는 \"자동화 버튼\" 탭에도 적힘",
+   "질문지를 제출하면 \"구직자 정보\" 탭에 ID-1, ID-2 순번으로 등록됨"
+  ],
+  "script_note": "답변이 등록되지 않은 것이 있으면 registerMissingJobseekerResponses를 한 번 실행. 코드는 모의 시트로만 시험했으므로 실제 사본에서 가상 답변으로 먼저 확인.",
+  "questions": [
+   [
+    "성명·별칭",
+    "단답형",
+    "필수"
+   ],
+   [
+    "희망 직무",
+    "단답형",
+    "필수"
+   ],
+   [
+    "경력 요약",
+    "장문형",
+    ""
+   ],
+   [
+    "핵심 역량",
+    "장문형",
+    ""
+   ],
+   [
+    "자격·훈련",
+    "장문형",
+    ""
+   ],
+   [
+    "경험 근거",
+    "장문형",
+    ""
+   ],
+   [
+    "필수 근무조건",
+    "장문형",
+    ""
+   ],
+   [
+    "희망 소득",
+    "단답형",
+    ""
+   ],
+   [
+    "취업 희망시점",
+    "단답형",
+    ""
+   ],
+   [
+    "필요한 지원",
+    "장문형",
+    ""
+   ],
+   [
+    "취업 후 정착 지원",
+    "장문형",
+    ""
+   ],
+   [
+    "메모",
+    "장문형",
+    ""
+   ]
+  ],
+  "code": "/**\n * 구직자용 사전 질문지(구글 폼) 만들기 — 내 사본 시트용\n *\n * 쓰는 법\n * 1. 상담자용 시트의 내 사본에서 확장 프로그램 → Apps Script 를 연다.\n * 2. 파일 옆 + → 스크립트 로 새 파일을 만들고 이 코드를 붙여 넣은 뒤 저장한다.\n * 3. 함수 createMyJobseekerForm 을 골라 한 번 실행하고 권한을 승인한다.\n *\n * 하는 일\n * - 질문 12개가 들어간 구글 폼을 만든다(이미 만들었으면 빠진 질문만 채운다).\n * - 폼을 제출하면 이 시트의 '구직자 정보' 탭에 ID-1, ID-2 … 순번으로 등록한다.\n * - 질문지 주소를 '자동화 버튼' 탭의 \"구직자 작성 링크\" 칸에 적는다.\n */\nconst MY_FORM_FIELDS = [\n  // [질문 제목(= '구직자 정보' 열 제목), 도움말, 필수 여부, 장문 여부]\n  ['성명·별칭', '상담에서 불리고 싶은 이름이나 별칭을 적어 주세요.', true, false],\n  ['희망 직무', '어떤 일을 하고 싶으세요? 아직 정하지 않았다면 관심 분야를 적어 주세요.', true, false],\n  ['경력 요약', '어디에서 어떤 일을 얼마나 하셨나요? 첫 구직이면 활동·실습 경험을 적어도 됩니다.', false, true],\n  ['핵심 역량', '혼자 해낼 수 있는 업무나 익숙한 도구는 무엇인가요?', false, true],\n  ['자격·훈련', '취득한 자격이나 수료한 과정 중 희망 직무와 관련된 것을 적어 주세요.', false, true],\n  ['경험 근거', '직접 맡은 일 하나를 골라 무엇을 했고 결과가 어땠는지 알려 주세요.', false, true],\n  ['필수 근무조건', '꼭 맞아야 하는 근무지역·시간·통근 조건이 있나요?', false, true],\n  ['희망 소득', '예: 세전 월 250만 원, 또는 상담 후 협의', false, false],\n  ['취업 희망시점', '예: 즉시, 한 달 이내, 또는 특정 월', false, false],\n  ['필요한 지원', '어떤 도움을 먼저 받고 싶으세요? 예: 희망 직무 좁히기, 면접 연습', false, true],\n  ['취업 후 정착 지원', '취업 후에도 어떤 도움이 있으면 좋을까요?', false, true],\n  ['메모', '상담자에게 미리 전하고 싶은 내용이 있다면 적어 주세요.', false, true]\n];\nconst MY_FORM_TITLE = '취업상담 사전 질문지';\nconst MY_FORM_INTRO = '취업상담 전에 희망하는 일과 경험을 알려 주세요. 답변은 담당 상담자가 직무 적합도를 함께 살펴보고 지원계획을 준비하는 데 사용합니다. 이름 또는 별칭과 희망 직무만 필수입니다. 연락처·주민등록번호·건강정보는 적지 마세요.';\nconst MY_INTAKE_SHEET = '구직자 정보';\nconst MY_GUIDE_SHEET = '자동화 버튼';\nconst MY_PROP_FORM = 'MY_JOBSEEKER_FORM_ID';\nconst MY_PROP_BOOK = 'MY_JOBSEEKER_BOOK_ID';\n\nfunction createMyJobseekerForm() {\n  const ss = SpreadsheetApp.getActiveSpreadsheet();\n  if (!ss || !ss.getSheetByName(MY_INTAKE_SHEET)) {\n    throw new Error(\"'구직자 정보' 탭이 있는 상담자용 시트(내 사본)의 Apps Script에서 실행하세요.\");\n  }\n  myCheckIntakeHeaders_(ss.getSheetByName(MY_INTAKE_SHEET));\n\n  const props = PropertiesService.getScriptProperties();\n  const lock = LockService.getScriptLock();\n  lock.waitLock(30000);\n  let form = null;\n  try {\n    const savedId = props.getProperty(MY_PROP_FORM);\n    if (savedId && props.getProperty(MY_PROP_BOOK) === ss.getId()) {\n      try { form = FormApp.openById(savedId); } catch (error) { form = null; }\n    }\n    if (!form) {\n      form = FormApp.create(MY_FORM_TITLE);\n      props.setProperty(MY_PROP_FORM, form.getId());\n    }\n    props.setProperty(MY_PROP_BOOK, ss.getId());\n\n    form.setDescription(MY_FORM_INTRO)\n      .setCollectEmail(false)\n      .setLimitOneResponsePerUser(false)\n      .setAllowResponseEdits(false)\n      .setConfirmationMessage('답변을 접수했습니다. 다음 상담에서 함께 확인하겠습니다.');\n\n    const existing = form.getItems().map(item => item.getTitle());\n    MY_FORM_FIELDS.forEach(([title, help, required, long]) => {\n      if (existing.indexOf(title) >= 0) return;\n      const item = long ? form.addParagraphTextItem() : form.addTextItem();\n      item.setTitle(title).setHelpText(help).setRequired(required);\n    });\n\n    const hasTrigger = ScriptApp.getProjectTriggers().some(trigger =>\n      trigger.getHandlerFunction() === 'onMyJobseekerFormSubmit' && trigger.getTriggerSourceId() === form.getId());\n    if (!hasTrigger) {\n      ScriptApp.newTrigger('onMyJobseekerFormSubmit').forForm(form).onFormSubmit().create();\n    }\n\n    try {\n      if (form.supportsAdvancedResponderPermissions && form.supportsAdvancedResponderPermissions()) form.setPublished(true);\n    } catch (error) { /* 예전 방식의 폼은 만들면 바로 공개된다 */ }\n    form.setAcceptingResponses(true);\n  } finally {\n    lock.releaseLock();\n  }\n\n  const url = form.getPublishedUrl();\n  myWriteGuideLink_(ss, url);\n  SpreadsheetApp.getUi().alert(\n    '사전 질문지를 만들었습니다',\n    '구직자에게 보낼 주소\\n' + url + '\\n\\n질문을 고치는 주소\\n' + form.getEditUrl() +\n      \"\\n\\n제출된 답변은 '구직자 정보' 탭에 ID 순번으로 등록됩니다.\",\n    SpreadsheetApp.getUi().ButtonSet.OK);\n}\n\n/** 폼이 제출될 때 자동으로 실행된다. */\nfunction onMyJobseekerFormSubmit(e) {\n  if (!e || !e.response) return;\n  myRegisterResponse_(e.response);\n}\n\n/** 자동 등록이 빠진 답변이 있을 때 한 번 실행하면 빠진 것만 등록한다. */\nfunction registerMissingJobseekerResponses() {\n  const formId = PropertiesService.getScriptProperties().getProperty(MY_PROP_FORM);\n  if (!formId) throw new Error('먼저 createMyJobseekerForm 을 실행하세요.');\n  FormApp.openById(formId).getResponses().forEach(response => myRegisterResponse_(response));\n}\n\nfunction myRegisterResponse_(response) {\n  const key = String(response.getId());\n  const answers = {};\n  response.getItemResponses().forEach(itemResponse => {\n    answers[itemResponse.getItem().getTitle()] = String(itemResponse.getResponse() || '').trim();\n  });\n\n  const lock = LockService.getScriptLock();\n  lock.waitLock(30000);\n  try {\n    const bookId = PropertiesService.getScriptProperties().getProperty(MY_PROP_BOOK);\n    const ss = bookId ? SpreadsheetApp.openById(bookId) : SpreadsheetApp.getActiveSpreadsheet();\n    const sheet = ss.getSheetByName(MY_INTAKE_SHEET);\n    const cols = myCheckIntakeHeaders_(sheet);\n    const width = cols.heads.length;\n    const lastRow = Math.max(sheet.getLastRow(), 2);\n    const rows = sheet.getRange(2, 1, lastRow - 1, width).getDisplayValues();\n\n    if (rows.some(row => row[cols.key] === key)) return;   // 이미 등록한 답변\n\n    const highest = rows.reduce((max, row) => (/^ID-\\d+$/.test(row[cols.id]) ? Math.max(max, Number(row[cols.id].slice(3))) : max), 0);\n    const freeIndex = rows.findIndex(row => row.slice(1).every(value => value === ''));\n    const target = freeIndex >= 0 ? freeIndex + 2 : lastRow + 1;\n    if (target > sheet.getMaxRows()) sheet.insertRowAfter(sheet.getMaxRows());\n\n    const values = cols.heads.map(head => {\n      const input = answers[head] || '';\n      return /^[=+@'-]/.test(input) ? \"'\" + input : input;   // 수식으로 실행되지 않게 막는다\n    });\n    values[0] = false;\n    values[cols.id] = 'ID-' + (highest + 1);\n    values[cols.key] = key;\n\n    sheet.getRange(target, 1).insertCheckboxes();\n    sheet.getRange(target, 1, 1, width).setValues([values]);\n    SpreadsheetApp.flush();\n  } finally {\n    lock.releaseLock();\n  }\n}\n\n/** '구직자 정보' 탭의 열 제목이 질문지와 맞는지 확인하고 열 위치를 돌려준다. */\nfunction myCheckIntakeHeaders_(sheet) {\n  const heads = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getDisplayValues()[0].map(text => String(text).trim());\n  const id = heads.indexOf('구직자 ID');\n  const key = heads.indexOf('폼 응답 식별자');\n  const missing = MY_FORM_FIELDS.map(field => field[0]).filter(title => heads.indexOf(title) < 0);\n  if (id < 0 || key < 0 || missing.length > 0) {\n    throw new Error(\"'구직자 정보' 탭의 열 제목을 확인하세요. 없는 제목: \" +\n      [id < 0 ? '구직자 ID' : '', key < 0 ? '폼 응답 식별자' : ''].concat(missing).filter(Boolean).join(', '));\n  }\n  return { heads: heads, id: id, key: key };\n}\n\nfunction myWriteGuideLink_(ss, url) {\n  const guide = ss.getSheetByName(MY_GUIDE_SHEET);\n  if (!guide) return;\n  const labels = guide.getRange(1, 1, guide.getLastRow(), 1).getDisplayValues().map(row => String(row[0]).trim());\n  const index = labels.indexOf('구직자 작성 링크');\n  if (index >= 0) guide.getRange(index + 1, 2).setValue(url);\n}\n"
+ },
+ "mine": {
+  "title": "내 업무용 자료 만들기",
+  "lead": "워크플로우 5단계와 같은 틀로 내 업무 하나를 구글 시트와 구글 폼으로 설계하는 개별 실습. 실명·연락처·내부 문서 원문은 넣지 않고, 업무의 순서와 자료 종류만 적음.",
+  "time": "50분 · 빈칸 양식 20분, 실행과 저장 15분, 계획표와 짝 점검 15분",
+  "out": [
+   "기획서 한 장(단계 흐름 포함)",
+   "구글 시트·구글 폼 구성안과 Apps Script 초안",
+   "직접 활용 계획",
+   "안전 사용 체크리스트 점검 결과"
+  ],
+  "boxes": [
+   [
+    "1",
+    "자동화할 업무",
+    "집단상담 프로그램 참여 신청 정리와 조 편성"
+   ],
+   [
+    "2",
+    "누가 쓰나",
+    "나 혼자 / 우리 팀 / 기관 전체"
+   ],
+   [
+    "3",
+    "입력 자료",
+    "참여 신청 구글 폼 응답, 프로그램 계획서, 지난 회차 조 편성표"
+   ],
+   [
+    "4",
+    "지금 하는 순서",
+    "신청 응답을 내려받는다 → 희망 직무별로 나눈다 → 조를 짠다 → 안내 문자를 쓴다 → 팀장 확인 후 발송"
+   ],
+   [
+    "5",
+    "AI에게 맡길 일",
+    "읽기, 분류, 계산, 초안, 대조"
+   ],
+   [
+    "6",
+    "담당자가 판단할 일",
+    "금액, 일정, 자격, 대외 발송"
+   ],
+   [
+    "7",
+    "어디에 저장하나",
+    "내 구글 드라이브 / 기관 공유 드라이브 / 내 컴퓨터"
+   ],
+   [
+    "8",
+    "사람 확인 지점",
+    "결과가 바깥으로 나가기 바로 앞"
+   ]
+  ],
+  "steps": [
+   "기획서 빈칸 양식의 여덟 칸을 채움(20분). 표의 예시는 내 업무 내용으로 바꿈",
+   "AI 채팅(Gemini, ChatGPT, Claude 가운데 쓰는 것)을 새로 엶",
+   "아래 지시문 전체를 복사한 뒤, [입력]의 여덟 줄을 내 빈칸 양식 내용으로 바꿔서 보냄",
+   "결과의 8단계에 나온 탭 구성대로 구글 시트를 만들고, 코드 블록을 Apps Script에 붙여 넣음",
+   "가상 자료 몇 줄을 넣어 실행해 봄. 오류가 나면 오류 문구를 그대로 AI에 붙여 넣고 고쳐 달라고 요청",
+   "직접 활용 계획표를 채우고, 짝과 바꿔 사람 확인 지점을 점검(15분)"
+  ],
+  "options": [
+   [
+    "쓰는 사람",
+    "나 혼자 / 우리 팀·부서 / 기관 전체"
+   ],
+   [
+    "자료·결과 저장 위치",
+    "내 컴퓨터에만 / 내 구글 드라이브 / 기관 공유 드라이브 / 아직 모름"
+   ],
+   [
+    "개인정보",
+    "들어 있지 않음 / 있음 — 지우고 넣을 것 / 있음 — 처리 방법을 모름"
+   ]
+  ],
+  "checks": [
+   "사람 확인이 바깥으로 나가는 결과(결재·발송·제출) 바로 앞에 있다",
+   "계산과 개인정보 가리기가 AI가 아니라 수식·코드에 있다",
+   "지금 걸리는 시간과 기관 규정을 지어내지 않고 [확인 필요]로 두었다",
+   "AI 초안 열과 담당자 확정 열이 나뉘어 있다",
+   "코드에 메일·문자 발송이나 삭제 기능이 없다",
+   "안전 사용 체크리스트 여덟 문장에 모두 \"예\"라고 답할 수 있다. \"아니오\"가 있으면 실제 자료를 넣지 않는다"
+  ],
+  "safety": [
+   "개인정보 원문(이름·연락처)을 넣지 않는다",
+   "근거로 쓸 자료가 정해져 있다",
+   "사람 확인 지점이 하나 이상 있다",
+   "자료와 결과를 어디에 둘지 정했다",
+   "시트와 폼의 공유 범위가 꼭 필요한 사람으로 한정되어 있다",
+   "가상 자료로 먼저 시험했다",
+   "결과물에 [확인 필요]·[가정]이 표시된다",
+   "다른 사람이 이어받아 쓸 수 있다"
+  ],
+  "after": [
+   [
+    "1회",
+    "교육 뒤 1주 안",
+    "가상 자료",
+    "설계한 순서대로 결과가 나오는가, 사람 확인 지점이 지켜지는가"
+   ],
+   [
+    "2회",
+    "교육 뒤 2주 안",
+    "개인정보를 지운 실제 자료 사본",
+    "이름·연락처가 결과에 없는가, [확인 필요]가 어디에 남는가"
+   ],
+   [
+    "3회",
+    "2회 뒤",
+    "2회와 같은 종류의 자료",
+    "고친 시트와 코드로 다시 실행해 결과가 나아졌는가"
+   ]
+  ],
+  "prompt": "[공통 작성 규칙]\n- 근거: 입력에 적힌 내용만 사용함. 입력에 없는 기관 규정·수치는 만들지 않고 [확인 필요]로 둠.\n- 문체: 개조식 업무보고(~함, ~임). 핵심 결론을 앞에 둠. 이모지를 쓰지 않음.\n- 사실과 제안을 구분함. 가정은 [가정], 제안 문장은 앞에 (제안)을 붙임.\n- 확인이 필요한 항목은 본문에 섞지 않고 끝에 따로 모아 제시함.\n- 마지막 확인은 사람이 함. 사람이 확인해야 할 지점을 명시함.\n\n[역할]\n취업지원 실무자가 자기 업무 하나를 구글 시트와 구글 폼으로 자동화하도록 돕는 설계 비서임.\n도구를 대신 운영하는 것이 아니라, 담당자가 스스로 만들고 점검할 수 있는 설계 문서와 코드 초안을 만듦.\n\n[입력]\n- 업무: 집단상담 프로그램 참여 신청 정리와 조 편성\n- 쓰는 사람: 나 혼자\n- 입력 자료: 참여 신청 구글 폼 응답, 프로그램 계획서, 지난 회차 조 편성표\n- 지금 하는 순서: 신청 응답을 내려받는다 → 희망 직무별로 나눈다 → 조를 짠다 → 안내 문자를 쓴다 → 팀장 확인 후 발송\n- 만들 결과물: 조 편성표와 안내 문자 초안\n- 담당자가 판단해야 하는 것: (미입력 — 단계에서 찾아 제안할 것)\n- 자료·결과 저장 위치: 아직 모름\n- 개인정보: 있음 — 지우고 넣을 것\n\n[1단계 — 먼저 되묻기]\n입력만으로 정할 수 없어 설계가 달라지는 것을 질문 3개 이내로 정리함.\n| 번호 | 질문 | 왜 필요한지 | 답이 없을 때 둘 [가정] |\n물을 것이 없으면 \"되물을 것 없음\" 한 줄만 적음. 표를 낸 뒤 [가정] 값으로 이어서 진행함.\n\n[2단계 — 업무 쪼개기]\n\"지금 하는 순서\"를 한 가지 일만 하는 단계로 나눔.\n| 번호 | 단계 | 들어오는 것 | 나가는 것 | 지금 걸리는 시간 |\n걸리는 시간은 입력에 없으면 [확인 필요]로 둠. 지어내지 않음.\n\n[3단계 — 위임 경계]\n| 단계 | AI가 맡을 일 | 담당자가 판단할 일 | 그렇게 나눈 이유 |\n금액·일정·자격 판정·대외 발송·개인에게 영향을 주는 결정은 담당자 몫으로 둠.\nAI가 맡을 일은 읽기·분류·계산·초안·대조처럼 결과를 사람이 확인할 수 있는 일로 한정함.\n\n[4단계 — 단계 흐름]\n| 번호 | 유형 | 하는 일 | 규칙 (AI가 틀리기 쉬운 것) |\n유형은 시작 / AI 초안 / 수식·코드 / 자료 확인 / 조건 분기 / 사람 확인 / 종료 일곱 가지만 씀.\n- 계산·개인정보 가리기·형식 맞추기는 AI가 아니라 수식·코드로 둠.\n- 사람 확인을 하나 이상 두고, 바깥으로 나가는 결과(발송·제출·결재) 바로 앞에 놓음.\n- 단계는 5~9개로 함. 더 길면 도구를 둘로 나누자고 (제안)함.\n\n[5단계 — 데이터 · 권한 점검]\n| 점검 항목 | 현재 입력 | 판단 | 해야 할 일 |\n항목: 누가 쓰나 / 입력 자료를 어디서 가져오나 / 결과를 어디에 저장하나 / 개인정보 처리 / 시트와 폼의 공유 범위 / 지우는 방법\n- 저장 위치가 \"아직 모름\"이면 쓰는 사람에 맞춰 (제안)함: 나 혼자 → 내 구글 드라이브 / 팀·기관 → 기관이 승인한 저장소 [확인 필요].\n- 개인정보가 있으면 \"원문은 담당자가 보관, AI에는 식별 정보를 지우거나 ID로 바꾼 사본만\" 절차를 적음.\n- 기관의 보안 규정은 추정하지 않고 [확인 필요]로 둠.\n\n[6단계 — 기획서 (한 장)]\n아래 양식을 그대로 채움. 한 칸은 두 줄을 넘기지 않음.\n| 칸 | 내용 |\n|---|---|\n| 도구 이름 | 업무가 드러나는 이름 (제안) |\n| 한 줄 설명 | 무엇을 받아 무엇을 만드는지 |\n| 누가 쓰나 | |\n| 입력 자료 | |\n| 결과물 | |\n| 단계 흐름 | 4단계 흐름을 화살표로 한 줄 |\n| AI에게 맡기는 일 | |\n| 담당자가 판단하는 일 | |\n| 사람 확인 지점 | 어느 단계 뒤, 무엇을 확인 |\n| 데이터 저장 위치 | |\n| 개인정보 처리 | |\n| 먼저 시험할 가상 자료 | 어떤 가상 자료로 시험할지 (제안) |\n| 잘 됐는지 보는 기준 | 2개. 시간 수치는 지어내지 않고 \"시범 때 측정\" |\n\n[7단계 — 안전 사용 체크리스트]\n이 설계에 맞춰 예/아니오로 답할 수 있는 점검 문장 8개를 냄.\n개인정보, 근거 자료, 사람 확인, 저장 위치, 공유 범위, 가상 자료 시험, 결과물 표시([확인 필요]·[가정]), 인계를 하나씩 다룸.\n\n[8단계 — 구글 시트 · 구글 폼 구성안과 Apps Script 초안]\n이 업무에만 맞춘 도구 구성을 냄.\n1) 시트 탭 구성\n| 탭 이름 | 쓰임 | 열 제목(왼쪽부터) | 누가 입력하나 |\n- 입력 탭과 결과 탭을 나눔. 입력 탭 첫 열은 실행할 행을 고르는 체크박스로 둠.\n- AI가 만든 내용은 \"초안\" 열에, 담당자가 확정한 내용은 \"확정\" 열에 따로 둠. \"검토 완료\" 체크박스 열을 둠.\n- \"고쳐 쓴 기록\" 탭(날짜 | 바꾼 것 | 이유)을 둠.\n2) 구글 폼 질문 목록 (폼이 필요할 때만)\n| 질문 제목 | 형식(단답형/장문형/객관식) | 필수 여부 | 받지 않을 정보 |\n- 연락처·주민등록번호·건강정보는 받지 않는다는 안내문을 넣음.\n3) Apps Script 초안\n- 코드 블록 하나에 넣음. 여는 줄은 ```javascript, 닫는 줄은 ```.\n- 시트를 열면 메뉴가 생기게 함(onOpen). 메뉴 항목은 3개 이내.\n- 체크한 행만 처리함. 결과는 결과 탭에 쓰고 기존 확정 열은 건드리지 않음.\n- 메일·문자 발송, 파일 삭제, 외부 전송은 넣지 않음. 발송이 필요한 단계는 초안만 만들고 사람이 보냄.\n- AI 호출이 필요하면 API 키를 코드에 적지 않고 스크립트 속성에서 읽게 함. 키가 없으면 안내만 띄움.\n- 함수마다 한 줄 설명을 붙임. 초안임을 밝히고, 가상 자료로 시험한 뒤 고쳐 쓰라고 적음.\n\n[9단계 — 직접 활용 계획]\n| 회차 | 언제 | 어떤 자료로 | 확인할 것 | 고칠 점 기록 |\n1회: 교육 뒤 1주 안, 가상 자료 / 2회: 2주 안, 개인정보를 지운 실제 자료 사본 / 3회: 고친 시트와 코드로 다시 실행.\n날짜를 정하지 않고 \"교육 뒤 1주 안\"처럼 적음. \"고칠 점 기록\" 칸은 비워 둠.\n\n[설계 점검표]\n| 점검 | 결과 |\n사람 확인이 있는가 / 계산이 수식·코드에 있는가 / 개인정보 원문이 AI에 들어가지 않는가 / 저장 위치가 정해졌는가 / 발송·삭제 기능이 코드에 없는가 / [확인 필요]로 남은 항목 수\n\n[하지 않는 일]\n기관 규정·보안 정책 추정, 절감 시간·효과 수치 지어내기, 사람 확인 없는 자동 발송 설계, 개인정보 원문을 AI에 넣는 설계."
+ },
  "timeline": [
   [
    "14:00~14:10",
@@ -551,6 +748,23 @@ window.LAB = {
     [
      "03_내담자B_중장년재취업_서류",
      "1단계 연습용. 중장년 재취업 가상 구직자의 이력서, 경력기술서, 자기소개서"
+    ]
+   ]
+  },
+  {
+   "group": "개별 실습 양식",
+   "items": [
+    [
+     "04_기획서_빈칸양식",
+     "개별 실습. 먼저 채우는 여덟 칸 양식"
+    ],
+    [
+     "05_안전사용_체크리스트",
+     "개별 실습. 실제 자료를 넣기 전에 확인"
+    ],
+    [
+     "06_직접활용_계획표",
+     "개별 실습. 교육 뒤 세 번 써 보는 계획"
     ]
    ]
   }
