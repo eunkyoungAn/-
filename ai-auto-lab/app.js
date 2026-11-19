@@ -68,7 +68,7 @@
 
   /* ---------- 시작 화면 ---------- */
   const FLOW_MAIL = [
-    ['Google Sheets', '목록 만들기', '이메일 주소 · 이름 · 발송 결과'],
+    ['Google Sheets', '목록 만들기', '이메일 주소 · 이름 · 발송 선택 · 발송 결과'],
     ['Gemini', '코드 받기', '기능을 번호로 나눠 요청'],
     ['Apps Script', '붙여 넣고 저장', '제목·본문만 내 내용으로'],
     ['Gmail', '테스트 → 전체 발송', '나에게 먼저']
@@ -134,7 +134,7 @@
     let steps = `<ol class="plain">${st.steps.map(s => `<li>${s}</li>`).join('')}</ol>`;
     if (st.table && !st.table.after) steps += tableBlock(st.table);
     steps += tableBlock(st.table2);
-    if (st.snippet) steps += `<h3>코드 맨 위, 이 세 줄만 고칩니다</h3>${promptBox(st.snippet, '고칠 곳 예시 (변수 이름은 코드마다 다를 수 있음)', 'cn-code')}`;
+    if (st.snippet) steps += `<h3>코드 맨 위 설정 영역만 고칩니다</h3>${promptBox(st.snippet, '설정 영역 예시 (Gemini 코드는 변수 이름이 다를 수 있음)', 'cn-code')}`;
     if (st.tip) steps += `<div class="result-card mt14"><strong>요청문 주소 바꾸는 법</strong><p>주소의 <code>/d/</code>와 <code>/edit</code> 사이 긴 문자열이 시트 고유번호입니다. 원본 번호 <code>${esc(D.sheetId)}</code> 자리에 내 사본 주소창의 번호를 넣습니다.</p></div>`;
     secs.push(['steps', '순서', steps]);
     if (st.prompt) secs.push(['prompt', '요청문 (복사해서 붙여 넣기)', promptBox(st.prompt.text, st.prompt.label)]);
@@ -257,7 +257,7 @@
     { g: 2, nav: '2-3', title: '맡길 일 고르는 기준 4가지', html: () => `<span class="slide-kicker">2. 자동화 · 3) AI에게 무엇을 맡길까</span><h1>AI vs 사람, 맡길 일 고르는 기준 4가지</h1>
       <p class="slide-lead">요즘IT가 2026년 5~10월에 실린 AI 활용 사례 9편을 분석해 정리한 기준입니다. 파란 글씨는 오늘 제미나이 메일 자동화에 적용한 곳입니다.</p>
       <div class="pts"><div class="pt"><b>기준 1</b><strong>맡길 가치가 있는 일인가</strong><p>자주, 오래, 틀리면 위험하게 반복되는 일부터 맡깁니다. 1년에 한두 번 하는 일은 도구를 만들고 관리하는 품이 더 클 수 있습니다.</p><p class="cn-apply">오늘: 여러 사람에게 같은 안내 메일 보내기</p></div>
-      <div class="pt"><b>기준 2</b><strong>정해진 답이 있는 일인가</strong><p>답이 정해진 일은 AI가 매번 판단하게 두지 않고 규칙으로 고정합니다. 그 규칙은 AI와 함께 만들어도 됩니다.</p><p class="cn-apply">오늘: "C열이 비어 있으면 보낸다"는 규칙을 Gemini와 코드로 만듦</p></div>
+      <div class="pt"><b>기준 2</b><strong>정해진 답이 있는 일인가</strong><p>답이 정해진 일은 AI가 매번 판단하게 두지 않고 규칙으로 고정합니다. 그 규칙은 AI와 함께 만들어도 됩니다.</p><p class="cn-apply">오늘: "C열이 체크되어 있고 D열이 비어 있으면 보낸다"는 규칙을 Gemini와 코드로 만듦</p></div>
       <div class="pt"><b>기준 3</b><strong>틀리면 되돌릴 수 있는 일인가</strong><p>되돌리기 어려운 결정과 승인은 사람에게 남깁니다. "경계선을 정하는 건 AI의 성능이 아니라 오류의 비용"입니다.</p><p class="cn-apply">오늘: 보낸 메일은 되돌릴 수 없으니 전체 발송은 내가 결정</p></div>
       <div class="pt"><b>기준 4</b><strong>어디서 확인할 것인가</strong><p>"완료" 보고만 믿지 말고, 결과를 언제 어디서 확인할지 맡기기 전에 정해 둡니다.</p><p class="cn-apply">오늘: 2행 내 주소로 테스트 발송, 발송 전 체크리스트</p></div></div>
       <p class="src">${esc(SRC_YOZM)}</p>` },
