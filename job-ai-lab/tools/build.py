@@ -2,7 +2,7 @@
 """AI 취업지원 실습실 빌드 스크립트.
 
 이 파일 하나가 사이트 내용의 원본이다.
-- data.js            : 화면에 쓰는 데이터(START 장표, 취업상담 워크플로우, 시간표, 참고 자료)
+- data.js            : 화면에 쓰는 데이터(START 장표, 취업상담 워크플로우, 개별 실습)
 - files/*.docx, *.pdf: 연습용 가상 사례 자료 (src/*.md 에서 생성)
 - files/AI취업지원_실습자료_전체.zip
 
@@ -326,20 +326,6 @@ MINE = {
 }
 
 
-# 시간표: 강의설계서(2026-11-19)의 통합 특강 3시간안. 구현 100분의 단계별 배분은 가정.
-TIMELINE = [
-    ['14:00~14:10', '이론', '도입', 'Google 계정 로그인 점검, 과정 안내', '로그인 완료'],
-    ['14:10~14:30', '이론', '변화', '구직자와 고용서비스업 종사자가 맞이하는 변화', ''],
-    ['14:30~14:45', '이론', '트렌드', '2027년 채용 트렌드, 2026년과 달라진 점', ''],
-    ['14:45~15:10', '이론', '역할', '사례로 보는 구직자의 마음, 우리의 역할 3S', ''],
-    ['15:10~15:20', '', '휴식', '', ''],
-    ['15:20~15:40', '구현', '1·2단계', '구직자 정보 받기, 채용공고 등록하기', '구직자 정보, 공고 1건'],
-    ['15:40~16:00', '구현', '3단계', '공고 분석 자료 만들기', '구인기업 분석'],
-    ['16:00~16:35', '구현', '4단계', '구직자와 공고 비교, 상담 결과 확정', '회차별 상담 기록'],
-    ['16:35~16:45', '구현', '5단계', '한 장으로 출력해 제공하기', '상담 결과지'],
-    ['16:45~17:00', '구현', '사례 검토·적용', 'AI 초안과 내 판단이 달랐던 곳 검토, 내 상담 절차에 넣을 한 가지', '적용 계획'],
-]
-
 # 참고 자료 목록: 사이트에는 싣지 않고 기록용으로만 둔다. 장표의 카드별 출처는 START 안에 있다.
 SOURCES = [
     'Beane, M. (2024). The skill code: How to save human ability in an age of intelligent machines. Harper Business.',
@@ -452,7 +438,7 @@ def build_files():
 
 
 def build_data():
-    data = {'links': LINKS, 'start': START, 'flow': FLOW, 'formMake': FORM_MAKE, 'mine': MINE, 'timeline': TIMELINE, 'files': FILES, 'zip': ZIP_NAME}
+    data = {'links': LINKS, 'start': START, 'flow': FLOW, 'formMake': FORM_MAKE, 'mine': MINE, 'files': FILES, 'zip': ZIP_NAME}
     js = '/* tools/build.py 가 만든 파일. 직접 고치지 말고 build.py 를 고친 뒤 다시 실행한다. */\nwindow.LAB = ' + \
          json.dumps(data, ensure_ascii=False, indent=1) + ';\n'
     open(os.path.join(ROOT, 'data.js'), 'w', encoding='utf-8').write(js)
