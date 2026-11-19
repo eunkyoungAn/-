@@ -186,7 +186,7 @@ function render(){ steps(); ({intro, guess, bridge, me, result})[S.phase](); win
 
 function intro(){
   app.innerHTML = `<div class="panel">
-    <p class="eyebrow">시작하기 전에</p>
+    <p class="eyebrow">시작하기 전에 · AI 역량검사 다음</p>
     <h1>나는 어떤 AI 사용자일까요? 먼저 맞춰 봅니다</h1>
     <ol class="cond">
       <li><b>맞춰 보기 ${GUESS.length}문제</b> — 다른 사람의 이야기를 읽고 몇 레벨인지 맞춥니다. 정답과 해설이 바로 열립니다.</li>
@@ -279,7 +279,7 @@ function result(){
       <li>AI에게 “질문”이 아니라 “일”을 맡기면 다음 단계로 넘어갑니다.</li>
       <li>내가 만든 것을 팀과 나누는 순간 조직의 실력이 됩니다.</li>
     </ul>
-    <div class="row"><a class="btn" href="../#start">START 장표로</a><a class="btn ghost" href="../ai-test/">AI 역량검사도 해 보기</a><button class="btn ghost" id="go">처음부터 다시</button></div></div>`;
+    <div class="row"><a class="btn" href="../#start">START 장표로</a><button class="btn ghost" id="go">처음부터 다시</button></div></div>`;
   $id("go").onclick=()=>{S.phase="intro";render();};
 }
 
