@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>나는 어떤 AI 사용자?</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* 레이아웃: 한 화면 한 단계(문제/채팅/결과), 상단에 진행·타이머 바 */
+:root{
+  --bg:#fff8f0; --surface:#ffffff; --fg:#2a2440; --muted:#6e6888; --line:#f0e3d6;
+  --accent:#5b4cf0; --accent-soft:#efecff; --sun:#ffb938; --sun-soft:#fff3d9; --pink:#ff7aa8;
+  --good:#14935c; --good-soft:#dcf7e9;
+  --warn:#b86e00; --warn-soft:#fff0d2; --bad:#e0413a; --bad-soft:#ffe6e4;
+  --sans:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#12131b; --surface:#1b1d29; --fg:#e8e9f1; --muted:#9a9fb5; --line:#2e3142;
+  --accent:#a99dff; --accent-soft:#2a2552; --sun:#ffc85c; --sun-soft:#3a2e14; --pink:#ff94b8; --good:#6fd39f; --good-soft:#173527;
+  --warn:#f0b452; --warn-soft:#3a2c12; --bad:#ff8a80; --bad-soft:#3d1c1a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12131b; --surface:#1b1d29; --fg:#e8e9f1; --muted:#9a9fb5; --line:#2e3142;
+  --accent:#a99dff; --accent-soft:#2a2552; --sun:#ffc85c; --sun-soft:#3a2e14; --pink:#ff94b8; --good:#6fd39f; --good-soft:#173527;
+  --warn:#f0b452; --warn-soft:#3a2c12; --bad:#ff8a80; --bad-soft:#3d1c1a; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:radial-gradient(circle at 0% 0%,var(--sun-soft),transparent 45%),radial-gradient(circle at 100% 10%,var(--accent-soft),transparent 40%),var(--bg);background-attachment:fixed;color:var(--fg);font-family:var(--sans);font-size:16px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+.wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{font-size:13px;color:var(--muted);letter-spacing:.04em}
+.steps{display:flex;gap:6px}
+.steps span{width:28px;height:6px;border-radius:3px;background:var(--line)}
+.steps span.on{background:linear-gradient(90deg,var(--accent),var(--pink))}
+.brand{font-weight:700;color:var(--accent)}
+h1{font-size:clamp(22px,5vw,30px);line-height:1.3;margin:0;text-wrap:balance}
+h2{font-size:20px;margin:0;text-wrap:balance}
+.eyebrow{font-size:13px;color:var(--muted);margin:0}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:24px;box-shadow:0 10px 30px -18px rgba(91,76,240,.35);border-top:6px solid var(--sun);display:flex;flex-direction:column;gap:16px}
+.passage{background:var(--sun-soft);border-radius:12px;padding:14px 16px;color:var(--fg)}
+.eyebrow{display:inline-block;align-self:flex-start;background:var(--accent-soft);color:var(--accent)!important;font-weight:700;padding:3px 12px;border-radius:999px}
+.q{font-weight:700}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{display:flex;gap:10px;text-align:left;width:100%;padding:14px;border:2px solid var(--line);border-radius:14px;transition:transform .15s,border-color .15s;
+  background:var(--surface);color:var(--fg);font:inherit;cursor:pointer;min-height:48px}
+.opt:hover:not(:disabled){border-color:var(--accent);transform:translateY(-1px)}
+.opt.sel{border-color:var(--accent);background:var(--accent-soft)}
+.opt.right{border-color:var(--good);background:var(--good-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.opt:disabled{cursor:default}
+.num{font-family:var(--mono);color:var(--accent);flex:none}
+.timer{display:flex;align-items:center;gap:12px}
+.bar{flex:1;height:8px;background:var(--line);border-radius:4px;overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--sun),var(--pink),var(--accent));transition:width 1s linear}
+.timer.low .bar i{background:var(--bad)}
+.time{font-family:var(--mono);font-size:22px;font-variant-numeric:tabular-nums;min-width:64px;text-align:right}
+.timer.low .time{color:var(--bad)}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+button.btn{font:inherit;font-weight:700;padding:12px 22px;border-radius:999px;border:2px solid var(--accent);
+  background:linear-gradient(135deg,var(--accent),var(--pink));border-color:transparent;color:var(--surface);cursor:pointer;min-height:48px}
+button.btn.ghost{background:transparent;color:var(--accent);border-color:var(--accent)}
+button.btn:disabled{opacity:.4;cursor:default}
+button:focus-visible,textarea:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.explain{display:flex;flex-direction:column;gap:10px}
+.explain dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 14px}
+.explain dt{font-weight:700;color:var(--accent);white-space:nowrap}
+.explain dd{margin:0;min-width:0}
+.verdict{font-weight:700;padding:10px 14px;border-radius:8px}
+.verdict.ok{background:var(--good-soft);color:var(--good)} .verdict.no{background:var(--bad-soft);color:var(--bad)}
+.chat{display:flex;flex-direction:column;gap:12px}
+.msg{max-width:88%;padding:12px 14px;border-radius:12px;white-space:pre-wrap;min-width:0;overflow-wrap:anywhere}
+.msg.them{background:var(--sun-soft);align-self:flex-start;border-top-left-radius:4px}
+.msg.me{background:linear-gradient(135deg,var(--accent),var(--pink));color:var(--surface);align-self:flex-end;border-top-right-radius:4px}
+.msg.ai{background:var(--surface);border:1px dashed var(--line);align-self:flex-start}
+.who{display:block;font-size:12px;opacity:.75;margin-bottom:4px}
+.cond{margin:0;padding-left:20px}
+textarea{width:100%;min-height:120px;font:inherit;padding:12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--fg);resize:vertical}
+.score{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.score b{font-family:var(--mono);font-size:44px;line-height:1}
+.tier{font-weight:700;padding:4px 12px;border-radius:999px}
+.tier.t1{background:var(--good-soft);color:var(--good)} .tier.t2{background:var(--warn-soft);color:var(--warn)} .tier.t3{background:var(--bad-soft);color:var(--bad)}
+.checks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.checks li{display:grid;grid-template-columns:28px 1fr auto;gap:8px;align-items:start}
+.checks .pt{font-family:var(--mono);color:var(--muted);font-variant-numeric:tabular-nums}
+.mark.y{color:var(--good)} .mark.n{color:var(--bad)}
+.small{font-size:14px;color:var(--muted)}
+table{border-collapse:collapse;width:100%;font-size:15px}
+td,th{border-bottom:1px solid var(--line);padding:8px;text-align:left}
+.tablebox{overflow-x:auto}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+a.brand{text-decoration:none}
+.lv{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.lv span{padding:8px 0;text-align:center;border-radius:999px;background:var(--line);color:var(--muted);font-weight:700;font-size:14px}
+.lv span.on{background:linear-gradient(135deg,var(--accent),var(--pink));color:var(--surface)}
+a.btn{display:inline-flex;align-items:center;font-weight:700;padding:12px 22px;border-radius:999px;background:linear-gradient(135deg,var(--accent),var(--pink));color:var(--surface);text-decoration:none;min-height:48px}
+a.btn.ghost{background:transparent;color:var(--accent);border:2px solid var(--accent)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="brand" href="../#before">← 실습실로 · 나는 어떤 AI 사용자?</a>
+    <div class="steps" id="steps" aria-label="진행 단계"></div>
+  </header>
+  <main id="app"></main>
+  <p class="small">레벨 기준은 이 수업을 위해 임의로 설정한 것입니다. 공인된 기준이나 표준화된 검사가 아니므로 참고용으로만 봐 주세요.</p>
+</div>
+
+<script>
+const LEVELS = ["1레벨","2레벨","3레벨"];
+const LV_DESC = [
+  "1레벨 · AI를 검색창처럼 쓰는 사용자",
+  "2레벨 · 업무 일부를 AI에게 맡기는 사용자",
+  "3레벨 · 팀과 공유해 조직에 퍼뜨리는 사용자"];
+
+/* 1부: 맞춰 보기 — 이 사람은 몇 레벨일까요? */
+const GUESS = [
+ {title:"[맞춰 보기 1] 하루 스무 번 쓰는 김 주임",
+  passage:"김 주임은 하루에도 스무 번씩 Gemini를 엽니다. 점심 맛집을 묻고, 뉴스 기사를 요약시키고, 영어 메일을 번역합니다. 동료들에게 “나는 AI 진짜 많이 써. 잘 쓰는 편이야.”라고 말합니다.",
+  q:"김 주임은 몇 레벨일까요?", opts:LV_DESC, ans:0,
+  why:"질문하고 답을 받는 데서 끝나면 검색창처럼 쓰는 1레벨입니다. 요즘은 대부분이 여기까지는 씁니다.",
+  trap:"“자주 쓰는 것”과 “잘 쓰는 것”은 상관이 없습니다. 횟수가 많다고 레벨이 올라가지 않습니다.",
+  work:"요약·번역에서 한 걸음 더 나가 “결과물을 만드는 일”을 맡겨 보면 2레벨로 넘어갑니다."},
+ {title:"[맞춰 보기 2] 퇴근 후에 만드는 박 대리",
+  passage:"박 대리의 회사는 AI 사용이 막혀 있습니다. 그래서 집에서 개인 계정으로 AI에게 코드를 받아, 매주 하던 엑셀 취합 작업을 버튼 하나로 끝내는 도구를 만들었습니다. 이 도구는 박 대리 혼자 씁니다.",
+  q:"박 대리는 몇 레벨일까요?", opts:LV_DESC, ans:1,
+  why:"업무 일부를 AI에게 맡기거나 자동화 도구를 만들면 2레벨입니다. 오늘 실습에서 구글 시트의 [공고 분석하기] 단추를 누르는 것이 바로 이 단계입니다.",
+  trap:"2레벨은 회사가 시켜서가 아니라 개인의 관심과 의지로 올라오는 경우가 많습니다.",
+  work:"반복하는 일 하나를 골라 AI에게 “코드로 만들어 줘”라고 맡겨 보세요."},
+ {title:"[맞춰 보기 3] 도구 열 개를 만든 최 과장",
+  passage:"최 과장은 AI로 자동화 도구를 열 개나 만들었습니다. 사내에서 AI를 제일 잘 다루는 사람으로 통합니다. 다만 도구는 모두 자기 컴퓨터에만 있고, 어떻게 만들었는지 팀원에게 알려 준 적은 없습니다.",
+  q:"최 과장은 몇 레벨일까요?", opts:LV_DESC, ans:1,
+  why:"혼자서는 아주 잘 쓰지만 2레벨입니다. 3레벨을 가르는 기준은 개인 실력이 아니라 “조직적 확산”입니다.",
+  trap:"도구 개수나 숙련도로 3레벨이 되지 않습니다. 팀과 공유해 함께 쓰는 환경을 만드는지가 기준입니다.",
+  work:"내가 만든 시트·요청문·지침 하나를 팀 공유 폴더에 올리는 것부터가 3레벨의 시작입니다."},
+ {title:"[맞춰 보기 4] 함께 키우는 이 팀장",
+  passage:"이 팀장은 팀의 업무 방식과 과거 프로젝트를 MD(마크다운) 문서로 정리해 AI가 읽게 했습니다. AI를 드라이브·캘린더와 연결(MCP)해 두고, 팀원 여섯 명이 같은 문서를 함께 채워 가며 같은 AI를 씁니다.",
+  q:"이 팀장은 몇 레벨일까요?", opts:LV_DESC, ans:2,
+  why:"AI의 “손발”인 연결(MCP)을 알고 쓰며, 팀원과 공유해 환경을 만들면 3레벨입니다.",
+  trap:"여섯 명이 같은 AI를 함께 가르치는 셈입니다. 여섯 명의 경험이 한 AI에 쌓이면 경력직처럼 일합니다.",
+  work:"오늘 실습의 사전 질문지와 구인기업 리스트가 업무 맥락을 글로 정리해 AI에게 주는 첫 연습입니다."},
+ {title:"[맞춰 보기 5] 조직을 바꾸는 쪽은?",
+  passage:"한 팀에 두 사람이 있습니다. A는 AI를 아주 잘 다루는 실무자입니다. B는 AI는 서툴지만 업무 흐름과 팀 구조를 바꿀 수 있는 리더입니다.",
+  q:"조직의 일하는 방식을 AI에 맞게 바꾸는 데 더 유리한 사람은 누구일까요?",
+  opts:["A · AI를 잘 다루는 실무자","B · AI는 서툴지만 결정권이 있는 리더"], ans:1,
+  why:"리더입니다. 의사결정권과 워크플로우를 바꿀 수 있는 힘은 실무자가 가져올 수 없기 때문입니다.",
+  trap:"AI 전환의 핵심은 “AI 도입”이 아니라 일하는 방식을 다시 짜는 것입니다. 그래서 일의 전체 흐름을 아는 사람이 유리합니다.",
+  work:"내 업무를 “AI로 증강 · AI에 위임 · 그대로 유지 · 사람만”으로 나눠 보는 것이 첫걸음입니다."}
+];
+
+/* 2부: 내 모습 고르기 — 정답 없음. 보기 순서대로 0~3점 */
+const ME = [
+ {title:"[내 모습 1] 같은 안내 메일을 20명에게 보내야 할 때",
+  q:"나라면 어떻게 할까요?",
+  opts:["한 명씩 직접 써서 보낸다.","AI에게 메일 초안을 받아 복사해서 보낸다.","AI가 만들어 준 자동화(코드, 메일 병합)로 한 번에 보낸다.","팀이 함께 쓰는 자동화 시트와 사용법을 만들어 공유한다."]},
+ {title:"[내 모습 2] AI에게 일을 시킬 때",
+  q:"평소 내 모습과 가장 가까운 것은?",
+  opts:["AI를 거의 쓰지 않는다.","필요할 때마다 그때그때 질문한다.","자주 쓰는 지시를 저장해 두고(지침, 프로젝트, Gem 등) 반복해서 쓴다.","업무 맥락을 문서로 정리해 AI에게 주고, 그 문서를 팀과 함께 쓴다."]},
+ {title:"[내 모습 3] AI와 다른 서비스를 함께 쓸 때",
+  q:"AI를 메일·시트·드라이브 같은 서비스와 어떻게 쓰나요?",
+  opts:["연결할 수 있다는 것을 몰랐다.","채팅창에 내용을 복사해 붙여 넣는다.","파일을 올리거나 시트·메일과 연결해 써 본 적이 있다.","커넥터(MCP)로 여러 서비스를 연결해 팀이 같이 쓰는 환경을 만들었다."]},
+ {title:"[내 모습 4] AI가 만든 결과를 받았을 때",
+  q:"평소 내 모습과 가장 가까운 것은?",
+  opts:["결과를 받아 본 적이 거의 없다.","읽어 보고 괜찮으면 그대로 쓴다.","숫자·날짜·이름을 직접 확인하고 고쳐서 쓴다.","확인 기준(체크리스트)을 만들어 팀과 함께 쓴다."]}
+];
+
+const RESULT = [
+ ["아직 시작 전","오늘이 첫걸음입니다. 실습을 끝까지 따라 하면 1레벨을 건너 2레벨의 맛을 보게 됩니다.","워크플로우 3단계에서 AI에게 처음으로 공고 분석이라는 “일”을 맡겨 봅니다."],
+ ["1레벨 · 검색창처럼 쓰는 사용자","요즘은 대부분이 여기에 있습니다. 오늘 실습은 “질문하기”에서 “업무를 맡기기”로 넘어가는 연습입니다.","워크플로우 3·4단계에서 AI에게 공고 분석과 구직자·공고 비교를 맡겨 봅니다. 이것이 2레벨입니다."],
+ ["2레벨 · 업무 일부를 맡기는 사용자","개인의 관심과 의지로 올라오는 단계입니다. 이제 “혼자 잘 쓰기”에서 “같이 쓰기”를 생각할 때입니다.","개별 실습에서 내 업무용 시트와 질문지를 직접 설계해 봅니다. 팀이 함께 쓰는 양식으로 만들면 3레벨로 이어집니다."],
+ ["3레벨 · 조직에 퍼뜨리는 사용자","기준은 개인 활용이 아니라 조직 확산입니다. 이미 그 길 위에 있습니다.","오늘 만든 시트·요청문·지침을 팀이 함께 쓰려면 무엇을 공유해야 할지 생각하며 실습해 보세요."]
+];
+
+const S = {phase:"intro", qi:0, picked:null, revealed:false, right:0, mi:0, mine:[]};
+const app = document.getElementById("app");
+const CIRC = ["①","②","③","④"];
+const $id = id => document.getElementById(id);
+
+function steps(){
+  const total = GUESS.length + ME.length + 1;
+  const cur = S.phase==="intro"?-1 : S.phase==="guess"?S.qi : S.phase==="bridge"?GUESS.length-1 : S.phase==="me"?GUESS.length+S.mi : total-1;
+  $id("steps").innerHTML = Array.from({length:total},(_,i)=>`<span class="${i<=cur?"on":""}"></span>`).join("");
+}
+function render(){ steps(); ({intro, guess, bridge, me, result})[S.phase](); window.scrollTo({top:0}); }
+
+function intro(){
+  app.innerHTML = `<div class="panel">
+    <p class="eyebrow">시작하기 전에 · AI 역량검사 다음</p>
+    <h1>나는 어떤 AI 사용자일까요? 먼저 맞춰 봅니다</h1>
+    <ol class="cond">
+      <li><b>맞춰 보기 ${GUESS.length}문제</b> — 다른 사람의 이야기를 읽고 몇 레벨인지 맞춥니다. 정답과 해설이 바로 열립니다.</li>
+      <li><b>내 모습 고르기 ${ME.length}문제</b> — 정답이 없습니다. 평소 내 모습에 가장 가까운 것을 고릅니다.</li>
+      <li><b>나의 레벨</b> — 내 레벨과 오늘 실습이 어디로 이어지는지 확인합니다.</li>
+    </ol>
+    <div class="tablebox"><table>
+      <tr><th>레벨</th><th>기준</th></tr>
+      <tr><td>1레벨</td><td>AI를 검색창처럼 쓴다</td></tr>
+      <tr><td>2레벨</td><td>업무 일부를 맡기거나 자동화 도구를 만든다</td></tr>
+      <tr><td>3레벨</td><td>연결(MCP)·MD를 알고 팀과 공유해 조직에 퍼뜨린다</td></tr></table></div>
+    <p class="small">레벨 기준은 이 수업을 위해 임의로 설정한 것입니다. 공인된 기준이나 표준화된 검사가 아니므로 참고용으로만 봐 주세요.</p>
+    <div class="row"><button class="btn" id="go">맞춰 보기 시작</button></div></div>`;
+  $id("go").onclick = ()=>{ Object.assign(S,{phase:"guess",qi:0,right:0,mi:0,mine:[],picked:null,revealed:false}); render(); };
+}
+
+function guess(){
+  const q = GUESS[S.qi];
+  app.innerHTML = `<div class="panel">
+    <p class="eyebrow">맞춰 보기 ${S.qi+1} / ${GUESS.length}</p>
+    <h2>${q.title}</h2>
+    <div class="passage">${q.passage}</div>
+    <p class="q">${q.q}</p>
+    <div class="opts">${q.opts.map((o,i)=>`<button class="opt" data-i="${i}"><span class="num">${CIRC[i]}</span><span>${o}</span></button>`).join("")}</div>
+    <div class="row"><button class="btn" id="sub" disabled>정답 확인</button></div>
+    <div id="exp"></div></div>`;
+  app.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
+    if(S.revealed) return; S.picked=+b.dataset.i;
+    app.querySelectorAll(".opt").forEach(x=>x.classList.toggle("sel",x===b)); $id("sub").disabled=false;});
+  $id("sub").onclick = reveal;
+}
+function reveal(){
+  if(S.revealed) return; S.revealed=true;
+  const q = GUESS[S.qi], ok = S.picked===q.ans; if(ok) S.right++;
+  app.querySelectorAll(".opt").forEach((b,i)=>{b.disabled=true;
+    if(i===q.ans) b.classList.add("right"); else if(i===S.picked) b.classList.add("wrong");});
+  $id("sub").hidden=true;
+  const last = S.qi===GUESS.length-1;
+  $id("exp").innerHTML = `<div class="explain">
+    <div class="verdict ${ok?"ok":"no"}">${ok?"정답입니다":"아쉬워요"} · 정답 ${CIRC[q.ans]}</div>
+    <dl><dt>정답 이유</dt><dd>${q.why}</dd><dt>헷갈리는 점</dt><dd>${q.trap}</dd><dt>오늘 실습에서는</dt><dd>${q.work}</dd></dl>
+    <div class="row"><button class="btn" id="nx">${last?"이제 내 모습 고르기":"다음 문제"}</button></div></div>`;
+  $id("nx").onclick = ()=>{ S.picked=null; S.revealed=false; if(last){S.phase="bridge";} else {S.qi++;} render(); };
+}
+
+function bridge(){
+  app.innerHTML = `<div class="panel">
+    <p class="eyebrow">맞춰 보기 결과</p>
+    <h1>${GUESS.length}문제 중 ${S.right}문제 정답</h1>
+    <p>다섯 문제의 공통점이 보이나요? 레벨을 가르는 것은 <b>얼마나 자주 쓰느냐가 아니라, 무엇을 맡기고 누구와 함께 쓰느냐</b>였습니다.</p>
+    <div class="tablebox"><table>
+      <tr><th>문항</th><th>기억할 것</th></tr>
+      <tr><td>1 · 김 주임</td><td>자주 쓰는 것 ≠ 잘 쓰는 것</td></tr>
+      <tr><td>2 · 박 대리</td><td>업무를 맡기면 2레벨</td></tr>
+      <tr><td>3 · 최 과장</td><td>혼자 잘 쓰는 것만으로는 3레벨이 아니다</td></tr>
+      <tr><td>4 · 이 팀장</td><td>연결 + 문서 + 공유 = 3레벨</td></tr>
+      <tr><td>5 · 리더</td><td>일하는 방식을 바꾸는 힘이 중요하다</td></tr></table></div>
+    <p>이제 반대로 해 봅니다. 이번에는 <b>여러분 자신</b>이 주인공입니다. 정답은 없으니 솔직하게 골라 주세요.</p>
+    <div class="row"><button class="btn" id="go">내 모습 고르기 시작</button></div></div>`;
+  $id("go").onclick=()=>{S.phase="me";S.mi=0;S.picked=null;render();};
+}
+
+function me(){
+  const q = ME[S.mi]; S.picked=null;
+  app.innerHTML = `<div class="panel">
+    <p class="eyebrow">내 모습 고르기 ${S.mi+1} / ${ME.length} · 정답 없음</p>
+    <h2>${q.title}</h2>
+    <p class="q">${q.q}</p>
+    <div class="opts">${q.opts.map((o,i)=>`<button class="opt" data-i="${i}"><span class="num">${CIRC[i]}</span><span>${o}</span></button>`).join("")}</div>
+    <div class="row"><button class="btn" id="nx" disabled>${S.mi===ME.length-1?"나의 레벨 보기":"다음"}</button></div></div>`;
+  app.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{ S.picked=+b.dataset.i;
+    app.querySelectorAll(".opt").forEach(x=>x.classList.toggle("sel",x===b)); $id("nx").disabled=false;});
+  $id("nx").onclick=()=>{ S.mine[S.mi]=S.picked; if(S.mi===ME.length-1){S.phase="result";} else {S.mi++;} render(); };
+}
+
+function myLevel(){ return Math.round(S.mine.reduce((a,c)=>a+c,0)/ME.length); }
+
+function result(){
+  const lv = myLevel(), r = RESULT[lv];
+  app.innerHTML = `<div class="panel">
+    <p class="eyebrow">나의 레벨</p>
+    <div class="lv">${LEVELS.map((l,i)=>`<span class="${i<lv?"on":""}">${l}</span>`).join("")}</div>
+    <h1>${r[0]}</h1>
+    <p>${r[1]}</p>
+    <p class="small">맞춰 보기 ${S.right}/${GUESS.length} 정답 · 내 모습 고르기 응답 ${S.mine.map(v=>v).join(" · ")} (보기마다 0~3점, 평균을 반올림해 레벨로 표시)</p>
+    <p class="small">레벨 기준은 이 수업을 위해 임의로 설정한 것입니다. 공인된 기준이나 표준화된 검사가 아니므로 참고용으로만 봐 주세요.</p>
+    <h2>오늘 실습에서는</h2>
+    <p>${r[2]}</p>
+    <h2>기억할 세 가지</h2>
+    <ul class="cond">
+      <li>자주 쓰는 것과 잘 쓰는 것은 다릅니다.</li>
+      <li>AI에게 “질문”이 아니라 “일”을 맡기면 다음 단계로 넘어갑니다.</li>
+      <li>내가 만든 것을 팀과 나누는 순간 조직의 실력이 됩니다.</li>
+    </ul>
+    <div class="row"><a class="btn" href="../#start">START 장표로</a><button class="btn ghost" id="go">처음부터 다시</button></div></div>`;
+  $id("go").onclick=()=>{S.phase="intro";render();};
+}
+
+render();
+</script>
+</body>
+</html>
