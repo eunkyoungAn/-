@@ -295,7 +295,7 @@
     $('#deckPrev').textContent = deckIdx === 0 ? '← 나는 어떤 사용자?' : '← 이전';
     $('#deckNext').textContent = deckIdx === SLIDES.length - 1 ? 'G-mail 자동화로 →' : '다음 →';
   }
-  $('#deckPrev').addEventListener('click', () => { location.hash = deckIdx > 0 ? '#start-' + (deckIdx - 1) : '#check'; });
+  $('#deckPrev').addEventListener('click', () => { if (deckIdx > 0) location.hash = '#start-' + (deckIdx - 1); else location.href = 'who/'; });
   $('#deckNext').addEventListener('click', () => { location.hash = deckIdx === SLIDES.length - 1 ? '#' + SEQ[0].id : '#start-' + (deckIdx + 1); });
   document.addEventListener('keydown', e => {
     if ($('#viewStart').hidden || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
@@ -307,7 +307,7 @@
   function renderQuick() {
     const groups = [
       ['소개', [['#home', '소개', '과정 소개'], ['#timeline', '시간표', '시간표 (10:00~13:00)']]],
-      ['시작하기 전에', [['#before', '준비', '시작하기 전에'], ['#check', '점검', '나는 어떤 AI 사용자?'], ...SLIDES.map((s, i) => ['#start-' + i, s.nav, s.title])]],
+      ['시작하기 전에', [['#before', '준비', '시작하기 전에'], ['who/', '첫 시작', '나는 어떤 AI 사용자? 맞춰 보기'], ['ai-test/', '선택', 'AI 역량검사'], ['#check', '체크', '체크리스트와 내 업무 나눠 보기'], ...SLIDES.map((s, i) => ['#start-' + i, s.nav, s.title])]],
       ...D.parts.map(p => [p.short, [...p.stages.map(s => ['#' + s.id, s.no + '단계', s.title]), ['#' + p.review.id, '마무리', p.review.title]]]),
       ['자료와 안내', [['#materials', '자료', '요청문과 참고 코드'], ['#safety', '유의', '실제 업무에 쓸 때'], ['#help', '도움', '막힐 때'], ['#sources', '출처', '참고 자료']]]
     ];

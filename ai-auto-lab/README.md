@@ -4,7 +4,8 @@
 
 - 주소: `https://eunkyoungan.github.io/-/ai-auto-lab/` (실제 배포는 `gh-pages` 브랜치. main에 합친 뒤 `ai-auto-lab/` 폴더를 `gh-pages`에 올린다)
 - 시간: 10:00~13:00, 3시간(개념 52분, 실습 108분 = 60%, 휴식 20분). [가정] 실제 수업 시간이 다르면 `data.js`의 `timeline`과 각 단계 `time`을 고친다.
-- 점검 주소: `#check` (START 전 "AI 사용 전, 나는 어떤 사용자?", 출처: 장현민(팀제이커브) 인터뷰의 AI 활용 3레벨, Lilys 요약 노트 https://lilys.ai/digest/12201909/16136708)
+- 첫 시작: `who/`(나는 어떤 AI 사용자? 맞춰 보기 5문제 + 나는? 4문제, `ai-practice`의 AI 역량검사와 같은 레이아웃), `ai-test/`(AI 역량검사, gh-pages의 `ai-practice/index.html`을 가져온 사본). 두 페이지는 글꼴을 Google Fonts에서 불러오는 독립 페이지다.
+- 체크리스트 주소: `#check` (START 전 "AI 사용 전, 나는 어떤 사용자?", 출처: 장현민(팀제이커브) 인터뷰의 AI 활용 3레벨, Lilys 요약 노트 https://lilys.ai/digest/12201909/16136708)
 - 첫 화면은 과정 소개이고, 순서는 소개 → 시작하기 전에(`#before`: 점검, START 장표, 준비) → G-mail 자동화(`#mail`) → 카드뉴스 자동화(`#card`)다.
 - 단계 주소: G-mail 자동화 `#m1`~`#m4`, 마무리 `#mr` / 실습 2 `#c1`~`#c3`, 마무리 `#cr` / START `#start`
 
