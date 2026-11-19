@@ -508,7 +508,7 @@
 
   /* ---------- START 장표 ---------- */
   const ST = D.start;
-  const srcLine = (t, u) => `<p class="src">출처: ${esc(t)}${u ? ` · <a href="${esc(u)}" target="_blank" rel="noopener noreferrer">원문 보기</a>` : ''}</p>`;
+  const srcLine = (t, u, u2) => `<p class="src">출처: ${esc(t)}${[u, u2].filter(Boolean).map((l, i, arr) => ` · <a href="${esc(l)}" target="_blank" rel="noopener noreferrer">원문 보기${arr.length > 1 ? ' ' + (i + 1) : ''}</a>`).join('')}</p>`;
   const ul = arr => `<ul class="bl">${arr.map(t => `<li>${esc(t)}</li>`).join('')}</ul>`;
   const HL = ['AI 네이티브', '오케스트라 인재', '커리어 민첩성', '롱제비티'];
   const SLIDES = [
@@ -518,7 +518,7 @@
       <a href="#start-3"><b>KEYWORD 2</b><strong>트렌드</strong><span>2027년 채용 트렌드 10가지 · 2026년과 달라진 4가지</span></a>
       <a href="#start-5"><b>KEYWORD 3</b><strong>역할</strong><span>사례로 보는 구직자의 마음 · 우리의 역할 3S</span></a></div>` },
     { g: 1, nav: '1-1', title: '구직자가 맞이하는 변화', html: () => `<span class="slide-kicker">1. 변화 · 1) 구직자</span><h1>구직자가 맞이하는 변화</h1>
-      <div class="stat3">${ST.seeker.map(x => `<div class="stat"><em>${esc(x.tag)}</em><strong>${esc(x.num)}</strong><div class="cap">${esc(x.cap)}</div>${ul(x.pts)}${srcLine(x.src, x.url)}</div>`).join('')}</div>
+      <div class="stat3">${ST.seeker.map(x => `<div class="stat"><em>${esc(x.tag)}</em><strong>${esc(x.num)}</strong><div class="cap">${esc(x.cap)}</div>${ul(x.pts)}${srcLine(x.src, x.url, x.url2)}</div>`).join('')}</div>
       <div class="note"><b>정리</b>${ul(ST.seeker_note)}</div>` },
     { g: 1, nav: '1-2', title: '고용서비스업 종사자가 맞이하는 변화', html: () => `<span class="slide-kicker">1. 변화 · 2) 고용서비스업 종사자</span><h1>종사자가 맞이하는 변화</h1>
       <div class="pts">${ST.worker.map((x, i) => `<div class="pt"><b>0${i + 1}</b><strong>${esc(x.h)}</strong>${ul(x.pts)}${srcLine(x.src)}</div>`).join('')}</div>` },
