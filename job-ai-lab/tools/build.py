@@ -5,6 +5,7 @@
 - data.js            : 화면에 쓰는 실습 데이터
 - files/*.docx, *.pdf: 수강생 배포용 가상 자료 (src/*.md 에서 생성)
 - files/스킬/*.zip   : 교육 뒤 Gemini 스킬로 등록하는 파일
+- instructor/        : 강사용 예시 답안. 수강생 사이트에 올리지 않는다
 - files/AI취업지원_실습자료_전체.zip
 
 실행: python3 job-ai-lab/tools/build.py   (python-docx, LibreOffice 필요)
@@ -14,6 +15,7 @@ import json, os, re, shutil, subprocess, tempfile, zipfile
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, 'src')
 OUT = os.path.join(ROOT, 'files')
+INS = os.path.join(ROOT, 'instructor')   # 강사용. 사이트(gh-pages)에 올리지 않는다.
 
 # ---------------------------------------------------------------- 기준 자료
 # 직업공통능력 7개 영역 21개 하위능력
@@ -220,23 +222,24 @@ START = {
 COMP_LIST_TEXT = '\n'.join(f'- {a}: ' + ', '.join(c[1] for c in COMPETENCIES if c[0] == a)
                            for a in dict.fromkeys(c[0] for c in COMPETENCIES))
 
-PROMPT_S1 = f"""너는 고용서비스 기관의 직무분석 보조자야. 첨부한 채용공고를 읽고 요구역량표를 만들어 줘.
+PROMPT_S1 = """너는 고용서비스 기관의 직무분석 보조자야. 첨부한 채용공고를 읽고 요구역량표를 만들어 줘.
 
 [규칙]
 1. 공고를 담당업무, 자격요건, 우대사항 세 부분으로 나눠 읽는다.
 2. 한 행에 공고 원문 문장 하나를 그대로 인용한다. 문장을 바꾸거나 줄이지 않는다.
 3. 공고에 없는 요건은 만들지 않는다. 짐작한 내용은 끝에 '(추론)'이라고 붙인다.
-4. 대응 하위능력은 아래 직업공통능력 21개 이름 가운데서만 고르고, 한 행에 두 개까지 쓴다. 맞는 것이 없으면 '해당 없음(NCS 확인)'이라고 쓴다.
+4. 대응 하위능력은 아래 [{{critname}}]의 이름 가운데서만 고르고, 한 행에 두 개까지 쓴다. 맞는 것이 없으면 '해당 없음(NCS 확인)'이라고 쓴다.
 5. 필수/우대 칸에는 담당업무는 '필수(업무)', 자격요건은 '필수', 우대사항은 '우대'라고 쓴다.
-6. {{{{focus}}}}
+6. {{focus}}
 
-[직업공통능력 7개 영역 21개 하위능력]
-{COMP_LIST_TEXT}
+[{{critname}}]
+{{complist}}
 
 [출력 형식]
 아래 열 순서의 마크다운 표 하나만 출력한다.
 | 구분 | 공고 원문 문장 | 요구 역량 | 대응 하위능력 | 필수/우대 |
 표 아래에 해석이 애매했던 공고 문장을 3개까지 적는다."""
+CRIT_NAME = '직업공통능력 7개 영역 21개 하위능력'
 
 PROMPT_S2 = """너는 직업상담사의 서류 검토 보조자야. 첨부한 내담자 서류를 읽고 아래 하위능력마다 충족, 부분, 미흡 가운데 하나로 판정해 줘.
 
@@ -298,7 +301,7 @@ STAGES = [
         'goal': ['요구역량표에 나온 하위능력만 골라 자기진단 점수를 확인한다.', 'AI에게 서류를 읽히고 하위능력마다 근거 문장을 인용하게 해 충족, 부분, 미흡을 판정한다.', '자기진단과 서류 판정을 비교해 격차 유형을 가르고 내담자에게 전할 문장을 쓴다.'],
         'input': ['내담자 서류 묶음 (고른 유형의 파일)', '1단계 요구역량표 (이 화면에 자동으로 들어옴)'],
         'steps': [
-            '아래 표의 자기진단 점수는 가상 내담자 응답지 값으로 채워져 있다. 실제 상담에서는 내담자가 직접 응답한다.',
+            '아래 표의 자기진단 점수는 가상 내담자 응답지 값으로 채워져 있다. 실제 상담에서는 내담자가 응답한 점수를 자기진단 칸에 직접 입력한다. 기관 평가 양식을 쓰려면 표 위의 [양식 바꾸기]에서 항목과 척도를 바꾼다.',
             'Gemini 새 채팅에 내담자 서류 파일을 첨부하고 요청문을 붙여 넣는다. 요청문에는 1단계 표의 하위능력이 자동으로 들어간다.',
             '하위능력이 많으면 [3~4개씩 나누기]를 눌러 여러 번에 나눠 보낸다. 무료 이용 시 한 번에 읽는 양이 적을수록 근거 인용이 정확하다.',
             'AI 표를 "AI 표 붙여 넣기" 칸에 넣고 [판정 옮기기]를 누른다. 판정과 근거 문장이 해당 행에 들어간다.',
@@ -392,7 +395,7 @@ AFTER = {
 
 SKILLS = [
     {'name': 'job-posting-analyzer', 'title': '채용공고 요구역량표', 'desc': '채용공고를 직업공통능력 21개 하위능력 기준의 요구역량표로 바꿀 때 사용. 공고 원문 인용, 필수/우대 구분.',
-     'body': PROMPT_S1.replace('{{focus}}', '내담자 유형이 주어지면 청년층 신입은 경험 요구 문장에, 중장년 재취업은 이전 경력에서 옮겨 쓸 수 있는 과업 단서에 ★를 붙인다.')},
+     'body': PROMPT_S1.replace('{{critname}}', CRIT_NAME).replace('{{complist}}', COMP_LIST_TEXT).replace('{{focus}}', '내담자 유형이 주어지면 청년층 신입은 경험 요구 문장에, 중장년 재취업은 이전 경력에서 옮겨 쓸 수 있는 과업 단서에 ★를 붙인다.')},
     {'name': 'document-gap-checker', 'title': '서류 근거 판정', 'desc': '내담자 서류를 읽고 하위능력별로 충족/부분/미흡을 근거 문장 인용과 함께 판정할 때 사용.',
      'body': PROMPT_S2.replace('{{focus}}', '판정 대상 목록이 없으면 먼저 사용자에게 요구역량표를 달라고 요청한다.').replace('{{list}}', '사용자가 준 요구역량표의 하위능력. 판정 단서는 아래를 쓴다.\n' + '\n'.join(f'- {c[1]}: {c[2]}' for c in COMPETENCIES))},
     {'name': 'support-plan-drafter', 'title': '취업지원 계획서 초안', 'desc': '격차표를 받아 격차 유형별 전략, 지원 제도 이름, 이번 달 목표가 담긴 취업지원 계획서 초안을 만들 때 사용.',
@@ -421,9 +424,6 @@ FILES = [
         ['02_내담자A_청년신입_서류', '2단계 · 청년층 신입 이력서, 자기소개서, 포트폴리오 요약'],
         ['03_내담자B_중장년재취업_서류', '2단계 · 중장년 재취업 이력서, 경력기술서, 자기소개서'],
         ['04_자기진단_응답지', '2단계 · 두 내담자의 직업공통능력 21개 자기진단 응답(4점 척도)'],
-    ]},
-    {'group': '강사용', 'items': [
-        ['05_강사용_예시답안', '요구역량표와 격차표 예시 답안'],
     ]},
 ]
 ZIP_NAME = 'AI취업지원_실습자료_전체.zip'
@@ -460,7 +460,9 @@ def write_extra_md():
             ex.append(f'| {n} | {s} | {j} | {q} | {gap_type(j, s)} |')
     ex += ['', '## 격차 유형 판정 규칙(커리어캐쳐 제안)', '', '| 유형 | 규칙 | 전략 |', '|---|---|---|']
     ex += [f'| {g["id"]} | {g["rule"]} | {g["strategy"]} |' for g in GAP_TYPES]
-    open(os.path.join(SRC, '05_강사용_예시답안.md'), 'w', encoding='utf-8').write('\n'.join(ex) + '\n')
+    os.makedirs(INS, exist_ok=True)
+    open(os.path.join(INS, '강사용_예시답안.md'), 'w', encoding='utf-8').write('\n'.join(ex) + '\n')
+    json.dump({'exReq': EX_REQ, 'exJudge': EX_JUDGE}, open(os.path.join(INS, 'example.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
 
 
 def md_to_docx(md_path, docx_path):
@@ -537,6 +539,8 @@ def build_files():
             dx = os.path.join(OUT, base + '.docx')
             md_to_docx(md, dx)
             docx_to_pdf(dx, OUT)
+    md_to_docx(os.path.join(INS, '강사용_예시답안.md'), os.path.join(INS, '강사용_예시답안.docx'))
+    docx_to_pdf(os.path.join(INS, '강사용_예시답안.docx'), INS)
     # 스킬
     sk = os.path.join(OUT, '스킬')
     os.makedirs(sk)
@@ -547,8 +551,6 @@ def build_files():
     # 전체 묶음
     with zipfile.ZipFile(os.path.join(OUT, ZIP_NAME), 'w', zipfile.ZIP_DEFLATED) as z:
         for grp in FILES:
-            if grp['group'] == '강사용':
-                continue
             for base, _ in grp['items']:
                 for ext in ('pdf', 'docx'):
                     z.write(os.path.join(OUT, f'{base}.{ext}'), f'{grp["group"]}/{base}.{ext}')
@@ -559,7 +561,7 @@ def build_files():
 def build_data():
     data = {
         'competencies': [{'area': a, 'name': n, 'cue': c} for a, n, c in COMPETENCIES],
-        'clients': CLIENTS, 'exReq': EX_REQ, 'exJudge': EX_JUDGE, 'gapTypes': GAP_TYPES, 'supports': SUPPORTS,
+        'clients': CLIENTS, 'critName': CRIT_NAME, 'compListText': COMP_LIST_TEXT, 'gapTypes': GAP_TYPES, 'supports': SUPPORTS,
         'prompts': {'s1': PROMPT_S1, 's2': PROMPT_S2, 's3': PROMPT_S3},
         'stages': STAGES, 'review': REVIEW, 'timeline': TIMELINE, 'roles': ROLES, 'keywords': KEYWORDS,
         'tools': TOOLS, 'after': AFTER,

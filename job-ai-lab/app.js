@@ -19,7 +19,20 @@
 
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const client = () => D.clients[S.type];
-  const compNames = D.competencies.map(c => c.name);
+  /* 판단 기준(자기진단 양식): 기본은 직업공통능력 21개 · 4점 척도. 기관 양식으로 바꿀 수 있다. */
+  S.form = S.form || { mode: 'default', items: [], max: 4, cut: 3, text: '' };
+  S.self = S.self || {};        // 직접 고친 자기진단 점수 {유형(.c): {항목: 점수}}
+  const isCustom = () => S.form.mode === 'custom' && S.form.items.length > 0;
+  const crit = () => (isCustom() ? S.form.items : D.competencies);
+  const compNames = () => crit().map(c => c.name);
+  const scaleMax = () => (isCustom() ? Number(S.form.max) || 4 : 4);
+  const scaleCut = () => (isCustom() ? Number(S.form.cut) || 3 : 3);
+  const selfKey = () => S.type + (isCustom() ? '.c' : '');
+  function selfScore(n) {
+    const o = (S.self[selfKey()] || {})[n];
+    if (o !== undefined && o !== '') return Number(o);
+    return isCustom() ? '' : client().self[n];
+  }
   const FILE_BASE = 'files/';
 
   /* ---------- 공용 ---------- */
@@ -47,13 +60,16 @@
   }
   function normComp(name) {
     const n = (name || '').replace(/\s/g, '');
-    return compNames.find(c => c.replace(/\s/g, '') === n) || compNames.find(c => n.includes(c.replace(/\s/g, ''))) || '';
+    if (!n) return '';
+    const names = compNames();
+    return names.find(c => c.replace(/\s/g, '') === n) || names.find(c => n.includes(c.replace(/\s/g, ''))) || '';
   }
   function splitComps(cell) {
     return (cell || '').split(/[,，·/]/).map(normComp).filter(Boolean);
   }
   function gapType(j, s) {
-    const hi = Number(s) >= 3;
+    if (s === '' || s === undefined || s === null) return '';
+    const hi = Number(s) >= scaleCut();
     if (j === '충족') return hi ? '충족' : '과소평가';
     if (j === '부분' || j === '미흡') return hi ? '증거 부족' : '역량 부족';
     return '';
@@ -191,14 +207,15 @@
   /* 1단계 */
   function renderS1() {
     const c = client();
-    $('#promptArea').innerHTML = promptBox(D.prompts.s1.replace('{{focus}}', c.focus1));
+    $('#promptArea').innerHTML = formNote() + promptBox(D.prompts.s1.replace(/\{\{critname\}\}/g, isCustom() ? `우리 기관 평가 항목 ${S.form.items.length}개` : D.critName)
+      .replace('{{complist}}', isCustom() ? S.form.items.map(x => `- ${x.name}${x.cue ? ': ' + x.cue : ''}`).join('\n') : D.compListText).replace('{{focus}}', c.focus1));
     bindCopy($('#promptArea'));
     drawS1();
   }
   function drawS1() {
     const area = $('#sheetArea');
     const H = ['구분', '공고 원문 문장', '요구 역량', '대응 하위능력', '필수/우대'];
-    const opts = compNames.map(n => `<option>${esc(n)}</option>`).join('');
+    const opts = compNames().map(n => `<option>${esc(n)}</option>`).join('');
     area.innerHTML = pasteBox('요구역량표', '표로 옮기기') +
       `<div class="sheet-wrap"><div class="g-table"><table class="edit-table"><thead><tr><th>#</th>${H.map(h => `<th>${h}</th>`).join('')}<th></th></tr></thead><tbody>${S.req.map((r, i) => `<tr>
         <td class="ro num">${i + 1}</td>
@@ -242,8 +259,9 @@
   /* 2단계 */
   function targetComps() {
     const set = [];
-    S.req.forEach(r => r.comp.forEach(c => { if (!set.includes(c)) set.push(c); }));
-    return set;
+    const names = compNames();
+    S.req.forEach(r => r.comp.forEach(c => { if (names.includes(c) && !set.includes(c)) set.push(c); }));
+    return set.length || !isCustom() ? set : names.slice();
   }
   function judgeOf(comp) {
     S.judge[S.type] = S.judge[S.type] || {};
@@ -252,7 +270,7 @@
   }
   function s2Prompt(list) {
     const c = client();
-    const items = list.map(n => { const cc = D.competencies.find(x => x.name === n); return `- ${n}: ${cc ? cc.cue : ''}`; }).join('\n');
+    const items = list.map(n => { const cc = crit().find(x => x.name === n); return `- ${n}: ${cc ? cc.cue : ''}`; }).join('\n');
     return D.prompts.s2.replace('{{focus}}', c.focus2).replace('{{list}}', items || '(1단계 요구역량표가 비어 있습니다. 먼저 1단계를 마칩니다.)');
   }
   function renderS2() {
@@ -268,13 +286,13 @@
   function drawS2(list) {
     const area = $('#sheetArea');
     const c = client();
-    const H = ['하위능력', '직무 요구', '자기진단', 'AI 판정', '근거 문장(원문 인용)', '격차 유형'];
+    const H = ['하위능력', '직무 요구', `자기진단(1~${scaleMax()})`, 'AI 판정', '근거 문장(원문 인용)', '격차 유형'];
     const need = comp => { const r = S.req.find(x => x.comp.includes(comp)); return r ? r.must : ''; };
-    area.innerHTML = pasteBox('격차표', '판정 옮기기') +
-      `<div class="gap-legend"><span class="g0">충족</span><span class="g1">증거 부족 (자기진단 높음, 서류 미흡)</span><span class="g2">과소평가 (자기진단 낮음, 서류 충족)</span><span class="g3">역량 부족 (둘 다 낮음)</span><span>구직 여건 제약 (직접 고름)</span></div>
+    area.innerHTML = formNote() + pasteBox('격차표', '판정 옮기기') +
+      `<div class="gap-legend"><span class="g0">충족</span><span class="g1">증거 부족 (자기진단 ${scaleCut()}점 이상, 서류 미흡)</span><span class="g2">과소평가 (자기진단 ${scaleCut()}점 미만, 서류 충족)</span><span class="g3">역량 부족 (둘 다 낮음)</span><span>구직 여건 제약 (직접 고름)</span></div>
       <div class="sheet-wrap"><div class="g-table"><table class="edit-table"><thead><tr>${H.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${list.map(n => {
-        const j = judgeOf(n); const s = c.self[n]; const g = j.ov || gapType(j.j, s);
-        return `<tr class="gap-${g.replace(/\s/g, '')}" data-comp="${esc(n)}"><td class="ro">${esc(n)}</td><td class="ro">${esc(need(n))}</td><td class="num ro">${s}</td>
+        const j = judgeOf(n); const s = selfScore(n); const g = j.ov || gapType(j.j, s);
+        return `<tr class="gap-${g.replace(/\s/g, '')}" data-comp="${esc(n)}"><td class="ro">${esc(n)}</td><td class="ro">${esc(need(n))}</td><td class="num"><input class="score-in" type="number" min="1" max="${scaleMax()}" step="1" value="${esc(s)}" data-score aria-label="${esc(n)} 자기진단 점수"></td>
           <td><select data-f="j"><option value="">—</option>${['충족', '부분', '미흡'].map(x => `<option ${j.j === x ? 'selected' : ''}>${x}</option>`).join('')}</select></td>
           <td class="w260"><textarea data-f="q">${esc(j.q)}</textarea></td>
           <td class="gapcell"><select data-f="ov"><option value="">${esc(g || '—')} (자동)</option>${D.gapTypes.map(x => `<option value="${esc(x.id)}" ${j.ov === x.id ? 'selected' : ''}>${esc(x.id)}</option>`).join('')}</select></td></tr>`; }).join('')}</tbody></table></div>
@@ -284,6 +302,7 @@
     area.querySelectorAll('tbody tr').forEach(tr => {
       const n = tr.dataset.comp; const j = judgeOf(n);
       tr.querySelectorAll('[data-f]').forEach(el => el.addEventListener('input', () => { j[el.dataset.f] = el.value; save(); if (el.dataset.f !== 'q') drawS2(list); }));
+      tr.querySelector('[data-score]').addEventListener('change', e => { const k = selfKey(); S.self[k] = S.self[k] || {}; S.self[k][n] = e.target.value; save(); drawS2(list); });
     });
     area.querySelector('[data-note]').addEventListener('input', e => { S.notes[S.type + '.s2msg'] = e.target.value; save(); });
     bindSheetActions(area, {
@@ -299,15 +318,15 @@
         });
         save(); drawS2(list); return n;
       },
-      clear() { S.judge[S.type] = {}; S.notes[S.type + '.s2msg'] = ''; save(); drawS2(list); },
-      md: () => tableToMd(H, list.map(n => { const j = judgeOf(n); return [n, need(n), c.self[n], j.j, j.q, j.ov || gapType(j.j, c.self[n])]; })) + '\n\n내담자에게 전할 문장:\n' + (S.notes[S.type + '.s2msg'] || ''),
+      clear() { S.judge[S.type] = {}; S.self[selfKey()] = {}; S.notes[S.type + '.s2msg'] = ''; save(); drawS2(list); },
+      md: () => tableToMd(H, list.map(n => { const j = judgeOf(n); return [n, need(n), selfScore(n), j.j, j.q, j.ov || gapType(j.j, selfScore(n))]; })) + '\n\n내담자에게 전할 문장:\n' + (S.notes[S.type + '.s2msg'] || ''),
     });
   }
 
   /* 3단계 */
   function gapRows() {
     const c = client();
-    return targetComps().map(n => { const j = judgeOf(n); return { comp: n, gap: j.ov || gapType(j.j, c.self[n]) }; }).filter(x => x.gap && x.gap !== '충족');
+    return targetComps().map(n => { const j = judgeOf(n); return { comp: n, gap: j.ov || gapType(j.j, selfScore(n)) }; }).filter(x => x.gap && x.gap !== '충족');
   }
   function planOf() {
     S.plan[S.type] = S.plan[S.type] || { rows: [], msg: '' };
@@ -320,7 +339,7 @@
   function renderS3() {
     const c = client();
     const gaps = gapRows();
-    const gapsText = gaps.length ? tableToMd(['격차 항목', '유형', '자기진단', 'AI 판정', '근거 문장'], gaps.map(g => { const j = judgeOf(g.comp); return [g.comp, g.gap, c.self[g.comp], j.j, j.q]; })) : '(2단계 격차표가 비어 있습니다. 먼저 2단계를 마칩니다.)';
+    const gapsText = gaps.length ? tableToMd(['격차 항목', '유형', '자기진단', 'AI 판정', '근거 문장'], gaps.map(g => { const j = judgeOf(g.comp); return [g.comp, g.gap, selfScore(g.comp), j.j, j.q]; })) : '(2단계 격차표가 비어 있습니다. 먼저 2단계를 마칩니다.)';
     $('#promptArea').innerHTML = (gaps.length ? '' : `<div class="empty-note">2단계 격차표에 충족을 뺀 항목이 없습니다. <a href="#s2">2단계로 돌아가기</a></div>`) +
       promptBox(D.prompts.s3.replace('{{type}}', `${c.label} · ${c.summary}`).replace('{{gaps}}', gapsText).replace('{{focus}}', c.focus3));
     bindCopy($('#promptArea'));
@@ -412,7 +431,7 @@
       const list = targetComps();
       const md = `# AI 취업지원 실습 결과 · ${c.label} · ${c.who} · ${today()}\n\n## 1단계 요구역량표\n` +
         tableToMd(['구분', '공고 원문 문장', '요구 역량', '대응 하위능력', '필수/우대'], S.req.map(r => [r.part, r.quote, r.need, r.comp.join(', ') || '해당 없음', r.must])) +
-        `\n\n## 2단계 격차표\n` + tableToMd(['하위능력', '자기진단', 'AI 판정', '근거 문장', '격차 유형'], list.map(n => { const j = judgeOf(n); return [n, c.self[n], j.j, j.q, j.ov || gapType(j.j, c.self[n])]; })) +
+        `\n\n## 2단계 격차표\n` + tableToMd(['하위능력', '자기진단', 'AI 판정', '근거 문장', '격차 유형'], list.map(n => { const j = judgeOf(n); return [n, selfScore(n), j.j, j.q, j.ov || gapType(j.j, selfScore(n))]; })) +
         `\n\n내담자에게 전할 문장:\n${S.notes[S.type + '.s2msg'] || ''}\n\n## 3단계 취업지원 계획서\n` +
         tableToMd(['격차 항목', '유형', '전략', '지원 제도', '이번 달 목표', '점검일'], p.rows.map(r => [r.item, r.gap, r.strategy, r.support, r.goal, r.date])) +
         `\n\n내담자에게 전할 문장:\n${p.msg || ''}\n\n## 검토 기록\n${S.notes.review || ''}\n\n## 적용 계획\n${S.notes.apply || ''}\n`;
@@ -420,6 +439,72 @@
     });
   }
 
+
+
+  /* ---------- 자기진단 양식 설정 ---------- */
+  function formNote() {
+    return `<div class="form-note">${isCustom() ? `<b>우리 기관 양식 사용 중</b> · 평가 항목 ${S.form.items.length}개, ${scaleMax()}점 척도(${scaleCut()}점 이상을 높음으로 봄)` : '<b>기본 양식</b> · 직업공통능력 21개 하위능력, 4점 척도'} · <a href="#form">양식 바꾸기</a></div>`;
+  }
+  function parseFormText(text) {
+    const items = [];
+    text.split(/\r?\n/).forEach(ln => {
+      const t = ln.trim(); if (!t) return;
+      let cells = t.startsWith('|') ? t.replace(/^\|/, '').replace(/\|$/, '').split('|') : t.split(/\t|\s*\|\s*/);
+      cells = cells.map(c => c.trim());
+      if (cells.every(c => /^:?-{2,}:?$/.test(c) || !c)) return;
+      const name = cells[0].replace(/^\d+[.)]\s*/, '').replace(/^[-•·]\s*/, '');
+      if (!name || /^(항목|평가 ?항목|영역|구분|문항)$/.test(name)) return;
+      if (!items.some(x => x.name === name)) items.push({ name, cue: cells.slice(1).filter(Boolean).join(' ') });
+    });
+    return items;
+  }
+  function renderForm() {
+    $('#bcStage').textContent = '자기진단 양식 바꾸기';
+    $('#shEyebrow').textContent = 'SETTING · 교육 뒤 기관에서 쓸 때';
+    $('#shTitle').textContent = '자기진단 양식 바꾸기';
+    $('#shSum').textContent = '기본 양식은 직업공통능력 21개 하위능력과 4점 척도입니다. 기관에서 쓰는 평가 양식이 있으면 그 항목과 척도로 바꿔 쓸 수 있습니다. 바꾼 양식은 1단계의 대응 항목, 2단계의 자기진단과 AI 판정 항목에 함께 적용됩니다.';
+    $('#shMeta').innerHTML = `<span class="meta-chip active">${isCustom() ? '우리 기관 양식 사용 중' : '기본 양식 사용 중'}</span>`;
+    const f = S.form;
+    const sample = '의사소통 | 내담자·기업과 말과 글로 소통한 경험\n직무 이해 | 지원 직무의 업무와 요건을 설명할 수 있음\n구직 기술 | 이력서·자기소개서·면접 준비 수준\n디지털 활용 | 문서·전산·AI 도구로 업무를 처리한 경험\n구직 의지 | 구직 활동 계획과 실행 정도';
+    const secs = [
+      ['how', '쓰는 방법', `<ol class="plain"><li>기관 평가 양식의 항목을 아래 칸에 한 줄에 하나씩 적습니다. 엑셀이나 한글 표에서 항목과 설명 두 열을 복사해 붙여 넣어도 됩니다.</li>
+        <li>항목 뒤에 세로줄(|)을 넣고 설명을 적으면 AI 판정의 단서로 쓰입니다. 설명은 없어도 됩니다.</li>
+        <li>척도의 최고점과, 몇 점부터 "높음"으로 볼지를 정합니다. 격차 유형 계산에 쓰입니다.</li>
+        <li>[이 양식 적용]을 누릅니다. 실습 전에 먼저 설정합니다. 중간에 바꾸면 1단계 표의 대응 항목을 다시 골라야 합니다.</li></ol>
+        <div class="result-card mt14"><strong>점수는 어디에 넣나</strong><p>2단계 격차표의 자기진단 칸에 내담자가 응답한 점수를 직접 입력합니다. 기본 양식에서도 이 칸은 고칠 수 있습니다.</p></div>`],
+      ['set', '양식 설정', `<div class="paste-box"><label>평가 항목 (한 줄에 하나 · 항목 | 설명)</label><textarea id="formText" placeholder="${esc(sample)}">${esc(f.text || '')}</textarea></div>
+        <div class="form-scale"><label>척도 최고점 <input type="number" id="formMax" min="2" max="100" value="${esc(f.max || 4)}"></label>
+        <label>이 점수 이상을 높음으로 봄 <input type="number" id="formCut" min="1" max="100" value="${esc(f.cut || 3)}"></label></div>
+        <div class="sheet-actions mt8"><button class="g-btn" type="button" id="formApply">이 양식 적용</button><button class="g-btn ghost" type="button" id="formSample">예시 넣기</button><button class="g-btn ghost" type="button" id="formReset">기본 양식으로 되돌리기</button></div>
+        <div class="g-msg" id="formMsg"></div>
+        <h3>지금 적용된 항목</h3><div class="g-table"><table><thead><tr><th>#</th><th>항목</th><th>설명(판정 단서)</th></tr></thead><tbody>${crit().map((x, i) => `<tr><td>${i + 1}</td><td>${esc(x.name)}</td><td>${esc(x.cue || '')}</td></tr>`).join('')}</tbody></table></div>`],
+      ['note', '유의할 점', `<ul class="plain"><li>이 화면의 설정은 이 기기 브라우저에만 저장됩니다. 동료와 같은 양식을 쓰려면 평가 항목 칸의 글을 복사해 전달합니다.</li>
+        <li>격차 유형(충족, 증거 부족, 과소평가, 역량 부족) 계산은 커리어캐쳐의 제안이며 표준화 검사가 아닙니다. 기관 양식의 해석 기준이 따로 있으면 그 기준을 우선합니다.</li>
+        <li>모든 수강생의 기본 양식 자체를 바꾸려면 저장소의 <code>job-ai-lab/tools/build.py</code>에서 <code>COMPETENCIES</code>를 고친 뒤 다시 배포합니다.</li></ul>`],
+    ];
+    $('#stageToc').innerHTML = '<strong>목차</strong>' + secs.map(s => `<a href="#form-${s[0]}">${esc(s[1])}</a>`).join('');
+    $('#stageBody').innerHTML = secs.map((s, i) => `<section id="form-${s[0]}"><span class="section-number">${i + 1}</span><h2>${esc(s[1])}</h2>${s[2]}</section>`).join('') +
+      `<div class="lesson-navigation"><a href="#home"><span>처음</span><strong>실습 목록으로</strong></a><a class="lesson-next" href="#s1"><span>다음</span><strong>1단계 · 채용공고를 요구역량표로</strong></a></div>`;
+    const say = (t, bad) => { const m = $('#formMsg'); m.textContent = t; m.classList.toggle('bad', !!bad); };
+    $('#formSample').addEventListener('click', () => { $('#formText').value = sample; $('#formMax').value = 5; $('#formCut').value = 4; });
+    $('#formApply').addEventListener('click', () => {
+      const text = $('#formText').value; const items = parseFormText(text);
+      const max = Math.round(Number($('#formMax').value)); const cut = Math.round(Number($('#formCut').value));
+      if (!items.length) return say('평가 항목을 한 줄에 하나씩 적습니다.', true);
+      if (!(max >= 2 && max <= 100) || !(cut >= 1 && cut <= max)) return say('척도 최고점은 2~100, 높음 기준은 1부터 최고점 사이의 숫자로 적습니다.', true);
+      S.form = { mode: 'custom', items, max, cut, text };
+      const names = items.map(x => x.name); let dropped = 0;
+      S.req.forEach(r => { const n = r.comp.length; r.comp = r.comp.filter(c => names.includes(c)); dropped += n - r.comp.length; });
+      save(); renderForm();
+      say(`항목 ${items.length}개, ${max}점 척도를 적용했습니다.` + (dropped ? ` 1단계 표에서 새 양식에 없는 대응 항목 ${dropped}개를 비웠습니다.` : ''));
+    });
+    $('#formReset').addEventListener('click', () => {
+      if (!confirm('기본 양식(직업공통능력 21개, 4점 척도)으로 되돌릴까요? 적어 둔 항목 글은 그대로 남습니다.')) return;
+      S.form.mode = 'default'; const names = D.competencies.map(c => c.name);
+      S.req.forEach(r => { r.comp = r.comp.filter(c => names.includes(c)); });
+      save(); renderForm(); say('기본 양식으로 되돌렸습니다.');
+    });
+  }
 
   /* ---------- START 장표 ---------- */
   const ST = D.start;
@@ -480,7 +565,7 @@
       ['START · 세 가지 키워드', SLIDES.map((s, i) => ['#start-' + i, s.nav, s.title])],
       ['먼저 알기', [['#basics-b1', '기준 1', '변화 3가지와 역할 3가지'], ['#basics-b2', '기준 2', '채용 트렌드 키워드가 들어가는 자리'], ['#basics-b3', '기준 3', '직업공통능력 21개 하위능력'], ['#basics-b4', '기준 4', '격차 유형 네 가지와 처방'], ['#basics-b5', '기준 5', 'AI에 맡기는 일과 맡기지 않는 일']]],
       ['실습', [...D.stages.map(s => ['#' + s.id, s.no + '단계', s.title]), ['#review', '검토', '사례 검토와 적용']]],
-      ['자료와 안내', [['#timeline', '시간표', '시간표 (14:00~17:00)'], ['#downloads', '자료', '자료 파일 받기'], ['#after', '교육 뒤', '내 AI에 등록하기'], ['#privacy', '유의', '실제 내담자 서류를 다룰 때'], ['#help', '도움', '막힐 때'], ['#sources', '출처', '참고 자료']]],
+      ['자료와 안내', [['#timeline', '시간표', '시간표 (14:00~17:00)'], ['#downloads', '자료', '자료 파일 받기'], ['#after', '교육 뒤', '내 AI에 등록하기'], ['#form', '양식', '자기진단 양식 바꾸기'], ['#privacy', '유의', '실제 내담자 서류를 다룰 때'], ['#help', '도움', '막힐 때'], ['#sources', '출처', '참고 자료']]],
     ];
     $('#quickPanel').innerHTML = groups.map(g => `<div class="menu-group"><strong>${esc(g[0])}</strong>${g[1].map(x => `<a href="${x[0]}"><span>${esc(x[1])}</span>${esc(x[2])}</a>`).join('')}</div>`).join('');
     $('#quickPanel').addEventListener('click', e => { if (e.target.closest('a')) $('#quickMenu').open = false; });
@@ -499,6 +584,7 @@
     else if (view === 'basics') { $('#viewBasics').hidden = false; renderBasics(); }
     else if (/^s[123]$/.test(view)) { $('#viewStage').hidden = false; renderStage(view); }
     else if (view === 'review') { $('#viewStage').hidden = false; renderReview(); }
+    else if (view === 'form') { $('#viewStage').hidden = false; renderForm(); }
     else { $('#viewHome').hidden = false; renderTypePick(); renderHomeStages(); if (HOME_SECS.includes(view)) target = document.getElementById('sec-' + view); }
     if (sub && view !== 'start') target = document.getElementById(h);
     requestAnimationFrame(() => { if (target) target.scrollIntoView({ block: 'start' }); else window.scrollTo(0, 0); });
