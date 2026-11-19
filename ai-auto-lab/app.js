@@ -68,10 +68,10 @@
 
   /* ---------- 시작 화면 ---------- */
   const FLOW_MAIL = [
-    ['Google Sheets', '목록 만들기', '이메일 주소 · 이름 · 발송 선택 · 발송 결과'],
+    ['Google Sheets', '예시 시트 사본', '받는 사람 목록 · 이메일 설정(H2~H4)'],
     ['Gemini', '코드 받기', '기능을 번호로 나눠 요청'],
-    ['Apps Script', '붙여 넣고 저장', '제목·본문만 내 내용으로'],
-    ['Gmail', '테스트 → 전체 발송', '나에게 먼저']
+    ['Apps Script', '붙여 넣고 저장', '코드는 그대로, 내용은 시트에서'],
+    ['Gmail', '테스트 → 선택 발송', '나에게 먼저']
   ];
   const FLOW_CARD = [
     ['Google Sheets', '기획 입력', '타깃·주제·장수 (B~I열)'],
@@ -128,6 +128,7 @@
     $('#shMeta').innerHTML = `<span class="meta-chip active">${esc(st.time)}</span><span class="meta-chip">산출물 · ${esc(st.output)}</span>`;
     const secs = [];
     let goal = `<ul class="plain">${st.goal.map(g => `<li>${esc(g)}</li>`).join('')}</ul><h3>이 단계에 필요한 것</h3>${ul(st.input)}`;
+    if (st.linkButton) goal += `<div class="go-studio mt16"><p><b>${esc(st.linkButton.label)}</b> — ${esc(st.linkButton.desc)}</p><a class="g-btn" href="${esc(st.linkButton.href)}" target="_blank" rel="noopener noreferrer">${esc(st.linkButton.label)}</a></div>`;
     if (st.copyButton) goal += `<div class="go-studio mt16"><p><b>운영 시트 사본 만들기</b> — 내 드라이브에 복사됩니다. 자동화 코드도 함께 복사됩니다.</p><a class="g-btn" href="${esc(D.sheetCopy)}" target="_blank" rel="noopener noreferrer">시트 사본 만들기</a></div>`;
     if (st.warn) goal += `<div class="safety-box mt16"><strong>꼭 지킬 것</strong><p>${esc(st.warn)}</p></div>`;
     secs.push(['goal', '학습 목표와 준비', goal]);
@@ -257,9 +258,9 @@
     { g: 2, nav: '2-3', title: '맡길 일 고르는 기준 4가지', html: () => `<span class="slide-kicker">2. 자동화 · 3) AI에게 무엇을 맡길까</span><h1>AI vs 사람, 맡길 일 고르는 기준 4가지</h1>
       <p class="slide-lead">요즘IT가 2026년 5~10월에 실린 AI 활용 사례 9편을 분석해 정리한 기준입니다. 파란 글씨는 오늘 제미나이 메일 자동화에 적용한 곳입니다.</p>
       <div class="pts"><div class="pt"><b>기준 1</b><strong>맡길 가치가 있는 일인가</strong><p>자주, 오래, 틀리면 위험하게 반복되는 일부터 맡깁니다. 1년에 한두 번 하는 일은 도구를 만들고 관리하는 품이 더 클 수 있습니다.</p><p class="cn-apply">오늘: 여러 사람에게 같은 안내 메일 보내기</p></div>
-      <div class="pt"><b>기준 2</b><strong>정해진 답이 있는 일인가</strong><p>답이 정해진 일은 AI가 매번 판단하게 두지 않고 규칙으로 고정합니다. 그 규칙은 AI와 함께 만들어도 됩니다.</p><p class="cn-apply">오늘: "C열이 체크되어 있고 D열이 비어 있으면 보낸다"는 규칙을 Gemini와 코드로 만듦</p></div>
-      <div class="pt"><b>기준 3</b><strong>틀리면 되돌릴 수 있는 일인가</strong><p>되돌리기 어려운 결정과 승인은 사람에게 남깁니다. "경계선을 정하는 건 AI의 성능이 아니라 오류의 비용"입니다.</p><p class="cn-apply">오늘: 보낸 메일은 되돌릴 수 없으니 전체 발송은 내가 결정</p></div>
-      <div class="pt"><b>기준 4</b><strong>어디서 확인할 것인가</strong><p>"완료" 보고만 믿지 말고, 결과를 언제 어디서 확인할지 맡기기 전에 정해 둡니다.</p><p class="cn-apply">오늘: 2행 내 주소로 테스트 발송, 발송 전 체크리스트</p></div></div>
+      <div class="pt"><b>기준 2</b><strong>정해진 답이 있는 일인가</strong><p>답이 정해진 일은 AI가 매번 판단하게 두지 않고 규칙으로 고정합니다. 그 규칙은 AI와 함께 만들어도 됩니다.</p><p class="cn-apply">오늘: "C열이 체크되어 있고 D열이 발송 완료가 아니면 보낸다"는 규칙을 Gemini와 코드로 만듦</p></div>
+      <div class="pt"><b>기준 3</b><strong>틀리면 되돌릴 수 있는 일인가</strong><p>되돌리기 어려운 결정과 승인은 사람에게 남깁니다. "경계선을 정하는 건 AI의 성능이 아니라 오류의 비용"입니다.</p><p class="cn-apply">오늘: 보낸 메일은 되돌릴 수 없으니 발송은 내가 결정</p></div>
+      <div class="pt"><b>기준 4</b><strong>어디서 확인할 것인가</strong><p>"완료" 보고만 믿지 말고, 결과를 언제 어디서 확인할지 맡기기 전에 정해 둡니다.</p><p class="cn-apply">오늘: 첫 번째 주소(내 주소)로 테스트 발송, 발송 전 체크리스트</p></div></div>
       <p class="src">${esc(SRC_YOZM)}</p>` },
     { g: 2, nav: '2-4', title: '먼저 해 본 사람들의 숫자', html: () => `<span class="slide-kicker">2. 자동화 · 4) 사례로 보는 기준</span><h1>먼저 맡겨 본 사람들이 겪은 일</h1>
       <div class="pts"><div class="pt"><b>기준 1 · 사업관리 담당자</b><strong>400쪽 · 매달 30분~1시간</strong><p>점검철 스캔본에서 서명 누락을 찾는 일을 가장 먼저 자동화했습니다. 1년에 한두 번 하는 일은 만들 수 있어도 만들지 않았습니다.</p></div>
@@ -286,7 +287,7 @@
     { g: 4, nav: '4-1', title: '한도와 권한', html: () => `<span class="slide-kicker">4. 안전 · 1) 알아 둘 것</span><h1>한도와 권한을 먼저 압니다</h1>
       <div class="stat3"><div class="stat"><em>개인 Gmail 계정</em><strong>100명</strong><div class="cap">Apps Script 하루 발송 받는 사람 수</div><p>Google Workspace 계정은 1,500명입니다. 한도는 바뀔 수 있습니다.</p><p class="src">출처: Google Apps Script, Quotas for Google Services</p></div>
       <div class="stat"><em>처음 한 번</em><strong>권한 승인</strong><div class="cap">"확인되지 않은 앱" 화면</div><p>내가 만든 코드라 Google 심사를 받지 않았다는 뜻입니다. 출처를 아는 코드일 때만 허용합니다.</p></div>
-      <div class="stat"><em>되돌릴 수 없음</em><strong>테스트 먼저</strong><div class="cap">나에게 먼저 보내기</div><p>메일은 2행의 내 주소로 테스트한 뒤 전체 발송합니다.</p></div></div>` },
+      <div class="stat"><em>되돌릴 수 없음</em><strong>테스트 먼저</strong><div class="cap">나에게 먼저 보내기</div><p>메일은 첫 번째 주소(내 주소)로 테스트한 뒤 발송합니다.</p></div></div>` },
     { g: 4, nav: '4-2', title: '실습 전 약속', html: () => `<span class="slide-kicker">4. 안전 · 2) 실습 전 약속</span><h1>AI가 작성하고, 사람이 확인합니다</h1>
       <div class="recap"><div class="recap-col"><b>AI가 하는 일</b><span>메일 발송 코드 쓰기</span><span>카드뉴스 원고·표지 훅 제안</span><span>게시 문구와 이미지 구성</span></div>
       <div class="recap-col"><b>사람이 하는 일</b><span>받는 사람과 주제 정하기</span><span>날짜·가격·건강 정보 확인</span><span>보낼지, 게시할지 최종 결정</span></div></div>
