@@ -586,6 +586,7 @@ window.LAB = {
   "Davis, J. (2025). [Review of the book The skill code: How to save human ability in an age of intelligent machines, by M. Beane]. Administrative Science Quarterly, 70(4), NP98–NP102. https://doi.org/10.1177/00018392251344917",
   "한국경영자총협회. (2026. 3. 13.). 2026년 신규채용 실태조사 결과. https://eiec.kdi.re.kr/policy/domesticView.do?ac=0000203504&pg=&pp=&issus=S",
   "고용노동부·한국고용정보원. (2025. 11. 28.). 인공지능(AI) 활용한 채용도 똑똑하고 공정하게!: 2025년 기업 채용동향조사 결과 2차 발표 [보도자료]. https://www.moel.go.kr/news/enews/report/enewsView.do?news_seq=18662",
+  "헤럴드경제. (2026. 10. 16.). Z세대 구직자 70% “AI에 고민 털어놨다” [데이터로 본 세상]. https://biz.heraldcorp.com/article/10904834",
   "뉴스서울. (2026. 3. 20.). 고용노동부, '인공지능(AI)이 하루 57명 취업 연결' 청년·기업이 직접 고른 인공지능(AI) 고용서비스 확대. https://newsseoul.co.kr/news/view/1065583818469225",
   "데일리안. (2026. 6. 29.). AI가 취업확률 분석한다…고용24 맞춤형 고용서비스 공개. https://www.dailian.co.kr/news/view/1661004",
   "한국사회복지저널. (2026. 10. 28.). [신간] 채용 트렌드 2027. https://www.ksw-news.com/news/articleView.html?idxno=3053312",
@@ -613,15 +614,17 @@ window.LAB = {
    },
    {
     "tag": "AI가 만들어 주는 나의 취업 로드맵",
-    "num": "41만 2천 건",
-    "cap": "잡케어(AI 진로·경력설계) 2025년 이용 건수",
+    "num": "69%",
+    "cap": "AI에 털어놓은 고민 1위: 취업·진로 (복수 응답)",
     "pts": [
-     "전년 대비 29% 증가, 이용자의 90% 이상이 30대 이하",
-     "고용24 취업확률 기반 구직컨설팅: 부족한 자격증·직업훈련·서류 보완점 추천(2026. 6.)",
-     "취업활동계획 수립 지원(8월), 이력서·자기소개서 컨설팅(12월) 추가 예정"
+     "생성형 AI를 쓰는 Z세대 구직자의 70%: AI에 고민을 털어놓은 경험",
+     "고민이 생기면 먼저 찾는 대상: 친구 31%, 생성형 AI 26%, 전문 상담사 4%",
+     "AI 조언을 실제 행동으로 옮김: 76%",
+     "공공 서비스도 확대: 잡케어(AI 진로·경력설계) 2025년 이용 41만 2천 건"
     ],
-    "src": "고용노동부 발표(뉴스서울 2026. 3. 20. 보도, 데일리안 2026. 6. 29. 보도). 8월·12월 기능의 현재 제공 여부는 확인 필요",
-    "url": "https://newsseoul.co.kr/news/view/1065583818469225"
+    "src": "진학사 캐치 조사(Z세대 구직자 1,110명), 헤럴드경제 2026. 10. 16. 보도 / 잡케어: 고용노동부 발표, 뉴스서울 2026. 3. 20. 보도",
+    "url": "https://biz.heraldcorp.com/article/10904834",
+    "url2": "https://newsseoul.co.kr/news/view/1065583818469225"
    },
    {
     "tag": "기업의 AI 면접 · AI 역량검사",
@@ -638,7 +641,7 @@ window.LAB = {
   ],
   "seeker_note": [
    "채용 기준: 스펙 → 직무 경험",
-   "구직 준비: 혼자 탐색 → AI가 진단하고 로드맵 제시",
+   "구직 준비: 사람에게 상담 → AI와 대화하며 진로 설계",
    "평가 방식: 서류·면접 → AI 역량검사·AI 면접 추가"
   ],
   "worker": [
