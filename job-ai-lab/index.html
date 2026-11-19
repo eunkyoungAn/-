@@ -7,9 +7,9 @@
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex">
 <title>AI 취업지원 실습실 | 커리어캐쳐</title>
-<meta name="description" content="채용공고 분석, 구직역량 진단, 취업전략 설계까지. Gemini·ChatGPT로 진행하는 취업지원 실무 3단계 실습실.">
+<meta name="description" content="구직자와 채용공고를 연결하는 취업상담 워크플로우. 구직자 정보 받기부터 공고 분석, 회차별 상담, 한 장 결과지까지 5단계.">
 <link rel="stylesheet" href="fonts/pretendard.css">
-<link rel="stylesheet" href="style.css?v=20261120i">
+<link rel="stylesheet" href="style.css?v=20261120j">
 </head>
 <body>
 <header class="g-header">
@@ -20,12 +20,8 @@
     </a>
     <nav class="g-nav" aria-label="실습실 메뉴">
       <a class="g-start" href="#start">START</a>
-      <a href="#s1">1 분석</a>
-      <a href="#s2">2 진단</a>
-      <a href="#s3">3 전략·지원</a>
-      <a href="#review">검토·적용</a>
+      <a href="#flow">워크플로우 5단계</a>
       <a href="#downloads">자료 받기</a>
-      <a href="#after">교육 뒤</a>
       <details class="menu" id="quickMenu">
         <summary class="g-home">바로가기</summary>
         <div class="menu-panel" id="quickPanel"></div>
@@ -40,79 +36,60 @@
     <section class="g-hero wrap">
       <div>
         <span class="eyebrow">커리어캐쳐 실무 과정</span>
-        <h1>채용공고 분석부터 취업지원 계획서까지</h1>
-        <p class="hero-copy">취업지원 실무자가 구인기업·직무 분석, 구직역량·직무 적합도 진단, 취업전략 설계·지원을 한 사례로 이어서 실습합니다. 같은 채용공고에 청년층 신입과 중장년 재취업 두 내담자가 지원하는 상황입니다. AI에는 추출과 분류를 맡기고 판단의 근거는 원문 문장으로 남깁니다.</p>
+        <h1>구직자와 채용공고를 연결하는 취업상담 워크플로우</h1>
+        <p class="hero-copy">구직자의 경험을 채용공고의 요구와 대조하고, 상담자와 구직자가 함께 다음 행동을 정하는 5단계 과정입니다. 구글 폼으로 받은 구직자 정보에서 시작해 공고 분석, 회차별 상담, 구직자에게 줄 한 장의 결과지까지 이어집니다.</p>
         <div class="hero-actions">
           <a class="g-btn" href="#start">START</a>
-          <a class="text-link" href="#s1">1단계 바로 가기</a>
+          <a class="text-link" href="#flow">워크플로우 5단계 보기</a>
         </div>
         <div class="hero-meta" aria-label="실습실 특징">
-          <span class="meta-chip active">Gemini 무료 수준</span>
-          <span class="meta-chip">실습 3단계 + 검토</span>
-          <span class="meta-chip">가상 내담자 2명</span>
-          <span class="meta-chip">검수 기준</span>
+          <span class="meta-chip active">구글 시트 + 구글 폼</span>
+          <span class="meta-chip">5단계</span>
+          <span class="meta-chip">회차별 상담 기록</span>
+          <span class="meta-chip">A4 한 장 결과지</span>
         </div>
       </div>
       <div>
-        <span class="demo-label">내담자 유형 선택</span>
+        <span class="demo-label">바로 시작</span>
         <div class="demo-card">
-          <div class="type-pick" id="typePick"></div>
-          <div class="demo-foot"><i></i><span>고른 유형에 따라 사례, 진단 초점, 지원 제도 목록이 바뀝니다. 통합 특강에서는 시연을 청년 사례로, 실습을 중장년 사례로 진행합니다.</span></div>
+          <div id="heroLinks"></div>
+          <div class="demo-foot"><i></i><span>각자 실습하려면 <a id="copyLink" class="tlink" target="_blank" rel="noopener noreferrer">내 사본 만들기</a>로 시트를 복사해 씁니다. 새 탭으로 열립니다.</span></div>
         </div>
       </div>
     </section>
 
     <div class="wrap">
-      <div class="progress-card" aria-label="내 진행 상황">
-        <div class="progress-number"><span id="pgNum">0 / 3</span><small>검수까지 마친 단계</small></div>
-        <div class="progress-track"><span id="pgBar"></span></div>
-        <div class="progress-copy">검수 항목을 모두 확인한 단계를 완료로 셉니다. 표와 검수 표시는 이 기기에만 저장됩니다.</div>
+      <div class="start-row">
+        <div class="start-item"><b>시작 전 1</b><strong>Google 계정 로그인</strong><p>노트북이나 태블릿의 크롬에서 개인 Google 계정으로 로그인합니다. 기기가 없으면 2인 1조로 참여합니다.</p></div>
+        <div class="start-item"><b>시작 전 2</b><strong>상담자용 시트 준비</strong><p>상담자용 시트를 열거나 내 사본을 만듭니다. 실행 단추를 처음 누르면 권한 승인 창이 뜹니다.</p></div>
+        <div class="start-item"><b>시작 전 3</b><strong>가상 정보만 입력</strong><p>질문지와 시트에는 실제 구직자의 이름, 연락처, 주소를 넣지 않습니다. <a href="#downloads">연습용 가상 사례</a>를 씁니다.</p></div>
       </div>
 
-      <div class="start-row">
-        <div class="start-item"><b>시작 전 1</b><strong>Google 계정 로그인</strong><p>노트북이나 태블릿의 크롬에서 <a href="https://gemini.google.com" target="_blank" rel="noopener noreferrer">gemini.google.com</a>에 개인 계정으로 로그인합니다. 기기가 없으면 2인 1조로 참여합니다.</p></div>
-        <div class="start-item"><b>시작 전 2</b><strong>자료 파일 받기</strong><p><a href="#downloads">자료 받기</a>에서 채용공고와 내담자 서류를 내려받습니다. PDF나 DOCX 어느 쪽이든 됩니다.</p></div>
-        <div class="start-item"><b>시작 전 3</b><strong>가상 자료만 사용</strong><p>모든 공고와 서류는 교육·실습용 가상 자료입니다. 실제 내담자 서류는 이름, 연락처, 학교명을 가린 뒤에만 AI에 넣습니다.</p></div>
-      </div>
+      <div id="homeFlow"></div>
 
       <section class="info-section" id="sec-timeline">
         <span class="level-kicker">TIMELINE</span>
         <h2>시간표 (14:00~17:00)</h2>
-        <p class="lead">이론 70분, 구현 100분, 휴식 10분. 구현 단계는 이 실습실의 1·2·3단계와 검토·적용입니다.</p>
+        <p class="lead">이론 70분, 구현 100분, 휴식 10분. 이론은 START 장표로, 구현은 워크플로우 5단계로 진행합니다.</p>
         <div class="g-table"><table id="timelineTable"></table></div>
       </section>
 
-      <div id="homeStages"></div>
-
       <section class="info-section" id="sec-downloads">
         <span class="level-kicker">DOWNLOADS</span>
-        <h2>자료 파일 한 곳에서 받기</h2>
-        <p class="lead">실습에 쓰는 파일을 모두 모았습니다. 한 번에 받으려면 전체 압축 파일을, 필요한 것만 받으려면 파일별로 누릅니다.</p>
+        <h2>연습용 가상 사례 받기</h2>
+        <p class="lead">워크플로우를 연습할 때 쓰는 가상 자료입니다. 가상 구직자 서류를 보고 사전 질문지를 작성하고, 가상 채용공고를 구인기업 리스트에 옮겨 적습니다.</p>
         <div class="go-studio zip-bar">
-          <p><b>전체 자료 한 번에 받기</b> — 채용공고, 내담자 서류 2종, 자기진단 응답지, 교육 뒤 스킬 파일이 들어 있습니다.</p>
+          <p><b>전체 자료 한 번에 받기</b> — 가상 채용공고 1건과 가상 구직자 서류 2종이 들어 있습니다.</p>
           <a class="g-btn" id="zipLink" download>전체 압축 파일 받기</a>
         </div>
         <div id="downloadGroups"></div>
       </section>
 
-      <section class="info-section" id="sec-after">
-        <span class="level-kicker">AFTER CLASS</span>
-        <h2>교육 뒤 · 내 AI에 등록하기 (선택)</h2>
-        <p class="lead">오늘 쓴 요청문 세 개를 매번 붙여 넣지 않고 쓰고 싶을 때 등록합니다. 실습 중에는 필요 없습니다.</p>
-        <div id="afterBox"></div>
-        <div class="go-studio">
-          <p><b>우리 기관의 자기진단 양식으로 바꾸기</b> — 기본은 직업공통능력 21개 하위능력과 4점 척도입니다. 기관 평가 양식이 있으면 항목과 척도를 바꿔 쓸 수 있습니다.</p>
-          <a class="g-btn" href="#form">양식 바꾸기</a>
-        </div>
-        <h3 class="dl-h">스킬 파일 3종</h3>
-        <div class="dl-grid" id="skillGrid"></div>
-      </section>
-
       <section class="info-section" id="sec-privacy">
         <span class="level-kicker">PRIVACY</span>
-        <h2>실제 내담자 서류를 다룰 때</h2>
-        <div class="safety-box wide"><strong>실습은 가상 자료만 씁니다. 현업에서는 가명처리와 동의가 먼저입니다.</strong>
-          <p>실제 서류를 AI에 넣기 전에 이름, 연락처, 주민등록번호, 주소, 학교명, 회사명을 가리거나 바꿉니다. 내담자에게 AI 도구를 쓴다는 사실과 목적을 알리고 동의를 받습니다. 무료 이용 조건에서는 입력한 내용이 서비스 개선에 쓰이지 않는다는 보장이 명시되어 있지 않으므로 기관의 개인정보 지침을 먼저 확인합니다.</p></div>
+        <h2>실제 구직자 정보를 다룰 때</h2>
+        <div class="safety-box wide"><strong>실습은 가상 정보만 씁니다. 현업에서는 상담자만 볼 수 있는 시트를 따로 둡니다.</strong>
+          <p>실제 구직자 정보와 상담 기록이 쌓이는 시트는 링크로 공개하지 않고 상담자 계정에만 공유합니다. AI 분석을 실행하기 전에 구직자에게 AI 도구를 쓴다는 사실과 목적을 알리고 동의를 받습니다. 무료 이용 조건에서는 입력한 내용이 서비스 개선에 쓰이지 않는다는 보장이 명시되어 있지 않으므로 기관의 개인정보 지침을 먼저 확인합니다.</p></div>
       </section>
 
       <section class="info-section" id="sec-help">
@@ -125,7 +102,7 @@
         <span class="level-kicker">SOURCES</span>
         <h2>참고 자료</h2>
         <ol class="plain-ol" id="sourceList"></ol>
-        <p class="local-note">직업공통능력 21개 하위능력 이름은 고용노동부 보도자료 붙임 1의 표를 그대로 옮겼습니다. 각 하위능력의 "판정 단서"는 커리어캐쳐가 쓴 요약이며 표준 원문의 수행기준·평가준거가 아닙니다. 제도의 금액·요건은 바뀌므로 강의 직전 주에 공식 페이지에서 다시 확인합니다.</p>
+        <p class="local-note">START 장표의 수치와 인용은 위 자료에서 가져왔습니다. 통계와 제도는 바뀌므로 강의 직전 주에 다시 확인합니다.</p>
       </section>
     </div>
   </div>
@@ -145,29 +122,29 @@
     <p class="local-note deck-hint">키보드 ← → 로도 넘길 수 있습니다.</p>
   </div>
 
-  <!-- ================= 단계 화면 ================= -->
-  <div id="viewStage" class="lesson-shell wrap" hidden>
-    <nav class="breadcrumb" aria-label="현재 위치"><a href="#home">처음</a><span>›</span><span id="bcStage"></span></nav>
+  <!-- ================= 취업상담 워크플로우 ================= -->
+  <div id="viewFlow" class="lesson-shell wrap" hidden>
+    <nav class="breadcrumb" aria-label="현재 위치"><a href="#home">처음</a><span>›</span><span>취업상담 워크플로우</span></nav>
     <header class="lesson-hero">
-      <span class="eyebrow" id="shEyebrow"></span>
-      <h1 id="shTitle"></h1>
-      <p id="shSum"></p>
-      <div class="hero-meta" id="shMeta"></div>
+      <span class="eyebrow">PRACTICE · 5단계</span>
+      <h1 id="flowTitle"></h1>
+      <p id="flowLead"></p>
+      <div class="hero-actions" id="flowMeta"></div>
     </header>
     <div class="lesson-layout">
-      <aside class="toc" aria-label="단계 목차" id="stageToc"></aside>
-      <article class="lesson-content" id="stageBody"></article>
+      <aside class="toc" aria-label="목차" id="flowToc"></aside>
+      <article class="lesson-content" id="flowBody"></article>
     </div>
   </div>
 </main>
 
 <footer class="g-footer"><div class="wrap">
-  <span>커리어캐쳐 AI 취업지원 실습 · 모든 공고와 서류는 교육·실습용 가상 자료입니다.</span>
-  <span>이 화면은 입력한 내용을 어디에도 보내지 않습니다. 표와 검수 표시는 이 기기에만 저장됩니다.</span>
+  <span>커리어캐쳐 AI 취업지원 실습 · 연습용 공고와 서류는 교육·실습용 가상 자료입니다.</span>
+  <span>이 화면은 입력을 받지 않으며 어디에도 내용을 보내지 않습니다. 실습은 연결된 구글 시트와 구글 폼에서 합니다.</span>
   <span class="g-contact"><strong>CareerCatcher</strong> 안은경 · <a href="mailto:dms5147@gmail.com">dms5147@gmail.com</a></span>
 </div></footer>
 
-<script src="data.js?v=20261120i"></script>
-<script src="app.js?v=20261120i"></script>
+<script src="data.js?v=20261120j"></script>
+<script src="app.js?v=20261120j"></script>
 </body>
 </html>
