@@ -109,6 +109,10 @@
 
 
   /* ---------- 취업상담 워크플로우 ---------- */
+  function sheetBar(s) {
+    return `<div class="go-studio sheet-get"><p><b>자동화 시트 받기</b> — 이 단계는 상담자용 시트의 "${esc(s.tab)}" 탭에서 진행합니다. [내 사본 만들기]를 누르면 내 구글 드라이브에 시트가 복사됩니다.</p>
+      <div class="btn-pair">${ext(L.copy, '내 사본 만들기')}${ext(L.sheet, '원본 시트 열기', 'g-btn ghost')}</div></div>`;
+  }
   function formMakeHtml() {
     return `<div class="make-form" id="flow-form"><h3>내가 쓸 사전 질문지 미리 만들기</h3><p>${esc(FM.why)}</p>
       <div class="two-col make-cols">
@@ -149,11 +153,14 @@
     $('#flowEyebrow').textContent = 'PRACTICE · 5단계';
     $('#flowTitle').textContent = F.title;
     $('#flowLead').textContent = F.lead;
-    $('#flowMeta').innerHTML = `${ext(L.sheet, '상담자용 시트 열기')}${ext(L.form, '구직자용 사전 질문지', 'g-btn ghost')}${ext(L.copy, '내 사본 만들기', 'g-btn ghost')}`;
+    $('#flowMeta').innerHTML = `${ext(L.copy, '자동화 시트 받기 (내 사본 만들기)')}${ext(L.sheet, '원본 시트 열기', 'g-btn ghost')}${ext(L.form, '구직자용 사전 질문지', 'g-btn ghost')}`;
     const secs = [
       ['all', '전체 과정', `<div class="g-table"><table><thead><tr><th>단계</th><th>쓰는 탭</th><th>상담에 남는 결과</th></tr></thead><tbody>${F.steps.map(s => `<tr><td><a class="tlink" href="#flow-${s.no}">${s.no}. ${esc(s.title)}</a></td><td>${esc(s.tab)}</td><td>${esc(s.out)}</td></tr>`).join('')}</tbody></table></div>
+        <div class="go-studio sheet-get"><p><b>자동화 시트 받기</b> — 2단계부터 5단계까지는 상담자용 구글 시트에서 진행합니다. [내 사본 만들기]를 누르면 내 구글 드라이브에 시트가 복사됩니다.</p>
+          <div class="btn-pair">${ext(L.copy, '내 사본 만들기')}${ext(L.sheet, '원본 시트 열기', 'g-btn ghost')}</div></div>
         <div class="safety-box mt16"><strong>실습에서는 가상 정보만 입력</strong><p>질문지와 시트에는 실제 구직자의 이름, 연락처, 주소를 넣지 않습니다. 자료 받기의 가상 구직자 서류와 가상 채용공고를 씁니다.</p></div>`],
       ...F.steps.map(s => [s.no, `${s.no}단계 · ${s.title}`, `<div class="step-meta"><span><b>쓰는 탭</b>${esc(s.tab)}</span>${s.run ? `<span><b>실행 단추</b>${esc(s.run)}</span>` : ''}</div>
+        ${s.no === '1' ? '' : sheetBar(s)}
         <h3>시트에서 하는 일</h3>${ul(s.do)}
         <div class="out-box"><b>상담에 남는 결과</b><p>${esc(s.out)}</p></div>
         ${s.no === '1' ? `<div class="sheet-actions mt14">${ext(L.form, '구직자용 사전 질문지 열기', 'g-btn ghost')}</div>${formMakeHtml()}` : ''}`]),
