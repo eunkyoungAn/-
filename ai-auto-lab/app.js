@@ -15,7 +15,7 @@
   const ul = a => `<ul class="plain">${a.map(x => `<li>${x}</li>`).join('')}</ul>`;
   const CODE = window.MAIL_CODE || '';
 
-  /* 실습 순서: m1~m4 → mr → c1~c3 → cr */
+  /* 실습 순서: m1~m7 → mr → c1~c3 → cr */
   const SEQ = [];
   D.parts.forEach(p => { p.stages.forEach(s => SEQ.push({ id: s.id, part: p, stage: s })); if (p.review) SEQ.push({ id: p.review.id, part: p, review: p.review }); });
   const find = id => SEQ.find(x => x.id === id);
@@ -68,11 +68,19 @@
 
   /* ---------- 시작 화면 ---------- */
   const FLOW_MAIL = [
-    ['Google Sheets', '예시 시트 사본', '받는 사람 목록 · 이메일 설정(H2~H4)'],
-    ['Gemini', '코드 받기', '기능을 번호로 나눠 요청'],
-    ['Apps Script', '붙여 넣고 저장', '코드는 그대로, 내용은 시트에서'],
-    ['Gmail', '테스트 → 선택 발송', '나에게 먼저']
+    ['Google Sheets', '시트 열기', '새 시트'],
+    ['Apps Script', '편집기 열기', '확장 프로그램 → Apps Script'],
+    ['Gemini', '코드 요청', '구성 요소는 내가 정하기'],
+    ['Google Sheets', '구성 요소 채우기', '방법 1 · 방법 2'],
+    ['Apps Script', '코드 붙여 넣기', '받은 코드 그대로'],
+    ['Apps Script', '저장 → 실행', '처음에는 권한 승인'],
+    ['Google Sheets', '완성', '시트에서 메뉴로 발송']
   ];
+  function stepFlow(p, cur) {
+    if (!p.flow) return '';
+    const ci = p.flow.findIndex(f => f[0] === cur);
+    return `<nav class="step-flow" aria-label="진행 순서"><p>진행 순서 <span>단계를 누르면 그 화면으로 갑니다 <i>[클릭]</i></span></p><ol>${p.flow.map((f, i) => `<li class="${i === ci ? 'on' : (ci >= 0 && i < ci ? 'past' : '')}"><a href="#${f[0]}"${i === ci ? ' aria-current="step"' : ''}><b>${i + 1}</b><span>${esc(f[1])}</span></a></li>`).join('')}</ol></nav>`;
+  }
   const FLOW_CARD = [
     ['Google Sheets', '기획 입력', '타깃·주제·장수 (B~I열)'],
     ['Gemini API', '원고 자동 생성', '표지 훅, 1~6장 (J~Q열)'],
@@ -86,7 +94,7 @@
   function renderHome() {
     $('#homeParts').innerHTML = D.parts.map(p => `<section class="level-section" id="sec-${p.id}">
       <div class="level-head"><div><span class="level-kicker">${esc(p.no)}</span><h2>${esc(p.title)}</h2></div><p>${esc(p.desc)}</p></div>
-      <div class="lesson-grid">${p.stages.map(s => { const x = find(s.id); return `<a class="lesson-card ${done(x) ? 'is-done' : ''}" href="#${s.id}">
+      ${stepFlow(p)}<div class="lesson-grid">${p.stages.map(s => { const x = find(s.id); return `<a class="lesson-card ${done(x) ? 'is-done' : ''}" href="#${s.id}">
         <span class="lesson-code">${esc(s.kicker)}</span><h3>${esc(s.title)}</h3><p>${esc(s.goal[0])}</p>
         <div class="lesson-output">산출물 <span>${esc(s.output)}</span></div><div class="lesson-arrow">${esc(s.role)} →</div></a>`; }).join('')}
       ${p.review ? `<a class="lesson-card ${done(find(p.review.id)) ? 'is-done' : ''}" href="#${p.review.id}"><span class="lesson-code">WRAP-UP</span><h3>${esc(p.review.title)}</h3><p>${p.id === 'mail' ? 'AI가 만든 메일을 바로 보내지 않고 체크리스트로 다시 읽습니다.' : '결과 링크와 상태를 시트에 기록하고 오늘 한 일을 돌아봅니다.'}</p><div class="lesson-output">산출물 <span>${p.id === 'mail' ? '체크 완료' : '카드뉴스 1편과 링크'}</span></div><div class="lesson-arrow">마무리 →</div></a>` : ''}
@@ -144,6 +152,7 @@
     if (st.table && st.table.after) chk += tableBlock(st.table);
     secs.push(['check', '검수', chk]);
     paint(st.id, secs);
+    $('#stageBody').insertAdjacentHTML('afterbegin', stepFlow(p, st.id));
   }
   function renderReview(x) {
     const r = x.review, p = x.part;
@@ -267,8 +276,8 @@
       <div class="pt"><b>기준 4 · 개발 도구</b><strong>요구사항 40개 중 25개</strong><p>AI가 "개발 완료"라고 보고했지만 실제로 들어간 건 25개였습니다. 이후 추적표를 만들어 사람이 빠진 곳을 확인합니다.</p></div></div>
       <div class="note">AI에게 맡긴다는 것은 사람의 일이 사라지는 것이 아니라, 사람이 봐야 할 곳이 좁고 분명해지는 것입니다.</div>
       <p class="src">${esc(SRC_YOZM)}</p>` },
-    { g: 2, nav: '2-5', title: '제미나이 메일 자동화 흐름', html: () => `<span class="slide-kicker">2. 자동화 · 5) 제미나이 메일 자동화</span><h1>시트 목록에서 Gmail까지 네 단계</h1>
-      <p class="slide-lead">원본 3회차 PPT 14~16번의 순서에 Gemini 요청과 권한 승인을 더했습니다.</p>${flowHtml(FLOW_MAIL, 'wide4')}` },
+    { g: 2, nav: '2-5', title: '제미나이 메일 자동화 흐름', html: () => `<span class="slide-kicker">2. 자동화 · 5) 제미나이 메일 자동화</span><h1>시트에서 Gmail까지 일곱 단계</h1>
+      <p class="slide-lead">코드는 AI에게 요청하고, 시트의 구성 요소는 내가 정합니다.</p>${flowHtml(FLOW_MAIL, 'wide4')}` },
     { g: 3, nav: '3-1', title: '카드뉴스 6장 구조', html: () => `<span class="slide-kicker">3. 카드뉴스 · 1) 6장의 역할</span><h1>장마다 맡은 일이 있습니다</h1>
       <p class="slide-lead">규칙: 장마다 제목 1줄 + 본문 2줄 이내. 확인되지 않은 사양·가격·건강 정보는 단정하지 않습니다.</p>
       <div class="cn-six">${SIX.map(x => `<div><b>${esc(x[0])} · ${esc(x[1])}</b><strong>${esc(x[2])}</strong><span>${esc(x[3])}</span></div>`).join('')}</div>
