@@ -1123,3 +1123,10 @@ body{word-break:keep-all;overflow-wrap:break-word;line-break:strict}
 .script-get{align-items:center;margin-bottom:10px}
 .script-get .local-note{margin:0}
 @media (max-width:720px){.tool-item{flex-direction:column;align-items:flex-start}.tool-item .btn-pair{justify-content:flex-start}}
+
+/* 사전 질문지 내용(제목 · 안내문 · 제출 뒤 문구) */
+.form-meta{display:grid;grid-template-columns:110px minmax(0,1fr);gap:6px 14px;margin:0 0 14px;font-size:15px;line-height:1.65}
+.form-meta dt{font-weight:700;color:var(--ink-mute)}
+.form-meta dd{margin:0;color:var(--ink)}
+.make-form > .sheet-actions{margin:12px 0 4px}
+@media (max-width:640px){.form-meta{grid-template-columns:minmax(0,1fr);gap:2px}.form-meta dd{margin-bottom:8px}}
