@@ -340,7 +340,8 @@ body{font-size:16px;word-break:keep-all}
 @media (max-width:980px){.step-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:640px){.step-grid,.two-col{grid-template-columns:minmax(0,1fr)}}
 
-/* =====================================================   편집물형 밝은 테마: 흰 바탕, 큰 제목, 작은 대문자 꼬리표, 검은 단추, 파란 강조 하나
+/* ============================================================
+   편집물형 밝은 테마: 흰 바탕, 큰 제목, 작은 대문자 꼬리표, 검은 단추, 파란 강조 하나
    ============================================================ */
 body{letter-spacing:-.005em}
 .g-header{backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
@@ -1141,7 +1142,6 @@ body{word-break:keep-all;overflow-wrap:break-word;line-break:strict}
 .way ol.plain{margin-top:12px;padding-left:20px;font-size:15.5px;line-height:1.8}
 .way .g-table{margin-top:14px}
 @media (max-width:640px){.way{padding:18px 16px}}
-=======
 
 /* ===== 첫 화면 개편 (2026-11-20)
    블록형 한 장 구성: 첫 화면 → 수업 구성(2열 카드 6장) → 시작하기 전에(회색 띠) → 자료실(어두운 띠 3칸)
