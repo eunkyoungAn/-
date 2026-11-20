@@ -35,7 +35,7 @@
       <div class="flow5">${F.steps.map(s => `<a class="flow-card" href="#flow-${s.no}"><span class="lesson-code">${s.no}단계</span><h3>${esc(s.title)}</h3><p>${esc(s.short)}</p><div class="flow-tab">${esc(s.tab)}</div><div class="flow-go">준비물 확인하고 시작 →</div></a>`).join('')}</div>
       <div class="sheet-actions mt14"><a class="g-btn" href="#flow-1">1단계부터 시작</a><a class="g-btn ghost" href="#flow">전체 과정 보기</a></div></section>
       <section class="level-section"><div class="level-head"><div><span class="level-kicker">MY OWN</span><h2>개별 실습 · ${esc(M.title)}</h2></div>
-      <p>${esc(M.time)}</p></div>
+      <p>워크플로우 5단계와 같은 틀로 내 업무 하나를 설계합니다.</p></div>
       <div class="go-studio"><p><b>같은 틀로 내 업무 하나를 설계</b> — 빈칸 양식 여덟 칸을 채우고 지시문을 실행하면 구글 시트·구글 폼 구성안과 Apps Script 초안이 나옵니다.</p><a class="g-btn" href="#mine">개별 실습 열기</a></div></section>`;
     $('#zipLink').href = FILE_BASE + D.zip;
     $('#downloadGroups').innerHTML = D.files.map(g => `<h3 class="dl-h">${esc(g.group)}</h3><div class="dl-grid">${g.items.map(([f, d]) =>
@@ -123,7 +123,7 @@
     $('#flowEyebrow').textContent = 'MY OWN · 개별 실습';
     $('#flowTitle').textContent = M.title;
     $('#flowLead').textContent = M.lead;
-    $('#flowMeta').innerHTML = `<span class="meta-chip active">${esc(M.time)}</span>`;
+    $('#flowMeta').innerHTML = '';
     const fileBtns = n => `<div class="btn-pair"><a class="g-btn ghost" href="${FILE_BASE}${encodeURIComponent(n)}.pdf" download>PDF</a><a class="g-btn ghost" href="${FILE_BASE}${encodeURIComponent(n)}.docx" download>DOCX</a></div>`;
     const secs = [
       ['out', '만드는 것', `${ul(M.out)}<div class="safety-box mt16"><strong>실명·연락처·내부 문서 원문은 넣지 않음</strong><p>업무의 순서와 자료 종류만 적습니다. 워크플로우 5단계에서 쓴 틀(입력 탭과 결과 탭, 체크한 행만 실행, 초안과 확정 구분)을 내 업무에 옮깁니다.</p></div>`],
@@ -154,6 +154,7 @@
     if (x.link) return ext(L[x.link], x.label, 'g-btn ghost');
     if (x.file) return `<a class="g-btn ghost" href="${FILE_BASE}${encodeURIComponent(x.file)}.pdf" download>${esc(x.label)}</a>`;
     if (x.href) return `<a class="g-btn ghost" href="${esc(x.href)}">${esc(x.label)}</a>`;
+    if (x.url) return ext(x.url, x.label, 'g-btn ghost');
     return '';
   }
   function flowToc(active) {
