@@ -1050,3 +1050,20 @@ body{word-break:keep-all;overflow-wrap:break-word;line-break:strict}
 .flow-go{margin-top:10px;color:var(--accent);font-size:13px;font-weight:700}
 .flow-tab{padding-top:14px}
 @media (max-width:760px){.prep-row{grid-template-columns:minmax(0,1fr)}.step-row{grid-template-columns:40px minmax(0,1fr)}.step-row em,.step-row i{grid-column:2;justify-self:start}}
+
+/* 개별 실습: agent-lab 화면 표시 */
+.mine-shell{padding-block:34px 0}
+.mine-head{padding:26px 0 18px}
+.mine-head h1{margin:12px 0 10px;font-size:clamp(28px,4vw,44px);line-height:1.15;letter-spacing:-.04em;font-weight:700}
+.mine-head p{max-width:820px;color:var(--ink-soft);font-size:16.5px}
+.mine-tabs{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:18px}
+.mine-tabs a{min-height:42px;display:inline-flex;align-items:center;padding:8px 18px;border:1px solid var(--rule);border-radius:999px;background:var(--surface);font-size:15px;font-weight:700;color:var(--ink-soft)}
+.mine-tabs a.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.mine-tabs a.open-new{margin-left:auto;border-color:transparent;background:transparent;color:var(--accent);font-size:13.5px}
+.mine-frame{display:block;width:100%;height:1400px;border:0;border-top:1px solid var(--rule);background:var(--ground)}
+@media (max-width:640px){.mine-tabs a.open-new{margin-left:0}}
+.mine-shell{padding-block:18px 0}
+.mine-head{padding:10px 0 14px}
+.mine-head h1{margin:6px 0 6px;font-size:clamp(24px,3vw,32px)}
+.mine-head p{font-size:15px;color:var(--ink-mute)}
+.mine-tabs{margin-top:12px}
