@@ -11,12 +11,12 @@
 |---|---|
 | `index.html` | 화면 뼈대(첫 화면, START 장표, 취업상담 워크플로우) |
 | `style.css` | `agent-lab/style.css` 복사본 + 아래쪽 전용 스타일 |
-| `app.js` | START 장표(`#start`), 워크플로우 전체 과정(`#flow`)과 단계별 화면(`#flow-1`~`#flow-5`, 준비물 확인부터 시작), 질문지 만들기(`#flow-form`), 개별 실습(`#mine`), 바로가기 메뉴 |
+| `app.js` | START 장표(`#start`), 워크플로우 전체 과정(`#flow`)과 단계별 화면(`#flow-1`~`#flow-5`, 준비물 확인부터 시작), 질문지 만들기(`#flow-form`), 개별 실습(`#mine-studio`, `#mine-agent`: `agent-lab`의 `#studio`, `#s8` 화면을 iframe으로 그대로 표시), 바로가기 메뉴 |
 | `ai-test/`, `who/` | 시작하기 전에: AI 역량검사, 나는 어떤 AI 사용자?(레벨 확인). `ai-auto-lab/`의 같은 폴더를 복사해 이 과정에 맞게 문구만 고친 것 |
 | `data.js` | 화면 데이터. `tools/build.py`가 만든다 |
 | `src/*.md` | 연습용 가상 채용공고와 가상 구직자 서류 원본 |
 | `files/` | 수강생이 내려받는 PDF·DOCX와 전체 압축 파일. build.py가 만든다 |
-| `tools/build.py` | 내용 원본. 연결 주소(`LINKS`), START 장표(`START`), 워크플로우(`FLOW`), 질문지 만들기(`FORM_MAKE`), 개별 실습(`MINE`). 참고 자료 목록(`SOURCES`)은 기록용이며 사이트에 싣지 않는다 |
+| `tools/build.py` | 내용 원본. 연결 주소(`LINKS`), START 장표(`START`), 워크플로우(`FLOW`), 질문지 만들기(`FORM_MAKE`), 개별 실습 화면 주소(`MINE`). 참고 자료 목록(`SOURCES`)은 기록용이며 사이트에 싣지 않는다 |
 | `sheet/FormSetup.gs` | 내 사본 시트에 연결할 구직자용 사전 질문지를 만드는 Apps Script. 사이트 1단계의 "내가 쓸 사전 질문지 미리 만들기"에 그대로 실린다 |
 | `sheet/Code.gs` | 이전 시안(구인기업·직무 분석 전용 시트)의 Apps Script. 현재 사이트가 연결하는 최종본 시트의 코드는 그 시트 안에 있다 |
 

@@ -35,8 +35,8 @@
       <div class="flow5">${F.steps.map(s => `<a class="flow-card" href="#flow-${s.no}"><span class="lesson-code">${s.no}단계</span><h3>${esc(s.title)}</h3><p>${esc(s.short)}</p><div class="flow-tab">${esc(s.tab)}</div><div class="flow-go">준비물 확인하고 시작 →</div></a>`).join('')}</div>
       <div class="sheet-actions mt14"><a class="g-btn" href="#flow-1">1단계부터 시작</a><a class="g-btn ghost" href="#flow">전체 과정 보기</a></div></section>
       <section class="level-section"><div class="level-head"><div><span class="level-kicker">MY OWN</span><h2>개별 실습 · ${esc(M.title)}</h2></div>
-      <p>워크플로우 5단계와 같은 틀로 내 업무 하나를 설계합니다.</p></div>
-      <div class="go-studio"><p><b>같은 틀로 내 업무 하나를 설계</b> — 빈칸 양식 여덟 칸을 채우고 지시문을 실행하면 구글 시트·구글 폼 구성안과 Apps Script 초안이 나옵니다.</p><a class="g-btn" href="#mine">개별 실습 열기</a></div></section>`;
+      <p>업무 에이전트 실습실의 두 화면을 이 사이트 안에서 그대로 봅니다.</p></div>
+      <div class="lesson-grid before-grid">${M.tabs.map(t => `<a class="lesson-card" href="#mine-${t.id}"><span class="lesson-code">개별 실습</span><h3>${esc(t.label)}</h3><div class="lesson-arrow">열기 →</div></a>`).join('')}</div></section>`;
     $('#zipLink').href = FILE_BASE + D.zip;
     $('#downloadGroups').innerHTML = D.files.map(g => `<h3 class="dl-h">${esc(g.group)}</h3><div class="dl-grid">${g.items.map(([f, d]) =>
       `<div class="dl-item"><div><strong>${esc(f)}</strong><span>${esc(d)}</span></div><div class="btn-pair"><a class="g-btn ghost" href="${FILE_BASE}${encodeURIComponent(f)}.pdf" download>PDF</a><a class="g-btn ghost" href="${FILE_BASE}${encodeURIComponent(f)}.docx" download>DOCX</a></div></div>`).join('')}</div>`).join('');
@@ -118,31 +118,33 @@
       <details class="fold"><summary>질문 12개 (제목은 글자 그대로)</summary><div class="fold-b"><div class="g-table"><table><thead><tr><th>#</th><th>질문 제목</th><th>형식</th><th>필수</th></tr></thead><tbody>${FM.questions.map((q, i) => `<tr><td>${i + 1}</td><td>${esc(q[0])}</td><td>${esc(q[1])}</td><td>${esc(q[2])}</td></tr>`).join('')}</tbody></table></div></div></details>
       <details class="fold"><summary>Apps Script 코드 (방법 2에서 붙여 넣는 코드)</summary><div class="fold-b">${copyBox(FM.code, 'createMyJobseekerForm', '코드 복사')}</div></details></div>`;
   }
-  function renderMine() {
-    $('#flowCrumb').textContent = '개별 실습';
-    $('#flowEyebrow').textContent = 'MY OWN · 개별 실습';
-    $('#flowTitle').textContent = M.title;
-    $('#flowLead').textContent = M.lead;
-    $('#flowMeta').innerHTML = '';
-    const fileBtns = n => `<div class="btn-pair"><a class="g-btn ghost" href="${FILE_BASE}${encodeURIComponent(n)}.pdf" download>PDF</a><a class="g-btn ghost" href="${FILE_BASE}${encodeURIComponent(n)}.docx" download>DOCX</a></div>`;
-    const secs = [
-      ['out', '만드는 것', `${ul(M.out)}<div class="safety-box mt16"><strong>실명·연락처·내부 문서 원문은 넣지 않음</strong><p>업무의 순서와 자료 종류만 적습니다. 워크플로우 5단계에서 쓴 틀(입력 탭과 결과 탭, 체크한 행만 실행, 초안과 확정 구분)을 내 업무에 옮깁니다.</p></div>`],
-      ['plan', '기획서 빈칸 양식', `<p>여덟 칸을 먼저 채웁니다. 오른쪽 예시는 내 업무 내용으로 바꿉니다.</p>
-        <div class="g-table"><table><thead><tr><th>번호</th><th>칸</th><th>내가 적을 내용</th><th>예시</th></tr></thead><tbody>${M.boxes.map(b => `<tr><td>${esc(b[0])}</td><td>${esc(b[1])}</td><td class="blank"></td><td>${esc(b[2])}</td></tr>`).join('')}</tbody></table></div>
-        <div class="file-list"><div class="file-row"><div><strong>04_기획서_빈칸양식</strong><span>인쇄하거나 워드에서 채움</span></div>${fileBtns('04_기획서_빈칸양식')}</div></div>`],
-      ['steps', '순서', ol(M.steps)],
-      ['prompt', '지시문', `<p>전체를 복사한 뒤 [입력]의 여덟 줄만 내 내용으로 바꿉니다. 지금 들어 있는 값은 예시입니다.</p>${copyBox(M.prompt, '지시문', '지시문 복사')}
-        <h3>[입력] 칸에 고를 수 있는 값</h3><div class="g-table"><table><tbody>${M.options.map(o => `<tr><td>${esc(o[0])}</td><td>${esc(o[1])}</td></tr>`).join('')}</tbody></table></div>`],
-      ['check', '결과에서 볼 것', ul(M.checks)],
-      ['safe', '안전 사용 체크리스트', `<p>실제 자료를 넣기 전에 여덟 가지를 예·아니오로 답합니다. "아니오"가 하나라도 있으면 실제 자료를 넣지 않습니다.</p>${ol(M.safety)}
-        <div class="file-list"><div class="file-row"><div><strong>05_안전사용_체크리스트</strong><span>예·아니오 칸이 있는 인쇄용</span></div>${fileBtns('05_안전사용_체크리스트')}</div></div>`],
-      ['after', '교육 뒤 직접 활용 계획', `<div class="g-table"><table><thead><tr><th>회차</th><th>언제</th><th>어떤 자료로</th><th>확인할 것</th></tr></thead><tbody>${M.after.map(r => `<tr>${r.map(c => `<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
-        <div class="file-list"><div class="file-row"><div><strong>06_직접활용_계획표</strong><span>고칠 점 기록 칸이 있는 인쇄용</span></div>${fileBtns('06_직접활용_계획표')}</div></div>`],
-    ];
-    $('#flowToc').innerHTML = '<strong>목차</strong>' + secs.map(s => `<a href="#mine-${s[0]}">${esc(s[1])}</a>`).join('');
-    $('#flowBody').innerHTML = secs.map((s, i) => `<section id="mine-${s[0]}"><span class="section-number">${i + 1}</span><h2>${esc(s[1])}</h2>${s[2]}</section>`).join('') +
-      `<div class="lesson-navigation"><a href="#flow"><span>이전</span><strong>취업상담 워크플로우 5단계</strong></a><a class="lesson-next" href="#downloads"><span>다음</span><strong>자료 받기</strong></a></div>`;
-    bindCopy($('#flowBody'));
+  /* 개별 실습: agent-lab의 화면을 같은 사이트 안에서 그대로 보여 준다(같은 출처의 iframe). */
+  let mineTimer = null;
+  function tidyFrame() {
+    const f = $('#mineFrame');
+    let doc; try { doc = f.contentDocument; } catch (e) { return; }
+    if (!doc || !doc.body) return;
+    ['.g-header', '.g-footer', '.breadcrumb', '.lesson-navigation'].forEach(sel => doc.querySelectorAll(sel).forEach(el => { el.style.display = 'none'; }));
+    const main = doc.querySelector('main');
+    const h = Math.ceil((main ? main.getBoundingClientRect().height : doc.body.scrollHeight) + 24);
+    if (h > 200 && Math.abs(h - f.offsetHeight) > 4) f.style.height = h + 'px';
+  }
+  function renderMine(tabId) {
+    const tab = M.tabs.find(t => t.id === tabId) || M.tabs[0];
+    $('#mineTitle').textContent = M.title;
+    $('#mineLead').textContent = M.lead;
+    $('#mineTabs').innerHTML = M.tabs.map(t => `<a class="${t === tab ? 'on' : ''}" href="#mine-${t.id}">${esc(t.label)}</a>`).join('') +
+      `<a class="open-new" href="${esc(tab.src)}" target="_blank" rel="noopener">새 탭에서 열기</a>`;
+    const f = $('#mineFrame');
+    f.title = tab.label;
+    if (f.dataset.tab !== tab.id) {
+      f.dataset.tab = tab.id;
+      if (f.dataset.loaded) { try { f.contentWindow.location.hash = tab.hash; } catch (e) { f.src = tab.src; } }
+      else { f.src = tab.src; f.addEventListener('load', () => { f.dataset.loaded = '1'; tidyFrame(); }); }
+    }
+    clearInterval(mineTimer);
+    mineTimer = setInterval(() => { if ($('#viewMine').hidden) { clearInterval(mineTimer); return; } tidyFrame(); }, 400);
+    tidyFrame();
   }
   /* 준비물 확인 표시는 이 기기에만 저장한다 */
   const PREP_KEY = 'jobAiLab.prep.v1';
@@ -220,7 +222,7 @@
       ['시작하기 전에', [['ai-test/', '검사', 'AI 역량검사'], ['who/', '레벨', '나는 어떤 AI 사용자?']]],
       ['START · 세 가지 키워드', SLIDES.map((s, i) => ['#start-' + i, s.nav, s.title])],
       ['취업상담 워크플로우', [['#flow', '안내', '전체 과정'], ...F.steps.map(s => ['#flow-' + s.no, s.no + '단계', s.title]), ['#flow-form', '질문지', '내가 쓸 사전 질문지 미리 만들기'], ['#flow-why', '의미', '이 워크플로우의 의미'], ['#flow-tabs', '탭', '시트 탭 구성']]],
-      ['개별 실습', [['#mine', '안내', M.title], ['#mine-plan', '양식', '기획서 빈칸 양식'], ['#mine-prompt', '지시문', '지시문'], ['#mine-safe', '점검', '안전 사용 체크리스트'], ['#mine-after', '계획', '교육 뒤 직접 활용 계획']]],
+      ['개별 실습', M.tabs.map(t => ['#mine-' + t.id, '개별', t.label])],
       ['자료와 안내', [['#downloads', '자료', '자료 받기'], ['#privacy', '유의', '실제 구직자 정보를 다룰 때'], ['#help', '도움', '막힐 때']]],
     ];
     $('#quickPanel').innerHTML = groups.map(g => `<div class="menu-group"><strong>${esc(g[0])}</strong>${g[1].map(x => `<a href="${x[0]}"><span>${esc(x[1])}</span>${esc(x[2])}</a>`).join('')}</div>`).join('');
@@ -233,7 +235,7 @@
   function route() {
     const h = (location.hash || '#home').replace('#', '');
     const [view, sub] = h.split('-');
-    ['#viewHome', '#viewStart', '#viewFlow'].forEach(v => { $(v).hidden = true; });
+    ['#viewHome', '#viewStart', '#viewFlow', '#viewMine'].forEach(v => { $(v).hidden = true; });
     $('#quickMenu').open = false;
     let target = null;
     if (view === 'start') { $('#viewStart').hidden = false; renderStart(Number(sub) || 0); }
@@ -243,7 +245,7 @@
       else if (sub === 'form') { renderStep('1'); target = document.getElementById('flow-form'); }
       else { renderFlow(); if (sub) target = document.getElementById(h); }
     }
-    else if (view === 'mine') { $('#viewFlow').hidden = false; renderMine(); if (sub) target = document.getElementById(h); }
+    else if (view === 'mine') { $('#viewMine').hidden = false; renderMine(sub); }
     else { $('#viewHome').hidden = false; if (HOME_SECS.includes(view)) target = document.getElementById('sec-' + view); }
     requestAnimationFrame(() => { if (target) target.scrollIntoView({ block: 'start' }); else window.scrollTo(0, 0); });
   }
