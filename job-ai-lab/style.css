@@ -1277,3 +1277,12 @@ main{padding-bottom:72px}
 }
 @media (prefers-reduced-motion:reduce){.hb-card,.hb-member,.hb-cta-item{transition:none}}
 @media print{.hb-acc details{box-shadow:none}}
+
+/* ===== 1단계 선택 실습 (2026-11-20): 사전 질문지 만들기와 Apps Script 연습은 접어 둔다 ===== */
+details.opt-fold > summary{align-items:center;font-size:16.5px}
+details.opt-fold > summary b{display:inline-block;margin-right:10px;padding:2px 10px;border:1px solid var(--accent);border-radius:999px;color:var(--accent);font-size:12px;font-weight:700;vertical-align:2px}
+details.opt-fold > .fold-b > h4{margin:18px 0 4px;font-size:18px;font-weight:700;letter-spacing:-.02em}
+details.opt-fold > .fold-b > p{color:var(--ink-soft)}
+details.opt-fold > .fold-b > ol.plain{margin-top:10px;padding-left:20px;font-size:15.5px;line-height:1.8}
+details.opt-fold > .fold-b > .sheet-actions{margin:16px 0 4px}
+details.opt-fold .g-table{margin-top:14px}

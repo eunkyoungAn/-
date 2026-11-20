@@ -23,7 +23,7 @@
 | `tools/build.py` | 내용 원본. 연결 주소(`LINKS`), START 장표(`START`), 워크플로우(`FLOW`), 질문지 만들기(`FORM_MAKE`), 개별 실습 화면 주소(`MINE`). 참고 자료 목록(`SOURCES`)은 기록용이며 사이트에 싣지 않는다 |
 | `sheet/FormSetup.gs` | 내 사본 시트에 연결할 구직자용 사전 질문지를 만드는 Apps Script. 사이트에 올라가 있는 구글 폼("질문지 미리 보기")과 같은 질문 12개를 만든다. 사이트 1단계의 "내가 쓸 사전 질문지 만들기"에 그대로 실리고, `files/사전질문지_폼만들기_AppsScript.txt`로도 받는다. 질문 표는 `build.py`가 이 파일에서 읽어 오므로 질문은 이 파일에서만 고친다 |
 | `tools/check_form.py` | 올라가 있는 구글 폼, 스크립트, 화면의 질문 표와 코드, 받는 파일, 압축 파일이 서로 같은지 대조한다. 질문지나 스크립트를 고친 뒤 `python3 job-ai-lab/tools/check_form.py`로 확인한다 |
-| `sheet/SurveyPractice.gs` | 1단계 "방법 2 · 직접 만들어 보기"에 실리는 연습용 코드. 새 구글 폼의 Apps Script에 붙여 넣어 가상의 교육 만족도 조사(질문 5개)를 만든다. 질문 표는 `build.py`가 이 파일에서 읽어 온다. 실제 구글 폼에서 실행해 확인하지 못했으므로 강의 전에 한 번 실행해 본다 |
+| `sheet/SurveyPractice.gs` | 1단계 아래 "더 해 보기 · Apps Script로 가상의 만족도 조사 만들기"에 실리는 연습용 코드. 새 구글 폼의 Apps Script에 붙여 넣어 가상의 교육 만족도 조사(질문 5개)를 만든다. 질문 표는 `build.py`가 이 파일에서 읽어 온다. 실제 구글 폼에서 실행해 확인하지 못했으므로 강의 전에 한 번 실행해 본다 |
 | `img/form-script-run.webp` | 1단계에 실리는 Apps Script 실행 화면. 질문지 주소는 흐리게 처리했다 |
 | `sheet/Code.gs` | 이전 시안(구인기업·직무 분석 전용 시트)의 Apps Script. 현재 사이트가 연결하는 최종본 시트의 코드는 그 시트 안에 있다 |
 
