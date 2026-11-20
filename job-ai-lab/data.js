@@ -597,17 +597,63 @@ window.LAB = {
   ]
  },
  "formMake": {
-  "why": "배포용 시트에는 함께 쓰는 질문지가 연결되어 있지 않음. 구직자에게 질문지로 받으려면 내 사본에 연결된 내 질문지를 만듦. 질문 12개는 [질문지 미리 보기]의 구글 폼과 같음.",
-  "builtin": "내 사본에는 사전 질문지를 만드는 기능이 들어 있음. 상단 [분석] 메뉴에서 사전 질문지(폼 접수)를 설정하면 내 질문지 주소가 \"자동화 버튼\" 탭의 구직자 작성 링크 칸에 적히고, 제출된 답변이 내 사본의 \"구직자 정보\"에 순번으로 등록됨.",
-  "script": [
-   "[내 사본 만들기]로 상담자용 시트를 복사",
-   "사본에서 확장 프로그램 → Apps Script를 엶",
-   "파일 옆 + → 스크립트를 눌러 새 파일을 만들고, 아래 코드를 붙여 넣은 뒤 저장",
-   "위쪽 함수 목록에서 createMyJobseekerForm을 고르고 실행. 처음에는 권한 승인 창이 뜸",
-   "실행이 끝나면 내 질문지 주소가 \"자동화 버튼\" 탭의 구직자 작성 링크 칸에 적힘. 실행 로그에도 나옴",
+  "why": "구직자에게 사전 질문지를 보내려면 내 사본에 연결된 내 질문지가 있어야 함. 질문지는 Apps Script 코드로 만듦. 먼저 방법 1로 이 사이트의 코드를 복사해 내 질문지를 만들고, 방법 2로 가상의 만족도 조사를 직접 만들어 보며 같은 방식을 연습함.",
+  "shot": "img/form-script-run.webp",
+  "shot_alt": "상담자용 시트의 Apps Script 화면. 왼쪽 파일 목록에 Code.gs와 구직자 사전질문지.gs가 있고, createMyJobseekerForm을 실행한 뒤 실행 로그에 구직자에게 보낼 주소와 질문을 고치는 주소가 나와 있음",
+  "shot_cap": "상담자용 시트 → 확장 프로그램 → Apps Script에서 \"구직자 사전질문지\" 파일을 열고 createMyJobseekerForm을 실행한 화면. 아래 실행 로그에 구직자에게 보낼 주소가 나옴.",
+  "copy_h": "복사해서 만들기",
+  "copy_lead": "이 사이트의 코드를 복사해 상담자용 시트에 붙여 넣고 실행함. 질문 12개는 [질문지 미리 보기]의 구글 폼과 같음.",
+  "copy": [
+   "상담자용 시트(내 사본)를 엶. 아직 없으면 [내 사본 만들기]로 먼저 복사",
+   "위쪽 메뉴에서 확장 프로그램 → Apps Script를 누름",
+   "왼쪽 파일 목록에서 \"구직자 사전질문지\"를 엶. 없으면 파일 옆 + → 스크립트를 눌러 같은 이름으로 새 파일을 만듦",
+   "아래 [코드 복사]를 눌러 복사하고, 파일 안의 내용을 모두 지운 뒤 붙여 넣고 저장",
+   "위쪽 함수 목록에서 createMyJobseekerForm을 고르고 [실행]을 누름. 처음에는 권한 승인 창이 뜸",
+   "아래 실행 로그에 \"구직자에게 보낼 주소\"가 나옴. 같은 주소가 \"자동화 버튼\" 탭의 구직자 작성 링크 칸에도 적힘",
    "그 주소를 구직자에게 보냄. 제출하면 \"구직자 정보\" 탭에 ID 순번으로 등록되고, 답변 원본은 \"설문지 응답 시트\" 탭에 쌓임"
   ],
-  "script_note": "방법 1의 메뉴를 쓸 수 없을 때 씀. 답변이 등록되지 않은 것이 있으면 registerMissingJobseekerResponses를 한 번 실행. 코드는 모의 시트로만 시험했으므로 내 사본에서 가상 답변으로 먼저 확인.",
+  "copy_note": "답변이 등록되지 않은 것이 있으면 registerMissingJobseekerResponses를 한 번 실행. 코드는 모의 시트로만 시험했으므로 내 사본에서 가상 답변으로 먼저 확인.",
+  "diy_h": "직접 만들어 보기 · 가상의 만족도 조사",
+  "diy_lead": "같은 방식을 내 손으로 한 번 해 보는 연습. 새 구글 폼을 열고, 질문 목록을 코드로 정리해 실행하면 \"[연습] 취업지원 교육 만족도 조사\"가 만들어짐. 실제 조사가 아닌 가상 설문임.",
+  "diy": [
+   "forms.google.com에서 [빈 양식]을 눌러 새 양식을 만듦",
+   "오른쪽 위 ⋮(더보기) → Apps Script를 누름",
+   "들어 있는 코드를 모두 지우고, 아래 [코드 복사]로 복사한 코드를 붙여 넣은 뒤 저장",
+   "코드 위쪽의 SURVEY_ITEMS 목록을 읽어 봄. 한 줄이 질문 하나이고, 순서대로 질문 제목, 형식, 필수 여부, 보기임",
+   "질문 한 줄을 내 말로 고치거나 한 줄을 더 넣어 봄. 형식은 scale(5점 척도), choice(객관식), text(서술형) 가운데 하나",
+   "함수 목록에서 createPracticeSurvey를 고르고 [실행]을 누름. 처음에는 권한 승인 창이 뜸",
+   "실행 로그의 \"응답자에게 보낼 주소\"를 열어 질문이 들어갔는지 확인"
+  ],
+  "diy_note": "질문이 이미 들어 있는 양식에서는 실행이 멈춤. 반드시 새 양식에서 실행.",
+  "diy_questions": [
+   [
+    "교육 전반에 만족하셨나요?",
+    "5점 척도",
+    "필수"
+   ],
+   [
+    "교육 내용이 내 업무에 도움이 되었나요?",
+    "5점 척도",
+    "필수"
+   ],
+   [
+    "가장 도움이 된 내용은 무엇인가요?",
+    "객관식",
+    "필수"
+   ],
+   [
+    "실습 난이도는 어땠나요?",
+    "객관식",
+    "필수"
+   ],
+   [
+    "개선할 점이나 더 다뤘으면 하는 내용을 적어 주세요.",
+    "서술형",
+    "선택"
+   ]
+  ],
+  "diy_code": "/**\n * [연습] 가상의 교육 만족도 조사 만들기 — 새 구글 폼의 Apps Script에서 쓰는 코드\n *\n * 쓰는 법\n * 1. forms.google.com 에서 빈 양식을 새로 만든다.\n * 2. 오른쪽 위 ⋮(더보기) → Apps Script 를 연다.\n * 3. 들어 있는 코드를 모두 지우고 이 코드를 붙여 넣은 뒤 저장한다.\n * 4. 함수 createPracticeSurvey 를 골라 실행하고 권한을 승인한다.\n *\n * 하는 일\n * - 지금 열려 있는 양식에 제목, 안내문, 질문 5개, 제출 뒤 문구를 넣는다.\n * - 질문이 이미 들어 있는 양식에서는 멈춘다. 반드시 새 양식에서 실행한다.\n *\n * 질문을 바꾸려면 아래 SURVEY_ITEMS 목록만 고친다.\n */\nconst SURVEY_TITLE = '[연습] 취업지원 교육 만족도 조사';\nconst SURVEY_INTRO = '연습용 가상 설문입니다. 실제 이름과 연락처는 적지 마세요.';\nconst SURVEY_DONE = '응답해 주셔서 감사합니다.';\nconst SURVEY_ITEMS = [\n  // [질문 제목, 형식(scale 5점 척도 / choice 객관식 / text 서술형), 필수 여부, 보기 또는 도움말]\n  ['교육 전반에 만족하셨나요?', 'scale', true, ['전혀 그렇지 않다', '매우 그렇다']],\n  ['교육 내용이 내 업무에 도움이 되었나요?', 'scale', true, ['전혀 그렇지 않다', '매우 그렇다']],\n  ['가장 도움이 된 내용은 무엇인가요?', 'choice', true, ['강의(변화·트렌드·역할)', '취업상담 워크플로우 5단계 실습', '내 업무 에이전트 만들기', '기타']],\n  ['실습 난이도는 어땠나요?', 'choice', true, ['쉬웠다', '적당했다', '어려웠다']],\n  ['개선할 점이나 더 다뤘으면 하는 내용을 적어 주세요.', 'text', false, '없으면 비워 두셔도 됩니다.']\n];\n\nfunction createPracticeSurvey() {\n  const form = FormApp.getActiveForm();\n  const existing = form.getItems();\n  if (existing.some(item => item.getTitle())) {\n    throw new Error('질문이 이미 들어 있는 양식입니다. 새 양식을 만들어 그 양식에서 실행하세요.');\n  }\n  existing.forEach(item => form.deleteItem(item));   // 새 양식에 기본으로 들어 있는 빈 질문을 지운다\n  form.setTitle(SURVEY_TITLE).setDescription(SURVEY_INTRO).setCollectEmail(false).setConfirmationMessage(SURVEY_DONE);\n  SURVEY_ITEMS.forEach(row => {\n    const title = row[0], type = row[1], required = row[2], extra = row[3];\n    if (type === 'scale') {\n      form.addScaleItem().setTitle(title).setBounds(1, 5).setLabels(extra[0], extra[1]).setRequired(required);\n    } else if (type === 'choice') {\n      form.addMultipleChoiceItem().setTitle(title).setChoiceValues(extra).setRequired(required);\n    } else {\n      form.addParagraphTextItem().setTitle(title).setHelpText(extra).setRequired(required);\n    }\n  });\n  Logger.log('응답자에게 보낼 주소: ' + form.getPublishedUrl());\n  Logger.log('질문을 고치는 주소: ' + form.getEditUrl());\n}\n",
+  "builtin": "내 사본에는 사전 질문지를 만드는 기능도 들어 있음. 상단 [분석] 메뉴에서 사전 질문지(폼 접수)를 설정하면 내 질문지 주소가 \"자동화 버튼\" 탭의 구직자 작성 링크 칸에 적히고, 제출된 답변이 내 사본의 \"구직자 정보\"에 순번으로 등록됨.",
   "manual": [
    "forms.google.com에서 새 양식을 만들고 제목을 \"취업상담 사전 질문지\"로 적음",
    "설명 칸에 아래 \"안내문\"을 그대로 붙여 넣음",
@@ -616,7 +662,7 @@ window.LAB = {
    "응답 탭 → Sheets에 연결 → 기존 스프레드시트 선택 → 내 사본 시트를 고름",
    "답변은 새로 생긴 \"설문지 응답 시트\" 탭에 쌓임. \"구직자 정보\" 탭에는 상담자가 옮겨 적음"
   ],
-  "manual_note": "직접 만든 질문지는 \"구직자 정보\" 탭에 자동으로 등록되지 않음. 자동 등록이 필요하면 방법 1이나 방법 2를 씀.",
+  "manual_note": "직접 만든 질문지는 \"구직자 정보\" 탭에 자동으로 등록되지 않음. 자동 등록이 필요하면 방법 1을 씀.",
   "title": "취업상담 사전 질문지",
   "intro": "취업상담 전에 희망하는 일과 경험을 알려 주세요. 답변은 담당 상담자가 직무 적합도를 함께 살펴보고 지원계획을 준비하는 데 사용합니다. 이름 또는 별칭과 희망 직무만 필수입니다. 연락처·주민등록번호·건강정보는 적지 마세요.",
   "done": "답변을 접수했습니다. 다음 상담에서 함께 확인하겠습니다.",
