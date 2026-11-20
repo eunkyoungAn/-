@@ -85,11 +85,11 @@
   }
   function renderHome() {
     $('#homeParts').innerHTML = D.parts.map(p => `<section class="level-section" id="sec-${p.id}">
-      <div class="level-head"><div><span class="level-kicker">${esc(p.no)} · ${esc(p.time)}</span><h2>${esc(p.title)}</h2></div><p>${esc(p.desc)}</p></div>
+      <div class="level-head"><div><span class="level-kicker">${esc(p.no)}</span><h2>${esc(p.title)}</h2></div><p>${esc(p.desc)}</p></div>
       <div class="lesson-grid">${p.stages.map(s => { const x = find(s.id); return `<a class="lesson-card ${done(x) ? 'is-done' : ''}" href="#${s.id}">
-        <span class="lesson-code">${esc(s.kicker)} · ${esc(s.time)}</span><h3>${esc(s.title)}</h3><p>${esc(s.goal[0])}</p>
+        <span class="lesson-code">${esc(s.kicker)}</span><h3>${esc(s.title)}</h3><p>${esc(s.goal[0])}</p>
         <div class="lesson-output">산출물 <span>${esc(s.output)}</span></div><div class="lesson-arrow">${esc(s.role)} →</div></a>`; }).join('')}
-      ${p.review ? `<a class="lesson-card ${done(find(p.review.id)) ? 'is-done' : ''}" href="#${p.review.id}"><span class="lesson-code">WRAP-UP · ${esc(p.review.time)}</span><h3>${esc(p.review.title)}</h3><p>${p.id === 'mail' ? 'AI가 만든 메일을 바로 보내지 않고 체크리스트로 다시 읽습니다.' : '결과 링크와 상태를 시트에 기록하고 오늘 한 일을 돌아봅니다.'}</p><div class="lesson-output">산출물 <span>${p.id === 'mail' ? '체크 완료' : '카드뉴스 1편과 링크'}</span></div><div class="lesson-arrow">마무리 →</div></a>` : ''}
+      ${p.review ? `<a class="lesson-card ${done(find(p.review.id)) ? 'is-done' : ''}" href="#${p.review.id}"><span class="lesson-code">WRAP-UP</span><h3>${esc(p.review.title)}</h3><p>${p.id === 'mail' ? 'AI가 만든 메일을 바로 보내지 않고 체크리스트로 다시 읽습니다.' : '결과 링크와 상태를 시트에 기록하고 오늘 한 일을 돌아봅니다.'}</p><div class="lesson-output">산출물 <span>${p.id === 'mail' ? '체크 완료' : '카드뉴스 1편과 링크'}</span></div><div class="lesson-arrow">마무리 →</div></a>` : ''}
       </div></section>`).join('');
     renderProgress();
   }
@@ -123,7 +123,7 @@
     $('#shEyebrow').textContent = `${p.short} · ${st.kicker} · ${st.role}`;
     $('#shTitle').textContent = st.title;
     $('#shSum').textContent = st.goal.join(' ');
-    $('#shMeta').innerHTML = `<span class="meta-chip active">${esc(st.time)}</span><span class="meta-chip">산출물 · ${esc(st.output)}</span>`;
+    $('#shMeta').innerHTML = `<span class="meta-chip active">산출물 · ${esc(st.output)}</span>`;
     const secs = [];
     let goal = `<ul class="plain">${st.goal.map(g => `<li>${esc(g)}</li>`).join('')}</ul><h3>이 단계에 필요한 것</h3>${ul(st.input)}`;
     if (st.linkButton) goal += `<div class="go-studio mt16"><p><b>${esc(st.linkButton.label)}</b> — ${esc(st.linkButton.desc)}</p><a class="g-btn" href="${esc(st.linkButton.href)}" target="_blank" rel="noopener noreferrer">${esc(st.linkButton.label)}</a></div>`;
@@ -151,7 +151,7 @@
     $('#shEyebrow').textContent = `${p.short} · WRAP-UP`;
     $('#shTitle').textContent = r.title;
     $('#shSum').textContent = p.id === 'mail' ? 'AI가 작성하고, 사람이 확인합니다. 보내기 전에 마지막으로 읽는 기준입니다. (원본 PPT 17번)' : '결과를 시트에 기록하고, 오늘 AI가 한 일과 내가 한 일을 나눠 봅니다.';
-    $('#shMeta').innerHTML = `<span class="meta-chip active">${esc(r.time)}</span>`;
+    $('#shMeta').innerHTML = '';
     const secs = [];
     const chk = ['check', p.id === 'mail' ? '발송 전 체크' : '검수', checklist(r.id, r.checks)];
     if (r.checkFirst) secs.push(chk);
