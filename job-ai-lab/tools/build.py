@@ -21,6 +21,8 @@ LINKS = {
     'sheet': f'https://docs.google.com/spreadsheets/d/{SHEET_ID}/edit?usp=sharing',   # 상담자용 시트(최종본)
     'copy': f'https://docs.google.com/spreadsheets/d/{SHEET_ID}/copy',               # 내 사본 만들기
     'form': 'https://docs.google.com/forms/d/e/1FAIpQLScgRDXzLZ_4TYRPZoxo-oG-r8_DGSGUORQmYDhVDBmI9wb1ow/viewform',  # 구직자용 사전 질문지
+    'studio': 'https://claude.ai/artifact/KZ8jbQyiu3qHRkMRhjxe93',   # 강사 스튜디오(업무 에이전트 스튜디오). agent-lab/config.js 의 studioUrl 과 같게 유지
+    'chat': 'https://claude.ai/new',                                  # Claude 새 채팅
 }
 
 # ---------------------------------------------------------------- START 장표 (변화 · 트렌드 · 역할)
@@ -202,11 +204,28 @@ FORM_MAKE = {
 # ---------------------------------------------------------------- 개별 실습: agent-lab의 두 화면을 그대로 보여 준다
 MINE = {
     'title': '내 업무 에이전트 만들기',
-    'lead': '업무 에이전트 실습실(agent-lab)의 두 화면을 그대로 보여 줌. 먼저 내 스튜디오를 만들고, 그 스튜디오에서 내 업무용 에이전트를 설계함.',
+    'lead': '①②는 업무 에이전트 실습실(agent-lab) 화면을 그대로 보여 줌. 먼저 내 스튜디오를 만들고, 그 스튜디오에서 내 업무용 에이전트를 설계함. 스튜디오를 아직 못 만들었으면 ③에서 강사 스튜디오의 프롬프트를 복사해 씀.',
     'tabs': [
         {'id': 'studio', 'label': '① 내 스튜디오 만들기', 'hash': '#studio', 'src': '../agent-lab/#studio'},
         {'id': 'agent', 'label': '② 내 업무용 에이전트 설계하기', 'hash': '#s8', 'src': '../agent-lab/#s8'},
+        {'id': 'prompt', 'label': '③ 강사 스튜디오에서 프롬프트 뽑기', 'panel': True},
     ],
+    'prompt': {
+        'why': '내 스튜디오를 아직 만들지 못했을 때 쓰는 방법. 강사 스튜디오에 내 값을 넣으면, 그 값이 들어간 지시문(프롬프트)을 복사해 Claude 채팅에서 실행할 수 있음.',
+        'steps': [
+            'claude.ai에 로그인한 브라우저에서 [강사 스튜디오 열기]를 누름',
+            '왼쪽 목록에서 쓸 에이전트를 고름. 개별 실습은 "나만의 에이전트"',
+            '칸에 내 값을 넣음. 자료가 필요한 에이전트는 파일을 올리거나 "본문 붙여넣기" 칸에 넣음',
+            '[에이전트 실행]을 누름. 강사 계정이 아니면 실행되지 않고 안내 상자가 나옴',
+            '안내 상자 아래 [임시 방법 — 지시문을 복사해 대화창에서 실행]을 누름. 내가 넣은 값이 들어간 지시문이 복사됨',
+            '[Claude 새 채팅 열기]를 눌러 붙여 넣고 보냄',
+        ],
+        'notes': [
+            '필수 칸이 비어 있으면 "실행하지 않았음" 안내가 먼저 나옴. 빈칸을 채우고 다시 누름',
+            '강사 스튜디오 링크는 누구나 열 수 있지만 "에이전트 실행"은 만든 사람 계정에서만 됨',
+            '실명·연락처·내부 문서 원문은 넣지 않음',
+        ],
+    },
 }
 
 # 참고 자료 목록: 사이트에는 싣지 않고 기록용으로만 둔다. 장표의 카드별 출처는 START 안에 있다.
