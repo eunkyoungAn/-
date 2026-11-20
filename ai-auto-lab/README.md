@@ -7,9 +7,9 @@
 - 첫 시작: `who/`(나는 어떤 AI 사용자? 맞춰 보기 5문제 + 나는? 4문제, `ai-practice`의 AI 역량검사와 같은 레이아웃), `ai-test/`(AI 역량검사, gh-pages의 `ai-practice/index.html`을 가져온 사본). 두 페이지는 글꼴을 Google Fonts에서 불러오는 독립 페이지다.
 - 체크리스트 주소: `#check` (체크 → 프롬프트로 적용 시작하기 → 기억할 세 가지 → 나의 단계 확인. 레벨 기준은 수업용으로 임의 설정)
 - 첫 화면은 과정 소개이고, 순서는 소개 → 시작하기 전에(`#before`: 점검, START 장표, 준비) → G-mail 자동화(`#mail`) → 카드뉴스 자동화(`#card`)다.
-- 단계 주소: G-mail 자동화 `#m1`~`#m4`, 마무리 `#mr` / 실습 2 `#c1`~`#c3`, 마무리 `#cr` / START `#start`
+- 단계 주소: G-mail 자동화 `#m1`~`#m7`, 마무리 `#mr` / 실습 2 `#c1`~`#c3`, 마무리 `#cr` / START `#start`
 
-- 첫 화면 구역(2026-11-20 재구성): 1 AI 사용 현황 안내(`#ai`) · 2 시작하기 전에(`#before`) · 3 제미나이 메일 자동화(`#mail`, m1~m4) · 4 ChatGPT 프로젝트 활용하기(`#gpt`, g1) · 5 카드뉴스 만들기(`#card`, c1~c3) · 6 다운로드 자료 모아보기(`#materials`) · 7 개인 연습실(`#practice`, `#check`와 `../prompt-practice/`). 시간표·막힐 때·참고 자료는 접어 둔 안내에 있다.
+- 첫 화면 구역(2026-11-20 재구성): 1 AI 사용 현황 안내(`#ai`) · 2 시작하기 전에(`#before`) · 3 제미나이 메일 자동화(`#mail`, m1~m7) · 4 ChatGPT 프로젝트 활용하기(`#gpt`, g1) · 5 카드뉴스 만들기(`#card`, c1~c3) · 6 다운로드 자료 모아보기(`#materials`) · 7 개인 연습실(`#practice`, `#check`와 `../prompt-practice/`). 시간표·막힐 때·참고 자료는 접어 둔 안내에 있다.
 
 - 4번(2026-11-20 교체): 무료 ChatGPT 계정 기준. g1 여행지 분석 프로젝트(지침 → 강릉·경주 반복 분석 → 비교), g2 스킬(무료는 스킬 문서를 프로젝트 지침에 추가, 스킬 메뉴가 있는 유료 계정은 `files/travel-analysis/SKILL.md` 등록). 카드뉴스용 프로젝트는 5번 3단계에서 만든다. 단계 화면의 "내 기록" 구역은 삭제했다.
 - [확인 필요] 무료 계정에서 프로젝트를 쓸 수 있는지, 스킬 메뉴가 어느 요금제에 보이는지, 메뉴 이름은 강의 전 실제 계정으로 확인한다.
@@ -25,7 +25,7 @@
 |---|---|
 | `index.html` | 화면 뼈대(첫 화면, START 장표, 단계 화면) |
 | `style.css` | `mail-lab/style.css` 복사본 + 맨 아래 전용 스타일 |
-| `app.js` | START 장표 14장, 실습 순서(m1→m4→mr→c1→c3→cr), 메모·검수 표시 |
+| `app.js` | START 장표 14장, 실습 순서(m1→m7→mr→c1→c3→cr), 메모·검수 표시 |
 | `data.js` | `mail-lab/data.js`와 `cardnews-lab/data.js`를 합친 데이터(parts 2개) |
 | `code.js`, `files/mail-automation.gs` | 메일 자동화 참고 코드 (`mail-lab`과 같음) |
 

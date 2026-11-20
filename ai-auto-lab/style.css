@@ -1041,3 +1041,23 @@ main h1,main h2,main h3,.lesson-card h3,.start-item strong,.result-card strong,.
 .prompt-box pre{word-break:keep-all;overflow-wrap:break-word}
 .sources-ol li a{overflow-wrap:anywhere}
 .g-table table:has(th:nth-child(4)){min-width:640px}
+
+/* ===== 메일 자동화 진행 순서도 ===== */
+.step-flow{margin:0 0 24px;padding:16px;border:1px solid var(--rule);border-radius:16px;background:var(--surface)}
+.step-flow>p{margin:0 0 12px;font-weight:800;font-size:14px}
+.step-flow>p span{margin-left:8px;color:var(--ink-mute);font-weight:500;font-size:12.5px}
+.step-flow>p i{font-style:normal;font-weight:700;color:var(--accent)}
+.step-flow ol{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.step-flow li{position:relative;margin:0}
+.step-flow li a{display:grid;justify-items:center;gap:6px;height:100%;padding:10px 4px;border:1px solid var(--rule);border-radius:12px;text-align:center;color:var(--ink-soft);font-size:12.5px;font-weight:600;line-height:1.4;word-break:keep-all;text-decoration:none}
+main .step-flow li a:not(.g-btn)::after{content:none}
+main .step-flow li a{text-decoration:none;border-bottom:1px solid var(--rule)}
+main .step-flow li.on a{border-color:var(--accent)}
+.step-flow li a:hover{border-color:var(--ink)}
+.step-flow b{width:26px;height:26px;border-radius:50%;background:var(--surface-2);color:var(--ink);font-size:13px;display:grid;place-items:center}
+.step-flow li.past b{background:var(--ink-mute);color:#fff}
+.step-flow li.on a{background:var(--accent);border-color:var(--accent);color:#fff}
+.step-flow li.on b{background:#fff;color:var(--accent)}
+.level-section .step-flow{margin:0 0 18px}
+@media (max-width:900px){.step-flow ol{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (max-width:640px){.step-flow ol{grid-template-columns:minmax(0,1fr)}.step-flow li a{grid-template-columns:26px minmax(0,1fr);justify-items:start;align-items:center;gap:10px;padding:9px 12px;text-align:left;font-size:13.5px}.step-flow>p span{display:block;margin:2px 0 0}}
