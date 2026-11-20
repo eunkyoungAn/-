@@ -1018,3 +1018,8 @@ body{word-break:keep-all;overflow-wrap:break-word;line-break:strict}
 .before-grid .lesson-card{min-height:230px}
 #sec-before .local-note{margin-top:12px}
 @media (max-width:640px){.before-grid{grid-template-columns:minmax(0,1fr)}}
+
+/* 단계 안의 시트 받기 */
+.sheet-get{max-width:860px;margin-top:18px}
+.sheet-get .btn-pair{flex-wrap:wrap}
+.sheet-get .g-btn{white-space:nowrap}
