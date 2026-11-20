@@ -1067,3 +1067,15 @@ body{word-break:keep-all;overflow-wrap:break-word;line-break:strict}
 .mine-head h1{margin:6px 0 6px;font-size:clamp(24px,3vw,32px)}
 .mine-head p{font-size:15px;color:var(--ink-mute)}
 .mine-tabs{margin-top:12px}
+
+/* 개별 실습: 강사 스튜디오에서 프롬프트 뽑기 */
+.mine-panel{border-top:1px solid var(--rule);padding-block:34px 80px}
+.prompt-pull{max-width:860px}
+.prompt-pull h2{font-size:27px;font-weight:700;letter-spacing:-.035em;margin-bottom:10px}
+.prompt-pull > p{color:var(--ink-soft);font-size:16px;line-height:1.75}
+.prompt-pull h3{margin:26px 0 8px;font-size:18px;font-weight:700}
+.prompt-pull ol.plain{margin:0;padding-left:22px;color:var(--ink-soft);font-size:16px;line-height:1.8}
+.prompt-pull ol.plain li + li{margin-top:6px}
+.prompt-pull .bl{font-size:15.5px;line-height:1.75}
+.before-grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (max-width:860px){.before-grid.three{grid-template-columns:minmax(0,1fr)}}
