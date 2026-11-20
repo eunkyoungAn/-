@@ -36,7 +36,7 @@
       <div class="sheet-actions mt14"><a class="g-btn" href="#flow-1">1단계부터 시작</a><a class="g-btn ghost" href="#flow">전체 과정 보기</a></div></section>
       <section class="level-section"><div class="level-head"><div><span class="level-kicker">MY OWN</span><h2>개별 실습 · ${esc(M.title)}</h2></div>
       <p>업무 에이전트 실습실의 두 화면을 이 사이트 안에서 그대로 봅니다.</p></div>
-      <div class="lesson-grid before-grid">${M.tabs.map(t => `<a class="lesson-card" href="#mine-${t.id}"><span class="lesson-code">개별 실습</span><h3>${esc(t.label)}</h3><div class="lesson-arrow">열기 →</div></a>`).join('')}</div></section>`;
+      <div class="lesson-grid before-grid three">${M.tabs.map(t => `<a class="lesson-card" href="#mine-${t.id}"><span class="lesson-code">개별 실습</span><h3>${esc(t.label)}</h3><div class="lesson-arrow">열기 →</div></a>`).join('')}</div></section>`;
     $('#zipLink').href = FILE_BASE + D.zip;
     $('#downloadGroups').innerHTML = D.files.map(g => `<h3 class="dl-h">${esc(g.group)}</h3><div class="dl-grid">${g.items.map(([f, d]) =>
       `<div class="dl-item"><div><strong>${esc(f)}</strong><span>${esc(d)}</span></div><div class="btn-pair"><a class="g-btn ghost" href="${FILE_BASE}${encodeURIComponent(f)}.pdf" download>PDF</a><a class="g-btn ghost" href="${FILE_BASE}${encodeURIComponent(f)}.docx" download>DOCX</a></div></div>`).join('')}</div>`).join('');
@@ -134,15 +134,26 @@
     $('#mineTitle').textContent = M.title;
     $('#mineLead').textContent = M.lead;
     $('#mineTabs').innerHTML = M.tabs.map(t => `<a class="${t === tab ? 'on' : ''}" href="#mine-${t.id}">${esc(t.label)}</a>`).join('') +
-      `<a class="open-new" href="${esc(tab.src)}" target="_blank" rel="noopener">새 탭에서 열기</a>`;
+      (tab.src ? `<a class="open-new" href="${esc(tab.src)}" target="_blank" rel="noopener">새 탭에서 열기</a>` : '');
     const f = $('#mineFrame');
+    const panel = $('#minePanel');
+    clearInterval(mineTimer);
+    if (tab.panel) {
+      const P = M.prompt;
+      f.hidden = true; panel.hidden = false;
+      panel.innerHTML = `<div class="wrap"><section class="prompt-pull"><h2>강사 스튜디오에서 프롬프트 뽑기</h2><p>${esc(P.why)}</p>
+        <div class="go-studio"><p><b>강사 스튜디오</b> — 값을 넣고 지시문을 복사하는 곳. 새 탭으로 열립니다.</p><div class="btn-pair">${ext(L.studio, '강사 스튜디오 열기')}${ext(L.chat, 'Claude 새 채팅 열기', 'g-btn ghost')}</div></div>
+        <h3>순서</h3>${ol(P.steps)}
+        <h3>알아 둘 것</h3>${ul(P.notes)}</section></div>`;
+      return;
+    }
+    f.hidden = false; panel.hidden = true;
     f.title = tab.label;
     if (f.dataset.tab !== tab.id) {
       f.dataset.tab = tab.id;
       if (f.dataset.loaded) { try { f.contentWindow.location.hash = tab.hash; } catch (e) { f.src = tab.src; } }
       else { f.src = tab.src; f.addEventListener('load', () => { f.dataset.loaded = '1'; tidyFrame(); }); }
     }
-    clearInterval(mineTimer);
     mineTimer = setInterval(() => { if ($('#viewMine').hidden) { clearInterval(mineTimer); return; } tidyFrame(); }, 400);
     tidyFrame();
   }
