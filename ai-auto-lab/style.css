@@ -1026,3 +1026,18 @@ main p a:not(.g-btn)::after,main li a:not(.g-btn)::after,
 .toc a::after{font-size:11.5px}
 main p a:not(.g-btn),main li a:not(.g-btn){color:inherit;font-weight:700;text-decoration:underline;text-underline-offset:3px}
 @media (min-width:981px){#sec-before .start-row{grid-template-columns:repeat(4,minmax(0,1fr))}}
+
+/* ===== 줄맞춤: 단어가 중간에서 끊기지 않게, 마지막 줄에 한두 글자만 남지 않게 ===== */
+main p,main li,main td,main dd,.demo-foot span,.progress-copy{word-break:keep-all;overflow-wrap:break-word;text-wrap:pretty}
+main h1,main h2,main h3,.lesson-card h3,.start-item strong,.result-card strong,.stat strong,.pt strong,.cn-order strong,.kw3 strong{word-break:keep-all;text-wrap:balance}
+/* 표: 칸을 억지로 좁히지 않고, 좁은 화면에서는 표 안에서 옆으로 민다 */
+.g-table{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.g-table td,.g-table th,.md td{word-break:keep-all;overflow-wrap:normal}
+.g-table th,.g-table td:first-child{white-space:nowrap}
+.g-table table{min-width:0}
+#timelineTable{min-width:760px}
+#timelineTable td:nth-child(2),#timelineTable td:nth-child(3){white-space:nowrap}
+/* 복사 상자: 한글 단어는 통째로 다음 줄로, 긴 주소만 끊는다 */
+.prompt-box pre{word-break:keep-all;overflow-wrap:break-word}
+.sources-ol li a{overflow-wrap:anywhere}
+.g-table table:has(th:nth-child(4)){min-width:640px}

@@ -233,7 +233,7 @@
         <div class="stat"><em>정보·결과물을 믿는다</em><strong>54.7%</strong><div class="cap">절반 남짓만 결과를 신뢰</div><p>AI가 만든 메일·코드·원고는 사람이 확인하고 써야 합니다.</p></div>
       </div><p class="src">${esc(SRC_AI)}</p>` },
     { g: 1, nav: '1-2', title: '서비스별 이용과 안 쓰는 이유', html: () => `<span class="slide-kicker">1. AI · 2) 어떤 AI를 쓰고, 왜 안 쓰나</span><h1>ChatGPT 41.8%, Gemini 9.8%</h1>
-      <p class="slide-lead">서비스별 경험률(복수응답). 유료 구독 비율은 7.9%로 대부분 무료로 씁니다.</p>
+      <p class="slide-lead">서비스별 경험률(복수응답). 오늘은 무료로 시작하는 방법부터 봅니다.</p>
       <div class="pts"><div class="pt"><b>안 쓰는 이유 ①</b><strong>필요를 못 느낀다</strong><p>미이용자 55.5% 중 49.5%가 "관심 또는 필요가 없어서"라고 답했습니다.</p></div>
       <div class="pt"><b>안 쓰는 이유 ②</b><strong>방법을 모른다</strong><p>"이용 방법을 몰라서"가 60대 25.3%, 70대 이상 26.1%로 상대적으로 높았습니다.</p></div></div>
       <div class="note">오늘은 "내 일에 필요한 곳"(메일, 홍보 카드뉴스)과 "쓰는 방법"을 함께 해결합니다.</div><p class="src">${esc(SRC_AI)}</p>` },
