@@ -1079,3 +1079,7 @@ body{word-break:keep-all;overflow-wrap:break-word;line-break:strict}
 .prompt-pull .bl{font-size:15.5px;line-height:1.75}
 .before-grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
 @media (max-width:860px){.before-grid.three{grid-template-columns:minmax(0,1fr)}}
+
+/* 체험해 보기 */
+.try-card .bl{margin:12px 0 0;font-size:14.5px;line-height:1.7;color:var(--ink-soft)}
+.try-card .lesson-output{padding-top:20px}

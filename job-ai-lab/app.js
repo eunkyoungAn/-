@@ -21,6 +21,7 @@
   const bindCopy = root => root.querySelectorAll('.copy-button').forEach(b => b.addEventListener('click', () => copyText(b.parentElement.querySelector('pre').textContent, b)));
   const ol = arr => `<ol class="plain">${arr.map(t => `<li>${esc(t)}</li>`).join('')}</ol>`;
   const M = D.mine;
+  const T = D.tryout;
   const FM = D.formMake;
   const ext = (href, label, cls) => `<a class="${cls || 'g-btn'}" href="${esc(href)}" target="_blank" rel="noopener noreferrer">${esc(label)}</a>`;
 
@@ -36,7 +37,11 @@
       <div class="sheet-actions mt14"><a class="g-btn" href="#flow-1">1단계부터 시작</a><a class="g-btn ghost" href="#flow">전체 과정 보기</a></div></section>
       <section class="level-section"><div class="level-head"><div><span class="level-kicker">MY OWN</span><h2>개별 실습 · ${esc(M.title)}</h2></div>
       <p>업무 에이전트 실습실의 두 화면을 이 사이트 안에서 그대로 봅니다.</p></div>
-      <div class="lesson-grid before-grid three">${M.tabs.map(t => `<a class="lesson-card" href="#mine-${t.id}"><span class="lesson-code">개별 실습</span><h3>${esc(t.label)}</h3><div class="lesson-arrow">열기 →</div></a>`).join('')}</div></section>`;
+      <div class="lesson-grid before-grid three">${M.tabs.map(t => `<a class="lesson-card" href="#mine-${t.id}"><span class="lesson-code">개별 실습</span><h3>${esc(t.label)}</h3><div class="lesson-arrow">열기 →</div></a>`).join('')}</div></section>
+      <section class="level-section" id="sec-try"><div class="level-head"><div><span class="level-kicker">TRY</span><h2>체험해 보기</h2></div>
+      <p>${esc(T.lead)}</p></div>
+      <div class="lesson-grid before-grid">${T.items.map(x => `<a class="lesson-card try-card" href="${esc(x.url)}" target="_blank" rel="noopener noreferrer"><span class="lesson-code">${esc(x.code)}</span><h3>${esc(x.title)}</h3><p>${esc(x.desc)}</p>${ul(x.pts)}<div class="lesson-output">먼저 눌러 볼 곳 <span>${esc(x.first)}</span></div><div class="lesson-arrow">새 탭에서 열기 ↗</div></a>`).join('')}</div>
+      <p class="local-note">${esc(T.note)}</p></section>`;
     $('#zipLink').href = FILE_BASE + D.zip;
     $('#downloadGroups').innerHTML = D.files.map(g => `<h3 class="dl-h">${esc(g.group)}</h3><div class="dl-grid">${g.items.map(([f, d]) =>
       `<div class="dl-item"><div><strong>${esc(f)}</strong><span>${esc(d)}</span></div><div class="btn-pair"><a class="g-btn ghost" href="${FILE_BASE}${encodeURIComponent(f)}.pdf" download>PDF</a><a class="g-btn ghost" href="${FILE_BASE}${encodeURIComponent(f)}.docx" download>DOCX</a></div></div>`).join('')}</div>`).join('');
@@ -234,15 +239,16 @@
       ['START · 세 가지 키워드', SLIDES.map((s, i) => ['#start-' + i, s.nav, s.title])],
       ['취업상담 워크플로우', [['#flow', '안내', '전체 과정'], ...F.steps.map(s => ['#flow-' + s.no, s.no + '단계', s.title]), ['#flow-form', '질문지', '내가 쓸 사전 질문지 미리 만들기'], ['#flow-why', '의미', '이 워크플로우의 의미'], ['#flow-tabs', '탭', '시트 탭 구성']]],
       ['개별 실습', M.tabs.map(t => ['#mine-' + t.id, '개별', t.label])],
+      ['체험해 보기', T.items.map((x, i) => [x.url, '체험 ' + (i + 1), x.title])],
       ['자료와 안내', [['#downloads', '자료', '자료 받기'], ['#privacy', '유의', '실제 구직자 정보를 다룰 때'], ['#help', '도움', '막힐 때']]],
     ];
-    $('#quickPanel').innerHTML = groups.map(g => `<div class="menu-group"><strong>${esc(g[0])}</strong>${g[1].map(x => `<a href="${x[0]}"><span>${esc(x[1])}</span>${esc(x[2])}</a>`).join('')}</div>`).join('');
+    $('#quickPanel').innerHTML = groups.map(g => `<div class="menu-group"><strong>${esc(g[0])}</strong>${g[1].map(x => `<a href="${esc(x[0])}"${/^https?:/.test(x[0]) ? ' target="_blank" rel="noopener noreferrer"' : ''}><span>${esc(x[1])}</span>${esc(x[2])}</a>`).join('')}</div>`).join('');
     $('#quickPanel').addEventListener('click', e => { if (e.target.closest('a')) $('#quickMenu').open = false; });
     document.addEventListener('click', e => { if (!e.target.closest('#quickMenu')) $('#quickMenu').open = false; });
   }
 
   /* ---------- 라우팅 ---------- */
-  const HOME_SECS = ['before', 'downloads', 'privacy', 'help'];
+  const HOME_SECS = ['before', 'try', 'downloads', 'privacy', 'help'];
   function route() {
     const h = (location.hash || '#home').replace('#', '');
     const [view, sub] = h.split('-');

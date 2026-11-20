@@ -202,6 +202,28 @@ FORM_MAKE = {
 }
 
 # ---------------------------------------------------------------- 개별 실습: agent-lab의 두 화면을 그대로 보여 준다
+# 체험해 보기: 커리어캐쳐가 만든 다른 서비스. 새 탭으로 열림
+TRYOUT = {
+    'lead': '커리어캐쳐가 만든 서비스 두 가지. 수업에서 본 흐름이 실제 서비스에서는 어떻게 쓰이는지 직접 눌러 봄.',
+    'items': [
+        {
+            'code': '체험 1 · 학교 취업지원', 'title': '내일캐쳐 · 학교 취업관리',
+            'desc': '특성화고 학생을 위한 취업 매칭 프로그램. 학교 취업지원 담당자가 쓰는 업무공간.',
+            'first': '샘플로 먼저 둘러보기',
+            'pts': ['샘플에는 실제 학생 정보가 없음', '저장소 암호를 만들면 자료는 이 기기의 브라우저에만 저장됨'],
+            'url': 'https://career-catcher-school-260917.aneunkyoung.chatgpt.site/',
+        },
+        {
+            'code': '체험 2 · 구직자용', 'title': '커리어캐쳐 AI 취업 준비 서비스 4종',
+            'desc': '기업·경험 찾기, AI 자기소개서 작성, AI 포트폴리오 작성, AI 면접 리허설. 구직자가 쓰는 화면을 그대로 체험.',
+            'first': 'AI 면접 리허설 (키 없이 기본 연습 가능)',
+            'pts': ['01~03은 본인 Gemini API 키가 필요함', '회원가입 없이 사용, 각 서비스는 새 창에서 열림'],
+            'url': 'https://eunkyoungan.github.io/-/career-hub/#services',
+        },
+    ],
+    'note': '체험용 링크입니다. 실제 구직자·학생의 이름과 연락처는 넣지 않습니다.',
+}
+
 MINE = {
     'title': '내 업무 에이전트 만들기',
     'lead': '①②는 업무 에이전트 실습실(agent-lab) 화면을 그대로 보여 줌. 먼저 내 스튜디오를 만들고, 그 스튜디오에서 내 업무용 에이전트를 설계함. 스튜디오를 아직 못 만들었으면 ③에서 강사 스튜디오의 프롬프트를 복사해 씀.',
@@ -335,7 +357,7 @@ def build_files():
 
 
 def build_data():
-    data = {'links': LINKS, 'start': START, 'flow': FLOW, 'formMake': FORM_MAKE, 'mine': MINE, 'files': FILES, 'zip': ZIP_NAME}
+    data = {'links': LINKS, 'start': START, 'flow': FLOW, 'formMake': FORM_MAKE, 'mine': MINE, 'tryout': TRYOUT, 'files': FILES, 'zip': ZIP_NAME}
     js = '/* tools/build.py 가 만든 파일. 직접 고치지 말고 build.py 를 고친 뒤 다시 실행한다. */\nwindow.LAB = ' + \
          json.dumps(data, ensure_ascii=False, indent=1) + ';\n'
     open(os.path.join(ROOT, 'data.js'), 'w', encoding='utf-8').write(js)
