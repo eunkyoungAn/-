@@ -147,7 +147,7 @@
       const P = M.prompt;
       f.hidden = true; panel.hidden = false;
       panel.innerHTML = `<div class="wrap"><section class="prompt-pull"><h2>강사 스튜디오에서 프롬프트 뽑기</h2><p>${esc(P.why)}</p>
-        <div class="go-studio"><p><b>강사 스튜디오</b> — 값을 넣고 지시문을 복사하는 곳. 새 탭으로 열립니다.</p><div class="btn-pair">${ext(L.studio, '강사 스튜디오 열기')}${ext(L.chat, 'Claude 새 채팅 열기', 'g-btn ghost')}</div></div>
+        <div class="go-studio"><p><b>강사 스튜디오</b> — 값을 넣고 프롬프트를 만드는 곳. 새 탭으로 열립니다.</p><div class="btn-pair">${ext(L.studio, '강사 스튜디오 열기')}${ext(L.chat, 'Claude 새 채팅 열기', 'g-btn ghost')}</div></div>
         <h3>순서</h3>${ol(P.steps)}
         <h3>알아 둘 것</h3>${ul(P.notes)}</section></div>`;
       return;
