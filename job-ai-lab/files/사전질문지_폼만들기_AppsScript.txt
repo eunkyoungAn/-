@@ -1,5 +1,5 @@
 /**
- * 구직자용 사전 질문지(구글 폼) 만들기 — 내 사본 시트용
+ * 구직자용 사전 질문지(구글 폼) 만들기 — 상담자용 시트의 내 사본에서 쓰는 코드
  *
  * 쓰는 법
  * 1. 상담자용 시트의 내 사본에서 확장 프로그램 → Apps Script 를 연다.
@@ -7,9 +7,14 @@
  * 3. 함수 createMyJobseekerForm 을 골라 한 번 실행하고 권한을 승인한다.
  *
  * 하는 일
- * - 질문 12개가 들어간 구글 폼을 만든다(이미 만들었으면 빠진 질문만 채운다).
- * - 폼을 제출하면 이 시트의 '구직자 정보' 탭에 ID-1, ID-2 … 순번으로 등록한다.
- * - 질문지 주소를 '자동화 버튼' 탭의 "구직자 작성 링크" 칸에 적는다.
+ * - 실습실 사이트에 올라가 있는 "취업상담 사전 질문지"와 같은 내용으로 내 질문지를 만든다.
+ *   (제목, 안내문, 질문 12개의 제목·도움말·형식·필수 여부, 제출 뒤 문구가 같다)
+ * - 이 시트에 같은 질문지가 이미 연결되어 있으면 새로 만들지 않고 그 질문지를 쓴다.
+ * - 답변 원본은 '설문지 응답 시트' 탭에 쌓이고, '구직자 정보' 탭에는 ID-1, ID-2 … 순번으로 등록된다.
+ * - 내 질문지 주소를 '자동화 버튼' 탭의 "구직자 작성 링크" 칸에 적는다.
+ *
+ * 질문 제목은 '구직자 정보' 탭의 열 제목과 글자가 같아야 등록된다.
+ * 질문을 바꾸려면 아래 목록과 '구직자 정보' 탭의 열 제목을 함께 바꾼다.
  */
 const MY_FORM_FIELDS = [
   // [질문 제목(= '구직자 정보' 열 제목), 도움말, 필수 여부, 장문 여부]
@@ -28,11 +33,15 @@ const MY_FORM_FIELDS = [
 ];
 const MY_FORM_TITLE = '취업상담 사전 질문지';
 const MY_FORM_INTRO = '취업상담 전에 희망하는 일과 경험을 알려 주세요. 답변은 담당 상담자가 직무 적합도를 함께 살펴보고 지원계획을 준비하는 데 사용합니다. 이름 또는 별칭과 희망 직무만 필수입니다. 연락처·주민등록번호·건강정보는 적지 마세요.';
+const MY_FORM_DONE = '답변을 접수했습니다. 다음 상담에서 함께 확인하겠습니다.';
 const MY_INTAKE_SHEET = '구직자 정보';
 const MY_GUIDE_SHEET = '자동화 버튼';
+const MY_GUIDE_ORDER = '제출하면 이 사본의 구직자 정보에 순번으로 등록됩니다.';
 const MY_PROP_FORM = 'MY_JOBSEEKER_FORM_ID';
 const MY_PROP_BOOK = 'MY_JOBSEEKER_BOOK_ID';
+const MY_PROP_LAST = 'MY_JOBSEEKER_LAST_NO';
 
+/** 내 질문지를 만들고 이 시트에 연결한다. 여러 번 실행해도 질문지는 하나만 쓴다. */
 function createMyJobseekerForm() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   if (!ss || !ss.getSheetByName(MY_INTAKE_SHEET)) {
@@ -45,21 +54,25 @@ function createMyJobseekerForm() {
   lock.waitLock(30000);
   let form = null;
   try {
+    // 1) 전에 이 시트에서 이 코드로 연결한 질문지
     const savedId = props.getProperty(MY_PROP_FORM);
     if (savedId && props.getProperty(MY_PROP_BOOK) === ss.getId()) {
       try { form = FormApp.openById(savedId); } catch (error) { form = null; }
     }
-    if (!form) {
-      form = FormApp.create(MY_FORM_TITLE);
-      props.setProperty(MY_PROP_FORM, form.getId());
-    }
+    // 2) 이 시트에 이미 연결되어 있는 같은 질문지
+    if (!form) form = myFindLinkedForm_(ss);
+    // 3) 없으면 새로 만든다
+    if (!form) form = FormApp.create(MY_FORM_TITLE);
+    props.setProperty(MY_PROP_FORM, form.getId());
     props.setProperty(MY_PROP_BOOK, ss.getId());
 
-    form.setDescription(MY_FORM_INTRO)
+    form.setTitle(MY_FORM_TITLE)
+      .setDescription(MY_FORM_INTRO)
       .setCollectEmail(false)
       .setLimitOneResponsePerUser(false)
+      .setPublishingSummary(false)
       .setAllowResponseEdits(false)
-      .setConfirmationMessage('답변을 접수했습니다. 다음 상담에서 함께 확인하겠습니다.');
+      .setConfirmationMessage(MY_FORM_DONE);
 
     const existing = form.getItems().map(item => item.getTitle());
     MY_FORM_FIELDS.forEach(([title, help, required, long]) => {
@@ -67,6 +80,15 @@ function createMyJobseekerForm() {
       const item = long ? form.addParagraphTextItem() : form.addTextItem();
       item.setTitle(title).setHelpText(help).setRequired(required);
     });
+
+    // 답변 원본이 이 시트의 '설문지 응답 시트' 탭에 쌓이게 한다
+    let destination = null;
+    try { destination = form.getDestinationId(); } catch (error) { destination = null; }
+    if (destination !== ss.getId()) {
+      try {
+        form.setDestination(FormApp.DestinationType.SPREADSHEET, ss.getId());
+      } catch (error) { /* 연결하지 못해도 '구직자 정보' 등록은 된다 */ }
+    }
 
     const hasTrigger = ScriptApp.getProjectTriggers().some(trigger =>
       trigger.getHandlerFunction() === 'onMyJobseekerFormSubmit' && trigger.getTriggerSourceId() === form.getId());
@@ -83,12 +105,11 @@ function createMyJobseekerForm() {
   }
 
   const url = form.getPublishedUrl();
-  myWriteGuideLink_(ss, url);
-  SpreadsheetApp.getUi().alert(
-    '사전 질문지를 만들었습니다',
-    '구직자에게 보낼 주소\n' + url + '\n\n질문을 고치는 주소\n' + form.getEditUrl() +
-      "\n\n제출된 답변은 '구직자 정보' 탭에 ID 순번으로 등록됩니다.",
-    SpreadsheetApp.getUi().ButtonSet.OK);
+  myWriteGuide_(ss, url);
+  Logger.log('구직자에게 보낼 주소: ' + url);
+  Logger.log('질문을 고치는 주소: ' + form.getEditUrl());
+  ss.toast("내 질문지 주소를 '자동화 버튼' 탭의 구직자 작성 링크 칸에 적었습니다.", '사전 질문지 연결 완료', 10);
+  return url;
 }
 
 /** 폼이 제출될 때 자동으로 실행된다. */
@@ -104,6 +125,22 @@ function registerMissingJobseekerResponses() {
   FormApp.openById(formId).getResponses().forEach(response => myRegisterResponse_(response));
 }
 
+/** 이 시트의 탭에 연결된 질문지 가운데 질문 12개가 모두 있는 것을 찾는다. 없으면 null. */
+function myFindLinkedForm_(ss) {
+  const sheets = ss.getSheets();
+  for (let i = 0; i < sheets.length; i++) {
+    let url = null;
+    try { url = sheets[i].getFormUrl(); } catch (error) { url = null; }
+    if (!url) continue;
+    try {
+      const linked = FormApp.openByUrl(url);
+      const titles = linked.getItems().map(item => item.getTitle());
+      if (MY_FORM_FIELDS.every(field => titles.indexOf(field[0]) >= 0)) return linked;
+    } catch (error) { /* 열 수 없는 질문지는 건너뛴다 */ }
+  }
+  return null;
+}
+
 function myRegisterResponse_(response) {
   const key = String(response.getId());
   const answers = {};
@@ -114,19 +151,24 @@ function myRegisterResponse_(response) {
   const lock = LockService.getScriptLock();
   lock.waitLock(30000);
   try {
-    const bookId = PropertiesService.getScriptProperties().getProperty(MY_PROP_BOOK);
+    const props = PropertiesService.getScriptProperties();
+    const bookId = props.getProperty(MY_PROP_BOOK);
     const ss = bookId ? SpreadsheetApp.openById(bookId) : SpreadsheetApp.getActiveSpreadsheet();
     const sheet = ss.getSheetByName(MY_INTAKE_SHEET);
     const cols = myCheckIntakeHeaders_(sheet);
     const width = cols.heads.length;
-    const lastRow = Math.max(sheet.getLastRow(), 2);
-    const rows = sheet.getRange(2, 1, lastRow - 1, width).getDisplayValues();
+    if (sheet.getMaxRows() < 2) sheet.insertRowAfter(1);
+    const rows = sheet.getRange(2, 1, sheet.getMaxRows() - 1, width).getDisplayValues();
 
     if (rows.some(row => row[cols.key] === key)) return;   // 이미 등록한 답변
 
-    const highest = rows.reduce((max, row) => (/^ID-\d+$/.test(row[cols.id]) ? Math.max(max, Number(row[cols.id].slice(3))) : max), 0);
-    const freeIndex = rows.findIndex(row => row.slice(1).every(value => value === ''));
-    const target = freeIndex >= 0 ? freeIndex + 2 : lastRow + 1;
+    // 지운 행의 번호를 다시 쓰지 않도록 마지막 번호를 따로 기억한다
+    const highest = rows.reduce(
+      (max, row) => (/^ID-\d+$/.test(row[cols.id]) ? Math.max(max, Number(row[cols.id].slice(3))) : max),
+      Number(props.getProperty(MY_PROP_LAST) || 0));
+    // 체크되지 않았고 A열 말고는 모두 빈 첫 행에 적는다
+    const freeIndex = rows.findIndex(row => row[0] !== 'TRUE' && row.slice(1).every(value => value === ''));
+    const target = freeIndex >= 0 ? freeIndex + 2 : sheet.getMaxRows() + 1;
     if (target > sheet.getMaxRows()) sheet.insertRowAfter(sheet.getMaxRows());
 
     const values = cols.heads.map(head => {
@@ -140,6 +182,7 @@ function myRegisterResponse_(response) {
     sheet.getRange(target, 1).insertCheckboxes();
     sheet.getRange(target, 1, 1, width).setValues([values]);
     SpreadsheetApp.flush();
+    props.setProperty(MY_PROP_LAST, String(highest + 1));
   } finally {
     lock.releaseLock();
   }
@@ -158,10 +201,13 @@ function myCheckIntakeHeaders_(sheet) {
   return { heads: heads, id: id, key: key };
 }
 
-function myWriteGuideLink_(ss, url) {
+/** '자동화 버튼' 탭의 안내 칸에 내 질문지 주소와 접수 안내를 적는다. */
+function myWriteGuide_(ss, url) {
   const guide = ss.getSheetByName(MY_GUIDE_SHEET);
   if (!guide) return;
   const labels = guide.getRange(1, 1, guide.getLastRow(), 1).getDisplayValues().map(row => String(row[0]).trim());
-  const index = labels.indexOf('구직자 작성 링크');
-  if (index >= 0) guide.getRange(index + 1, 2).setValue(url);
+  const link = labels.indexOf('구직자 작성 링크');
+  if (link >= 0) guide.getRange(link + 1, 2).setValue(url);
+  const order = labels.indexOf('접수 순서');
+  if (order >= 0) guide.getRange(order + 1, 2).setValue(MY_GUIDE_ORDER);
 }
