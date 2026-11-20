@@ -27,8 +27,8 @@
 
   /* ---------- 시작 화면 ---------- */
   function renderHome() {
-    $('#heroLinks').innerHTML = `<div class="link-row"><div><b>상담자</b><strong>상담자용 시트 열기</strong><span>공고 분석, 구직자와 공고 비교, 상담 결과지까지 이 시트에서 진행</span></div>${ext(L.sheet, '시트 열기')}</div>
-      <div class="link-row"><div><b>구직자</b><strong>사전 질문지 작성</strong><span>희망 직무, 경력·훈련, 직접 맡았던 일, 필요한 지원을 적으면 시트에 등록됨</span></div>${ext(L.form, '질문지 열기', 'g-btn ghost')}</div>`;
+    $('#heroLinks').innerHTML = `<div class="link-row"><div><b>상담자</b><strong>상담자용 자동화 시트</strong><span>실행 단추와 Apps Script가 들어 있는 구글 시트. 내 사본을 만들어 그 사본에서 실습</span></div>${ext(L.copy, '내 사본 만들기')}</div>
+      <div class="link-row"><div><b>구직자</b><strong>사전 질문지 작성</strong><span>희망 직무, 경력·훈련, 직접 맡았던 일, 필요한 지원을 적는 구글 폼. 답변은 강사 시트에 등록됨</span></div>${ext(L.form, '질문지 열기', 'g-btn ghost')}</div>`;
     $('#copyLink').href = L.copy;
     $('#homeFlow').innerHTML = `<section class="level-section">
       <div class="level-head"><div><span class="level-kicker">PRACTICE</span><h2>취업상담 워크플로우 5단계</h2></div>
@@ -43,6 +43,12 @@
       <div class="lesson-grid before-grid">${T.items.map(x => `<a class="lesson-card try-card" href="${esc(x.url)}" target="_blank" rel="noopener noreferrer"><span class="lesson-code">${esc(x.code)}</span><h3>${esc(x.title)}</h3><p>${esc(x.desc)}</p>${ul(x.pts)}<div class="lesson-output">먼저 눌러 볼 곳 <span>${esc(x.first)}</span></div><div class="lesson-arrow">새 탭에서 열기 ↗</div></a>`).join('')}</div>
       <p class="local-note">${esc(T.note)}</p></section>`;
     $('#zipLink').href = FILE_BASE + D.zip;
+    const toolBtn = b => { const cls = 'g-btn' + (b.ghost ? ' ghost' : '');
+      if (b.link) return ext(L[b.link], b.label, cls);
+      if (b.dl) return `<a class="${cls}" href="${FILE_BASE}${encodeURIComponent(b.dl)}" download>${esc(b.label)}</a>`;
+      return `<a class="${cls}" href="${esc(b.href)}">${esc(b.label)}</a>`; };
+    $('#downloadTools').innerHTML = `<h3 class="dl-h">실습 도구 · 구글 시트, 구글 폼, Apps Script</h3><div class="tool-list">${D.tools.map(t =>
+      `<div class="dl-item tool-item"><div><strong>${esc(t.t)}</strong><span>${esc(t.d)}</span></div><div class="btn-pair">${t.btns.map(toolBtn).join('')}</div></div>`).join('')}</div>`;
     $('#downloadGroups').innerHTML = D.files.map(g => `<h3 class="dl-h">${esc(g.group)}</h3><div class="dl-grid">${g.items.map(([f, d]) =>
       `<div class="dl-item"><div><strong>${esc(f)}</strong><span>${esc(d)}</span></div><div class="btn-pair"><a class="g-btn ghost" href="${FILE_BASE}${encodeURIComponent(f)}.pdf" download>PDF</a><a class="g-btn ghost" href="${FILE_BASE}${encodeURIComponent(f)}.docx" download>DOCX</a></div></div>`).join('')}</div>`).join('');
     $('#helpList').innerHTML = `<div class="two-col">${F.help.map(h => `<div class="result-card"><strong>${esc(h[0])}</strong><p>${esc(h[1])}</p></div>`).join('')}</div>`;
@@ -115,13 +121,13 @@
 
   /* ---------- 취업상담 워크플로우 ---------- */
   function formMakeHtml() {
-    return `<div class="make-form" id="flow-form"><h3>내가 쓸 사전 질문지 미리 만들기</h3><p>${esc(FM.why)}</p>
+    return `<div class="make-form" id="flow-form"><h3>내가 쓸 사전 질문지 미리 만들기</h3><p>${esc(FM.why)}</p>${so(FM.builtin, '먼저 이 방법')}
       <div class="two-col make-cols">
         <div class="result-card"><span class="way-tag">방법 1</span><strong>구글 폼에서 직접 만들기</strong>${ol(FM.manual)}<p class="local-note">${esc(FM.manual_note)}</p></div>
         <div class="result-card"><span class="way-tag on">방법 2</span><strong>Apps Script로 만들기</strong>${ol(FM.script)}<p class="local-note">${esc(FM.script_note)}</p></div>
       </div>
       <details class="fold"><summary>질문 12개 (제목은 글자 그대로)</summary><div class="fold-b"><div class="g-table"><table><thead><tr><th>#</th><th>질문 제목</th><th>형식</th><th>필수</th></tr></thead><tbody>${FM.questions.map((q, i) => `<tr><td>${i + 1}</td><td>${esc(q[0])}</td><td>${esc(q[1])}</td><td>${esc(q[2])}</td></tr>`).join('')}</tbody></table></div></div></details>
-      <details class="fold"><summary>Apps Script 코드 (방법 2에서 붙여 넣는 코드)</summary><div class="fold-b">${copyBox(FM.code, 'createMyJobseekerForm', '코드 복사')}</div></details></div>`;
+      <details class="fold" open><summary>Apps Script 코드 (방법 2에서 붙여 넣는 코드)</summary><div class="fold-b"><div class="sheet-actions script-get"><a class="g-btn ghost" href="${FILE_BASE}${encodeURIComponent(D.scriptFile)}" download>코드 파일 받기</a><span class="local-note">아래 [코드 복사]로 바로 복사해도 됩니다.</span></div>${copyBox(FM.code, 'createMyJobseekerForm', '코드 복사')}</div></details></div>`;
   }
   /* 개별 실습: agent-lab의 화면을 같은 사이트 안에서 그대로 보여 준다(같은 출처의 iframe). */
   let mineTimer = null;
@@ -218,7 +224,7 @@
     $('#flowEyebrow').textContent = 'PRACTICE · 5단계';
     $('#flowTitle').textContent = F.title;
     $('#flowLead').textContent = F.lead;
-    $('#flowMeta').innerHTML = `${ext(L.copy, '자동화 시트 받기 (내 사본 만들기)')}${ext(L.sheet, '원본 시트 열기', 'g-btn ghost')}${ext(L.form, '구직자용 사전 질문지', 'g-btn ghost')}`;
+    $('#flowMeta').innerHTML = `${ext(L.copy, '자동화 시트 받기 (내 사본 만들기)')}${ext(L.sheet, '시트 미리 보기', 'g-btn ghost')}${ext(L.form, '구직자용 사전 질문지', 'g-btn ghost')}`;
     flowToc('all');
     const secs = [
       ['all', '전체 과정', `<p>단계를 누르면 그 단계의 준비물 확인부터 시작합니다.</p>
@@ -240,7 +246,7 @@
       ['START · 세 가지 키워드', SLIDES.map((s, i) => ['#start-' + i, s.nav, s.title])],
       ['취업상담 워크플로우', [['#flow', '안내', '전체 과정'], ...F.steps.map(s => ['#flow-' + s.no, s.no + '단계', s.title]), ['#flow-form', '질문지', '내가 쓸 사전 질문지 미리 만들기'], ['#flow-why', '의미', '이 워크플로우의 의미'], ['#flow-tabs', '탭', '시트 탭 구성']]],
       ['개별 실습', M.tabs.map(t => ['#mine-' + t.id, '개별', t.label])],
-      ['자료와 안내', [['#downloads', '자료', '자료 받기'], ['#privacy', '유의', '실제 구직자 정보를 다룰 때'], ['#help', '도움', '막힐 때']]],
+      ['자료와 안내', [['#downloads', '자료', '자료 받기 · 상담자용 시트, Apps Script, 가상 사례'], ['#privacy', '유의', '실제 구직자 정보를 다룰 때'], ['#help', '도움', '막힐 때']]],
     ];
     $('#quickPanel').innerHTML = groups.map(g => `<div class="menu-group"><strong>${esc(g[0])}</strong>${g[1].map(x => `<a href="${esc(x[0])}"${/^https?:/.test(x[0]) ? ' target="_blank" rel="noopener noreferrer"' : ''}><span>${esc(x[1])}</span>${esc(x[2])}</a>`).join('')}</div>`).join('');
     $('#quickPanel').addEventListener('click', e => { if (e.target.closest('a')) $('#quickMenu').open = false; });

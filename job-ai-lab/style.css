@@ -1113,3 +1113,13 @@ body{word-break:keep-all;overflow-wrap:break-word;line-break:strict}
   .t5-tip{margin-top:1px}
   .yy{font-size:13.5px;line-height:1.5;margin-top:8px}
 }
+
+/* 자료 받기: 실습 도구(구글 시트 · 폼 · Apps Script) */
+.tool-list{display:grid;gap:10px;margin-top:4px}
+.tool-item{padding:16px 18px;gap:16px}
+.tool-item strong{font-size:16.5px}
+.tool-item span{margin-top:3px;font-size:14px;line-height:1.6;color:var(--ink-soft)}
+.tool-item .btn-pair{flex-wrap:wrap;justify-content:flex-end}
+.script-get{align-items:center;margin-bottom:10px}
+.script-get .local-note{margin:0}
+@media (max-width:720px){.tool-item{flex-direction:column;align-items:flex-start}.tool-item .btn-pair{justify-content:flex-start}}
