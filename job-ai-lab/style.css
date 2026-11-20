@@ -1023,3 +1023,30 @@ body{word-break:keep-all;overflow-wrap:break-word;line-break:strict}
 .sheet-get{max-width:860px;margin-top:18px}
 .sheet-get .btn-pair{flex-wrap:wrap}
 .sheet-get .g-btn{white-space:nowrap}
+
+/* 단계 화면: 준비물 확인 */
+.prep-list{display:grid;gap:10px;margin-top:16px;max-width:860px}
+.prep-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:center;padding:14px 16px;border:1.5px solid var(--rule);border-radius:14px;background:var(--surface)}
+.prep-row:has(input:checked){border-color:var(--leaf);background:rgba(22,128,60,.05)}
+.prep-row label{display:grid;grid-template-columns:26px minmax(0,1fr);gap:12px;align-items:start;cursor:pointer;margin:0}
+.prep-row input{width:20px;height:20px;margin-top:3px;accent-color:var(--leaf)}
+.prep-row strong{display:block;font-size:16.5px;font-weight:700}
+.prep-row strong em{margin-left:6px;padding:1px 8px;border:1px solid var(--rule);border-radius:999px;font-style:normal;font-size:11.5px;font-weight:600;color:var(--ink-mute)}
+.prep-row small{display:block;margin-top:2px;color:var(--ink-mute);font-size:13.5px;line-height:1.6}
+.prep-row .g-btn{white-space:nowrap}
+.prep-status{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin-top:14px;padding:14px 18px;border-radius:14px;background:var(--surface-2);max-width:860px}
+.prep-status b{font-size:16px}
+.prep-status span{flex:1 1 220px;color:var(--ink-soft);font-size:14.5px}
+.prep-status.ok{background:rgba(22,128,60,.08)}
+.prep-status.ok b{color:var(--leaf)}
+.step-list{display:grid;gap:10px;margin-top:14px;max-width:900px}
+.step-row{display:grid;grid-template-columns:40px minmax(0,1fr) auto auto;gap:14px;align-items:center;padding:14px 18px;border:1px solid var(--rule);border-radius:14px;background:var(--surface)}
+.step-row:hover{border-color:var(--ink)}
+.step-row > b{display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:var(--accent);color:#fff;font-size:15px}
+.step-row strong{display:block;font-size:16.5px;font-weight:700}
+.step-row span{display:block;margin-top:2px;color:var(--ink-mute);font-size:13.5px;line-height:1.55}
+.step-row em{font-style:normal;font-size:12.5px;font-weight:700;color:var(--ink-soft);white-space:nowrap}
+.step-row i{font-style:normal;padding:3px 10px;border:1px solid var(--rule);border-radius:999px;font-size:12px;font-weight:700;color:var(--ink-mute);white-space:nowrap}
+.flow-go{margin-top:10px;color:var(--accent);font-size:13px;font-weight:700}
+.flow-tab{padding-top:14px}
+@media (max-width:760px){.prep-row{grid-template-columns:minmax(0,1fr)}.step-row{grid-template-columns:40px minmax(0,1fr)}.step-row em,.step-row i{grid-column:2;justify-self:start}}
