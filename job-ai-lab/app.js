@@ -70,13 +70,13 @@
       <div class="recap"><div class="recap-col"><b>구직자</b>${ST.seeker_note.slice(0, 3).map(t => `<span>${esc(t)}</span>`).join('')}</div>
       <div class="recap-col"><b>고용서비스업 종사자</b>${ST.worker_note.map(t => `<span>${esc(t)}</span>`).join('')}</div></div>
       <div class="note">${esc(ST.seeker_note[3])}</div>` },
-    { g: 2, nav: '2-1', title: '2027년 채용 트렌드', html: () => `<span class="slide-kicker">2. 트렌드 · 3) 2027년 채용 트렌드</span><h1>2027년 채용 트렌드 10가지</h1>
-      <p class="slide-lead">키워드를 누르면 요점과 상담에서의 의미가 펼쳐집니다. 파란 테두리 네 개는 다음 장에서 2026년과 비교합니다.</p>
-      <div class="t10">${ST.trend27.map((k, i) => `<details class="${HL.includes(k[0]) ? 'hl' : ''}"><summary><b>${String(i + 1).padStart(2, '0')}</b><strong>${esc(k[0])}</strong><span>${esc(k[1])}</span></summary>${ul(k[2])}${so(k[3], '상담에서')}</details>`).join('')}</div>
-      ${srcFold(ST.trend27_src, ST.trend27_url)}` },
-    { g: 2, nav: '2-2', title: '2026년과 달라진 점', html: () => `<span class="slide-kicker">2. 트렌드 · 4) 2026년과 달라진 점</span><h1>2026년과 달라진 점</h1>
+    ...[0, 5].map(from => ({ g: 2, nav: `2-1${from ? 'b' : 'a'}`, title: `2027년 채용 트렌드 · ${from ? '06~10' : '01~05'}`, html: () => `<span class="slide-kicker">2. 트렌드 · 3) 2027년 채용 트렌드 · ${from ? '② 06~10' : '① 01~05'}</span><h1>2027년 채용 트렌드 10가지</h1>
+      <p class="slide-lead">${from ? '짙은 색 네 가지(AI 네이티브, 오케스트라 인재, 커리어 민첩성, 롱제비티)는 다음 장에서 2026년과 비교' : '왼쪽은 키워드와 한 줄 뜻, 오른쪽은 달라지는 점과 상담에서 쓸 점 · 06~10은 다음 장'}</p>
+      <div class="t5">${ST.trend27.slice(from, from + 5).map((k, j) => `<div class="t5-row${HL.includes(k[0]) ? ' hl' : ''}"><div class="t5-key"><b>${String(from + j + 1).padStart(2, '0')}</b><strong>${esc(k[0])}</strong><span>${esc(k[1])}</span></div><div class="t5-body">${ul(k[2])}<p class="t5-tip"><b>상담에서</b>${esc(k[3])}</p></div></div>`).join('')}</div>
+      ${srcFold(ST.trend27_src, ST.trend27_url)}` })),
+    { g: 2, nav: '2-2', title: '2026년과 달라진 점', html: () => `<span class="slide-kicker">2. 트렌드 · 4) 2026년과 달라진 점</span><h1>같은 주제, 한 단계 더 나아간 요구</h1>
       <p class="slide-lead">2027년 키워드 네 가지 · 2026년 키워드와 비교</p>
-      <div class="shift2">${ST.shift.map(r => `<div class="shift-card"><div class="shift-head"><span class="y26"><small>2026</small>${esc(r[0])}</span><span class="arr">→</span><span class="y27"><small>2027</small>${esc(r[1])}</span></div><p>${esc(r[2])}</p>${so(r[3])}<i>${esc(r[4])}</i></div>`).join('')}</div>
+      <div class="shift2">${ST.shift.map(r => `<div class="shift-card"><div class="shift-head"><span class="y26"><small>2026</small>${esc(r[0])}</span><span class="arr">→</span><span class="y27"><small>2027</small>${esc(r[1])}</span></div><ul class="yy"><li class="was"><b>2026</b>${esc(r[2])}</li><li><b>2027</b>${esc(r[3])}</li><li class="tip"><b>상담에서</b>${esc(r[4])}</li></ul><i>${esc(r[5])}</i></div>`).join('')}</div>
       <details class="srcd"><summary>출처와 2026년 10대 키워드</summary><p class="src">2026년 10대 키워드: ${esc(ST.trend26.join(', '))}</p>${srcLine(ST.trend26_src, ST.trend26_url)}<p class="src">${esc(ST.shift_note)}</p></details>` },
     ...ST.cases.map((cs, i) => ({ g: 3, nav: `3-1${i ? 'b' : 'a'}`, title: `${cs.no} · 구직자의 마음`, html: () => `<span class="slide-kicker">3. 역할 · 1) 사례로 알아보는 구직자의 마음 · ${esc(cs.no)}</span><h1>${esc(cs.title)}</h1>
       <div class="case"><div class="case-what"><b>현장에서 자주 보는 장면</b>${ul(cs.what)}</div>
