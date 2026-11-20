@@ -32,8 +32,8 @@
     $('#homeFlow').innerHTML = `<section class="level-section">
       <div class="level-head"><div><span class="level-kicker">PRACTICE</span><h2>취업상담 워크플로우 5단계</h2></div>
       <p>구직자의 경험을 채용공고의 요구와 대조하고, 상담자와 구직자가 함께 다음 행동을 정합니다.</p></div>
-      <div class="flow5">${F.steps.map(s => `<a class="flow-card" href="#flow-${s.no}"><span class="lesson-code">${s.no}단계</span><h3>${esc(s.title)}</h3><p>${esc(s.short)}</p><div class="flow-tab">${esc(s.tab)}</div></a>`).join('')}</div>
-      <div class="sheet-actions mt14"><a class="g-btn" href="#flow">워크플로우 안내 보기</a></div></section>
+      <div class="flow5">${F.steps.map(s => `<a class="flow-card" href="#flow-${s.no}"><span class="lesson-code">${s.no}단계</span><h3>${esc(s.title)}</h3><p>${esc(s.short)}</p><div class="flow-tab">${esc(s.tab)}</div><div class="flow-go">준비물 확인하고 시작 →</div></a>`).join('')}</div>
+      <div class="sheet-actions mt14"><a class="g-btn" href="#flow-1">1단계부터 시작</a><a class="g-btn ghost" href="#flow">전체 과정 보기</a></div></section>
       <section class="level-section"><div class="level-head"><div><span class="level-kicker">MY OWN</span><h2>개별 실습 · ${esc(M.title)}</h2></div>
       <p>${esc(M.time)}</p></div>
       <div class="go-studio"><p><b>같은 틀로 내 업무 하나를 설계</b> — 빈칸 양식 여덟 칸을 채우고 지시문을 실행하면 구글 시트·구글 폼 구성안과 Apps Script 초안이 나옵니다.</p><a class="g-btn" href="#mine">개별 실습 열기</a></div></section>`;
@@ -109,10 +109,6 @@
 
 
   /* ---------- 취업상담 워크플로우 ---------- */
-  function sheetBar(s) {
-    return `<div class="go-studio sheet-get"><p><b>자동화 시트 받기</b> — 이 단계는 상담자용 시트의 "${esc(s.tab)}" 탭에서 진행합니다. [내 사본 만들기]를 누르면 내 구글 드라이브에 시트가 복사됩니다.</p>
-      <div class="btn-pair">${ext(L.copy, '내 사본 만들기')}${ext(L.sheet, '원본 시트 열기', 'g-btn ghost')}</div></div>`;
-  }
   function formMakeHtml() {
     return `<div class="make-form" id="flow-form"><h3>내가 쓸 사전 질문지 미리 만들기</h3><p>${esc(FM.why)}</p>
       <div class="two-col make-cols">
@@ -148,30 +144,73 @@
       `<div class="lesson-navigation"><a href="#flow"><span>이전</span><strong>취업상담 워크플로우 5단계</strong></a><a class="lesson-next" href="#downloads"><span>다음</span><strong>자료 받기</strong></a></div>`;
     bindCopy($('#flowBody'));
   }
+  /* 준비물 확인 표시는 이 기기에만 저장한다 */
+  const PREP_KEY = 'jobAiLab.prep.v1';
+  let PREP; try { PREP = JSON.parse(localStorage.getItem(PREP_KEY) || '{}'); } catch (e) { PREP = {}; }
+  const savePrep = () => { try { localStorage.setItem(PREP_KEY, JSON.stringify(PREP)); } catch (e) { /* 저장 불가 시 무시 */ } };
+  const prepNeed = s => s.prep.filter(x => !x.opt);
+  const prepDone = s => prepNeed(s).filter(x => PREP[x.id]).length;
+  function prepAction(x) {
+    if (x.link) return ext(L[x.link], x.label, 'g-btn ghost');
+    if (x.file) return `<a class="g-btn ghost" href="${FILE_BASE}${encodeURIComponent(x.file)}.pdf" download>${esc(x.label)}</a>`;
+    if (x.href) return `<a class="g-btn ghost" href="${esc(x.href)}">${esc(x.label)}</a>`;
+    return '';
+  }
+  function flowToc(active) {
+    $('#flowToc').innerHTML = '<strong>목차</strong>' +
+      `<a href="#flow" class="${active === 'all' ? 'toc-run' : ''}">전체 과정</a>` +
+      F.steps.map(s => `<a href="#flow-${s.no}" class="${active === s.no ? 'toc-run' : ''}">${s.no}단계 · ${esc(s.title)}</a>`).join('') +
+      `<a href="#flow-why">이 워크플로우의 의미</a><a href="#flow-tabs">시트 탭 구성</a>`;
+  }
+  function renderStep(no) {
+    const s = F.steps.find(x => x.no === no);
+    const idx = F.steps.indexOf(s);
+    $('#flowCrumb').textContent = `취업상담 워크플로우 › ${s.no}단계`;
+    $('#flowEyebrow').textContent = `PRACTICE · ${s.no}단계 / ${F.steps.length}단계`;
+    $('#flowTitle').textContent = s.title;
+    $('#flowLead').textContent = s.out;
+    $('#flowMeta').innerHTML = `<span class="meta-chip active">쓰는 탭 · ${esc(s.tab)}</span>${s.run ? `<span class="meta-chip">실행 단추 · ${esc(s.run)}</span>` : ''}`;
+    flowToc(s.no);
+    const prev = idx === 0 ? ['#flow', '전체 과정'] : [`#flow-${F.steps[idx - 1].no}`, `${F.steps[idx - 1].no}단계 · ${F.steps[idx - 1].title}`];
+    const next = idx === F.steps.length - 1 ? ['#mine', `개별 실습 · ${M.title}`] : [`#flow-${F.steps[idx + 1].no}`, `${F.steps[idx + 1].no}단계 · ${F.steps[idx + 1].title}`];
+    $('#flowBody').innerHTML = `<section id="flow-${s.no}-prep"><span class="section-number">1</span><h2>준비물 확인</h2>
+        <p>아래 준비물을 받았는지 확인하고 체크합니다. 모두 체크하면 바로 시작합니다.</p>
+        <div class="prep-list">${s.prep.map(x => `<div class="prep-row${x.opt ? ' opt' : ''}"><label><input type="checkbox" data-prep="${esc(x.id)}" ${PREP[x.id] ? 'checked' : ''}><span><strong>${esc(x.t)}${x.opt ? ' <em>선택</em>' : ''}</strong><small>${esc(x.d)}</small></span></label>${prepAction(x)}</div>`).join('')}</div>
+        <div class="prep-status" id="prepStatus"></div></section>
+      <section id="flow-${s.no}-do"><span class="section-number">2</span><h2>시작하기 · 시트에서 하는 일</h2>${ul(s.do)}
+        <div class="out-box"><b>상담에 남는 결과</b><p>${esc(s.out)}</p></div></section>
+      ${s.no === '1' ? `<section id="flow-form-wrap">${formMakeHtml()}</section>` : ''}
+      <div class="lesson-navigation"><a href="${prev[0]}"><span>이전</span><strong>${esc(prev[1])}</strong></a><a class="lesson-next" href="${next[0]}"><span>다음</span><strong>${esc(next[1])}</strong></a></div>`;
+    const status = () => {
+      const need = prepNeed(s).length, done = prepDone(s), ok = done === need;
+      $('#prepStatus').className = 'prep-status' + (ok ? ' ok' : '');
+      $('#prepStatus').innerHTML = ok
+        ? `<b>준비 완료</b><span>필수 준비물 ${need}개를 모두 확인했습니다.</span><a class="g-btn" href="#flow-${s.no}-do" id="prepGo">바로 시작하기</a>`
+        : `<b>준비물 ${done} / ${need}</b><span>체크하지 않은 준비물을 먼저 받습니다.</span>`;
+      const go = $('#prepGo');
+      if (go) go.addEventListener('click', e => { e.preventDefault(); document.getElementById(`flow-${s.no}-do`).scrollIntoView({ block: 'start' }); });
+    };
+    $('#flowBody').querySelectorAll('[data-prep]').forEach(c => c.addEventListener('change', () => { PREP[c.dataset.prep] = c.checked; savePrep(); status(); }));
+    status();
+    bindCopy($('#flowBody'));
+  }
   function renderFlow() {
     $('#flowCrumb').textContent = '취업상담 워크플로우';
     $('#flowEyebrow').textContent = 'PRACTICE · 5단계';
     $('#flowTitle').textContent = F.title;
     $('#flowLead').textContent = F.lead;
     $('#flowMeta').innerHTML = `${ext(L.copy, '자동화 시트 받기 (내 사본 만들기)')}${ext(L.sheet, '원본 시트 열기', 'g-btn ghost')}${ext(L.form, '구직자용 사전 질문지', 'g-btn ghost')}`;
+    flowToc('all');
     const secs = [
-      ['all', '전체 과정', `<div class="g-table"><table><thead><tr><th>단계</th><th>쓰는 탭</th><th>상담에 남는 결과</th></tr></thead><tbody>${F.steps.map(s => `<tr><td><a class="tlink" href="#flow-${s.no}">${s.no}. ${esc(s.title)}</a></td><td>${esc(s.tab)}</td><td>${esc(s.out)}</td></tr>`).join('')}</tbody></table></div>
-        <div class="go-studio sheet-get"><p><b>자동화 시트 받기</b> — 2단계부터 5단계까지는 상담자용 구글 시트에서 진행합니다. [내 사본 만들기]를 누르면 내 구글 드라이브에 시트가 복사됩니다.</p>
-          <div class="btn-pair">${ext(L.copy, '내 사본 만들기')}${ext(L.sheet, '원본 시트 열기', 'g-btn ghost')}</div></div>
+      ['all', '전체 과정', `<p>단계를 누르면 그 단계의 준비물 확인부터 시작합니다.</p>
+        <div class="step-list">${F.steps.map(s => `<a class="step-row" href="#flow-${s.no}"><b>${s.no}</b><div><strong>${esc(s.title)}</strong><span>${esc(s.out)}</span></div><em>${esc(s.tab)}</em><i>준비물 ${prepDone(s)}/${prepNeed(s).length}</i></a>`).join('')}</div>
         <div class="safety-box mt16"><strong>실습에서는 가상 정보만 입력</strong><p>질문지와 시트에는 실제 구직자의 이름, 연락처, 주소를 넣지 않습니다. 자료 받기의 가상 구직자 서류와 가상 채용공고를 씁니다.</p></div>`],
-      ...F.steps.map(s => [s.no, `${s.no}단계 · ${s.title}`, `<div class="step-meta"><span><b>쓰는 탭</b>${esc(s.tab)}</span>${s.run ? `<span><b>실행 단추</b>${esc(s.run)}</span>` : ''}</div>
-        ${s.no === '1' ? '' : sheetBar(s)}
-        <h3>시트에서 하는 일</h3>${ul(s.do)}
-        <div class="out-box"><b>상담에 남는 결과</b><p>${esc(s.out)}</p></div>
-        ${s.no === '1' ? `<div class="sheet-actions mt14">${ext(L.form, '구직자용 사전 질문지 열기', 'g-btn ghost')}</div>${formMakeHtml()}` : ''}`]),
       ['why', '이 워크플로우의 의미', `<div class="why3">${F.meaning.map((m, i) => `<div class="pt"><b>0${i + 1}</b><strong>${esc(m.h)}</strong>${ul(m.pts)}${so(m.so)}</div>`).join('')}</div>`],
       ['tabs', '시트 탭 구성', `<div class="g-table"><table><thead><tr><th>탭</th><th>쓰임</th></tr></thead><tbody>${F.tabs.map(t => `<tr><td>${esc(t[0])}</td><td>${esc(t[1])}</td></tr>`).join('')}</tbody></table></div>
         <p class="local-note">자세한 사용 순서는 시트의 "자동화 버튼" 탭에 있는 안내를 따릅니다.</p>`],
     ];
-    $('#flowToc').innerHTML = '<strong>목차</strong>' + secs.map(s => `<a href="#flow-${s[0]}">${esc(s[1])}</a>`).join('');
-    $('#flowBody').innerHTML = secs.map(s => `<section id="flow-${s[0]}">${/^\d$/.test(s[0]) ? `<span class="section-number">${s[0]}</span>` : ''}<h2>${esc(s[1])}</h2>${s[2]}</section>`).join('') +
-      `<div class="lesson-navigation"><a href="#start"><span>이전</span><strong>START · 변화, 트렌드, 역할</strong></a><a class="lesson-next" href="#mine"><span>다음</span><strong>개별 실습 · ${esc(M.title)}</strong></a></div>`;
-    bindCopy($('#flowBody'));
+    $('#flowBody').innerHTML = secs.map(s => `<section id="flow-${s[0]}"><h2>${esc(s[1])}</h2>${s[2]}</section>`).join('') +
+      `<div class="lesson-navigation"><a href="#start"><span>이전</span><strong>START · 변화, 트렌드, 역할</strong></a><a class="lesson-next" href="#flow-1"><span>다음</span><strong>1단계 · ${esc(F.steps[0].title)}</strong></a></div>`;
   }
 
   /* ---------- 바로가기 ---------- */
@@ -197,7 +236,12 @@
     $('#quickMenu').open = false;
     let target = null;
     if (view === 'start') { $('#viewStart').hidden = false; renderStart(Number(sub) || 0); }
-    else if (view === 'flow') { $('#viewFlow').hidden = false; renderFlow(); if (sub) target = document.getElementById(h); }
+    else if (view === 'flow') {
+      $('#viewFlow').hidden = false;
+      if (/^[1-5]$/.test(sub || '')) renderStep(sub);
+      else if (sub === 'form') { renderStep('1'); target = document.getElementById('flow-form'); }
+      else { renderFlow(); if (sub) target = document.getElementById(h); }
+    }
     else if (view === 'mine') { $('#viewFlow').hidden = false; renderMine(); if (sub) target = document.getElementById(h); }
     else { $('#viewHome').hidden = false; if (HOME_SECS.includes(view)) target = document.getElementById('sec-' + view); }
     requestAnimationFrame(() => { if (target) target.scrollIntoView({ block: 'start' }); else window.scrollTo(0, 0); });
