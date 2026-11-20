@@ -27,30 +27,41 @@
 
   /* ---------- 시작 화면 ---------- */
   function renderHome() {
-    $('#heroLinks').innerHTML = `<div class="link-row"><div><b>상담자</b><strong>상담자용 자동화 시트</strong><span>실행 단추와 Apps Script가 들어 있는 구글 시트. 내 사본을 만들어 그 사본에서 실습</span></div>${ext(L.copy, '내 사본 만들기')}</div>
-      <div class="link-row"><div><b>구직자</b><strong>사전 질문지</strong><span>희망 직무, 경력·훈련, 직접 맡았던 일, 필요한 지원을 묻는 질문 12개. 내 사본에서 내 질문지를 만들어 구직자에게 보냄</span></div>${ext(L.form, '질문지 미리 보기', 'g-btn ghost')}</div>`;
     $('#copyLink').href = L.copy;
-    $('#homeFlow').innerHTML = `<section class="level-section">
-      <div class="level-head"><div><span class="level-kicker">PRACTICE</span><h2>취업상담 워크플로우 5단계</h2></div>
-      <p>구직자의 경험을 채용공고의 요구와 대조하고, 상담자와 구직자가 함께 다음 행동을 정합니다.</p></div>
-      <div class="flow5">${F.steps.map(s => `<a class="flow-card" href="#flow-${s.no}"><span class="lesson-code">${s.no}단계</span><h3>${esc(s.title)}</h3><p>${esc(s.short)}</p><div class="flow-tab">${esc(s.tab)}</div><div class="flow-go">준비물 확인하고 시작 →</div></a>`).join('')}</div>
+    /* ③ 수업 구성: 색 세 가지(회색, 파랑, 어두운 색)가 번갈아 나온다 */
+    const course = [
+      ['수업 준비', '#before', 'AI 역량검사 · 나는 어떤 AI 사용자?'],
+      ['강의', '#start', `변화 · 트렌드 · 역할, 장표 ${SLIDES.length}장`],
+      ['실습 5단계', '#flow', '취업상담 워크플로우. 구직자 정보 받기부터 한 장 결과지까지'],
+      ['내 에이전트', '#mine', M.title],
+      ['체험', '#try', '커리어캐쳐가 만든 서비스 두 가지'],
+      ['자료실', '#downloads', '구글 시트, 구글 폼, Apps Script, 연습용 가상 사례'],
+    ];
+    const tone = ['grey', 'blue', 'dark'];
+    $('#homeCourse').innerHTML = course.map((c, i) => `<a class="hb-card t-${tone[i % 3]}" href="${c[1]}"><div><strong>${esc(c[0])}</strong><span class="d">${esc(c[2])}</span></div><div class="go"><i aria-hidden="true">↗</i>열기</div></a>`).join('');
+    /* ⑥ 실습 5단계(접이식) · ⑦ 내 에이전트 */
+    $('#homeFlow').innerHTML = `<section class="hb-sec" id="sec-steps">
+      <div class="hb-head"><h2>실습 5단계</h2><p>구직자의 경험을 채용공고의 요구와 대조하고, 상담자와 구직자가 함께 다음 행동을 정합니다. 단계를 누르면 펼쳐집니다.</p></div>
+      <div class="hb-acc">${F.steps.map((s, i) => `<details name="hb-steps"${i === 0 ? ' open' : ''}><summary><b>0${s.no}</b><span>${esc(s.title)}</span></summary>
+        <div class="hb-acc-b"><p>${esc(s.short)}</p><span class="hb-tab">쓰는 탭 · ${esc(s.tab)}</span><span class="hb-tab">준비물 ${prepDone(s)}/${prepNeed(s).length}</span><a class="hb-go" href="#flow-${s.no}">준비물 확인하고 시작 →</a></div></details>`).join('')}</div>
       <div class="sheet-actions mt14"><a class="g-btn" href="#flow-1">1단계부터 시작</a><a class="g-btn ghost" href="#flow">전체 과정 보기</a></div></section>
-      <section class="level-section"><div class="level-head"><div><span class="level-kicker">MY OWN</span><h2>개별 실습 · ${esc(M.title)}</h2></div>
-      <p>업무 에이전트 실습실의 두 화면을 이 사이트 안에서 그대로 봅니다.</p></div>
-      <div class="lesson-grid before-grid three">${M.tabs.map(t => `<a class="lesson-card" href="#mine-${t.id}"><span class="lesson-code">개별 실습</span><h3>${esc(t.label)}</h3><div class="lesson-arrow">열기 →</div></a>`).join('')}</div></section>`;
-    $('#homeTry').innerHTML = `<section class="level-section" id="sec-try"><div class="level-head"><div><span class="level-kicker">TRY</span><h2>체험해 보기</h2></div>
-      <p>${esc(T.lead)}</p></div>
-      <div class="lesson-grid before-grid">${T.items.map(x => `<a class="lesson-card try-card" href="${esc(x.url)}" target="_blank" rel="noopener noreferrer"><span class="lesson-code">${esc(x.code)}</span><h3>${esc(x.title)}</h3><p>${esc(x.desc)}</p>${ul(x.pts)}<div class="lesson-output">먼저 눌러 볼 곳 <span>${esc(x.first)}</span></div><div class="lesson-arrow">새 탭에서 열기 ↗</div></a>`).join('')}</div>
+      <section class="hb-sec" id="sec-mine"><div class="hb-head"><h2>내 에이전트</h2><p>${esc(M.title)}. 업무 에이전트 실습실의 두 화면을 이 사이트 안에서 그대로 봅니다.</p></div>
+      <div class="hb-team">${M.tabs.map(t => `<a class="hb-member" href="#mine-${t.id}"><span>개별 실습</span><strong>${esc(t.label)}</strong><em>열기 →</em></a>`).join('')}</div></section>`;
+    /* ⑧ 체험해 보기 */
+    $('#homeTry').innerHTML = `<section class="hb-sec" id="sec-try"><div class="hb-head"><h2>체험해 보기</h2><p>${esc(T.lead)}</p></div>
+      <div class="hb-band two">${T.items.map(x => `<a class="hb-try" href="${esc(x.url)}" target="_blank" rel="noopener noreferrer"><span>${esc(x.code)}</span><strong>${esc(x.title)}</strong><p>${esc(x.desc)}</p>${ul(x.pts)}<p class="first">먼저 눌러 볼 곳 · ${esc(x.first)}</p><em>새 탭에서 열기 ↗</em></a>`).join('')}</div>
       <p class="local-note">${esc(T.note)}</p></section>`;
+    /* ⑤ 자료실: 가상 사례는 어두운 띠, 실습 도구는 목록 */
     $('#zipLink').href = FILE_BASE + D.zip;
     const toolBtn = b => { const cls = 'g-btn' + (b.ghost ? ' ghost' : '');
       if (b.link) return ext(L[b.link], b.label, cls);
       if (b.dl) return `<a class="${cls}" href="${FILE_BASE}${encodeURIComponent(b.dl)}" download>${esc(b.label)}</a>`;
       return `<a class="${cls}" href="${esc(b.href)}">${esc(b.label)}</a>`; };
+    $('#downloadGroups').innerHTML = D.files.map(g => `<h3 class="dl-h">${esc(g.group)}</h3><div class="hb-band">${g.items.map(([f, d]) =>
+      `<div class="hb-col"><strong>${esc(f)}</strong><span>${esc(d)}</span><div><a href="${FILE_BASE}${encodeURIComponent(f)}.pdf" download>PDF 받기</a><a href="${FILE_BASE}${encodeURIComponent(f)}.docx" download>DOCX 받기</a></div></div>`).join('')}</div>`).join('');
     $('#downloadTools').innerHTML = `<h3 class="dl-h">실습 도구 · 구글 시트, 구글 폼, Apps Script</h3><div class="tool-list">${D.tools.map(t =>
       `<div class="dl-item tool-item"><div><strong>${esc(t.t)}</strong><span>${esc(t.d)}</span></div><div class="btn-pair">${t.btns.map(toolBtn).join('')}</div></div>`).join('')}</div>`;
-    $('#downloadGroups').innerHTML = D.files.map(g => `<h3 class="dl-h">${esc(g.group)}</h3><div class="dl-grid">${g.items.map(([f, d]) =>
-      `<div class="dl-item"><div><strong>${esc(f)}</strong><span>${esc(d)}</span></div><div class="btn-pair"><a class="g-btn ghost" href="${FILE_BASE}${encodeURIComponent(f)}.pdf" download>PDF</a><a class="g-btn ghost" href="${FILE_BASE}${encodeURIComponent(f)}.docx" download>DOCX</a></div></div>`).join('')}</div>`).join('');
+    /* ⑨ 막힐 때 */
     $('#helpList').innerHTML = `<div class="two-col">${F.help.map(h => `<div class="result-card"><strong>${esc(h[0])}</strong><p>${esc(h[1])}</p></div>`).join('')}</div>`;
   }
 
@@ -256,12 +267,12 @@
   /* ---------- 바로가기 ---------- */
   function renderQuick() {
     const groups = [
+      ['수업 준비', [['ai-test/', '검사', 'AI 역량검사'], ['who/', '레벨', '나는 어떤 AI 사용자?']]],
+      ['강의 · 세 가지 키워드', SLIDES.map((s, i) => ['#start-' + i, s.nav, s.title])],
+      ['실습 5단계', [['#flow', '안내', '전체 과정'], ...F.steps.map(s => ['#flow-' + s.no, s.no + '단계', s.title]), ['#flow-form', '질문지', '구글 폼 Apps Script 적용 · 사전 질문지 만들기'], ['#flow-why', '의미', '이 워크플로우의 의미'], ['#flow-tabs', '탭', '시트 탭 구성']]],
+      ['내 에이전트', M.tabs.map(t => ['#mine-' + t.id, '개별', t.label])],
       ['체험해 보기', T.items.map((x, i) => [x.url, '체험 ' + (i + 1), x.title])],
-      ['시작하기 전에', [['ai-test/', '검사', 'AI 역량검사'], ['who/', '레벨', '나는 어떤 AI 사용자?']]],
-      ['START · 세 가지 키워드', SLIDES.map((s, i) => ['#start-' + i, s.nav, s.title])],
-      ['취업상담 워크플로우', [['#flow', '안내', '전체 과정'], ...F.steps.map(s => ['#flow-' + s.no, s.no + '단계', s.title]), ['#flow-form', '질문지', '구글 폼 Apps Script 적용 · 사전 질문지 만들기'], ['#flow-why', '의미', '이 워크플로우의 의미'], ['#flow-tabs', '탭', '시트 탭 구성']]],
-      ['개별 실습', M.tabs.map(t => ['#mine-' + t.id, '개별', t.label])],
-      ['자료와 안내', [['#downloads', '자료', '자료 받기 · 상담자용 시트, Apps Script, 가상 사례'], ['#privacy', '유의', '실제 구직자 정보를 다룰 때'], ['#help', '도움', '막힐 때']]],
+      ['자료실과 도움말', [['#downloads', '자료', '자료실 · 상담자용 시트, Apps Script, 가상 사례'], ['#privacy', '유의', '실제 구직자 정보를 다룰 때'], ['#help', '도움', '막힐 때']]],
     ];
     $('#quickPanel').innerHTML = groups.map(g => `<div class="menu-group"><strong>${esc(g[0])}</strong>${g[1].map(x => `<a href="${esc(x[0])}"${/^https?:/.test(x[0]) ? ' target="_blank" rel="noopener noreferrer"' : ''}><span>${esc(x[1])}</span>${esc(x[2])}</a>`).join('')}</div>`).join('');
     $('#quickPanel').addEventListener('click', e => { if (e.target.closest('a')) $('#quickMenu').open = false; });
@@ -284,7 +295,7 @@
       else { renderFlow(); if (sub) target = document.getElementById(h); }
     }
     else if (view === 'mine') { $('#viewMine').hidden = false; renderMine(sub); }
-    else { $('#viewHome').hidden = false; if (HOME_SECS.includes(view)) target = document.getElementById('sec-' + view); }
+    else { $('#viewHome').hidden = false; renderHome(); if (HOME_SECS.includes(view)) target = document.getElementById('sec-' + view); }
     requestAnimationFrame(() => { if (target) target.scrollIntoView({ block: 'start' }); else window.scrollTo(0, 0); });
   }
 
