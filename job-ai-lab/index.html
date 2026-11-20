@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'; object-src 'none'; frame-src 'self'; worker-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex">
 <title>AI 취업지원 실습실 | 커리어캐쳐</title>
 <meta name="description" content="구직자와 채용공고를 연결하는 취업상담 워크플로우. 구직자 정보 받기부터 공고 분석, 회차별 상담, 한 장 결과지까지 5단계.">
 <link rel="stylesheet" href="fonts/pretendard.css">
-<link rel="stylesheet" href="style.css?v=20261120s">
+<link rel="stylesheet" href="style.css?v=20261120t">
 </head>
 <body>
 <header class="g-header">
@@ -82,9 +82,9 @@
       <section class="info-section" id="sec-downloads">
         <span class="level-kicker">DOWNLOADS</span>
         <h2>자료 받기</h2>
-        <p class="lead">워크플로우 연습에 쓰는 가상 사례와 개별 실습 양식입니다. 가상 구직자 서류를 보고 사전 질문지를 작성하고, 가상 채용공고를 구인기업 리스트에 옮겨 적습니다.</p>
+        <p class="lead">워크플로우 연습에 쓰는 가상 사례입니다. 가상 구직자 서류를 보고 사전 질문지를 작성하고, 가상 채용공고를 구인기업 리스트에 옮겨 적습니다.</p>
         <div class="go-studio zip-bar">
-          <p><b>전체 자료 한 번에 받기</b> — 가상 채용공고 1건, 가상 구직자 서류 2종, 개별 실습 양식 3종이 들어 있습니다.</p>
+          <p><b>전체 자료 한 번에 받기</b> — 가상 채용공고 1건과 가상 구직자 서류 2종이 들어 있습니다.</p>
           <a class="g-btn" id="zipLink" download>전체 압축 파일 받기</a>
         </div>
         <div id="downloadGroups"></div>
@@ -134,6 +134,19 @@
       <article class="lesson-content" id="flowBody"></article>
     </div>
   </div>
+  <!-- ================= 개별 실습 (agent-lab 화면을 그대로 표시) ================= -->
+  <div id="viewMine" class="mine-shell" hidden>
+    <div class="wrap">
+      <nav class="breadcrumb" aria-label="현재 위치"><a href="#home">처음</a><span>›</span><span>개별 실습</span></nav>
+      <header class="mine-head">
+        <span class="eyebrow">MY OWN · 개별 실습</span>
+        <h1 id="mineTitle"></h1>
+        <p id="mineLead"></p>
+        <nav class="mine-tabs" id="mineTabs" aria-label="개별 실습 화면"></nav>
+      </header>
+    </div>
+    <iframe id="mineFrame" class="mine-frame" title="개별 실습" loading="lazy"></iframe>
+  </div>
 </main>
 
 <footer class="g-footer"><div class="wrap">
@@ -142,7 +155,7 @@
   <span class="g-contact"><strong>CareerCatcher</strong> 안은경 · <a href="mailto:dms5147@gmail.com">dms5147@gmail.com</a></span>
 </div></footer>
 
-<script src="data.js?v=20261120s"></script>
-<script src="app.js?v=20261120s"></script>
+<script src="data.js?v=20261120t"></script>
+<script src="app.js?v=20261120t"></script>
 </body>
 </html>
