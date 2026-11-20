@@ -97,8 +97,6 @@
     document.querySelectorAll('[data-copylink]').forEach(a => { a.href = D.sheetCopy; });
     if ($('#homeFlowMail')) $('#homeFlowMail').innerHTML = FLOW_MAIL.map((f, i) => `<li><b>${i + 1}</b><div><strong>${esc(f[1])}</strong><span>${esc(f[0])}</span></div></li>`).join('');
     if ($('#homeFlowCard')) $('#homeFlowCard').innerHTML = FLOW_CARD.map((f, i) => `<li><b>${i + 1}</b><div><strong>${esc(f[1])}</strong><span>${esc(f[0])}</span></div></li>`).join('');
-    $('#timelineTable').innerHTML = '<thead><tr><th>시간</th><th>구분</th><th>단계</th><th>내용</th><th>산출물</th></tr></thead><tbody>' +
-      D.timeline.map(r => `<tr${r[1] === '휴식' ? ' class="cn-break"' : ''}>${r.map(c => `<td>${esc(c)}</td>`).join('')}</tr>`).join('') + '</tbody>';
     const mailPrompt = D.parts[0].stages.find(s => s.prompt);
     $('#materialBox').innerHTML = `<h3 class="dl-h">내려받는 파일</h3><div class="dl-grid">${D.downloads.map(f => `<div class="dl-item"><div><strong>${esc(f[0])}</strong><span>${esc(f[1])}</span></div><a class="g-btn ghost" href="${esc(f[2])}" ${f[3] ? 'download' : 'target="_blank" rel="noopener noreferrer"'}>${f[3] ? '받기' : '열기'}</a></div>`).join('')}</div>
       <h3 class="dl-h">3 · 제미나이 메일 자동화</h3>${promptBox(mailPrompt.prompt.text, '1. 코드 요청문 (gemini.google.com)')}${CODE ? promptBox(CODE, '2. 참고 코드 (Code.gs)', 'cn-code') : ''}
@@ -323,7 +321,7 @@
       ...D.parts.map(p => [`${p.no} · ${p.title}`, [...p.stages.map(s => ['#' + s.id, s.no + '단계', s.title]), ...(p.review ? [['#' + p.review.id, '마무리', p.review.title]] : [])]]),
       ['6 · 다운로드 자료 모아보기', [['#materials', '자료', '파일, 요청문, 참고 코드']]],
       ['7 · 개인 연습실', [['#check', '연습', '체크하고 프롬프트로 적용 시작하기'], ['../prompt-practice/', '연습', '질문 구조 연습']]],
-      ['안내', [['#timeline', '시간표', '시간표 (10:00~13:00)'], ['#safety', '유의', '실제 업무에 쓸 때'], ['#help', '도움', '막힐 때'], ['#sources', '출처', '참고 자료']]]
+      ['안내', [['#safety', '유의', '실제 업무에 쓸 때'], ['#help', '도움', '막힐 때'], ['#sources', '출처', '참고 자료']]]
     ];
     $('#quickPanel').innerHTML = groups.map(g => `<div class="menu-group"><strong>${esc(g[0])}</strong>${g[1].map(x => `<a href="${x[0]}"><span>${esc(x[1])}</span>${esc(x[2])}</a>`).join('')}</div>`).join('');
     $('#quickPanel').addEventListener('click', e => { if (e.target.closest('a')) $('#quickMenu').open = false; });
@@ -331,7 +329,7 @@
   }
 
   /* ---------- 라우팅 ---------- */
-  const HOME_SECS = ['ai', 'gpt', 'practice', 'intro', 'before', 'timeline', 'mail', 'card', 'materials', 'safety', 'help', 'sources'];
+  const HOME_SECS = ['ai', 'gpt', 'practice', 'intro', 'before', 'goals', 'mail', 'card', 'materials', 'safety', 'help', 'sources'];
   function route() {
     const h = (location.hash || '#home').replace('#', '');
     const [view, sub] = h.split('-');
