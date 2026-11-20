@@ -1286,3 +1286,19 @@ details.opt-fold > .fold-b > p{color:var(--ink-soft)}
 details.opt-fold > .fold-b > ol.plain{margin-top:10px;padding-left:20px;font-size:15.5px;line-height:1.8}
 details.opt-fold > .fold-b > .sheet-actions{margin:16px 0 4px}
 details.opt-fold .g-table{margin-top:14px}
+
+/* ===== 1단계 아래 두 묶음 (2026-11-20): 시트 받기 + 오류 이유 표, 자유 실습(세 가지 질문 → AI에게 보낼 질문 두 개) ===== */
+.make-form > ol.plain{margin-top:14px;padding-left:22px;font-size:16px;line-height:1.85}
+.make-form > .prompt-box{margin-top:16px;max-width:none}
+.way h4.sub{margin-top:22px;font-size:17px}
+.way ul.bl{margin-top:8px}
+.way p.src{margin-top:14px;font-size:13px;color:var(--ink-mute);line-height:1.7}
+.way p.src a{color:var(--accent);font-weight:600}
+.err-table td:first-child{white-space:nowrap}
+.err-table td{vertical-align:top;line-height:1.7}
+.ask3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:18px}
+.ask{padding:18px 20px;border:1px solid var(--rule);border-radius:14px;background:var(--surface)}
+.ask b{display:block;color:var(--accent);font-size:13px;font-weight:700}
+.ask strong{display:block;margin-top:4px;font-size:17px;font-weight:700;line-height:1.45}
+.ask span{display:block;margin-top:6px;color:var(--ink-mute);font-size:14px;line-height:1.65}
+@media (max-width:760px){.ask3{grid-template-columns:minmax(0,1fr)}.err-table td:first-child{white-space:normal}}
