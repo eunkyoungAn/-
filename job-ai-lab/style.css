@@ -1130,3 +1130,15 @@ body{word-break:keep-all;overflow-wrap:break-word;line-break:strict}
 .form-meta dd{margin:0;color:var(--ink)}
 .make-form > .sheet-actions{margin:12px 0 4px}
 @media (max-width:640px){.form-meta{grid-template-columns:minmax(0,1fr);gap:2px}.form-meta dd{margin-bottom:8px}}
+
+/* ===== 1단계 · 구글 폼 Apps Script 적용 (2026-11-20): 실행 화면 그림 + 방법 1 복사해서 만들기, 방법 2 직접 만들어 보기 ===== */
+.make-shot{margin:20px 0 4px}
+.make-shot img{display:block;width:100%;height:auto;border:1px solid var(--rule);border-radius:12px}
+.make-shot figcaption{margin-top:8px;color:var(--ink-mute);font-size:13.5px;line-height:1.7}
+.way{margin-top:26px;padding:24px 26px;border:1px solid var(--rule);border-radius:16px;background:var(--surface)}
+.way h4{margin:2px 0 6px;font-size:20px;font-weight:700;letter-spacing:-.025em}
+.way > p{color:var(--ink-soft)}
+.way > .sheet-actions{margin:14px 0 4px}
+.way ol.plain{margin-top:12px;padding-left:20px;font-size:15.5px;line-height:1.8}
+.way .g-table{margin-top:14px}
+@media (max-width:640px){.way{padding:18px 16px}}
