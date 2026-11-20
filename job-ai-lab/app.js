@@ -138,7 +138,7 @@
       <section class="way" id="flow-form-copy"><span class="way-tag on">방법 1</span><h4>${esc(FM.copy_h)}</h4><p>${esc(FM.copy_lead)}</p>
         <div class="sheet-actions">${ext(L.copy, '내 사본 만들기')}${ext(L.form, '질문지 미리 보기', 'g-btn ghost')}<a class="g-btn ghost" href="${scriptHref}" download>코드 파일 받기</a></div>
         ${ol(FM.copy)}<p class="local-note">${esc(FM.copy_note)}</p>
-        <details class="fold" open><summary>Apps Script 코드 · 상담자용 시트에 붙여 넣는 코드</summary><div class="fold-b"><p class="local-note">[코드 파일 받기]의 파일과 같은 내용입니다.</p>${copyBox(FM.code, 'createMyJobseekerForm', '코드 복사')}</div></details>
+        <details class="fold"><summary>Apps Script 코드 · "구직자 사전질문지" 파일이 없을 때 붙여 넣는 코드</summary><div class="fold-b"><p class="local-note">[코드 파일 받기]의 파일과 같은 내용입니다.</p>${copyBox(FM.code, 'createMyJobseekerForm', '코드 복사')}</div></details>
         <details class="fold"><summary>질문지 내용 · 질문 12개 (올라가 있는 구글 폼과 같음)</summary><div class="fold-b">
           <dl class="form-meta"><dt>제목</dt><dd>${esc(FM.title)}</dd><dt>안내문</dt><dd>${esc(FM.intro)}</dd><dt>제출 뒤 문구</dt><dd>${esc(FM.done)}</dd></dl>
           <div class="g-table"><table><thead><tr><th>#</th><th>질문 제목</th><th>도움말</th><th>형식</th><th>필수</th></tr></thead><tbody>${FM.questions.map((q, i) => `<tr><td>${i + 1}</td><td>${esc(q[0])}</td><td>${esc(q[3])}</td><td>${esc(q[1])}</td><td>${esc(q[2])}</td></tr>`).join('')}</tbody></table></div>
