@@ -131,32 +131,40 @@
 
 
   /* ---------- 취업상담 워크플로우 ---------- */
-  /* 1단계 아래의 선택 실습. 하지 않아도 5단계를 끝낼 수 있으므로 접어 둔다 */
+  /* 1단계 아래: ① 시트 받기(두 파일 저장·실행, 오류 이유) ② 자유 실습(생성형 AI에게 질문해 폼 만들기 코드 받기) */
   function formMakeHtml() {
     const scriptHref = FILE_BASE + encodeURIComponent(D.scriptFile);
-    return `<div class="make-form"><h3>선택 · 더 해 보기</h3><p>여기부터는 하지 않아도 5단계 실습을 끝낼 수 있습니다. 필요할 때 펼쳐 봅니다.</p>
-      <details class="fold opt-fold" id="flow-form"><summary><span><b>선택</b>사전 질문지 만들기 · 구직자에게 구글 폼으로 답을 받고 싶을 때</span></summary><div class="fold-b">
-        <p>${esc(FM.why)}</p>
-        <h4>${esc(FM.copy_h)}</h4><p>${esc(FM.copy_lead)}</p>
-        ${ol(FM.copy)}<p class="local-note">${esc(FM.copy_note)}</p>
-        <div class="sheet-actions">${ext(L.copy, '내 사본 만들기')}${ext(L.form, '질문지 미리 보기', 'g-btn ghost')}<a class="g-btn ghost" href="${scriptHref}" download>코드 파일 받기</a></div>
-        <figure class="make-shot"><img src="${esc(FM.shot)}" alt="${esc(FM.shot_alt)}" width="1600" height="598" loading="lazy"><figcaption>${esc(FM.shot_cap)}</figcaption></figure>
-        <details class="fold"><summary>Apps Script 코드 · "구직자 사전질문지" 파일이 없을 때 붙여 넣는 코드</summary><div class="fold-b"><p class="local-note">[코드 파일 받기]의 파일과 같은 내용입니다.</p>${copyBox(FM.code, 'createMyJobseekerForm', '코드 복사')}</div></details>
-        <details class="fold"><summary>질문지 내용 · 질문 12개 (올라가 있는 구글 폼과 같음)</summary><div class="fold-b">
-          <dl class="form-meta"><dt>제목</dt><dd>${esc(FM.title)}</dd><dt>안내문</dt><dd>${esc(FM.intro)}</dd><dt>제출 뒤 문구</dt><dd>${esc(FM.done)}</dd></dl>
-          <div class="g-table"><table><thead><tr><th>#</th><th>질문 제목</th><th>도움말</th><th>형식</th><th>필수</th></tr></thead><tbody>${FM.questions.map((q, i) => `<tr><td>${i + 1}</td><td>${esc(q[0])}</td><td>${esc(q[3])}</td><td>${esc(q[1])}</td><td>${esc(q[2])}</td></tr>`).join('')}</tbody></table></div>
-          <p class="local-note">질문 제목은 "구직자 정보" 탭의 열 제목과 글자가 같아야 등록됩니다.</p></div></details>
-        <details class="fold"><summary>참고 · 다른 방법으로 만들기</summary><div class="fold-b">
-          ${so(FM.builtin, '시트에 들어 있는 기능')}
-          <p><strong>구글 폼에서 손으로 만들기</strong></p>${ol(FM.manual)}<p class="local-note">${esc(FM.manual_note)}</p></div></details>
-      </div></details>
-      <details class="fold opt-fold" id="flow-form-diy"><summary><span><b>더 해 보기</b>${esc(FM.diy_h)}</span></summary><div class="fold-b">
+    return `<div class="make-form" id="flow-form"><h3>${esc(FM.setup_h)}</h3><p>${esc(FM.setup_lead)}</p>
+      <div class="sheet-actions">${ext(L.copy, '내 사본 만들기')}${ext(L.sheet, '시트 미리 보기', 'g-btn ghost')}</div>
+      ${ol(FM.setup)}<p class="local-note">${esc(FM.setup_note)}</p>
+      <figure class="make-shot"><img src="${esc(FM.shot)}" alt="${esc(FM.shot_alt)}" width="1600" height="598" loading="lazy"><figcaption>${esc(FM.shot_cap)}</figcaption></figure>
+      <section class="way" id="flow-errors"><h4>${esc(FM.err_h)}</h4><p>${esc(FM.err_lead)}</p>
+        <div class="g-table err-table"><table><thead><tr><th>로그의 숫자</th><th>이유</th><th>할 일</th></tr></thead><tbody>${FM.errors.map(r => `<tr><td><b>${esc(r[0])}</b></td><td>${esc(r[1])}</td><td>${esc(r[2])}</td></tr>`).join('')}</tbody></table></div>
+        <p class="local-note">${esc(FM.err_note)}</p>
+        <h4 class="sub">${esc(FM.key_h)}</h4>${ul(FM.key)}
+        <p class="src">출처: ${FM.err_src.map(x => `<a href="${esc(x[1])}" target="_blank" rel="noopener noreferrer">${esc(x[0])}</a>`).join(' · ')} (${esc(FM.err_src_date)})</p>
+      </section>
+      <details class="fold"><summary>사전 질문지 내용 · 질문 12개 (올라가 있는 구글 폼과 같음)</summary><div class="fold-b">
+        <dl class="form-meta"><dt>제목</dt><dd>${esc(FM.title)}</dd><dt>안내문</dt><dd>${esc(FM.intro)}</dd><dt>제출 뒤 문구</dt><dd>${esc(FM.done)}</dd></dl>
+        <div class="g-table"><table><thead><tr><th>#</th><th>질문 제목</th><th>도움말</th><th>형식</th><th>필수</th></tr></thead><tbody>${FM.questions.map((q, i) => `<tr><td>${i + 1}</td><td>${esc(q[0])}</td><td>${esc(q[3])}</td><td>${esc(q[1])}</td><td>${esc(q[2])}</td></tr>`).join('')}</tbody></table></div>
+        <p class="local-note">질문 제목은 "구직자 정보" 탭의 열 제목과 글자가 같아야 등록됩니다. ${esc(FM.copy_note)}</p></div></details>
+      <details class="fold"><summary>"구직자 사전질문지" 파일이 없을 때 붙여 넣는 코드</summary><div class="fold-b"><div class="sheet-actions script-get"><a class="g-btn ghost" href="${scriptHref}" download>코드 파일 받기</a><span class="local-note">파일과 아래 코드는 같은 내용입니다.</span></div>${copyBox(FM.code, 'createMyJobseekerForm', '코드 복사')}</div></details>
+      <details class="fold"><summary>참고 · 다른 방법으로 사전 질문지 만들기</summary><div class="fold-b">
+        ${so(FM.builtin, '시트에 들어 있는 기능')}
+        <p><strong>구글 폼에서 손으로 만들기</strong></p>${ol(FM.manual)}<p class="local-note">${esc(FM.manual_note)}</p></div></details>
+    </div>
+    <div class="make-form" id="flow-free"><h3>${esc(FM.free_h)}</h3><p>${esc(FM.free_lead)}</p>
+      <div class="ask3">${FM.free_ask.map((q, i) => `<div class="ask"><b>0${i + 1}</b><strong>${esc(q[0])}</strong><span>${esc(q[1])}</span></div>`).join('')}</div>
+      ${ol(FM.free)}
+      <div class="sheet-actions">${ext('https://forms.google.com/', '구글 폼 열기')}</div>
+      ${copyBox(FM.free_q1, '질문 1 · 문항 정하기', '질문 복사')}
+      ${copyBox(FM.free_q2, '질문 2 · 코드 받기', '질문 복사')}
+      <p class="local-note">${esc(FM.free_note)}</p>
+      <details class="fold" id="flow-form-diy"><summary>예시 · AI에게 받는 코드는 이런 모양 (가상의 만족도 조사)</summary><div class="fold-b">
         <p>${esc(FM.diy_lead)}</p>
-        <div class="sheet-actions">${ext('https://forms.google.com/', '구글 폼 열기')}</div>
-        ${ol(FM.diy)}<p class="local-note">${esc(FM.diy_note)}</p>
         <div class="g-table"><table><thead><tr><th>#</th><th>질문 제목</th><th>형식</th><th>필수</th></tr></thead><tbody>${FM.diy_questions.map((q, i) => `<tr><td>${i + 1}</td><td>${esc(q[0])}</td><td>${esc(q[1])}</td><td>${esc(q[2])}</td></tr>`).join('')}</tbody></table></div>
-        <details class="fold" open><summary>Apps Script 코드 · 새 구글 폼에 붙여 넣는 코드</summary><div class="fold-b">${copyBox(FM.diy_code, 'createPracticeSurvey', '코드 복사')}</div></details>
-      </div></details></div>`;
+        <p class="local-note">${esc(FM.diy_note)}</p>${copyBox(FM.diy_code, 'createPracticeSurvey', '코드 복사')}</div></details>
+    </div>`;
   }
   /* 개별 실습: agent-lab의 화면을 같은 사이트 안에서 그대로 보여 준다(같은 출처의 iframe). */
   let mineTimer = null;
@@ -272,7 +280,7 @@
     const groups = [
       ['수업 준비', [['ai-test/', '검사', 'AI 역량검사'], ['who/', '레벨', '나는 어떤 AI 사용자?']]],
       ['강의 · 세 가지 키워드', SLIDES.map((s, i) => ['#start-' + i, s.nav, s.title])],
-      ['실습 5단계', [['#flow', '안내', '전체 과정'], ...F.steps.map(s => ['#flow-' + s.no, s.no + '단계', s.title]), ['#flow-form', '선택', '사전 질문지 만들기 (선택)'], ['#flow-why', '의미', '이 워크플로우의 의미'], ['#flow-tabs', '탭', '시트 탭 구성']]],
+      ['실습 5단계', [['#flow', '안내', '전체 과정'], ...F.steps.map(s => ['#flow-' + s.no, s.no + '단계', s.title]), ['#flow-form', '시트', '구직자 정보, 구인정보 등 시트 받기'], ['#flow-errors', '오류', 'API 키를 넣었는데 결과가 안 만들어질 때'], ['#flow-free', '자유', '자유 실습 · 구글 폼을 Apps Script로 만들기'], ['#flow-why', '의미', '이 워크플로우의 의미'], ['#flow-tabs', '탭', '시트 탭 구성']]],
       ['내 에이전트', M.tabs.map(t => ['#mine-' + t.id, '개별', t.label])],
       ['체험해 보기', T.items.map((x, i) => [x.url, '체험 ' + (i + 1), x.title])],
       ['자료실과 도움말', [['#downloads', '자료', '자료실 · 상담자용 시트, Apps Script, 가상 사례'], ['#privacy', '유의', '실제 구직자 정보를 다룰 때'], ['#help', '도움', '막힐 때']]],
@@ -294,7 +302,7 @@
     else if (view === 'flow') {
       $('#viewFlow').hidden = false;
       if (/^[1-5]$/.test(sub || '')) renderStep(sub);
-      else if (sub === 'form') { renderStep('1'); target = document.getElementById('flow-form'); if (target) target.open = true; }
+      else if (['form', 'free', 'errors'].includes(sub)) { renderStep('1'); target = document.getElementById('flow-' + sub); }
       else { renderFlow(); if (sub) target = document.getElementById(h); }
     }
     else if (view === 'mine') { $('#viewMine').hidden = false; renderMine(sub); }
