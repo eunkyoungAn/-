@@ -113,7 +113,7 @@
   function navPair(id) {
     if (id === 'check') return [['#practice', '개인 연습실'], ['#home', '처음 화면']];
     const i = SEQ.findIndex(x => x.id === id);
-    const prev = i === 0 ? ['#start', 'START · AI, 자동화, 카드뉴스, 안전'] : ['#' + SEQ[i - 1].id, label(SEQ[i - 1])];
+    const prev = i === 0 ? ['#start', 'START · AI, 자동화, 카드뉴스, 사람의 확인'] : ['#' + SEQ[i - 1].id, label(SEQ[i - 1])];
     const next = i === SEQ.length - 1 ? ['#home', '처음 화면'] : ['#' + SEQ[i + 1].id, label(SEQ[i + 1])];
     return [prev, next];
   }
@@ -218,12 +218,12 @@
   const KB1 = [['표지 훅', '청축·적축·갈축, 내 귀에는 뭐가 맞을까?'], ['1장', '청축·적축·갈축 / 3초 만에 고르기'], ['2장', '키감만 보고 샀다가 / 소음 때문에 후회할 수 있어요'], ['3장', '청축: 경쾌한 클릭음 / 타건 피드백이 분명해요'], ['4장', '적축: 조용하고 부드러움 / 갈축: 소리와 구분감의 중간'], ['5장', '사용 장소와 원하는 키감을 / 먼저 정하세요'], ['6장', '저장해 두고 매장에서 비교하세요']];
   const gi = g => SLIDES.findIndex(s => s.g === g);
   const SLIDES = [
-    { g: 0, nav: '시작', title: '네 가지 키워드', html: () => `<span class="slide-kicker">START · Gemini 업무 자동화</span><h1>AI, 자동화, 카드뉴스, 안전</h1>
+    { g: 0, nav: '시작', title: '네 가지 키워드', html: () => `<span class="slide-kicker">START · Gemini 업무 자동화</span><h1>AI, 자동화, 카드뉴스, 사람의 확인</h1>
       <p class="slide-lead">실습 전에 보는 키워드. 먼저 제미나이 메일 자동화, 다음에 카드뉴스 만들기를 실습합니다.</p>
       <div class="kw3 cn-kw4"><a href="#start-${gi(1)}"><b>KEYWORD 1</b><strong>AI</strong><span>생성형 AI 이용 현황 · 오늘 쓰는 AI · API 키</span></a>
       <a href="#start-${gi(2)}"><b>KEYWORD 2</b><strong>자동화</strong><span>Apps Script · 맡길 일 고르는 기준 4가지 · 제미나이 메일 자동화 흐름</span></a>
       <a href="#start-${gi(3)}"><b>KEYWORD 3</b><strong>카드뉴스</strong><span>6장 구조 · 표지 훅 · 카드뉴스 만들기 흐름</span></a>
-      <a href="#start-${gi(4)}"><b>KEYWORD 4</b><strong>안전</strong><span>발송 한도 · 권한 승인 · 사람이 확인</span></a></div>` },
+      <a href="#start-${gi(4)}"><b>KEYWORD 4</b><strong>사람의 확인</strong><span>AI가 만들고 사람이 확인하고 결정 · 보내기 전에 볼 것</span></a></div>` },
     { g: 1, nav: '1-1', title: '생성형 AI 이용 현황', html: () => `<span class="slide-kicker">1. AI · 1) 우리나라 생성형 AI 이용 현황</span><h1>국민 절반 가까이가 써 봤습니다</h1>
       <div class="stat3">
         <div class="stat"><em>생성형 AI 경험률</em><strong>44.5%</strong><div class="cap">2024년 33.3% → 2025년 44.5%</div><p>1년 사이 11.2%p 늘었습니다.</p></div>
@@ -282,16 +282,16 @@
       <div class="pt"><b>03 · 공감형</b><strong>손목이 아프다면 키보드 높이부터 확인하세요</strong><p>불편을 먼저 짚어 "내 얘기"로 느끼게 합니다. (KB-005)</p></div></div>` },
     { g: 3, nav: '3-4', title: '카드뉴스 만들기 흐름', html: () => `<span class="slide-kicker">3. 카드뉴스 · 4) 카드뉴스 만들기</span><h1>시트 한 줄에서 디자인까지</h1>
       <p class="slide-lead">모든 결과가 내 시트 한 줄에 모입니다. 내가 직접 쓰는 칸은 B~I열 여덟 개뿐입니다.</p>${flowHtml(FLOW_CARD, 'wide')}` },
-    { g: 4, nav: '4-1', title: '한도와 권한', html: () => `<span class="slide-kicker">4. 안전 · 1) 알아 둘 것</span><h1>한도와 권한을 먼저 압니다</h1>
+    { g: 4, nav: '4-1', title: '한도와 권한', html: () => `<span class="slide-kicker">4. 사람의 확인 · 1) 보내기 전에 알아 둘 것</span><h1>한도와 권한을 먼저 압니다</h1>
       <div class="stat3"><div class="stat"><em>개인 Gmail 계정</em><strong>100명</strong><div class="cap">Apps Script 하루 발송 받는 사람 수</div><p>Google Workspace 계정은 1,500명입니다. 한도는 바뀔 수 있습니다.</p><p class="src">출처: Google Apps Script, Quotas for Google Services</p></div>
       <div class="stat"><em>처음 한 번</em><strong>권한 승인</strong><div class="cap">"확인되지 않은 앱" 화면</div><p>내가 만든 코드라 Google 심사를 받지 않았다는 뜻입니다. 출처를 아는 코드일 때만 허용합니다.</p></div>
       <div class="stat"><em>되돌릴 수 없음</em><strong>테스트 먼저</strong><div class="cap">나에게 먼저 보내기</div><p>메일은 첫 번째 주소(내 주소)로 테스트한 뒤 발송합니다.</p></div></div>` },
-    { g: 4, nav: '4-2', title: '실습 전 약속', html: () => `<span class="slide-kicker">4. 안전 · 2) 실습 전 약속</span><h1>AI가 작성하고, 사람이 확인합니다</h1>
+    { g: 4, nav: '4-2', title: '실습 전 약속', html: () => `<span class="slide-kicker">4. 사람의 확인 · 2) 실습 전 약속</span><h1>AI가 작성하고, 사람이 확인합니다</h1>
       <div class="recap"><div class="recap-col"><b>AI가 하는 일</b><span>메일 발송 코드 쓰기</span><span>카드뉴스 원고·표지 훅 제안</span><span>게시 문구와 이미지 구성</span></div>
       <div class="recap-col"><b>사람이 하는 일</b><span>받는 사람과 주제 정하기</span><span>날짜·가격·건강 정보 확인</span><span>보낼지, 게시할지 최종 결정</span></div></div>
       <div class="note">예시 주소만 씁니다. API 키는 나만 봅니다. 모르는 코드는 허용하지 않습니다.</div>` }
   ];
-  const GROUPS = ['시작', 'AI', '자동화', '카드뉴스', '안전'];
+  const GROUPS = ['시작', 'AI', '자동화', '카드뉴스', '사람의 확인'];
   let deckIdx = 0;
   function renderStart(i) {
     deckIdx = Math.max(0, Math.min(SLIDES.length - 1, i || 0));
