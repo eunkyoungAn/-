@@ -232,7 +232,7 @@
     $('#flowToc').innerHTML = '<strong>목차</strong>' +
       `<a href="#flow" class="${active === 'all' ? 'toc-run' : ''}">전체 과정</a>` +
       F.steps.map(s => `<a href="#flow-${s.no}" class="${active === s.no ? 'toc-run' : ''}">${s.no}단계 · ${esc(s.title)}</a>`).join('') +
-      `<a href="#flow-why">이 워크플로우의 의미</a><a href="#flow-tabs">시트 탭 구성</a>`;
+      `<a href="#flow-extra">추가 제공 · 구직자용 시트</a><a href="#flow-why">이 워크플로우의 의미</a><a href="#flow-tabs">시트 탭 구성</a>`;
   }
   function renderStep(no) {
     const s = F.steps.find(x => x.no === no);
@@ -278,6 +278,8 @@
       ['all', '전체 과정', `<p>단계를 누르면 그 단계의 준비물 확인부터 시작합니다.</p>
         <div class="step-list">${F.steps.map(s => `<a class="step-row" href="#flow-${s.no}"><b>${s.no}</b><div><strong>${esc(s.title)}</strong><span>${esc(s.out)}</span></div><em>${esc(s.tab)}</em><i>준비물 ${prepDone(s)}/${prepNeed(s).length}</i></a>`).join('')}</div>
         <div class="safety-box mt16"><strong>실습에서는 가상 정보만 입력</strong><p>질문지와 시트에는 실제 구직자의 이름, 연락처, 주소를 넣지 않습니다. 자료 받기의 가상 구직자 서류와 가상 채용공고를 씁니다.</p></div>`],
+      ['extra', D.extra.title, `<div class="hb-extra flow-extra"><strong>${esc(D.extra.name)}</strong><p>${esc(D.extra.lead)}</p>${ul(D.extra.pts)}
+        <div class="sheet-actions">${ext(L.seekerCopy, '구직자용 시트 내 사본 만들기')}${ext(L.seekerSheet, '시트 미리 보기', 'g-btn ghost')}</div><p class="local-note">${esc(D.extra.note)}</p></div>`],
       ['why', '이 워크플로우의 의미', `<div class="why3">${F.meaning.map((m, i) => `<div class="pt"><b>0${i + 1}</b><strong>${esc(m.h)}</strong>${ul(m.pts)}${so(m.so)}</div>`).join('')}</div>`],
       ['tabs', '시트 탭 구성', `<div class="g-table"><table><thead><tr><th>탭</th><th>쓰임</th></tr></thead><tbody>${F.tabs.map(t => `<tr><td>${esc(t[0])}</td><td>${esc(t[1])}</td></tr>`).join('')}</tbody></table></div>
         <p class="local-note">자세한 사용 순서는 시트의 "자동화 버튼" 탭에 있는 안내를 따릅니다.</p>`],
@@ -291,7 +293,7 @@
     const groups = [
       ['수업 준비', [['ai-test/', '검사', 'AI 역량검사'], ['who/', '레벨', '나는 어떤 AI 사용자?']]],
       ['강의 · 세 가지 키워드', SLIDES.map((s, i) => ['#start-' + i, s.nav, s.title])],
-      ['실습 5단계', [['#flow', '안내', '전체 과정'], ...F.steps.map(s => ['#flow-' + s.no, s.no + '단계', s.title]), ['#flow-form', '시트', '구직자 정보, 구인정보 등 시트 받기'], ['#flow-key', '키', 'API 키 없이 / 등록하고 · 장단점'], ['#extra', '추가', '추가 제공 · 구직자용 시트'], ['#flow-errors', '오류', 'API 키를 넣었는데 결과가 안 만들어질 때'], ['#flow-free', '자유', '자유 실습 · 구글 폼을 Apps Script로 만들기'], ['#flow-why', '의미', '이 워크플로우의 의미'], ['#flow-tabs', '탭', '시트 탭 구성']]],
+      ['실습 5단계', [['#flow', '안내', '전체 과정'], ...F.steps.map(s => ['#flow-' + s.no, s.no + '단계', s.title]), ['#flow-form', '시트', '구직자 정보, 구인정보 등 시트 받기'], ['#flow-key', '키', 'API 키 없이 / 등록하고 · 장단점'], ['#flow-extra', '추가', '추가 제공 · 구직자용 시트'], ['#flow-errors', '오류', 'API 키를 넣었는데 결과가 안 만들어질 때'], ['#flow-free', '자유', '자유 실습 · 구글 폼을 Apps Script로 만들기'], ['#flow-why', '의미', '이 워크플로우의 의미'], ['#flow-tabs', '탭', '시트 탭 구성']]],
       ['내 에이전트', M.tabs.map(t => ['#mine-' + t.id, '개별', t.label])],
       ['체험해 보기', T.items.map((x, i) => [x.url, '체험 ' + (i + 1), x.title])],
       ['자료실과 도움말', [['#downloads', '자료', '자료실 · 상담자용 시트, Apps Script, 가상 사례'], ['#privacy', '유의', '실제 구직자 정보를 다룰 때'], ['#help', '도움', '다양한 오류 상황']]],
