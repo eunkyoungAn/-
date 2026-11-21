@@ -21,6 +21,8 @@ ORIGINAL_SHEET_ID = '1R87w3R4U7ghu4KeKgtd7fApo-jlAzaKBX3l0K8J-M7c'  # [원본] �
 LINKS = {
     'sheet': f'https://docs.google.com/spreadsheets/d/{SHEET_ID}/edit?usp=sharing',   # 상담자용 시트(최종본)
     'copy': f'https://docs.google.com/spreadsheets/d/{SHEET_ID}/copy',               # 내 사본 만들기
+    'seekerSheet': 'https://docs.google.com/spreadsheets/d/1Q3Rrso8kvIZdrZVlJUDzIi9E2262Srw05NzFpdkXTdU/edit?usp=sharing',  # 추가 제공: 구직자용 시트(기업리스트 및 경험노트)
+    'seekerCopy': 'https://docs.google.com/spreadsheets/d/1Q3Rrso8kvIZdrZVlJUDzIi9E2262Srw05NzFpdkXTdU/copy',
     'form': 'https://docs.google.com/forms/d/e/1FAIpQLScgRDXzLZ_4TYRPZoxo-oG-r8_DGSGUORQmYDhVDBmI9wb1ow/viewform',  # 사전 질문지 미리 보기(답변은 강사 시트로 감). 질문은 sheet/FormSetup.gs 와 같아야 한다 → tools/check_form.py
     'studio': 'https://claude.ai/artifact/KZ8jbQyiu3qHRkMRhjxe93',   # 강사 스튜디오(업무 에이전트 스튜디오). agent-lab/config.js 의 studioUrl 과 같게 유지
     'chat': 'https://claude.ai/new',                                  # Claude 새 채팅
@@ -197,6 +199,20 @@ KEY_COMPARE = {
          'sample': ['1) 폭넓은 PM 경험 - R&D 기획부터 국책과제, 고객사 대응까지 아우르는 PM 전문가로 성장하고자 지원함', '2) 자동차 부품 기술력 - 1987년부터 축적된 한국후꼬꾸의 엔진 및 고무·플라스틱 부품 기술력에 매료됨', '3) 산학연 협력의 허브 - 정부 및 학계와의 협력을 주도하며 회사의 기술 경쟁력 확보에 기여하고 싶음']},
     ],
     'note': 'API 키를 적용하지 않은 결과와 적용한 결과를 구분해서 진행해 봅니다. 같은 공고를 먼저 키 없이 분석하고, 이어서 키를 등록한 뒤 다시 분석해 두 결과를 나란히 비교합니다.',
+}
+
+# ---------------------------------------------------------------- 추가 제공: 구직자용 시트
+EXTRA = {
+    'title': '추가 제공 · 구직자용 시트',
+    'lead': '실습 5단계는 상담자가 쓰는 시트임. 같은 방식을 구직자가 직접 써 보도록 구직자용 시트를 함께 제공함.',
+    'name': '기업리스트 및 경험노트 · 자동화 활용',
+    'pts': [
+        '구직자가 관심 기업을 "기업리스트"에 적고 체크한 뒤 실행하면 "기업분석 노트"에 분석이 만들어짐',
+        '"경험 노트"에 내 경험을 정리하고, "자기소개서 초안"까지 이어 씀',
+        '쓰는 방법은 상담자용 시트와 같음. 내 사본을 만들고, 자동화 메뉴에서 실행하며, 첫 실행 때 권한을 승인함',
+        '상담자는 구직자에게 이 시트를 건네 상담 전에 미리 써 오게 할 수 있음',
+    ],
+    'note': '구직자용 시트의 실행은 Gemini API 키를 등록해야 결과가 만들어집니다. 실제 이름과 연락처는 넣지 않습니다.',
 }
 
 # ---------------------------------------------------------------- 1단계 보충: 내가 쓸 사전 질문지 미리 만들기
@@ -399,7 +415,7 @@ SOURCES = [
 
 FILES = [
     {'group': '연습용 가상 사례', 'items': [
-        ['01_채용공고_직업상담사', '2단계 연습용. 구인기업 리스트에 옮겨 적는 가상 채용공고'],
+        ['01_채용공고_직업상담사', '2단계 연습용. 시트의 "구인기업 리스트" 열 순서대로 정리한 가상 채용공고'],
         ['02_내담자A_청년신입_서류', '1단계 연습용. 청년층 신입 가상 구직자의 이력서, 자기소개서, 포트폴리오 요약'],
         ['03_내담자B_중장년재취업_서류', '1단계 연습용. 중장년 재취업 가상 구직자의 이력서, 경력기술서, 자기소개서'],
     ]},
@@ -458,6 +474,12 @@ def md_to_docx(md_path, docx_path):
                     if r == 0:
                         for run in cell.paragraphs[0].runs:
                             run.bold = True
+            if rows[0][0] == '시트의 열':   # 열 이름은 좁게, 적을 내용은 넓게
+                from docx.shared import Cm
+                t.autofit = False
+                for row in t.rows:
+                    row.cells[0].width = Cm(4.2)
+                    row.cells[1].width = Cm(12.3)
             doc.add_paragraph()
             continue
         m = re.match(r'(#{1,3}) (.*)', ln)
@@ -507,7 +529,7 @@ def build_zip():
 
 
 def build_data():
-    data = {'links': LINKS, 'start': START, 'flow': FLOW, 'formMake': FORM_MAKE, 'keyCompare': KEY_COMPARE, 'mine': MINE, 'tryout': TRYOUT, 'tools': TOOLS, 'scriptFile': SCRIPT_FILE, 'files': FILES, 'zip': ZIP_NAME}
+    data = {'links': LINKS, 'start': START, 'flow': FLOW, 'formMake': FORM_MAKE, 'keyCompare': KEY_COMPARE, 'extra': EXTRA, 'mine': MINE, 'tryout': TRYOUT, 'tools': TOOLS, 'scriptFile': SCRIPT_FILE, 'files': FILES, 'zip': ZIP_NAME}
     js = '/* tools/build.py 가 만든 파일. 직접 고치지 말고 build.py 를 고친 뒤 다시 실행한다. */\nwindow.LAB = ' + \
          json.dumps(data, ensure_ascii=False, indent=1) + ';\n'
     open(os.path.join(ROOT, 'data.js'), 'w', encoding='utf-8').write(js)
