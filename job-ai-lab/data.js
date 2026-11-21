@@ -3,6 +3,8 @@ window.LAB = {
  "links": {
   "sheet": "https://docs.google.com/spreadsheets/d/1nwIp4qP7iGJ44jZeSsKM48D7k5U7_pufWXhPFXC_eGQ/edit?usp=sharing",
   "copy": "https://docs.google.com/spreadsheets/d/1nwIp4qP7iGJ44jZeSsKM48D7k5U7_pufWXhPFXC_eGQ/copy",
+  "seekerSheet": "https://docs.google.com/spreadsheets/d/1Q3Rrso8kvIZdrZVlJUDzIi9E2262Srw05NzFpdkXTdU/edit?usp=sharing",
+  "seekerCopy": "https://docs.google.com/spreadsheets/d/1Q3Rrso8kvIZdrZVlJUDzIi9E2262Srw05NzFpdkXTdU/copy",
   "form": "https://docs.google.com/forms/d/e/1FAIpQLScgRDXzLZ_4TYRPZoxo-oG-r8_DGSGUORQmYDhVDBmI9wb1ow/viewform",
   "studio": "https://claude.ai/artifact/KZ8jbQyiu3qHRkMRhjxe93",
   "chat": "https://claude.ai/new"
@@ -895,6 +897,18 @@ window.LAB = {
   ],
   "note": "API 키를 적용하지 않은 결과와 적용한 결과를 구분해서 진행해 봅니다. 같은 공고를 먼저 키 없이 분석하고, 이어서 키를 등록한 뒤 다시 분석해 두 결과를 나란히 비교합니다."
  },
+ "extra": {
+  "title": "추가 제공 · 구직자용 시트",
+  "lead": "실습 5단계는 상담자가 쓰는 시트임. 같은 방식을 구직자가 직접 써 보도록 구직자용 시트를 함께 제공함.",
+  "name": "기업리스트 및 경험노트 · 자동화 활용",
+  "pts": [
+   "구직자가 관심 기업을 \"기업리스트\"에 적고 체크한 뒤 실행하면 \"기업분석 노트\"에 분석이 만들어짐",
+   "\"경험 노트\"에 내 경험을 정리하고, \"자기소개서 초안\"까지 이어 씀",
+   "쓰는 방법은 상담자용 시트와 같음. 내 사본을 만들고, 자동화 메뉴에서 실행하며, 첫 실행 때 권한을 승인함",
+   "상담자는 구직자에게 이 시트를 건네 상담 전에 미리 써 오게 할 수 있음"
+  ],
+  "note": "구직자용 시트의 실행은 Gemini API 키를 등록해야 결과가 만들어집니다. 실제 이름과 연락처는 넣지 않습니다."
+ },
  "mine": {
   "title": "내 업무 에이전트 만들기",
   "lead": "①②는 업무 에이전트 실습실(agent-lab) 화면을 그대로 보여 줌. 먼저 내 스튜디오를 만들고, 그 스튜디오에서 내 업무용 에이전트를 설계함. 스튜디오를 아직 못 만들었으면 ③에서 강사 스튜디오의 프롬프트를 복사해 씀.",
@@ -1017,7 +1031,7 @@ window.LAB = {
    "items": [
     [
      "01_채용공고_직업상담사",
-     "2단계 연습용. 구인기업 리스트에 옮겨 적는 가상 채용공고"
+     "2단계 연습용. 시트의 \"구인기업 리스트\" 열 순서대로 정리한 가상 채용공고"
     ],
     [
      "02_내담자A_청년신입_서류",
