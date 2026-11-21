@@ -847,6 +847,54 @@ window.LAB = {
   ],
   "code": "/**\n * 구직자용 사전 질문지(구글 폼) 만들기 — 상담자용 시트의 내 사본에서 쓰는 코드\n *\n * 쓰는 법\n * 1. 상담자용 시트의 내 사본에서 확장 프로그램 → Apps Script 를 연다.\n * 2. 파일 옆 + → 스크립트 로 새 파일을 만들고 이 코드를 붙여 넣은 뒤 저장한다.\n * 3. 함수 createMyJobseekerForm 을 골라 한 번 실행하고 권한을 승인한다.\n *\n * 하는 일\n * - 실습실 사이트에 올라가 있는 \"취업상담 사전 질문지\"와 같은 내용으로 내 질문지를 만든다.\n *   (제목, 안내문, 질문 12개의 제목·도움말·형식·필수 여부, 제출 뒤 문구가 같다)\n * - 이 시트에 같은 질문지가 이미 연결되어 있으면 새로 만들지 않고 그 질문지를 쓴다.\n * - 답변 원본은 '설문지 응답 시트' 탭에 쌓이고, '구직자 정보' 탭에는 ID-1, ID-2 … 순번으로 등록된다.\n * - 내 질문지 주소를 '자동화 버튼' 탭의 \"구직자 작성 링크\" 칸에 적는다.\n *\n * 질문 제목은 '구직자 정보' 탭의 열 제목과 글자가 같아야 등록된다.\n * 질문을 바꾸려면 아래 목록과 '구직자 정보' 탭의 열 제목을 함께 바꾼다.\n */\nconst MY_FORM_FIELDS = [\n  // [질문 제목(= '구직자 정보' 열 제목), 도움말, 필수 여부, 장문 여부]\n  ['성명·별칭', '상담에서 불리고 싶은 이름이나 별칭을 적어 주세요.', true, false],\n  ['희망 직무', '어떤 일을 하고 싶으세요? 아직 정하지 않았다면 관심 분야를 적어 주세요.', true, false],\n  ['경력 요약', '어디에서 어떤 일을 얼마나 하셨나요? 첫 구직이면 활동·실습 경험을 적어도 됩니다.', false, true],\n  ['핵심 역량', '혼자 해낼 수 있는 업무나 익숙한 도구는 무엇인가요?', false, true],\n  ['자격·훈련', '취득한 자격이나 수료한 과정 중 희망 직무와 관련된 것을 적어 주세요.', false, true],\n  ['경험 근거', '직접 맡은 일 하나를 골라 무엇을 했고 결과가 어땠는지 알려 주세요.', false, true],\n  ['필수 근무조건', '꼭 맞아야 하는 근무지역·시간·통근 조건이 있나요?', false, true],\n  ['희망 소득', '예: 세전 월 250만 원, 또는 상담 후 협의', false, false],\n  ['취업 희망시점', '예: 즉시, 한 달 이내, 또는 특정 월', false, false],\n  ['필요한 지원', '어떤 도움을 먼저 받고 싶으세요? 예: 희망 직무 좁히기, 면접 연습', false, true],\n  ['취업 후 정착 지원', '취업 후에도 어떤 도움이 있으면 좋을까요?', false, true],\n  ['메모', '상담자에게 미리 전하고 싶은 내용이 있다면 적어 주세요.', false, true]\n];\nconst MY_FORM_TITLE = '취업상담 사전 질문지';\nconst MY_FORM_INTRO = '취업상담 전에 희망하는 일과 경험을 알려 주세요. 답변은 담당 상담자가 직무 적합도를 함께 살펴보고 지원계획을 준비하는 데 사용합니다. 이름 또는 별칭과 희망 직무만 필수입니다. 연락처·주민등록번호·건강정보는 적지 마세요.';\nconst MY_FORM_DONE = '답변을 접수했습니다. 다음 상담에서 함께 확인하겠습니다.';\nconst MY_INTAKE_SHEET = '구직자 정보';\nconst MY_GUIDE_SHEET = '자동화 버튼';\nconst MY_GUIDE_ORDER = '제출하면 이 사본의 구직자 정보에 순번으로 등록됩니다.';\nconst MY_PROP_FORM = 'MY_JOBSEEKER_FORM_ID';\nconst MY_PROP_BOOK = 'MY_JOBSEEKER_BOOK_ID';\nconst MY_PROP_LAST = 'MY_JOBSEEKER_LAST_NO';\n\n/** 내 질문지를 만들고 이 시트에 연결한다. 여러 번 실행해도 질문지는 하나만 쓴다. */\nfunction createMyJobseekerForm() {\n  const ss = SpreadsheetApp.getActiveSpreadsheet();\n  if (!ss || !ss.getSheetByName(MY_INTAKE_SHEET)) {\n    throw new Error(\"'구직자 정보' 탭이 있는 상담자용 시트(내 사본)의 Apps Script에서 실행하세요.\");\n  }\n  myCheckIntakeHeaders_(ss.getSheetByName(MY_INTAKE_SHEET));\n\n  const props = PropertiesService.getScriptProperties();\n  const lock = LockService.getScriptLock();\n  lock.waitLock(30000);\n  let form = null;\n  try {\n    // 1) 전에 이 시트에서 이 코드로 연결한 질문지\n    const savedId = props.getProperty(MY_PROP_FORM);\n    if (savedId && props.getProperty(MY_PROP_BOOK) === ss.getId()) {\n      try { form = FormApp.openById(savedId); } catch (error) { form = null; }\n    }\n    // 2) 이 시트에 이미 연결되어 있는 같은 질문지\n    if (!form) form = myFindLinkedForm_(ss);\n    // 3) 없으면 새로 만든다\n    if (!form) form = FormApp.create(MY_FORM_TITLE);\n    props.setProperty(MY_PROP_FORM, form.getId());\n    props.setProperty(MY_PROP_BOOK, ss.getId());\n\n    form.setTitle(MY_FORM_TITLE)\n      .setDescription(MY_FORM_INTRO)\n      .setCollectEmail(false)\n      .setLimitOneResponsePerUser(false)\n      .setPublishingSummary(false)\n      .setAllowResponseEdits(false)\n      .setConfirmationMessage(MY_FORM_DONE);\n\n    const existing = form.getItems().map(item => item.getTitle());\n    MY_FORM_FIELDS.forEach(([title, help, required, long]) => {\n      if (existing.indexOf(title) >= 0) return;\n      const item = long ? form.addParagraphTextItem() : form.addTextItem();\n      item.setTitle(title).setHelpText(help).setRequired(required);\n    });\n\n    // 답변 원본이 이 시트의 '설문지 응답 시트' 탭에 쌓이게 한다\n    let destination = null;\n    try { destination = form.getDestinationId(); } catch (error) { destination = null; }\n    if (destination !== ss.getId()) {\n      try {\n        form.setDestination(FormApp.DestinationType.SPREADSHEET, ss.getId());\n      } catch (error) { /* 연결하지 못해도 '구직자 정보' 등록은 된다 */ }\n    }\n\n    const hasTrigger = ScriptApp.getProjectTriggers().some(trigger =>\n      trigger.getHandlerFunction() === 'onMyJobseekerFormSubmit' && trigger.getTriggerSourceId() === form.getId());\n    if (!hasTrigger) {\n      ScriptApp.newTrigger('onMyJobseekerFormSubmit').forForm(form).onFormSubmit().create();\n    }\n\n    try {\n      if (form.supportsAdvancedResponderPermissions && form.supportsAdvancedResponderPermissions()) form.setPublished(true);\n    } catch (error) { /* 예전 방식의 폼은 만들면 바로 공개된다 */ }\n    form.setAcceptingResponses(true);\n  } finally {\n    lock.releaseLock();\n  }\n\n  const url = form.getPublishedUrl();\n  myWriteGuide_(ss, url);\n  Logger.log('구직자에게 보낼 주소: ' + url);\n  Logger.log('질문을 고치는 주소: ' + form.getEditUrl());\n  ss.toast(\"내 질문지 주소를 '자동화 버튼' 탭의 구직자 작성 링크 칸에 적었습니다.\", '사전 질문지 연결 완료', 10);\n  return url;\n}\n\n/** 폼이 제출될 때 자동으로 실행된다. */\nfunction onMyJobseekerFormSubmit(e) {\n  if (!e || !e.response) return;\n  myRegisterResponse_(e.response);\n}\n\n/** 자동 등록이 빠진 답변이 있을 때 한 번 실행하면 빠진 것만 등록한다. */\nfunction registerMissingJobseekerResponses() {\n  const formId = PropertiesService.getScriptProperties().getProperty(MY_PROP_FORM);\n  if (!formId) throw new Error('먼저 createMyJobseekerForm 을 실행하세요.');\n  FormApp.openById(formId).getResponses().forEach(response => myRegisterResponse_(response));\n}\n\n/** 이 시트의 탭에 연결된 질문지 가운데 질문 12개가 모두 있는 것을 찾는다. 없으면 null. */\nfunction myFindLinkedForm_(ss) {\n  const sheets = ss.getSheets();\n  for (let i = 0; i < sheets.length; i++) {\n    let url = null;\n    try { url = sheets[i].getFormUrl(); } catch (error) { url = null; }\n    if (!url) continue;\n    try {\n      const linked = FormApp.openByUrl(url);\n      const titles = linked.getItems().map(item => item.getTitle());\n      if (MY_FORM_FIELDS.every(field => titles.indexOf(field[0]) >= 0)) return linked;\n    } catch (error) { /* 열 수 없는 질문지는 건너뛴다 */ }\n  }\n  return null;\n}\n\nfunction myRegisterResponse_(response) {\n  const key = String(response.getId());\n  const answers = {};\n  response.getItemResponses().forEach(itemResponse => {\n    answers[itemResponse.getItem().getTitle()] = String(itemResponse.getResponse() || '').trim();\n  });\n\n  const lock = LockService.getScriptLock();\n  lock.waitLock(30000);\n  try {\n    const props = PropertiesService.getScriptProperties();\n    const bookId = props.getProperty(MY_PROP_BOOK);\n    const ss = bookId ? SpreadsheetApp.openById(bookId) : SpreadsheetApp.getActiveSpreadsheet();\n    const sheet = ss.getSheetByName(MY_INTAKE_SHEET);\n    const cols = myCheckIntakeHeaders_(sheet);\n    const width = cols.heads.length;\n    if (sheet.getMaxRows() < 2) sheet.insertRowAfter(1);\n    const rows = sheet.getRange(2, 1, sheet.getMaxRows() - 1, width).getDisplayValues();\n\n    if (rows.some(row => row[cols.key] === key)) return;   // 이미 등록한 답변\n\n    // 지운 행의 번호를 다시 쓰지 않도록 마지막 번호를 따로 기억한다\n    const highest = rows.reduce(\n      (max, row) => (/^ID-\\d+$/.test(row[cols.id]) ? Math.max(max, Number(row[cols.id].slice(3))) : max),\n      Number(props.getProperty(MY_PROP_LAST) || 0));\n    // 체크되지 않았고 A열 말고는 모두 빈 첫 행에 적는다\n    const freeIndex = rows.findIndex(row => row[0] !== 'TRUE' && row.slice(1).every(value => value === ''));\n    const target = freeIndex >= 0 ? freeIndex + 2 : sheet.getMaxRows() + 1;\n    if (target > sheet.getMaxRows()) sheet.insertRowAfter(sheet.getMaxRows());\n\n    const values = cols.heads.map(head => {\n      const input = answers[head] || '';\n      return /^[=+@'-]/.test(input) ? \"'\" + input : input;   // 수식으로 실행되지 않게 막는다\n    });\n    values[0] = false;\n    values[cols.id] = 'ID-' + (highest + 1);\n    values[cols.key] = key;\n\n    sheet.getRange(target, 1).insertCheckboxes();\n    sheet.getRange(target, 1, 1, width).setValues([values]);\n    SpreadsheetApp.flush();\n    props.setProperty(MY_PROP_LAST, String(highest + 1));\n  } finally {\n    lock.releaseLock();\n  }\n}\n\n/** '구직자 정보' 탭의 열 제목이 질문지와 맞는지 확인하고 열 위치를 돌려준다. */\nfunction myCheckIntakeHeaders_(sheet) {\n  const heads = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getDisplayValues()[0].map(text => String(text).trim());\n  const id = heads.indexOf('구직자 ID');\n  const key = heads.indexOf('폼 응답 식별자');\n  const missing = MY_FORM_FIELDS.map(field => field[0]).filter(title => heads.indexOf(title) < 0);\n  if (id < 0 || key < 0 || missing.length > 0) {\n    throw new Error(\"'구직자 정보' 탭의 열 제목을 확인하세요. 없는 제목: \" +\n      [id < 0 ? '구직자 ID' : '', key < 0 ? '폼 응답 식별자' : ''].concat(missing).filter(Boolean).join(', '));\n  }\n  return { heads: heads, id: id, key: key };\n}\n\n/** '자동화 버튼' 탭의 안내 칸에 내 질문지 주소와 접수 안내를 적는다. */\nfunction myWriteGuide_(ss, url) {\n  const guide = ss.getSheetByName(MY_GUIDE_SHEET);\n  if (!guide) return;\n  const labels = guide.getRange(1, 1, guide.getLastRow(), 1).getDisplayValues().map(row => String(row[0]).trim());\n  const link = labels.indexOf('구직자 작성 링크');\n  if (link >= 0) guide.getRange(link + 1, 2).setValue(url);\n  const order = labels.indexOf('접수 순서');\n  if (order >= 0) guide.getRange(order + 1, 2).setValue(MY_GUIDE_ORDER);\n}\n"
  },
+ "keyCompare": {
+  "lead": "공고 분석은 Gemini API 키가 없어도 돌아감. 두 방법은 결과로 나오는 글의 수준이 다름.",
+  "ways": [
+   {
+    "tag": "방법 1",
+    "name": "API 키 없이 실행",
+    "how": "키를 넣지 않고 [공고 분석하기]를 누름. 공고에 적힌 문장을 정해진 틀에 옮겨 초안을 만듦.",
+    "good": [
+     "준비 없이 바로 됨. 키 발급과 등록이 필요 없음",
+     "한도 오류가 나지 않아 수업이 멈추지 않음",
+     "공고 내용이 외부 AI로 보내지지 않음"
+    ],
+    "bad": [
+     "글의 수준이 낮음. 어느 공고에나 맞는 틀 문장이 나오고 빈칸([구체적 경험], [담당 역할])을 직접 채워야 함",
+     "공고에 없는 표현으로 풀어 쓰거나 기업 특성을 짚어 주지 못함"
+    ],
+    "label": "API 미등록 · 자기소개서 문장 재료",
+    "sample": [
+     "1) 지원동기 - 한국후꼬꾸㈜의 연구개발 기획 업무에 관심을 갖게 된 계기는 [구체적 경험]입니다.",
+     "2) 직무 경험 - [과제]에서 [담당 역할]을 맡아 [결과]를 만들었습니다.",
+     "3) 입사 후 기여 - 이 경험을 살려 국책 업무에서 [기여할 부분]을 담당하고 싶습니다."
+    ]
+   },
+   {
+    "tag": "방법 2",
+    "on": true,
+    "name": "API 키를 등록하고 실행",
+    "how": "상단 [분석] 메뉴에서 Gemini 키를 등록한 뒤 [공고 분석하기]를 누름. Gemini가 공고를 읽고 풀어 씀.",
+    "good": [
+     "글의 수준이 높음. 기업과 직무의 특성을 짚은 문장이 나옴",
+     "키워드, 면접 질문, 자기소개서 문장 재료를 공고에 맞춰 써 줌"
+    ],
+    "bad": [
+     "키 발급과 등록이 먼저 필요함",
+     "무료 한도에 닿으면 그날은 생성되지 않음. 수업 당일 강사 시연에서 한도에 닿아 생성되지 않은 일이 있었음",
+     "여러 사람이 한 키를 함께 쓰면 한도에 금방 닿으므로 각자 자기 키를 씀",
+     "AI가 쓴 내용은 공고 원문과 대조해 확인해야 함"
+    ],
+    "label": "API 등록 · 자기소개서 문장 재료",
+    "sample": [
+     "1) 폭넓은 PM 경험 - R&D 기획부터 국책과제, 고객사 대응까지 아우르는 PM 전문가로 성장하고자 지원함",
+     "2) 자동차 부품 기술력 - 1987년부터 축적된 한국후꼬꾸의 엔진 및 고무·플라스틱 부품 기술력에 매료됨",
+     "3) 산학연 협력의 허브 - 정부 및 학계와의 협력을 주도하며 회사의 기술 경쟁력 확보에 기여하고 싶음"
+    ]
+   }
+  ],
+  "note": "예시는 같은 공고(한국후꼬꾸㈜ · 기술연구소 연구개발 기획·프로젝트 매니저)를 두 방법으로 분석한 결과. 수업에서는 방법 1로 전 과정을 먼저 돌리고, 방법 2의 결과는 한 건만 비교해 봄."
+ },
  "mine": {
   "title": "내 업무 에이전트 만들기",
   "lead": "①②는 업무 에이전트 실습실(agent-lab) 화면을 그대로 보여 줌. 먼저 내 스튜디오를 만들고, 그 스튜디오에서 내 업무용 에이전트를 설계함. 스튜디오를 아직 못 만들었으면 ③에서 강사 스튜디오의 프롬프트를 복사해 씀.",

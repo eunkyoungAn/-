@@ -1302,3 +1302,14 @@ details.opt-fold .g-table{margin-top:14px}
 .ask strong{display:block;margin-top:4px;font-size:17px;font-weight:700;line-height:1.45}
 .ask span{display:block;margin-top:6px;color:var(--ink-mute);font-size:14px;line-height:1.65}
 @media (max-width:760px){.ask3{grid-template-columns:minmax(0,1fr)}.err-table td:first-child{white-space:normal}}
+
+/* 3단계: API 키 없이 / 등록하고 비교 */
+.key-card .key-how{margin-top:6px;color:var(--ink-soft);font-size:15px;line-height:1.65}
+.key-card .pc{display:block;margin-top:14px;font-size:12.5px;letter-spacing:.06em}
+.key-card .pc.good{color:var(--accent)}
+.key-card .pc.bad{color:#b42318}
+.key-card .bl{margin-top:4px;font-size:15px;line-height:1.65}
+.key-sample{margin-top:16px;padding:12px 14px;border:1px dashed var(--rule-strong);border-radius:12px;background:rgba(17,17,19,.02)}
+.key-sample b{display:block;margin-bottom:6px;font-size:12.5px;color:var(--ink-mute)}
+.key-sample p{font-size:14.5px;line-height:1.65;color:var(--ink)}
+.key-sample p + p{margin-top:4px}

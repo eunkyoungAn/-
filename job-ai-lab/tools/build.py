@@ -181,6 +181,24 @@ FLOW = {
     ],
 }
 
+# ---------------------------------------------------------------- 3단계 보충: API 키 없이 / 키를 등록해서
+KEY_COMPARE = {
+    'lead': '공고 분석은 Gemini API 키가 없어도 돌아감. 두 방법은 결과로 나오는 글의 수준이 다름.',
+    'ways': [
+        {'tag': '방법 1', 'name': 'API 키 없이 실행', 'how': '키를 넣지 않고 [공고 분석하기]를 누름. 공고에 적힌 문장을 정해진 틀에 옮겨 초안을 만듦.',
+         'good': ['준비 없이 바로 됨. 키 발급과 등록이 필요 없음', '한도 오류가 나지 않아 수업이 멈추지 않음', '공고 내용이 외부 AI로 보내지지 않음'],
+         'bad': ['글의 수준이 낮음. 어느 공고에나 맞는 틀 문장이 나오고 빈칸([구체적 경험], [담당 역할])을 직접 채워야 함', '공고에 없는 표현으로 풀어 쓰거나 기업 특성을 짚어 주지 못함'],
+         'label': 'API 미등록 · 자기소개서 문장 재료',
+         'sample': ['1) 지원동기 - 한국후꼬꾸㈜의 연구개발 기획 업무에 관심을 갖게 된 계기는 [구체적 경험]입니다.', '2) 직무 경험 - [과제]에서 [담당 역할]을 맡아 [결과]를 만들었습니다.', '3) 입사 후 기여 - 이 경험을 살려 국책 업무에서 [기여할 부분]을 담당하고 싶습니다.']},
+        {'tag': '방법 2', 'on': True, 'name': 'API 키를 등록하고 실행', 'how': '상단 [분석] 메뉴에서 Gemini 키를 등록한 뒤 [공고 분석하기]를 누름. Gemini가 공고를 읽고 풀어 씀.',
+         'good': ['글의 수준이 높음. 기업과 직무의 특성을 짚은 문장이 나옴', '키워드, 면접 질문, 자기소개서 문장 재료를 공고에 맞춰 써 줌'],
+         'bad': ['키 발급과 등록이 먼저 필요함', '무료 한도에 닿으면 그날은 생성되지 않음. 수업 당일 강사 시연에서 한도에 닿아 생성되지 않은 일이 있었음', '여러 사람이 한 키를 함께 쓰면 한도에 금방 닿으므로 각자 자기 키를 씀', 'AI가 쓴 내용은 공고 원문과 대조해 확인해야 함'],
+         'label': 'API 등록 · 자기소개서 문장 재료',
+         'sample': ['1) 폭넓은 PM 경험 - R&D 기획부터 국책과제, 고객사 대응까지 아우르는 PM 전문가로 성장하고자 지원함', '2) 자동차 부품 기술력 - 1987년부터 축적된 한국후꼬꾸의 엔진 및 고무·플라스틱 부품 기술력에 매료됨', '3) 산학연 협력의 허브 - 정부 및 학계와의 협력을 주도하며 회사의 기술 경쟁력 확보에 기여하고 싶음']},
+    ],
+    'note': '예시는 같은 공고(한국후꼬꾸㈜ · 기술연구소 연구개발 기획·프로젝트 매니저)를 두 방법으로 분석한 결과. 수업에서는 방법 1로 전 과정을 먼저 돌리고, 방법 2의 결과는 한 건만 비교해 봄.',
+}
+
 # ---------------------------------------------------------------- 1단계 보충: 내가 쓸 사전 질문지 미리 만들기
 FORM_SCRIPT = open(os.path.join(ROOT, 'sheet', 'FormSetup.gs'), encoding='utf-8').read()
 def _gs_const(name):
@@ -489,7 +507,7 @@ def build_zip():
 
 
 def build_data():
-    data = {'links': LINKS, 'start': START, 'flow': FLOW, 'formMake': FORM_MAKE, 'mine': MINE, 'tryout': TRYOUT, 'tools': TOOLS, 'scriptFile': SCRIPT_FILE, 'files': FILES, 'zip': ZIP_NAME}
+    data = {'links': LINKS, 'start': START, 'flow': FLOW, 'formMake': FORM_MAKE, 'keyCompare': KEY_COMPARE, 'mine': MINE, 'tryout': TRYOUT, 'tools': TOOLS, 'scriptFile': SCRIPT_FILE, 'files': FILES, 'zip': ZIP_NAME}
     js = '/* tools/build.py 가 만든 파일. 직접 고치지 말고 build.py 를 고친 뒤 다시 실행한다. */\nwindow.LAB = ' + \
          json.dumps(data, ensure_ascii=False, indent=1) + ';\n'
     open(os.path.join(ROOT, 'data.js'), 'w', encoding='utf-8').write(js)
