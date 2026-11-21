@@ -138,7 +138,7 @@
       <div class="two-col make-cols">${K.ways.map(w => `<div class="result-card key-card"><span class="way-tag${w.on ? ' on' : ''}">${esc(w.tag)}</span><strong>${esc(w.name)}</strong><p class="key-how">${esc(w.how)}</p>
         <b class="pc good">장점</b>${ul(w.good)}<b class="pc bad">단점</b>${ul(w.bad)}
         <div class="key-sample"><b>${esc(w.label)}</b>${w.sample.map(t => `<p>${esc(t)}</p>`).join('')}</div></div>`).join('')}</div>
-      ${K.note ? `<p class="local-note">${esc(K.note)}</p>` : ''}</section>`;
+      ${K.note ? `<div class="key-guide"><b>이렇게 해 보세요</b><p>${esc(K.note)}</p></div>` : ''}</section>`;
   }
   function formMakeHtml() {
     const scriptHref = FILE_BASE + encodeURIComponent(D.scriptFile);
