@@ -61,7 +61,7 @@
       `<div class="hb-col"><strong>${esc(f)}</strong><span>${esc(d)}</span><div><a href="${FILE_BASE}${encodeURIComponent(f)}.pdf" download>PDF 받기</a><a href="${FILE_BASE}${encodeURIComponent(f)}.docx" download>DOCX 받기</a></div></div>`).join('')}</div>`).join('');
     $('#downloadTools').innerHTML = `<h3 class="dl-h">실습 도구 · 구글 시트, 구글 폼, Apps Script</h3><div class="tool-list">${D.tools.map(t =>
       `<div class="dl-item tool-item"><div><strong>${esc(t.t)}</strong><span>${esc(t.d)}</span></div><div class="btn-pair">${t.btns.map(toolBtn).join('')}</div></div>`).join('')}</div>`;
-    /* ⑨ 막힐 때 */
+    /* ⑨ 다양한 오류 상황 */
     $('#helpList').innerHTML = `<div class="two-col">${F.help.map(h => `<div class="result-card"><strong>${esc(h[0])}</strong><p>${esc(h[1])}</p></div>`).join('')}</div>`;
   }
 
@@ -292,7 +292,7 @@
       ['실습 5단계', [['#flow', '안내', '전체 과정'], ...F.steps.map(s => ['#flow-' + s.no, s.no + '단계', s.title]), ['#flow-form', '시트', '구직자 정보, 구인정보 등 시트 받기'], ['#flow-key', '키', 'API 키 없이 / 등록하고 · 장단점'], ['#flow-errors', '오류', 'API 키를 넣었는데 결과가 안 만들어질 때'], ['#flow-free', '자유', '자유 실습 · 구글 폼을 Apps Script로 만들기'], ['#flow-why', '의미', '이 워크플로우의 의미'], ['#flow-tabs', '탭', '시트 탭 구성']]],
       ['내 에이전트', M.tabs.map(t => ['#mine-' + t.id, '개별', t.label])],
       ['체험해 보기', T.items.map((x, i) => [x.url, '체험 ' + (i + 1), x.title])],
-      ['자료실과 도움말', [['#downloads', '자료', '자료실 · 상담자용 시트, Apps Script, 가상 사례'], ['#privacy', '유의', '실제 구직자 정보를 다룰 때'], ['#help', '도움', '막힐 때']]],
+      ['자료실과 도움말', [['#downloads', '자료', '자료실 · 상담자용 시트, Apps Script, 가상 사례'], ['#privacy', '유의', '실제 구직자 정보를 다룰 때'], ['#help', '도움', '다양한 오류 상황']]],
     ];
     $('#quickPanel').innerHTML = groups.map(g => `<div class="menu-group"><strong>${esc(g[0])}</strong>${g[1].map(x => `<a href="${esc(x[0])}"${/^https?:/.test(x[0]) ? ' target="_blank" rel="noopener noreferrer"' : ''}><span>${esc(x[1])}</span>${esc(x[2])}</a>`).join('')}</div>`).join('');
     $('#quickPanel').addEventListener('click', e => { if (e.target.closest('a')) $('#quickMenu').open = false; });
