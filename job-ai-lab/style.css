@@ -1317,3 +1317,11 @@ details.opt-fold .g-table{margin-top:14px}
 .key-guide{margin-top:18px;padding:16px 18px;border:2px solid var(--accent);border-radius:12px;background:rgba(11,100,244,.05)}
 .key-guide b{display:block;margin-bottom:4px;font-size:13px;letter-spacing:.04em;color:var(--accent)}
 .key-guide p{font-size:16px;line-height:1.7;font-weight:600;color:var(--ink)}
+
+/* 실습 5단계 아래: 추가 제공(구직자용 시트) */
+.hb-extra{margin-top:28px;padding:26px 28px;border:1px dashed var(--rule-strong);border-radius:20px;background:var(--surface)}
+.hb-extra > span{display:block;font-size:12.5px;font-weight:700;letter-spacing:.06em;color:var(--accent)}
+.hb-extra > strong{display:block;margin-top:4px;font-size:20px;letter-spacing:-.02em}
+.hb-extra > p{margin-top:8px;color:var(--ink-soft);font-size:15.5px;line-height:1.7}
+.hb-extra .bl{margin-top:8px;font-size:15px;line-height:1.7}
+.hb-extra .sheet-actions{margin-top:14px}

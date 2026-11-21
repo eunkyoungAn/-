@@ -44,7 +44,9 @@
       <div class="hb-head"><h2>실습 5단계</h2><p>구직자의 경험을 채용공고의 요구와 대조하고, 상담자와 구직자가 함께 다음 행동을 정합니다. 단계를 누르면 펼쳐집니다.</p></div>
       <div class="hb-acc">${F.steps.map((s, i) => `<details name="hb-steps"${i === 0 ? ' open' : ''}><summary><b>0${s.no}</b><span>${esc(s.title)}</span></summary>
         <div class="hb-acc-b"><p>${esc(s.short)}</p><span class="hb-tab">쓰는 탭 · ${esc(s.tab)}</span><span class="hb-tab">준비물 ${prepDone(s)}/${prepNeed(s).length}</span><a class="hb-go" href="#flow-${s.no}">준비물 확인하고 시작 →</a></div></details>`).join('')}</div>
-      <div class="sheet-actions mt14"><a class="g-btn" href="#flow-1">1단계부터 시작</a><a class="g-btn ghost" href="#flow">전체 과정 보기</a></div></section>
+      <div class="sheet-actions mt14"><a class="g-btn" href="#flow-1">1단계부터 시작</a><a class="g-btn ghost" href="#flow">전체 과정 보기</a></div>
+      <div class="hb-extra" id="sec-extra"><span>${esc(D.extra.title)}</span><strong>${esc(D.extra.name)}</strong><p>${esc(D.extra.lead)}</p>${ul(D.extra.pts)}
+        <div class="sheet-actions">${ext(L.seekerCopy, '구직자용 시트 내 사본 만들기')}${ext(L.seekerSheet, '시트 미리 보기', 'g-btn ghost')}</div><p class="local-note">${esc(D.extra.note)}</p></div></section>
       <section class="hb-sec" id="sec-mine"><div class="hb-head"><h2>내 에이전트</h2><p>${esc(M.title)}. 업무 에이전트 실습실의 두 화면을 이 사이트 안에서 그대로 봅니다.</p></div>
       <div class="hb-team">${M.tabs.map(t => `<a class="hb-member" href="#mine-${t.id}"><span>개별 실습</span><strong>${esc(t.label)}</strong><em>열기 →</em></a>`).join('')}</div></section>`;
     /* ⑧ 체험해 보기 */
@@ -289,7 +291,7 @@
     const groups = [
       ['수업 준비', [['ai-test/', '검사', 'AI 역량검사'], ['who/', '레벨', '나는 어떤 AI 사용자?']]],
       ['강의 · 세 가지 키워드', SLIDES.map((s, i) => ['#start-' + i, s.nav, s.title])],
-      ['실습 5단계', [['#flow', '안내', '전체 과정'], ...F.steps.map(s => ['#flow-' + s.no, s.no + '단계', s.title]), ['#flow-form', '시트', '구직자 정보, 구인정보 등 시트 받기'], ['#flow-key', '키', 'API 키 없이 / 등록하고 · 장단점'], ['#flow-errors', '오류', 'API 키를 넣었는데 결과가 안 만들어질 때'], ['#flow-free', '자유', '자유 실습 · 구글 폼을 Apps Script로 만들기'], ['#flow-why', '의미', '이 워크플로우의 의미'], ['#flow-tabs', '탭', '시트 탭 구성']]],
+      ['실습 5단계', [['#flow', '안내', '전체 과정'], ...F.steps.map(s => ['#flow-' + s.no, s.no + '단계', s.title]), ['#flow-form', '시트', '구직자 정보, 구인정보 등 시트 받기'], ['#flow-key', '키', 'API 키 없이 / 등록하고 · 장단점'], ['#extra', '추가', '추가 제공 · 구직자용 시트'], ['#flow-errors', '오류', 'API 키를 넣었는데 결과가 안 만들어질 때'], ['#flow-free', '자유', '자유 실습 · 구글 폼을 Apps Script로 만들기'], ['#flow-why', '의미', '이 워크플로우의 의미'], ['#flow-tabs', '탭', '시트 탭 구성']]],
       ['내 에이전트', M.tabs.map(t => ['#mine-' + t.id, '개별', t.label])],
       ['체험해 보기', T.items.map((x, i) => [x.url, '체험 ' + (i + 1), x.title])],
       ['자료실과 도움말', [['#downloads', '자료', '자료실 · 상담자용 시트, Apps Script, 가상 사례'], ['#privacy', '유의', '실제 구직자 정보를 다룰 때'], ['#help', '도움', '다양한 오류 상황']]],
@@ -300,7 +302,7 @@
   }
 
   /* ---------- 라우팅 ---------- */
-  const HOME_SECS = ['before', 'try', 'downloads', 'privacy', 'help'];
+  const HOME_SECS = ['before', 'try', 'downloads', 'privacy', 'help', 'extra'];
   function route() {
     const h = (location.hash || '#home').replace('#', '');
     const [view, sub] = h.split('-');
