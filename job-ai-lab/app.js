@@ -132,6 +132,14 @@
 
   /* ---------- 취업상담 워크플로우 ---------- */
   /* 1단계 아래: ① 시트 받기(두 파일 저장·실행, 오류 이유) ② 자유 실습(생성형 AI에게 질문해 폼 만들기 코드 받기) */
+  function keyCompareHtml() {
+    const K = D.keyCompare;
+    return `<section class="make-form" id="flow-key"><h3>API 키 없이 할까, 등록하고 할까</h3><p>${esc(K.lead)}</p>
+      <div class="two-col make-cols">${K.ways.map(w => `<div class="result-card key-card"><span class="way-tag${w.on ? ' on' : ''}">${esc(w.tag)}</span><strong>${esc(w.name)}</strong><p class="key-how">${esc(w.how)}</p>
+        <b class="pc good">장점</b>${ul(w.good)}<b class="pc bad">단점</b>${ul(w.bad)}
+        <div class="key-sample"><b>${esc(w.label)}</b>${w.sample.map(t => `<p>${esc(t)}</p>`).join('')}</div></div>`).join('')}</div>
+      <p class="local-note">${esc(K.note)}</p></section>`;
+  }
   function formMakeHtml() {
     const scriptHref = FILE_BASE + encodeURIComponent(D.scriptFile);
     return `<div class="make-form" id="flow-form"><h3>${esc(FM.setup_h)}</h3><p>${esc(FM.setup_lead)}</p>
@@ -242,6 +250,7 @@
       <section id="flow-${s.no}-do"><span class="section-number">2</span><h2>시작하기 · 시트에서 하는 일</h2>${ul(s.do)}
         <div class="out-box"><b>상담에 남는 결과</b><p>${esc(s.out)}</p></div></section>
       ${s.no === '1' ? `<section id="flow-form-wrap">${formMakeHtml()}</section>` : ''}
+      ${s.no === '3' ? keyCompareHtml() : ''}
       <div class="lesson-navigation"><a href="${prev[0]}"><span>이전</span><strong>${esc(prev[1])}</strong></a><a class="lesson-next" href="${next[0]}"><span>다음</span><strong>${esc(next[1])}</strong></a></div>`;
     const status = () => {
       const need = prepNeed(s).length, done = prepDone(s), ok = done === need;
@@ -280,7 +289,7 @@
     const groups = [
       ['수업 준비', [['ai-test/', '검사', 'AI 역량검사'], ['who/', '레벨', '나는 어떤 AI 사용자?']]],
       ['강의 · 세 가지 키워드', SLIDES.map((s, i) => ['#start-' + i, s.nav, s.title])],
-      ['실습 5단계', [['#flow', '안내', '전체 과정'], ...F.steps.map(s => ['#flow-' + s.no, s.no + '단계', s.title]), ['#flow-form', '시트', '구직자 정보, 구인정보 등 시트 받기'], ['#flow-errors', '오류', 'API 키를 넣었는데 결과가 안 만들어질 때'], ['#flow-free', '자유', '자유 실습 · 구글 폼을 Apps Script로 만들기'], ['#flow-why', '의미', '이 워크플로우의 의미'], ['#flow-tabs', '탭', '시트 탭 구성']]],
+      ['실습 5단계', [['#flow', '안내', '전체 과정'], ...F.steps.map(s => ['#flow-' + s.no, s.no + '단계', s.title]), ['#flow-form', '시트', '구직자 정보, 구인정보 등 시트 받기'], ['#flow-key', '키', 'API 키 없이 / 등록하고 · 장단점'], ['#flow-errors', '오류', 'API 키를 넣었는데 결과가 안 만들어질 때'], ['#flow-free', '자유', '자유 실습 · 구글 폼을 Apps Script로 만들기'], ['#flow-why', '의미', '이 워크플로우의 의미'], ['#flow-tabs', '탭', '시트 탭 구성']]],
       ['내 에이전트', M.tabs.map(t => ['#mine-' + t.id, '개별', t.label])],
       ['체험해 보기', T.items.map((x, i) => [x.url, '체험 ' + (i + 1), x.title])],
       ['자료실과 도움말', [['#downloads', '자료', '자료실 · 상담자용 시트, Apps Script, 가상 사례'], ['#privacy', '유의', '실제 구직자 정보를 다룰 때'], ['#help', '도움', '막힐 때']]],
@@ -303,6 +312,7 @@
       $('#viewFlow').hidden = false;
       if (/^[1-5]$/.test(sub || '')) renderStep(sub);
       else if (['form', 'free', 'errors'].includes(sub)) { renderStep('1'); target = document.getElementById('flow-' + sub); }
+      else if (sub === 'key') { renderStep('3'); target = document.getElementById('flow-key'); }
       else { renderFlow(); if (sub) target = document.getElementById(h); }
     }
     else if (view === 'mine') { $('#viewMine').hidden = false; renderMine(sub); }
