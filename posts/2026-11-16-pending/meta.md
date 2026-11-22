@@ -1,4 +1,4 @@
-status: asked
+status: superseded (2026-11-23 새 후보 질문으로 대체, 무응답)
 slack_thread: https://cc-a-hq.slack.com/archives/C0C6ACW2ML7/p1794786787891679
 slack_ts: 1794786787.891679
 후보:
