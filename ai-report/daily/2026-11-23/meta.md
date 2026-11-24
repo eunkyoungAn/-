@@ -1,4 +1,4 @@
-status: drafted        # drafted → sent
+status: not_sent       # 슬랙 전송이 승인 대기로 멈춤. 소식은 2026-11-24 리포트에 합쳐 발송
 type: daily
 collected_via: page    # 채널 /videos 페이지 + WebSearch 교차확인
 window: 최근 72시간(월요일). 8개 채널, 미발송 새 영상 9개 → 2건 수록
