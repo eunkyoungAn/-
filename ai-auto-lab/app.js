@@ -92,13 +92,25 @@
     return `<ol class="cn-flow${cls ? ' ' + cls : ''}">${f.map((x, i) => `<li><b>${i + 1}</b><div><strong>${esc(x[1])}</strong><span>${esc(x[0])} · ${esc(x[2])}</span></div></li>`).join('')}</ol>`;
   }
   function renderHome() {
-    $('#homeParts').innerHTML = D.parts.map(p => `<section class="level-section" id="sec-${p.id}">
-      <div class="level-head"><div>${p.no ? `<span class="level-kicker">${esc(p.no)}</span>` : ''}<h2>${esc(p.title)}</h2></div><p>${esc(p.desc)}</p></div>
-      ${stepFlow(p)}<div class="lesson-grid">${p.stages.map(s => { const x = find(s.id); return `<a class="lesson-card ${done(x) ? 'is-done' : ''}" href="#${s.id}">
-        <span class="lesson-code">${esc(s.kicker)}</span><h3>${esc(s.title)}</h3><p>${esc(s.goal[0])}</p>
-        <div class="lesson-output">산출물 <span>${esc(s.output)}</span></div><div class="lesson-arrow">${esc(s.role)} →</div></a>`; }).join('')}
-      ${p.review ? `<a class="lesson-card ${done(find(p.review.id)) ? 'is-done' : ''}" href="#${p.review.id}"><span class="lesson-code">WRAP-UP</span><h3>${esc(p.review.title)}</h3><p>${p.id === 'mail' ? 'AI가 만든 메일을 바로 보내지 않고 체크리스트로 다시 읽습니다.' : '결과 링크와 상태를 시트에 기록하고 오늘 한 일을 돌아봅니다.'}</p><div class="lesson-output">산출물 <span>${p.id === 'mail' ? '체크 완료' : '카드뉴스 1편과 링크'}</span></div><div class="lesson-arrow">마무리 →</div></a>` : ''}
-      </div></section>`).join('');
+    /* 오늘 만드는 결과물: 색 세 가지(회색, 파랑, 어두운 색)가 번갈아 나온다 */
+    const course = [
+      ['메일 자동화', '#mail', '이름이 들어간 메일을 한 번에 보내는 시트'],
+      ['카드뉴스', '#card', '카드뉴스 1편과 게시 문구'],
+      ['보고서', '#report', '팀장님 제출용 한 장 요약'],
+      ['데이터분석', '#data', '후보별 표·막대그래프와 최종 보고서'],
+      ['할루시네이션', '#hallu', 'AI 답을 확인하는 다섯 가지 습관'],
+      ['자료실', '#materials', '실습 파일, 요청문, 지침, 참고 코드']
+    ];
+    const tone = ['grey', 'blue', 'dark'];
+    $('#homeCourse').innerHTML = course.map((c, i) => `<a class="hb-card t-${tone[i % 3]}" href="${c[1]}"><div><strong>${esc(c[0])}</strong><span class="d">${esc(c[2])}</span></div><div class="go"><i aria-hidden="true">↗</i>열기</div></a>`).join('');
+    /* 파트: 단계를 접이식 목록으로 */
+    const two = n => String(n).padStart(2, '0');
+    $('#homeParts').innerHTML = D.parts.map(p => `<section class="hb-sec" id="sec-${p.id}">
+      <div class="hb-head"><h2>${esc(p.title)}</h2><p>${esc(p.desc)}</p></div>
+      <div class="hb-acc">${p.stages.map((s, i) => `<details name="hb-${p.id}"${i === 0 ? ' open' : ''}><summary><b>${two(s.no)}</b><span>${esc(s.title)}</span></summary>
+        <div class="hb-acc-b"><p>${esc(s.goal[0])}</p><span class="hb-tab">산출물 · ${esc(s.output)}</span>${done(find(s.id)) ? '<span class="hb-tab">검수 완료</span>' : ''}<a class="hb-go" href="#${s.id}">이 단계 시작 →</a></div></details>`).join('')}
+      ${p.review ? `<details name="hb-${p.id}"><summary><b>끝</b><span>${esc(p.review.title)}</span></summary><div class="hb-acc-b"><p>${p.id === 'mail' ? '보내기 전에 체크리스트로 다시 읽습니다.' : '결과를 시트에 기록하고 오늘 한 일을 돌아봅니다.'}</p><a class="hb-go" href="#${p.review.id}">마무리 시작 →</a></div></details>` : ''}</div>
+      <div class="sheet-actions mt14"><a class="g-btn" href="#${p.stages[0].id}">1단계부터 시작</a></div></section>`).join('');
     renderProgress();
   }
   function renderStatic() {
@@ -106,13 +118,16 @@
     if ($('#homeFlowMail')) $('#homeFlowMail').innerHTML = FLOW_MAIL.map((f, i) => `<li><b>${i + 1}</b><div><strong>${esc(f[1])}</strong><span>${esc(f[0])}</span></div></li>`).join('');
     if ($('#homeFlowCard')) $('#homeFlowCard').innerHTML = FLOW_CARD.map((f, i) => `<li><b>${i + 1}</b><div><strong>${esc(f[1])}</strong><span>${esc(f[0])}</span></div></li>`).join('');
     const mailPrompt = D.parts[0].stages.find(s => s.prompt);
-    $('#materialBox').innerHTML = `<h3 class="dl-h">내려받는 파일</h3><div class="dl-grid">${D.downloads.map(f => `<div class="dl-item"><div><strong>${esc(f[0])}</strong><span>${esc(f[1])}</span></div><a class="g-btn ghost" href="${esc(f[2])}" ${f[3] ? 'download' : 'target="_blank" rel="noopener noreferrer"'}>${f[3] ? '받기' : '열기'}</a></div>`).join('')}</div>
-      <h3 class="dl-h">3 · 제미나이 메일 자동화</h3>${promptBox(mailPrompt.prompt.text, '1. 코드 요청문 (gemini.google.com)')}${CODE ? promptBox(CODE, '2. 참고 코드 (Code.gs)', 'cn-code') : ''}
-      <h3 class="dl-h">4 · ChatGPT 프로젝트 활용하기</h3>${promptBox(D.texts.travelGuide, '프로젝트 지침 · 여행지 분석실')}
-      <h3 class="dl-h">5 · 카드뉴스 만들기</h3>${[['guide', '1. 카드뉴스 프로젝트 지침'], ['requestFree', '2. 무료 계정용 요청문 (엑셀 파일 첨부)'], ['request', '3. 유료 계정용 요청문 (Google Drive 연결)'], ['cover', '4. 표지 이미지 요청문']].map(([k, l]) => promptBox(D.texts[k], l)).join('')}
+    const dlBtn = f => `<a class="g-btn" href="${esc(f[2])}" ${f[3] ? 'download' : 'target="_blank" rel="noopener noreferrer"'}>${f[3] ? '받기' : '사본 만들기'}</a>`;
+    const files = D.downloads.filter(f => /\.(hwpx|xlsx|docx)$/.test(f[2])), tools = D.downloads.filter(f => !files.includes(f));
+    $('#materialBox').innerHTML = `<h3 class="dl-h">실습 파일</h3><div class="hb-band">${files.map(f => `<div class="hb-col"><strong>${esc(f[0])}</strong><span>${esc(f[1])}</span><div><a href="${esc(f[2])}" download>파일 받기</a></div></div>`).join('')}</div>
+      <h3 class="dl-h">구글 시트와 참고 코드</h3><div class="tool-list">${tools.map(f => `<div class="dl-item tool-item"><div><strong>${esc(f[0])}</strong><span>${esc(f[1])}</span></div><div class="btn-pair">${dlBtn(f)}</div></div>`).join('')}</div>
+      <h3 class="dl-h">메일 자동화</h3>${promptBox(mailPrompt.prompt.text, '1. 코드 요청문 (gemini.google.com)')}${CODE ? promptBox(CODE, '2. 참고 코드 (Code.gs)', 'cn-code') : ''}
+      <h3 class="dl-h">ChatGPT 프로젝트</h3>${promptBox(D.texts.travelGuide, '프로젝트 지침 · 여행지 분석실')}
+      <h3 class="dl-h">카드뉴스</h3>${[['guide', '1. 카드뉴스 프로젝트 지침'], ['requestFree', '2. 무료 계정용 요청문 (엑셀 파일 첨부)'], ['request', '3. 유료 계정용 요청문 (Google Drive 연결)'], ['cover', '4. 표지 이미지 요청문']].map(([k, l]) => promptBox(D.texts[k], l)).join('')}
       <h3 class="dl-h">보고서</h3>${promptBox(D.texts.reportGuide, '1. 프로젝트 지침 · 보고서 작성 실습')}${promptBox(D.texts.reportPrompt, '2. 실습 프롬프트 · 3쪽 회의자료 요약')}
       <h3 class="dl-h">데이터분석</h3>${promptBox(D.texts.dataGuide, '1. 프로젝트 지침 · 고객 선호 데이터 분석')}${promptBox(D.texts.dataPrompt, '2. 실습 프롬프트 · 고객 선호 데이터 분류 및 시각화')}${promptBox(D.texts.finalReportPrompt, '3. 최종 보고서 프롬프트')}
-      <h3 class="dl-h">7 · 개인 연습실</h3>${promptBox(D.selfcheck.applyPrompt, '적용 시작 요청문')}`;
+      <h3 class="dl-h">개인 연습실</h3>${promptBox(D.selfcheck.applyPrompt, '적용 시작 요청문')}`;
     bindAll($('#materialBox'));
     $('#helpList').innerHTML = ['메일', 'ChatGPT', '카드뉴스', '공통'].map(g => `<h3 class="dl-h">${({ 메일: '제미나이 메일 자동화', ChatGPT: 'ChatGPT 프로젝트 활용하기', 카드뉴스: '카드뉴스 만들기', 공통: '공통' })[g]}</h3><div class="two-col">${D.help.filter(h => h[0] === g).map(h => `<div class="result-card"><strong>${esc(h[1])}</strong><p>${esc(h[2])}</p></div>`).join('')}</div>`).join('');
     $('#sourceList').innerHTML = D.sources.map(s => `<li>${esc(s).replace(/(https?:\/\/\S+)/, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>')}</li>`).join('');
@@ -378,12 +393,12 @@
   /* ---------- 바로가기 ---------- */
   function renderQuick() {
     const groups = [
-      ['1 · AI 사용 현황 안내', [['#ai', '현황', 'AI 사용 현황 안내'], ...SLIDES.map((s, i) => ['#start-' + i, s.nav, s.title])]],
-      ['2 · 시작하기 전에', [['ai-test/', '맨 처음', 'AI 역량검사'], ['who/', '그다음', '나는 어떤 AI 사용자? 맞춰 보기']]],
-      ...D.parts.map(p => [p.no ? `${p.no} · ${p.title}` : p.title, [...p.stages.map(s => ['#' + s.id, s.no + '단계', s.title]), ...(p.review ? [['#' + p.review.id, '마무리', p.review.title]] : [])]]),
+      ['AI 사용 현황', [['#ai', '현황', 'AI 사용 현황 안내'], ...SLIDES.map((s, i) => ['#start-' + i, s.nav, s.title])]],
+      ['시작하기 전에', [['ai-test/', '맨 처음', 'AI 역량검사'], ['who/', '그다음', '나는 어떤 AI 사용자? 맞춰 보기']]],
+      ...D.parts.map(p => [p.title, [...p.stages.map(s => ['#' + s.id, s.no + '단계', s.title]), ...(p.review ? [['#' + p.review.id, '마무리', p.review.title]] : [])]]),
       ['할루시네이션', [['#hallu', '정리', 'OpenAI · Anthropic 기준 줄이는 방법']]],
-      ['6 · 다운로드 자료 모아보기', [['#materials', '자료', '파일, 요청문, 참고 코드']]],
-      ['7 · 개인 연습실', [['#check', '연습', '체크하고 프롬프트로 적용 시작하기'], ['../prompt-practice/', '연습', '질문 구조 연습']]],
+      ['자료실', [['#materials', '자료', '파일, 요청문, 참고 코드']]],
+      ['개인 연습실', [['#check', '연습', '체크하고 프롬프트로 적용 시작하기'], ['../prompt-practice/', '연습', '질문 구조 연습']]],
       ['안내', [['#safety', '유의', '실제 업무에 쓸 때'], ['#help', '도움', '막힐 때'], ['#sources', '출처', '참고 자료']]]
     ];
     $('#quickPanel').innerHTML = groups.map(g => `<div class="menu-group"><strong>${esc(g[0])}</strong>${g[1].map(x => `<a href="${x[0]}"><span>${esc(x[1])}</span>${esc(x[2])}</a>`).join('')}</div>`).join('');
@@ -392,7 +407,7 @@
   }
 
   /* ---------- 라우팅 ---------- */
-  const HOME_SECS = ['ai', 'gpt', 'practice', 'intro', 'before', 'goals', 'mail', 'card', 'materials', 'safety', 'help', 'sources', 'report', 'data', 'hallu'];
+  const HOME_SECS = ['ai', 'gpt', 'practice', 'intro', 'before', 'goals', 'mail', 'card', 'materials', 'safety', 'help', 'sources', 'report', 'data', 'hallu', 'course', 'info'];
   function route() {
     const h = (location.hash || '#home').replace('#', '');
     const [view, sub] = h.split('-');
