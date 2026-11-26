@@ -100,6 +100,7 @@
       ['데이터분석', '#data', '후보별 표·막대그래프와 최종 보고서'],
       ['할루시네이션', '#hallu', 'AI 답을 확인하는 다섯 가지 습관'],
       ['점검', [['#quiz', '퀴즈', '객관식 다섯 문제']]],
+      ['의견 주세요!', [['#opinion', '의견', '다음 교육에서 배우고 싶은 과정']]],
       ['자료실', '#materials', '실습 파일, 요청문, 지침, 참고 코드']
     ];
     const tone = ['grey', 'blue', 'dark'];
@@ -128,8 +129,26 @@
     box.querySelectorAll('.qz-opts button').forEach(bt => bt.addEventListener('click', () => { S.quiz[bt.dataset.q] = Number(bt.dataset.k); save(); renderQuiz(); }));
     $('#quizReset').addEventListener('click', () => { S.quiz = {}; save(); renderQuiz(); });
   }
+  /* ---------- 의견 주세요: 내용을 채운 메일 쓰기 창을 연다 (이 화면에서 직접 전송하지는 않는다) ---------- */
+  function bindOpinion() {
+    const t = $('#opText'); if (!t) return;
+    const name = $('#opName'), g = $('#opGmail'), m = $('#opMail'), msg = $('#opMsg');
+    const to = ($('.g-contact a') ? $('.g-contact a').getAttribute('href') : '').replace('mailto:', '');
+    t.value = S.notes['opinion.text'] || ''; name.value = S.notes['opinion.name'] || '';
+    const sync = () => {
+      S.notes['opinion.text'] = t.value; S.notes['opinion.name'] = name.value; save();
+      if (t.value.trim().length >= 2 && msg.textContent === '의견을 먼저 적어 주세요.') msg.textContent = '';
+      const su = '[AI 활용 스마트 문서작성] 다음 교육 의견';
+      const body = `다음 교육에서 배우고 싶은 과정\n\n${t.value.trim()}\n\n보낸 사람: ${name.value.trim() || '(적지 않음)'}`;
+      g.href = 'https://mail.google.com/mail/?view=cm&fs=1&to=' + encodeURIComponent(to) + '&su=' + encodeURIComponent(su) + '&body=' + encodeURIComponent(body);
+      m.href = 'mailto:' + to + '?subject=' + encodeURIComponent(su) + '&body=' + encodeURIComponent(body);
+    };
+    const guard = e => { if (t.value.trim().length < 2) { e.preventDefault(); msg.textContent = '의견을 먼저 적어 주세요.'; t.focus(); } else msg.textContent = '메일 쓰기 창이 열렸습니다. 그 창에서 [보내기]를 눌러야 전달됩니다.'; };
+    t.addEventListener('input', sync); name.addEventListener('input', sync); g.addEventListener('click', guard); m.addEventListener('click', guard); sync();
+  }
   function renderStatic() {
     renderQuiz();
+    bindOpinion();
     document.querySelectorAll('[data-copylink]').forEach(a => { a.href = D.sheetCopy; });
     if ($('#homeFlowMail')) $('#homeFlowMail').innerHTML = FLOW_MAIL.map((f, i) => `<li><b>${i + 1}</b><div><strong>${esc(f[1])}</strong><span>${esc(f[0])}</span></div></li>`).join('');
     if ($('#homeFlowCard')) $('#homeFlowCard').innerHTML = FLOW_CARD.map((f, i) => `<li><b>${i + 1}</b><div><strong>${esc(f[1])}</strong><span>${esc(f[0])}</span></div></li>`).join('');
@@ -414,6 +433,7 @@
       ...D.parts.map(p => [p.title, [...p.stages.map(s => ['#' + s.id, s.no + '단계', s.title]), ...(p.review ? [['#' + p.review.id, '마무리', p.review.title]] : [])]]),
       ['할루시네이션', [['#hallu', '정리', 'OpenAI · Anthropic 기준 줄이는 방법']]],
       ['점검', [['#quiz', '퀴즈', '객관식 다섯 문제']]],
+      ['의견 주세요!', [['#opinion', '의견', '다음 교육에서 배우고 싶은 과정']]],
       ['자료실', [['#materials', '자료', '파일, 요청문, 참고 코드']]],
       ['개인 연습실', [['#check', '연습', '체크하고 프롬프트로 적용 시작하기'], ['../prompt-practice/', '연습', '질문 구조 연습']]],
       ['안내', [['#safety', '유의', '실제 업무에 쓸 때'], ['#help', '도움', '막힐 때'], ['#sources', '출처', '참고 자료']]]
@@ -424,7 +444,7 @@
   }
 
   /* ---------- 라우팅 ---------- */
-  const HOME_SECS = ['ai', 'gpt', 'practice', 'intro', 'before', 'goals', 'mail', 'card', 'materials', 'safety', 'help', 'sources', 'report', 'data', 'hallu', 'course', 'info', 'quiz'];
+  const HOME_SECS = ['ai', 'gpt', 'practice', 'intro', 'before', 'goals', 'mail', 'card', 'materials', 'safety', 'help', 'sources', 'report', 'data', 'hallu', 'course', 'info', 'quiz', 'opinion'];
   function route() {
     const h = (location.hash || '#home').replace('#', '');
     const [view, sub] = h.split('-');
