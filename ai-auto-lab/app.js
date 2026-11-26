@@ -123,13 +123,12 @@
     $('#materialBox').innerHTML = `<h3 class="dl-h">실습 파일</h3><div class="hb-band">${files.map(f => `<div class="hb-col"><strong>${esc(f[0])}</strong><span>${esc(f[1])}</span><div><a href="${esc(f[2])}" download>파일 받기</a></div></div>`).join('')}</div>
       <h3 class="dl-h">구글 시트와 참고 코드</h3><div class="tool-list">${tools.map(f => `<div class="dl-item tool-item"><div><strong>${esc(f[0])}</strong><span>${esc(f[1])}</span></div><div class="btn-pair">${dlBtn(f)}</div></div>`).join('')}</div>
       <h3 class="dl-h">메일 자동화</h3>${promptBox(mailPrompt.prompt.text, '1. 코드 요청문 (gemini.google.com)')}${CODE ? promptBox(CODE, '2. 참고 코드 (Code.gs)', 'cn-code') : ''}
-      <h3 class="dl-h">ChatGPT 프로젝트</h3>${promptBox(D.texts.travelGuide, '프로젝트 지침 · 여행지 분석실')}
       <h3 class="dl-h">카드뉴스</h3>${[['guide', '1. 카드뉴스 프로젝트 지침'], ['requestFree', '2. 무료 계정용 요청문 (엑셀 파일 첨부)'], ['request', '3. 유료 계정용 요청문 (Google Drive 연결)'], ['cover', '4. 표지 이미지 요청문']].map(([k, l]) => promptBox(D.texts[k], l)).join('')}
       <h3 class="dl-h">보고서</h3>${promptBox(D.texts.reportGuide, '1. 프로젝트 지침 · 보고서 작성 실습')}${promptBox(D.texts.reportPrompt, '2. 실습 프롬프트 · 3쪽 회의자료 요약')}
       <h3 class="dl-h">데이터분석</h3>${promptBox(D.texts.dataGuide, '1. 프로젝트 지침 · 고객 선호 데이터 분석')}${promptBox(D.texts.dataPrompt, '2. 실습 프롬프트 · 고객 선호 데이터 분류 및 시각화')}${promptBox(D.texts.finalReportPrompt, '3. 최종 보고서 프롬프트')}
       <h3 class="dl-h">개인 연습실</h3>${promptBox(D.selfcheck.applyPrompt, '적용 시작 요청문')}`;
     bindAll($('#materialBox'));
-    $('#helpList').innerHTML = ['메일', 'ChatGPT', '카드뉴스', '공통'].map(g => `<h3 class="dl-h">${({ 메일: '제미나이 메일 자동화', ChatGPT: 'ChatGPT 프로젝트 활용하기', 카드뉴스: '카드뉴스 만들기', 공통: '공통' })[g]}</h3><div class="two-col">${D.help.filter(h => h[0] === g).map(h => `<div class="result-card"><strong>${esc(h[1])}</strong><p>${esc(h[2])}</p></div>`).join('')}</div>`).join('');
+    $('#helpList').innerHTML = ['메일', '카드뉴스', '공통'].map(g => `<h3 class="dl-h">${({ 메일: '제미나이 메일 자동화', ChatGPT: 'ChatGPT 프로젝트 활용하기', 카드뉴스: '카드뉴스 만들기', 공통: '공통' })[g]}</h3><div class="two-col">${D.help.filter(h => h[0] === g).map(h => `<div class="result-card"><strong>${esc(h[1])}</strong><p>${esc(h[2])}</p></div>`).join('')}</div>`).join('');
     $('#sourceList').innerHTML = D.sources.map(s => `<li>${esc(s).replace(/(https?:\/\/\S+)/, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>')}</li>`).join('');
     $('#sourceList').classList.add('sources-ol');
   }
