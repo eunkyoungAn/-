@@ -9,7 +9,7 @@
 <title>AI 활용 스마트 문서작성 | 커리어캐쳐</title>
 <meta name="description" content="Gemini와 Apps Script로 메일을 한 번에 보내고, 시트 한 줄로 카드뉴스를 만드는 실습실.">
 <link rel="stylesheet" href="fonts/pretendard.css">
-<link rel="stylesheet" href="style.css?v=20261126q">
+<link rel="stylesheet" href="style.css?v=20261126r">
 </head>
 <body>
 <header class="g-header">
@@ -110,7 +110,10 @@
         <div class="hx-three">
           <article><header><span class="hx-shape c"><i>1</i></span><em>요청하기 전</em><strong>모르면 모른다고</strong></header><div class="hx-who"><b>OpenAI</b><span>오답보다 답변 보류가 나음. 불확실성 표현에 부분 점수</span></div><div class="hx-who an"><b>Anthropic</b><span>"모른다"고 답해도 된다고 명시적으로 허락</span></div></article>
           <article><header><span class="hx-shape q"><i>2</i></span><em>요청할 때</em><strong>자료에 근거해서</strong></header><div class="hx-who"><b>OpenAI</b><span>근거가 될 참고 텍스트 제공. 검색(RAG) 활용</span></div><div class="hx-who an"><b>Anthropic</b><span>원문을 먼저 인용하게 함. 제공한 문서만 쓰게 함</span></div></article>
-          <article><header><span class="hx-shape d"><i>3</i></span><em>답을 받은 뒤</em><strong>따로 검증하기</strong></header><div class="hx-who"><b>OpenAI</b><span>사실 확인 단계 추가. 질문-정답 20쌍 이상으로 평가</span></div><div class="hx-who an"><b>Anthropic</b><span>주장마다 근거 인용. 여러 번 실행해 어긋나는 곳 확인</span></div></article>
+          <article><header><span class="hx-shape d"><i>3</i></span><em>답을 받은 뒤</em><strong>따로 검증하기</strong></header><div class="hx-who"><b>OpenAI</b><span>사실 확인 단계 추가. 질문-정답 20쌍 이상으로 평가. 실패 비용이 큰 일은 사람이 판단</span></div><div class="hx-who an"><b>Anthropic</b><span>주장마다 근거 인용. 여러 번 실행해 어긋나는 곳 확인. 추론 과정을 살펴 잘못된 가정 찾기. 나온 답을 다시 넣어 검증</span></div></article>
+        </div>
+        <div class="hx-cases"><b>OpenAI가 권하는 프롬프트 작성법</b>
+          <span>지침을 명확히 쓰기</span><span>복잡한 작업 나누기</span><span>단계적으로 생각할 시간 주기</span><span>참고 텍스트 제공하기</span><span>외부 도구 쓰기</span><span>퓨샷 예시 주기</span><span>바꿀 때마다 테스트하기</span>
         </div>
         <p class="hx-src">[자료 근거] OpenAI, <a href="https://developers.openai.com/api/docs/guides/optimizing-llm-accuracy" target="_blank" rel="noopener noreferrer">Optimizing LLM Accuracy</a> · Anthropic, <a href="https://platform.claude.com/docs/en/test-and-evaluate/strengthen-guardrails/reduce-hallucinations" target="_blank" rel="noopener noreferrer">Reduce hallucinations</a> (접속일 2026. 11. 26.)</p>
 
@@ -126,11 +129,39 @@
         <p class="hx-src">[일반 지식] 예시를 주면 AI가 형식과 기준을 추측하지 않고 따라 합니다. OpenAI 가이드는 "퓨샷 예시 주기"를 정확도를 높이는 방법으로 꼽습니다.</p>
 
         <h3 class="dl-h">용어 풀이 · 검색(RAG)</h3>
-        <div class="hx-flow four">
-          <div><b>1</b><strong>질문</strong><span>사용자가 묻습니다</span></div><i aria-hidden="true">→</i>
-          <div><b>2</b><strong>자료 검색</strong><span>내 문서나 웹에서 관련 자료를 찾습니다</span></div><i aria-hidden="true">→</i>
-          <div><b>3</b><strong>자료 + 질문</strong><span>찾은 자료를 질문과 함께 AI에게 줍니다</span></div><i aria-hidden="true">→</i>
-          <div class="good"><b>4</b><strong>근거 있는 답</strong><span>기억이 아니라 자료를 보고 답합니다</span></div>
+        <div class="rag-wrap"><svg class="rag-svg" viewBox="0 0 980 300" role="img" aria-labelledby="ragT ragD">
+          <title id="ragT">검색(RAG)이 작동하는 순서</title>
+          <desc id="ragD">사람이 질문하면, 문서함에서 관련 자료를 찾고, 찾은 자료와 질문을 함께 AI에게 주어, 자료에 근거한 답을 받는 흐름</desc>
+          <!-- 1 질문 -->
+          <circle class="ln fs" cx="78" cy="96" r="20"/><path class="ln fs" d="M44 168 q34 -62 68 0 z"/>
+          <path class="ln fs" d="M112 44 h70 a10 10 0 0 1 10 10 v28 a10 10 0 0 1 -10 10 h-44 l-14 14 v-14 h-12 a10 10 0 0 1 -10 -10 v-28 a10 10 0 0 1 10 -10 z"/>
+          <text class="t" x="147" y="75" text-anchor="middle">?</text>
+          <path class="ln ac" d="M212 118 H264"/><path class="fa" d="M264 110 l14 8 l-14 8 z"/>
+          <!-- 2 자료 검색 -->
+          <rect class="ln fs" x="296" y="48" width="92" height="116" rx="8"/><rect class="ln fs" x="312" y="62" width="92" height="116" rx="8"/><rect class="ln fs" x="328" y="76" width="92" height="116" rx="8"/>
+          <path class="ln" d="M344 104 h60 M344 122 h60 M344 140 h40"/>
+          <circle class="ln fs" cx="420" cy="72" r="24"/><path class="ln thick" d="M437 89 l20 20"/>
+          <path class="ln ac" d="M470 118 H522"/><path class="fa" d="M522 110 l14 8 l-14 8 z"/>
+          <!-- 3 자료 + 질문 → AI -->
+          <rect class="fa" x="556" y="58" width="150" height="120" rx="22"/>
+          <text class="tw big" x="631" y="130" text-anchor="middle">AI</text>
+          <rect class="ln fs" x="540" y="42" width="46" height="56" rx="6"/><path class="ln" d="M550 58 h26 M550 70 h26 M550 82 h16"/>
+          <circle class="ln fs" cx="700" cy="60" r="18"/><text class="t" x="700" y="67" text-anchor="middle">?</text>
+          <path class="ln ac" d="M724 118 H776"/><path class="fa" d="M776 110 l14 8 l-14 8 z"/>
+          <!-- 4 근거 있는 답 -->
+          <rect class="ln fs" x="806" y="44" width="134" height="148" rx="10"/>
+          <path class="ln" d="M824 74 h98 M824 96 h98 M824 118 h70"/>
+          <rect class="fl" x="824" y="140" width="98" height="30" rx="6"/><text class="tsm" x="873" y="160" text-anchor="middle">출처: 3쪽</text>
+          <circle class="fa" cx="938" cy="46" r="18"/><path class="ck" d="M929 46 l7 7 l12 -13"/>
+          <!-- 설명 -->
+          <text class="t" x="112" y="232" text-anchor="middle">① 질문</text><text class="ts" x="112" y="256" text-anchor="middle">사용자가 묻습니다</text>
+          <text class="t" x="372" y="232" text-anchor="middle">② 자료 검색</text><text class="ts" x="372" y="256" text-anchor="middle">내 문서나 웹에서 찾습니다</text>
+          <text class="t" x="631" y="232" text-anchor="middle">③ 자료 + 질문</text><text class="ts" x="631" y="256" text-anchor="middle">찾은 자료를 함께 줍니다</text>
+          <text class="t" x="873" y="232" text-anchor="middle">④ 근거 있는 답</text><text class="ts" x="873" y="256" text-anchor="middle">자료를 보고 답합니다</text>
+        </svg></div>
+        <div class="hx-two rag-vs">
+          <article><header><em>검색 없이</em><strong>기억으로 답함</strong><p>자료에 없는 내용은 추측할 수 있습니다. 출처를 확인하기 어렵습니다.</p></header></article>
+          <article class="on"><header><em>검색(RAG)</em><strong>찾은 자료로 답함</strong><p>답의 근거가 자료에 있습니다. 출처를 원문과 대조할 수 있습니다.</p></header></article>
         </div>
         <p class="hx-src">[일반 지식] RAG는 검색 증강 생성(Retrieval-Augmented Generation)의 줄임말입니다. 오늘 실습에서 회의록과 엑셀을 첨부하고 "첨부한 자료만 보고"라고 요청한 것이 같은 원리입니다.<br>[자료 근거] 관련 없는 자료가 섞이면 오히려 정확도가 떨어진 사례가 있어, 효과를 평가하면서 도입합니다. (OpenAI, Optimizing LLM Accuracy)</p>
 
@@ -236,8 +267,8 @@
   <span class="g-contact"><strong>CareerCatcher</strong> 안은경 · <a href="mailto:dms5147@gmail.com">dms5147@gmail.com</a></span>
 </div></footer>
 
-<script src="data.js?v=20261126q"></script>
-<script src="code.js?v=20261126q"></script>
-<script src="app.js?v=20261126q"></script>
+<script src="data.js?v=20261126r"></script>
+<script src="code.js?v=20261126r"></script>
+<script src="app.js?v=20261126r"></script>
 </body>
 </html>
