@@ -1285,3 +1285,8 @@ main{padding-bottom:72px}
 .hx-ex span{font-weight:600}
 @media (max-width:980px){.hx-flow.four{grid-template-columns:minmax(0,1fr) 26px minmax(0,1fr)}.hx-flow.four>i:nth-of-type(2){display:none}}
 @media (max-width:760px){.hx-flow.four{grid-template-columns:minmax(0,1fr)}.hx-flow.four>i:nth-of-type(2){display:grid}.hx-two{grid-template-columns:minmax(0,1fr)}}
+.hx-flow strong{font-size:16.5px;line-height:1.45}
+.hx-cases{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:12px;padding:14px 18px;border:1px solid var(--rule);border-radius:16px;background:var(--surface)}
+.hx-cases b{margin-right:6px;font-size:14px;font-weight:800}
+.hx-cases span{padding:6px 12px;border-radius:999px;background:var(--surface-2);font-size:13.5px;font-weight:600}
+@media (max-width:640px){.hx-cases b{flex-basis:100%}}
