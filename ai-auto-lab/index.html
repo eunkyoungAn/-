@@ -9,7 +9,7 @@
 <title>AI 활용 스마트 문서작성 | 커리어캐쳐</title>
 <meta name="description" content="Gemini와 Apps Script로 메일을 한 번에 보내고, 시트 한 줄로 카드뉴스를 만드는 실습실.">
 <link rel="stylesheet" href="fonts/pretendard.css">
-<link rel="stylesheet" href="style.css?v=20261126o">
+<link rel="stylesheet" href="style.css?v=20261126p">
 </head>
 <body>
 <header class="g-header">
@@ -94,11 +94,17 @@
 
         <h3 class="dl-h">왜 생기는가</h3>
         <div class="hx-flow">
-          <div><b>1</b><strong>모르는 질문</strong><span>드물고 임의적인 사실. 패턴으로 예측 불가</span></div><i aria-hidden="true">→</i>
-          <div><b>2</b><strong>추측이 유리한 채점</strong><span>찍으면 점수, "모름"은 0점</span></div><i aria-hidden="true">→</i>
-          <div class="bad"><b>3</b><strong>그럴듯한 오답</strong><span>자신 있게 틀린 답 = 할루시네이션</span></div>
+          <div><b>1 · 자료에 없는 질문</b><strong>"지난달 교육 만족도 평균이 몇 점이었지?"</strong><span>AI에게 준 자료에는 그 수치가 없음</span></div><i aria-hidden="true">→</i>
+          <div><b>2 · 모른다고 하지 않고 추측</b><strong>"모름"보다 추측이 유리</strong><span>찍으면 점수, "모름"은 0점으로 평가받아 왔기 때문</span></div><i aria-hidden="true">→</i>
+          <div class="bad"><b>3 · 그럴듯한 오답</b><strong>"4.6점입니다."</strong><span>근거 없이 자신 있게 답함 = 할루시네이션</span></div>
         </div>
-        <p class="hx-src">[자료 근거] OpenAI, <a href="https://openai.com/index/why-language-models-hallucinate/" target="_blank" rel="noopener noreferrer">Why language models hallucinate</a> (2025. 9. 5.)</p>
+        <div class="hx-cases"><b>사무실에서 흔한 상황</b>
+          <span>회의록에 없는 담당자와 기한을 채워 넣음</span>
+          <span>없는 규정 조항 번호를 지어냄</span>
+          <span>존재하지 않는 통계와 출처를 인용함</span>
+          <span>엑셀에 없는 합계를 계산한 것처럼 적음</span>
+        </div>
+        <p class="hx-src">[자료 근거] 원인 설명: OpenAI, <a href="https://openai.com/index/why-language-models-hallucinate/" target="_blank" rel="noopener noreferrer">Why language models hallucinate</a> (2025. 9. 5.)<br>[추론·제안] 대화와 상황 예시는 이해를 돕기 위해 사무 업무에 맞춰 만든 것입니다.</p>
 
         <h3 class="dl-h">줄이는 방법 세 가지 · 회사별 비교</h3>
         <div class="hx-three">
@@ -230,8 +236,8 @@
   <span class="g-contact"><strong>CareerCatcher</strong> 안은경 · <a href="mailto:dms5147@gmail.com">dms5147@gmail.com</a></span>
 </div></footer>
 
-<script src="data.js?v=20261126o"></script>
-<script src="code.js?v=20261126o"></script>
-<script src="app.js?v=20261126o"></script>
+<script src="data.js?v=20261126p"></script>
+<script src="code.js?v=20261126p"></script>
+<script src="app.js?v=20261126p"></script>
 </body>
 </html>
