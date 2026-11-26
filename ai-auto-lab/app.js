@@ -328,6 +328,7 @@
       ['1 · AI 사용 현황 안내', [['#ai', '현황', 'AI 사용 현황 안내'], ...SLIDES.map((s, i) => ['#start-' + i, s.nav, s.title])]],
       ['2 · 시작하기 전에', [['ai-test/', '맨 처음', 'AI 역량검사'], ['who/', '그다음', '나는 어떤 AI 사용자? 맞춰 보기']]],
       ...D.parts.map(p => [`${p.no} · ${p.title}`, [...p.stages.map(s => ['#' + s.id, s.no + '단계', s.title]), ...(p.review ? [['#' + p.review.id, '마무리', p.review.title]] : [])]]),
+      ['보고서 · 데이터분석 · 할루시네이션', [['#report', '준비 중', '보고서'], ['#data', '준비 중', '데이터분석'], ['#hallu', '준비 중', '할루시네이션']]],
       ['6 · 다운로드 자료 모아보기', [['#materials', '자료', '파일, 요청문, 참고 코드']]],
       ['7 · 개인 연습실', [['#check', '연습', '체크하고 프롬프트로 적용 시작하기'], ['../prompt-practice/', '연습', '질문 구조 연습']]],
       ['안내', [['#safety', '유의', '실제 업무에 쓸 때'], ['#help', '도움', '막힐 때'], ['#sources', '출처', '참고 자료']]]
@@ -338,7 +339,7 @@
   }
 
   /* ---------- 라우팅 ---------- */
-  const HOME_SECS = ['ai', 'gpt', 'practice', 'intro', 'before', 'goals', 'mail', 'card', 'materials', 'safety', 'help', 'sources'];
+  const HOME_SECS = ['ai', 'gpt', 'practice', 'intro', 'before', 'goals', 'mail', 'card', 'materials', 'safety', 'help', 'sources', 'report', 'data', 'hallu'];
   function route() {
     const h = (location.hash || '#home').replace('#', '');
     const [view, sub] = h.split('-');
