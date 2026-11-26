@@ -974,16 +974,16 @@ window.LAB = {
      ],
      "input": [
       "1단계에서 만든 프로젝트",
-      "실습 자료 「신규 여행상품 아이데이션 회의자료」 (3쪽)"
+      "실습 자료 「신규 여행상품 아이데이션 회의록」 (아래 단추로 받기)"
      ],
      "steps": [
-      "실습 자료 <b>신규 여행상품 아이데이션 회의자료</b> 파일을 내 컴퓨터에 준비합니다.",
+      "위 <b>회의록 파일 받기</b>를 눌러 실습 자료를 내 컴퓨터에 내려받습니다.",
       "1단계에서 만든 프로젝트를 엽니다.",
       "프로젝트 화면의 <b>[파일 추가]</b>를 누르고 회의록 파일을 올립니다.",
       "프로젝트 파일 목록에 회의록이 보이는지 확인합니다."
      ],
      "checks": [
-      "회의록 파일을 준비했다",
+      "회의록 파일을 내려받았다",
       "프로젝트에 회의록 파일을 올렸다",
       "파일 목록에 회의록이 보인다"
      ],
@@ -1014,6 +1014,11 @@ window.LAB = {
         "교육용 가상자료 (시장 수치와 고객 사례는 실제 자료가 아님)"
        ]
       ]
+     },
+     "linkButton": {
+      "label": "회의록 파일 받기",
+      "desc": "실습 자료 「신규 여행상품 아이데이션 회의록」 한글(hwpx) 파일입니다.",
+      "href": "files/meeting-report.hwpx"
      }
     },
     {
@@ -1351,6 +1356,12 @@ window.LAB = {
    "Google 스프레드시트 · 사본 만들기로 내 드라이브에 복사",
    "https://docs.google.com/spreadsheets/d/1JMZuDCpw7NQtclAhg_DbLuN-7NaFAhm4AQdpG0kYJUc/copy",
    false
+  ],
+  [
+   "보고서 실습 회의록",
+   "meeting-report.hwpx · 신규 여행상품 아이데이션 회의록 (교육용 가상자료)",
+   "files/meeting-report.hwpx",
+   true
   ]
  ],
  "mailSheetCopy": "https://docs.google.com/spreadsheets/d/1D2apN_CM2CdVG6aR4T9SN7RV9_gghxFhxoxIrdRAgfE/copy"
