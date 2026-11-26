@@ -1334,3 +1334,5 @@ main{padding-bottom:72px}
 .qz-score p{flex:1 1 220px;margin:0;font-size:15px}
 .qz-score .g-btn.ghost{background:#fff;color:var(--ink);border-color:#fff}
 @media (max-width:760px){.qz-opts{grid-template-columns:minmax(0,1fr)}.qz{padding:18px}}
+.hx-cases.row1 b{flex-basis:100%;margin:0 0 2px}
+@media (min-width:1100px){.hx-cases.row1{flex-wrap:nowrap}.hx-cases.row1{flex-wrap:wrap}.hx-cases.row1 span{flex:1 1 0;text-align:center;white-space:nowrap;padding:6px 8px;font-size:13px}}
