@@ -207,6 +207,7 @@
     let steps = `<ol class="plain">${st.steps.map(s => `<li>${s}</li>`).join('')}</ol>`;
     if (st.table && !st.table.after) steps += tableBlock(st.table);
     steps += tableBlock(st.table2);
+    if (st.figures) steps += `<h3>${esc(st.figures.title)}</h3>${st.figures.items.map(f => `<figure class="result-fig"><div><img src="${esc(f.src)}" width="${f.w}" height="${f.h}" alt="${esc(f.alt)}" loading="lazy"></div><figcaption>${esc(f.cap)}</figcaption></figure>`).join('')}<p class="local-note">${esc(st.figures.note)}</p>`;
     if (st.snippet) steps += `<h3>코드 맨 위 설정 영역만 고칩니다</h3>${promptBox(st.snippet, '설정 영역 예시 (Gemini 코드는 변수 이름이 다를 수 있음)', 'cn-code')}`;
     if (st.tip) steps += `<div class="result-card mt14"><strong>유료 계정 · 요청문 주소 바꾸는 법</strong><p>주소의 <code>/d/</code>와 <code>/edit</code> 사이 긴 문자열이 시트 고유번호입니다. 원본 번호 <code>${esc(D.sheetId)}</code> 자리에 내 사본 주소창의 번호를 넣습니다.</p></div>`;
     secs.push(['steps', '순서', steps]);

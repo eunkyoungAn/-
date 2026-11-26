@@ -1306,3 +1306,8 @@ main{padding-bottom:72px}
 .rag-svg .tw{fill:#fff;font-weight:800}
 .rag-svg .tw.big{font-size:38px}
 .rag-vs header{padding-bottom:20px}
+/* 결과 예시 그림 */
+.result-fig{margin:14px 0 0}
+.result-fig>div{border:1px solid var(--rule);border-radius:14px;background:#fff;overflow-x:auto}
+.result-fig img{display:block;width:100%;min-width:680px;height:auto}
+.result-fig figcaption{margin-top:8px;font-size:13.5px;font-weight:700;color:var(--ink-soft)}
