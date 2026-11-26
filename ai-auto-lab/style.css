@@ -1311,3 +1311,26 @@ main{padding-bottom:72px}
 .result-fig>div{border:1px solid var(--rule);border-radius:14px;background:#fff;overflow-x:auto}
 .result-fig img{display:block;width:100%;min-width:680px;height:auto}
 .result-fig figcaption{margin-top:8px;font-size:13.5px;font-weight:700;color:var(--ink-soft)}
+/* ===== 점검 퀴즈 ===== */
+#quizBox{display:grid;gap:14px;margin-top:18px}
+.qz{padding:22px 24px;border:1px solid var(--rule);border-radius:18px;background:var(--surface)}
+.qz header{display:flex;align-items:center;gap:10px}
+.qz header b{font-size:13px;font-weight:800;color:var(--accent)}
+.qz header span{padding:3px 10px;border-radius:999px;background:var(--surface-2);font-size:12.5px;font-weight:700}
+.qz h3{margin:10px 0 14px;font-size:18px;font-weight:800;letter-spacing:-.02em;line-height:1.5}
+.qz-opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.qz-opts button{display:grid;grid-template-columns:24px minmax(0,1fr) auto;align-items:center;gap:8px;padding:13px 14px;border:1px solid var(--rule);border-radius:12px;background:var(--surface);color:var(--ink);font:inherit;font-size:15px;line-height:1.5;text-align:left;cursor:pointer}
+.qz-opts button:hover:not(:disabled){border-color:var(--ink)}
+.qz-opts button:disabled{cursor:default;color:var(--ink-soft)}
+.qz-opts button i{font-style:normal;font-weight:700;color:var(--ink-mute)}
+.qz-opts button em{font-style:normal;font-size:12px;font-weight:800;white-space:nowrap}
+.qz-opts button.ok{border-color:var(--accent);background:rgba(11,100,244,.08);color:var(--ink);font-weight:700}
+.qz-opts button.ok em,.qz-opts button.ok i{color:var(--accent)}
+.qz-opts button.no{border-color:var(--ink);background:var(--surface-2)}
+.qz-why{margin:14px 0 0;padding:12px 14px;border-radius:12px;background:var(--surface-2);font-size:14.5px;line-height:1.65}
+.qz-score{display:flex;flex-wrap:wrap;align-items:center;gap:18px;padding:20px 24px;border-radius:18px;background:var(--ink);color:#fff}
+.qz-score div span{display:block;font-size:12.5px;font-weight:700;opacity:.8}
+.qz-score div strong{font-size:30px;font-weight:800;line-height:1.1}
+.qz-score p{flex:1 1 220px;margin:0;font-size:15px}
+.qz-score .g-btn.ghost{background:#fff;color:var(--ink);border-color:#fff}
+@media (max-width:760px){.qz-opts{grid-template-columns:minmax(0,1fr)}.qz{padding:18px}}
