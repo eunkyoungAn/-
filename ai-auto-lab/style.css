@@ -1338,3 +1338,13 @@ main{padding-bottom:72px}
 @media (min-width:1100px){.hx-cases.row1{flex-wrap:nowrap}.hx-cases.row1{flex-wrap:wrap}.hx-cases.row1 span{flex:1 1 0;text-align:center;white-space:nowrap;padding:6px 8px;font-size:13px}}
 .hx-full{display:inline-block;margin-left:8px;font-size:14px;font-weight:600;color:var(--ink-mute);letter-spacing:0}
 .hx-read{display:block;margin-top:2px;font-size:12.5px;font-weight:500;color:var(--ink-mute);letter-spacing:0}
+/* ===== 의견 주세요 ===== */
+.op-box{display:grid;gap:8px;margin-top:18px;padding:24px;border:1px solid var(--rule);border-radius:18px;background:var(--surface)}
+.op-box label{margin-top:6px;font-size:15px;font-weight:800;letter-spacing:-.02em}
+.op-box textarea,.op-box input{width:100%;padding:12px 14px;border:1px solid var(--rule);border-radius:12px;background:var(--ground);color:var(--ink);font:inherit;font-size:15px;line-height:1.6}
+.op-box textarea{min-height:120px;resize:vertical}
+.op-box input{max-width:360px}
+.op-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.op-msg{min-height:22px;margin:0;font-size:14px;font-weight:700;color:var(--accent)}
+.op-how{margin:4px 0 0;padding-left:20px;color:var(--ink-soft);font-size:14px;line-height:1.7}
+.g-nav a{white-space:nowrap}
