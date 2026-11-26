@@ -99,6 +99,7 @@
       ['보고서', '#report', '팀장님 제출용 한 장 요약'],
       ['데이터분석', '#data', '후보별 표·막대그래프와 최종 보고서'],
       ['할루시네이션', '#hallu', 'AI 답을 확인하는 다섯 가지 습관'],
+      ['점검', [['#quiz', '퀴즈', '객관식 다섯 문제']]],
       ['자료실', '#materials', '실습 파일, 요청문, 지침, 참고 코드']
     ];
     const tone = ['grey', 'blue', 'dark'];
@@ -113,7 +114,22 @@
       <div class="sheet-actions mt14"><a class="g-btn" href="#${p.stages[0].id}">1단계부터 시작</a></div></section>`).join('');
     renderProgress();
   }
+  /* ---------- 점검 퀴즈 (객관식 5문제) ---------- */
+  function renderQuiz() {
+    const box = $('#quizBox'); if (!box || !D.quiz) return;
+    S.quiz = S.quiz || {};
+    const mark = '①②③④';
+    const n = D.quiz.filter((q, i) => S.quiz[i] != null).length, ok = D.quiz.filter((q, i) => S.quiz[i] === q.ans).length;
+    box.innerHTML = D.quiz.map((q, i) => { const pick = S.quiz[i], done = pick != null;
+      return `<article class="qz${done ? ' done' : ''}"><header><b>문제 ${i + 1}</b><span>${esc(q.part)}</span></header><h3>${esc(q.q)}</h3>
+        <div class="qz-opts">${q.opts.map((o, k) => `<button type="button" data-q="${i}" data-k="${k}" class="${done ? (k === q.ans ? 'ok' : (k === pick ? 'no' : '')) : ''}"${done ? ' disabled' : ''}><i>${mark[k]}</i><span>${esc(o)}</span>${done && k === q.ans ? '<em>정답</em>' : ''}${done && k === pick && k !== q.ans ? '<em>내 답</em>' : ''}</button>`).join('')}</div>
+        ${done ? `<p class="qz-why"><b>${pick === q.ans ? '맞았습니다.' : '다시 볼까요.'}</b> ${esc(q.why)}</p>` : ''}</article>`; }).join('') +
+      `<div class="qz-score"><div><span>맞힌 문제</span><strong>${ok} / ${D.quiz.length}</strong></div><p>${n < D.quiz.length ? `${D.quiz.length - n}문제가 남았습니다.` : (ok === D.quiz.length ? '다섯 문제를 모두 맞혔습니다.' : '틀린 문제의 풀이를 읽고 해당 파트를 다시 봅니다.')}</p><button class="g-btn ghost" type="button" id="quizReset">다시 풀기</button></div>`;
+    box.querySelectorAll('.qz-opts button').forEach(bt => bt.addEventListener('click', () => { S.quiz[bt.dataset.q] = Number(bt.dataset.k); save(); renderQuiz(); }));
+    $('#quizReset').addEventListener('click', () => { S.quiz = {}; save(); renderQuiz(); });
+  }
   function renderStatic() {
+    renderQuiz();
     document.querySelectorAll('[data-copylink]').forEach(a => { a.href = D.sheetCopy; });
     if ($('#homeFlowMail')) $('#homeFlowMail').innerHTML = FLOW_MAIL.map((f, i) => `<li><b>${i + 1}</b><div><strong>${esc(f[1])}</strong><span>${esc(f[0])}</span></div></li>`).join('');
     if ($('#homeFlowCard')) $('#homeFlowCard').innerHTML = FLOW_CARD.map((f, i) => `<li><b>${i + 1}</b><div><strong>${esc(f[1])}</strong><span>${esc(f[0])}</span></div></li>`).join('');
@@ -397,6 +413,7 @@
       ['시작하기 전에', [['ai-test/', '맨 처음', 'AI 역량검사'], ['who/', '그다음', '나는 어떤 AI 사용자? 맞춰 보기']]],
       ...D.parts.map(p => [p.title, [...p.stages.map(s => ['#' + s.id, s.no + '단계', s.title]), ...(p.review ? [['#' + p.review.id, '마무리', p.review.title]] : [])]]),
       ['할루시네이션', [['#hallu', '정리', 'OpenAI · Anthropic 기준 줄이는 방법']]],
+      ['점검', [['#quiz', '퀴즈', '객관식 다섯 문제']]],
       ['자료실', [['#materials', '자료', '파일, 요청문, 참고 코드']]],
       ['개인 연습실', [['#check', '연습', '체크하고 프롬프트로 적용 시작하기'], ['../prompt-practice/', '연습', '질문 구조 연습']]],
       ['안내', [['#safety', '유의', '실제 업무에 쓸 때'], ['#help', '도움', '막힐 때'], ['#sources', '출처', '참고 자료']]]
@@ -407,7 +424,7 @@
   }
 
   /* ---------- 라우팅 ---------- */
-  const HOME_SECS = ['ai', 'gpt', 'practice', 'intro', 'before', 'goals', 'mail', 'card', 'materials', 'safety', 'help', 'sources', 'report', 'data', 'hallu', 'course', 'info'];
+  const HOME_SECS = ['ai', 'gpt', 'practice', 'intro', 'before', 'goals', 'mail', 'card', 'materials', 'safety', 'help', 'sources', 'report', 'data', 'hallu', 'course', 'info', 'quiz'];
   function route() {
     const h = (location.hash || '#home').replace('#', '');
     const [view, sub] = h.split('-');
