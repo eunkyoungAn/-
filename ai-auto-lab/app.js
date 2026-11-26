@@ -79,7 +79,7 @@
   function stepFlow(p, cur) {
     if (!p.flow) return '';
     const ci = p.flow.findIndex(f => f[0] === cur);
-    return `<nav class="step-flow" aria-label="진행 순서"><p>진행 순서 <span>단계를 누르면 그 화면으로 갑니다 <i>[클릭]</i></span></p><ol>${p.flow.map((f, i) => `<li class="${i === ci ? 'on' : (ci >= 0 && i < ci ? 'past' : '')}"><a href="#${f[0]}"${i === ci ? ' aria-current="step"' : ''}><b>${i + 1}</b><span>${esc(f[1])}</span></a></li>`).join('')}</ol></nav>`;
+    return `<nav class="step-flow" aria-label="진행 순서"><p>진행 순서 <span>단계를 누르면 그 화면으로 갑니다 <i>[클릭]</i></span></p><ol class="n${p.flow.length}">${p.flow.map((f, i) => `<li class="${i === ci ? 'on' : (ci >= 0 && i < ci ? 'past' : '')}"><a href="#${f[0]}"${i === ci ? ' aria-current="step"' : ''}><b>${i + 1}</b><span>${esc(f[1])}</span></a></li>`).join('')}</ol></nav>`;
   }
   const FLOW_CARD = [
     ['Google Sheets', '기획 입력', '타깃·주제·장수 (B~I열)'],
@@ -93,7 +93,7 @@
   }
   function renderHome() {
     $('#homeParts').innerHTML = D.parts.map(p => `<section class="level-section" id="sec-${p.id}">
-      <div class="level-head"><div><span class="level-kicker">${esc(p.no)}</span><h2>${esc(p.title)}</h2></div><p>${esc(p.desc)}</p></div>
+      <div class="level-head"><div>${p.no ? `<span class="level-kicker">${esc(p.no)}</span>` : ''}<h2>${esc(p.title)}</h2></div><p>${esc(p.desc)}</p></div>
       ${stepFlow(p)}<div class="lesson-grid">${p.stages.map(s => { const x = find(s.id); return `<a class="lesson-card ${done(x) ? 'is-done' : ''}" href="#${s.id}">
         <span class="lesson-code">${esc(s.kicker)}</span><h3>${esc(s.title)}</h3><p>${esc(s.goal[0])}</p>
         <div class="lesson-output">산출물 <span>${esc(s.output)}</span></div><div class="lesson-arrow">${esc(s.role)} →</div></a>`; }).join('')}
@@ -110,6 +110,7 @@
       <h3 class="dl-h">3 · 제미나이 메일 자동화</h3>${promptBox(mailPrompt.prompt.text, '1. 코드 요청문 (gemini.google.com)')}${CODE ? promptBox(CODE, '2. 참고 코드 (Code.gs)', 'cn-code') : ''}
       <h3 class="dl-h">4 · ChatGPT 프로젝트 활용하기</h3>${promptBox(D.texts.travelGuide, '프로젝트 지침 · 여행지 분석실')}
       <h3 class="dl-h">5 · 카드뉴스 만들기</h3>${[['guide', '1. 카드뉴스 프로젝트 지침'], ['requestFree', '2. 무료 계정용 요청문 (엑셀 파일 첨부)'], ['request', '3. 유료 계정용 요청문 (Google Drive 연결)'], ['cover', '4. 표지 이미지 요청문']].map(([k, l]) => promptBox(D.texts[k], l)).join('')}
+      <h3 class="dl-h">보고서</h3>${promptBox(D.texts.reportGuide, '1. 프로젝트 지침 · 보고서 작성 실습')}${promptBox(D.texts.reportPrompt, '2. 실습 프롬프트 · 3쪽 회의자료 요약')}
       <h3 class="dl-h">7 · 개인 연습실</h3>${promptBox(D.selfcheck.applyPrompt, '적용 시작 요청문')}`;
     bindAll($('#materialBox'));
     $('#helpList').innerHTML = ['메일', 'ChatGPT', '카드뉴스', '공통'].map(g => `<h3 class="dl-h">${({ 메일: '제미나이 메일 자동화', ChatGPT: 'ChatGPT 프로젝트 활용하기', 카드뉴스: '카드뉴스 만들기', 공통: '공통' })[g]}</h3><div class="two-col">${D.help.filter(h => h[0] === g).map(h => `<div class="result-card"><strong>${esc(h[1])}</strong><p>${esc(h[2])}</p></div>`).join('')}</div>`).join('');
@@ -327,8 +328,8 @@
     const groups = [
       ['1 · AI 사용 현황 안내', [['#ai', '현황', 'AI 사용 현황 안내'], ...SLIDES.map((s, i) => ['#start-' + i, s.nav, s.title])]],
       ['2 · 시작하기 전에', [['ai-test/', '맨 처음', 'AI 역량검사'], ['who/', '그다음', '나는 어떤 AI 사용자? 맞춰 보기']]],
-      ...D.parts.map(p => [`${p.no} · ${p.title}`, [...p.stages.map(s => ['#' + s.id, s.no + '단계', s.title]), ...(p.review ? [['#' + p.review.id, '마무리', p.review.title]] : [])]]),
-      ['보고서 · 데이터분석 · 할루시네이션', [['#report', '준비 중', '보고서'], ['#data', '준비 중', '데이터분석'], ['#hallu', '준비 중', '할루시네이션']]],
+      ...D.parts.map(p => [p.no ? `${p.no} · ${p.title}` : p.title, [...p.stages.map(s => ['#' + s.id, s.no + '단계', s.title]), ...(p.review ? [['#' + p.review.id, '마무리', p.review.title]] : [])]]),
+      ['데이터분석 · 할루시네이션', [['#data', '준비 중', '데이터분석'], ['#hallu', '준비 중', '할루시네이션']]],
       ['6 · 다운로드 자료 모아보기', [['#materials', '자료', '파일, 요청문, 참고 코드']]],
       ['7 · 개인 연습실', [['#check', '연습', '체크하고 프롬프트로 적용 시작하기'], ['../prompt-practice/', '연습', '질문 구조 연습']]],
       ['안내', [['#safety', '유의', '실제 업무에 쓸 때'], ['#help', '도움', '막힐 때'], ['#sources', '출처', '참고 자료']]]
