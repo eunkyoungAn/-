@@ -1336,3 +1336,4 @@ main{padding-bottom:72px}
 @media (max-width:760px){.qz-opts{grid-template-columns:minmax(0,1fr)}.qz{padding:18px}}
 .hx-cases.row1 b{flex-basis:100%;margin:0 0 2px}
 @media (min-width:1100px){.hx-cases.row1{flex-wrap:nowrap}.hx-cases.row1{flex-wrap:wrap}.hx-cases.row1 span{flex:1 1 0;text-align:center;white-space:nowrap;padding:6px 8px;font-size:13px}}
+.hx-full{display:inline-block;margin-left:8px;font-size:14px;font-weight:600;color:var(--ink-mute);letter-spacing:0}
