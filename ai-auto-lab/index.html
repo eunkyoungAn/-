@@ -9,7 +9,7 @@
 <title>AI 활용 스마트 문서작성 | 커리어캐쳐</title>
 <meta name="description" content="Gemini와 Apps Script로 메일을 한 번에 보내고, 시트 한 줄로 카드뉴스를 만드는 실습실.">
 <link rel="stylesheet" href="fonts/pretendard.css">
-<link rel="stylesheet" href="style.css?v=20261126w">
+<link rel="stylesheet" href="style.css?v=20261126x">
 </head>
 <body>
 <header class="g-header">
@@ -25,6 +25,7 @@
       <a href="#data">데이터분석</a>
       <a href="#hallu">할루시네이션</a>
       <a href="#quiz">점검</a>
+      <a href="#opinion">의견</a>
       <details class="menu" id="quickMenu">
         <summary class="g-home">바로가기</summary>
         <div class="menu-panel" id="quickPanel"></div>
@@ -190,6 +191,22 @@
         <div id="quizBox"></div>
       </section>
 
+      <section class="hb-sec" id="sec-opinion">
+        <div class="hb-head"><h2>의견 주세요!</h2><p>다음 교육에서 배우고 싶은 과정을 적어 주세요. 강사에게 메일로 전달됩니다.</p></div>
+        <div class="op-box">
+          <label for="opText">다음 교육에서 어떤 과정을 배우고 싶으신가요?</label>
+          <textarea id="opText" placeholder="예: 엑셀 보고서 자동화, 발표 자료 만들기, 업무용 챗봇 만들기"></textarea>
+          <label for="opName">이름 또는 소속 (선택)</label>
+          <input id="opName" type="text" autocomplete="off" placeholder="적지 않아도 됩니다">
+          <div class="op-actions">
+            <a class="g-btn" id="opGmail" target="_blank" rel="noopener noreferrer">Gmail로 보내기</a>
+            <a class="g-btn ghost" id="opMail">메일 앱으로 보내기</a>
+          </div>
+          <p class="op-msg" id="opMsg" aria-live="polite"></p>
+          <ol class="op-how"><li>의견을 적고 <b>[Gmail로 보내기]</b>를 누릅니다.</li><li>새 창에 받는 사람과 내용이 채워진 메일이 열립니다.</li><li>그 창에서 <b>[보내기]</b>를 누르면 강사에게 전달됩니다.</li></ol>
+        </div>
+      </section>
+
       <section class="hb-sec" id="sec-materials">
         <div class="hb-head"><h2>자료실</h2><p>실습 파일과, 복사해서 쓰는 요청문·지침·참고 코드를 한곳에 모았습니다.</p></div>
         <div id="materialBox"></div>
@@ -273,8 +290,8 @@
   <span class="g-contact"><strong>CareerCatcher</strong> 안은경 · <a href="mailto:dms5147@gmail.com">dms5147@gmail.com</a></span>
 </div></footer>
 
-<script src="data.js?v=20261126w"></script>
-<script src="code.js?v=20261126w"></script>
-<script src="app.js?v=20261126w"></script>
+<script src="data.js?v=20261126x"></script>
+<script src="code.js?v=20261126x"></script>
+<script src="app.js?v=20261126x"></script>
 </body>
 </html>
