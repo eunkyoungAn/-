@@ -111,7 +111,7 @@
       <h3 class="dl-h">4 · ChatGPT 프로젝트 활용하기</h3>${promptBox(D.texts.travelGuide, '프로젝트 지침 · 여행지 분석실')}
       <h3 class="dl-h">5 · 카드뉴스 만들기</h3>${[['guide', '1. 카드뉴스 프로젝트 지침'], ['requestFree', '2. 무료 계정용 요청문 (엑셀 파일 첨부)'], ['request', '3. 유료 계정용 요청문 (Google Drive 연결)'], ['cover', '4. 표지 이미지 요청문']].map(([k, l]) => promptBox(D.texts[k], l)).join('')}
       <h3 class="dl-h">보고서</h3>${promptBox(D.texts.reportGuide, '1. 프로젝트 지침 · 보고서 작성 실습')}${promptBox(D.texts.reportPrompt, '2. 실습 프롬프트 · 3쪽 회의자료 요약')}
-      <h3 class="dl-h">데이터분석</h3>${promptBox(D.texts.dataGuide, '1. 프로젝트 지침 · 고객 선호 데이터 분석')}${promptBox(D.texts.dataPrompt, '2. 실습 프롬프트 · 고객 선호 데이터 분류 및 시각화')}
+      <h3 class="dl-h">데이터분석</h3>${promptBox(D.texts.dataGuide, '1. 프로젝트 지침 · 고객 선호 데이터 분석')}${promptBox(D.texts.dataPrompt, '2. 실습 프롬프트 · 고객 선호 데이터 분류 및 시각화')}${promptBox(D.texts.finalReportPrompt, '3. 최종 보고서 프롬프트')}
       <h3 class="dl-h">7 · 개인 연습실</h3>${promptBox(D.selfcheck.applyPrompt, '적용 시작 요청문')}`;
     bindAll($('#materialBox'));
     $('#helpList').innerHTML = ['메일', 'ChatGPT', '카드뉴스', '공통'].map(g => `<h3 class="dl-h">${({ 메일: '제미나이 메일 자동화', ChatGPT: 'ChatGPT 프로젝트 활용하기', 카드뉴스: '카드뉴스 만들기', 공통: '공통' })[g]}</h3><div class="two-col">${D.help.filter(h => h[0] === g).map(h => `<div class="result-card"><strong>${esc(h[1])}</strong><p>${esc(h[2])}</p></div>`).join('')}</div>`).join('');
@@ -127,6 +127,43 @@
     const next = i === SEQ.length - 1 ? ['#home', '처음 화면'] : ['#' + SEQ[i + 1].id, label(SEQ[i + 1])];
     return [prev, next];
   }
+  /* ---------- 직접 써 보고 평가받기 (CO-STAR, 10점 만점) ---------- */
+  const COSTAR = [
+    ['Context (맥락)', '질문이나 요청이 어떤 상황인지 설명', 2, [/회의록|회의\s*자료|회의\s*보고서|첨부|파일|자료/, /너는|역할|담당자|여행|상품|기획|아이데이션/], '어떤 자료를 주는지, AI가 어떤 역할인지 적어 보세요. 예: 너는 상품기획팀의 회의록 정리 담당자야. 첨부한 회의록을 보고'],
+    ['Objective (목적)', '원하는 결과나 목표 명시', 2, [/요약|정리|작성|만들어|뽑아|보고서/, /목적|배경|결정|합의|후속|미결|비교|담당자|기한|일정/], '무엇을 해 달라는지, 무엇을 꼭 담을지 적어 보세요. 예: 목적·배경, 결정사항, 후속 업무를 요약해줘'],
+    ['Style (스타일)', '답변이 어떤 형식으로 나오길 원하는지 설정', 1, [/표|목록|번호|순서|개조식|항목|①|1\./], '답의 형식을 정해 보세요. 예: 표로 비교해줘, 번호 순서로 정리해줘'],
+    ['Tone (톤)', '감성 및 분위기 설정', 1, [/간결|객관|쉽게|짧게|핵심만|간단|명확|공손|정중|보고용/], '글의 분위기를 정해 보세요. 예: 간결하고 객관적으로, 핵심만 간단히'],
+    ['Audience (독자)', '누구를 위한 글, 내용인지 제시', 2, [/팀장|상사|임원|대표|독자|읽는\s*사람|처음\s*읽|참석하지\s*않은|동료|고객/, /\d+\s*분|처음|빠르게|바로|한눈에|이해/], '누가 읽는지, 그 사람이 어떻게 읽는지 적어 보세요. 예: 처음 읽는 팀장이 2분 안에 이해하도록'],
+    ['Response (응답형식)', '실제 출력물 형태를 구체적으로 제시', 2, [/워드|word|docx|파일|문서|한글|pdf/i, /한\s*장|1\s*쪽|A4|\d+\s*줄|분량|이내|\d+\s*개/i], '결과물의 형태와 분량을 적어 보세요. 예: 워드 한 장으로 만들어줘, 2줄 이내로']
+  ];
+  function scoreCostar(text) {
+    const t = String(text || '').trim();
+    return COSTAR.map(c => { const got = t.length < 10 ? 0 : Math.min(c[2], c[3].filter(re => re.test(t)).length); return { name: c[0], desc: c[1], max: c[2], got, tip: c[4] }; });
+  }
+  function tryBox(st) {
+    return `<h3>먼저 직접 써 보기</h3>
+      <p>실습 프롬프트를 보기 전에, 회의록을 팀장님 보고용으로 요약해 달라는 프롬프트를 직접 써 봅니다. 아래 여섯 가지가 들어 있는지로 10점 만점에 몇 점인지 알려 드립니다.</p>
+      ${table(['좋은 질문의 구조 (CO-STAR)', '내용', '배점'], COSTAR.map(c => [c[0], c[1], c[2] + '점']))}
+      <p class="try-src">기준: 쉴라 테오(Sheila Teo)의 CO-STAR 기법 · <a href="https://medium.com/data-science/how-i-won-singapores-gpt-4-prompt-engineering-competition-34c195a93d41" target="_blank" rel="noopener noreferrer">How I Won Singapore's GPT-4 Prompt Engineering Competition (Medium)</a>. 항목별 배점은 이 실습을 위해 임의로 정한 것입니다.</p>
+      ${noteBox(st.id + '.try', '내가 쓰는 프롬프트', '예: 너는 … 담당자야. 첨부한 회의록을 …')}
+      <div class="try-actions"><button class="g-btn" type="button" id="tryEval">평가받기</button></div>
+      <div id="tryResult" class="try-result" aria-live="polite"></div>
+      <details class="fold cn-fold try-fold"><summary>실습 프롬프트 보기 (직접 써 본 뒤에)</summary><div class="fold-b">${st.promptsTop.map(q => promptBox(D.texts[q.key], q.label)).join('')}</div></details>`;
+  }
+  function bindTry(st) {
+    const btn = $('#tryEval'); if (!btn) return;
+    btn.addEventListener('click', () => {
+      const text = (S.notes[st.id + '.try'] || '').trim();
+      const out = $('#tryResult');
+      if (text.length < 10) { out.innerHTML = '<p class="try-empty">프롬프트를 먼저 써 주세요. (10자 이상)</p>'; return; }
+      const r = scoreCostar(text); const sum = r.reduce((a, x) => a + x.got, 0);
+      const miss = r.filter(x => x.got < x.max);
+      out.innerHTML = `<div class="try-score"><span>10점 만점에</span><strong>${sum}점</strong></div>
+        ${table(['요소', '점수', '보완할 점'], r.map(x => [x.name, `${x.got} / ${x.max}`, x.got === x.max ? '들어 있습니다' : x.tip]))}
+        <p>${miss.length ? '빠진 요소를 보완해 다시 [평가받기]를 눌러 보세요.' : '여섯 가지가 모두 들어 있습니다. 실습 프롬프트와 비교해 보세요.'}</p>
+        <p class="try-src">이 점수는 글에 들어 있는 표현을 찾아 자동으로 매긴 간이 점수입니다. 글을 AI에게 보내지 않으며, 내용이 맞는지까지 판단하지는 못합니다.</p>`;
+    });
+  }
   function renderStage(x) {
     const st = x.stage, p = x.part;
     $('#bcStage').textContent = `${p.short} › ${st.no}단계 ${st.title}`;
@@ -136,7 +173,8 @@
     $('#shMeta').innerHTML = `<span class="meta-chip active">산출물 · ${esc(st.output)}</span>`;
     const secs = [];
     let goal = `<ul class="plain">${st.goal.map(g => `<li>${esc(g)}</li>`).join('')}</ul><h3>이 단계에 필요한 것</h3>${ul(st.input)}`;
-    if (st.promptsTop) goal += st.promptsTop.map(q => promptBox(D.texts[q.key], q.label)).join('');
+    if (st.tryPrompt) goal += tryBox(st);
+    else if (st.promptsTop) goal += st.promptsTop.map(q => promptBox(D.texts[q.key], q.label)).join('');
     if (st.linkButton) goal += `<div class="go-studio mt16"><p><b>${esc(st.linkButton.label)}</b> — ${esc(st.linkButton.desc)}</p><a class="g-btn" href="${esc(st.linkButton.href)}" target="_blank" rel="noopener noreferrer">${esc(st.linkButton.label)}</a></div>`;
     if (st.copyButton) goal += `<div class="go-studio mt16"><p><b>운영 시트 사본 만들기</b> — 내 드라이브에 복사됩니다. 자동화 코드도 함께 복사됩니다.</p><a class="g-btn" href="${esc(D.sheetCopy)}" target="_blank" rel="noopener noreferrer">시트 사본 만들기</a></div>`;
     if (st.warn) goal += `<div class="safety-box mt16"><strong>꼭 지킬 것</strong><p>${esc(st.warn)}</p></div>`;
@@ -156,6 +194,7 @@
     secs.push(['check', '검수', chk]);
     paint(st.id, secs);
     $('#stageBody').insertAdjacentHTML('afterbegin', stepFlow(p, st.id));
+    if (st.tryPrompt) bindTry(st);
   }
   function renderReview(x) {
     const r = x.review, p = x.part;
