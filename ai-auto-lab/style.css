@@ -1081,3 +1081,8 @@ main .step-flow li.on a{border-color:var(--accent)}
 #sec-hallu .result-card li{margin:6px 0}
 #sec-hallu .hallu-sum{margin-bottom:8px}
 #sec-hallu details.fold{max-width:none}
+.try-hint{margin:14px 0;max-width:none}
+.try-hint ol.plain{margin:8px 0 0}
+.try-hint li{margin:6px 0}
+.try-hint li span{display:block;color:var(--ink-mute);font-size:13.5px}
+.try-hint .try-frame{margin:12px 0 0;padding:12px 14px;border-radius:10px;background:var(--surface-2);font-weight:600}

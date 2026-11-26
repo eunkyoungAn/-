@@ -145,6 +145,17 @@
       <p>실습 프롬프트를 보기 전에, 회의록을 팀장님 보고용으로 요약해 달라는 프롬프트를 직접 써 봅니다. 아래 여섯 가지가 들어 있는지로 10점 만점에 몇 점인지 알려 드립니다.</p>
       ${table(['좋은 질문의 구조 (CO-STAR)', '내용', '배점'], COSTAR.map(c => [c[0], c[1], c[2] + '점']))}
       <p class="try-src">기준: 쉴라 테오(Sheila Teo)의 CO-STAR 기법 · <a href="https://medium.com/data-science/how-i-won-singapores-gpt-4-prompt-engineering-competition-34c195a93d41" target="_blank" rel="noopener noreferrer">How I Won Singapore's GPT-4 Prompt Engineering Competition (Medium)</a>. 항목별 배점은 이 실습을 위해 임의로 정한 것입니다.</p>
+      <div class="result-card try-hint"><strong>힌트 · 이렇게 요청해 보세요</strong>
+        <p>아래 여섯 가지 질문에 한 줄씩 답한다는 생각으로 이어서 쓰면 됩니다.</p>
+        <ol class="plain">
+          <li>AI에게 어떤 역할을 맡기고, 어떤 자료를 주나요? <span>예: 너는 ○○팀의 ○○ 담당자야. 첨부한 ○○을 보고</span></li>
+          <li>무엇을 해 달라고 하나요? 꼭 들어가야 할 내용은 무엇인가요? <span>예: ○○, ○○, ○○을 요약해줘</span></li>
+          <li>어떤 형식으로 받고 싶나요? <span>예: 표로, 번호 순서로</span></li>
+          <li>어떤 분위기의 글이면 좋겠나요? <span>예: 간결하게, 객관적으로</span></li>
+          <li>누가 읽나요? <span>예: 처음 읽는 ○○이 ○분 안에 이해하도록</span></li>
+          <li>결과물은 어떤 파일, 어느 정도 분량인가요? <span>예: 워드 한 장으로</span></li>
+        </ol>
+        <p class="try-frame">문장 틀: 너는 ( ) 담당자야. 첨부한 ( )을 ( )이 읽을 수 있게 ( )해줘. ( ) 형식으로, ( ) 분량으로 만들어줘.</p></div>
       ${noteBox(st.id + '.try', '내가 쓰는 프롬프트', '예: 너는 … 담당자야. 첨부한 회의록을 …')}
       <div class="try-actions"><button class="g-btn" type="button" id="tryEval">평가받기</button></div>
       <div id="tryResult" class="try-result" aria-live="polite"></div>
