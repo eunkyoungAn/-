@@ -136,6 +136,7 @@
     $('#shMeta').innerHTML = `<span class="meta-chip active">산출물 · ${esc(st.output)}</span>`;
     const secs = [];
     let goal = `<ul class="plain">${st.goal.map(g => `<li>${esc(g)}</li>`).join('')}</ul><h3>이 단계에 필요한 것</h3>${ul(st.input)}`;
+    if (st.promptsTop) goal += st.promptsTop.map(q => promptBox(D.texts[q.key], q.label)).join('');
     if (st.linkButton) goal += `<div class="go-studio mt16"><p><b>${esc(st.linkButton.label)}</b> — ${esc(st.linkButton.desc)}</p><a class="g-btn" href="${esc(st.linkButton.href)}" target="_blank" rel="noopener noreferrer">${esc(st.linkButton.label)}</a></div>`;
     if (st.copyButton) goal += `<div class="go-studio mt16"><p><b>운영 시트 사본 만들기</b> — 내 드라이브에 복사됩니다. 자동화 코드도 함께 복사됩니다.</p><a class="g-btn" href="${esc(D.sheetCopy)}" target="_blank" rel="noopener noreferrer">시트 사본 만들기</a></div>`;
     if (st.warn) goal += `<div class="safety-box mt16"><strong>꼭 지킬 것</strong><p>${esc(st.warn)}</p></div>`;
