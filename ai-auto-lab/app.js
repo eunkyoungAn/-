@@ -192,7 +192,7 @@
   }
   /* ---------- 직접 써 보고 평가받기 (CO-STAR, 10점 만점) ---------- */
   const COSTAR = [
-    ['Context (맥락)', '질문이나 요청이 어떤 상황인지 설명', 2, [/회의록|회의\s*자료|회의\s*보고서|첨부|파일|자료/, /너는|역할|담당자|여행|상품|기획|아이데이션/], '어떤 자료를 주는지, AI가 어떤 역할인지 적어 보세요. 예: 너는 상품기획팀의 회의록 정리 담당자야. 첨부한 회의록을 보고'],
+    ['Context (맥락)', '질문이나 요청이 어떤 상황인지 설명', 2, [/회의록|회의\s*자료|회의\s*보고서|첨부|파일|자료|엑셀|시트/, /너는|역할|담당자|여행|상품|기획|아이데이션/], '어떤 자료를 주는지, AI가 어떤 역할인지 적어 보세요. 예: 너는 상품기획팀의 회의록 정리 담당자야. 첨부한 회의록을 보고'],
     ['Objective (목적)', '원하는 결과나 목표 명시', 2, [/요약|정리|작성|만들어|뽑아|보고서/, /목적|배경|결정|합의|후속|미결|비교|담당자|기한|일정/], '무엇을 해 달라는지, 무엇을 꼭 담을지 적어 보세요. 예: 목적·배경, 결정사항, 후속 업무를 요약해줘'],
     ['Style (스타일)', '답변이 어떤 형식으로 나오길 원하는지 설정', 1, [/표|목록|번호|순서|개조식|항목|①|1\./], '답의 형식을 정해 보세요. 예: 표로 비교해줘, 번호 순서로 정리해줘'],
     ['Tone (톤)', '감성 및 분위기 설정', 1, [/간결|객관|쉽게|짧게|핵심만|간단|명확|공손|정중|보고용/], '글의 분위기를 정해 보세요. 예: 간결하고 객관적으로, 핵심만 간단히'],
@@ -205,7 +205,7 @@
   }
   function tryBox(st) {
     return `<h3>먼저 직접 써 보기</h3>
-      <p>실습 프롬프트를 보기 전에, 회의록을 팀장님 보고용으로 요약해 달라는 프롬프트를 직접 써 봅니다. 아래 여섯 가지가 들어 있는지로 10점 만점에 몇 점인지 알려 드립니다.</p>
+      <p>${esc(st.tryIntro || '실습 프롬프트를 보기 전에, 회의록을 팀장님 보고용으로 요약해 달라는 프롬프트를 직접 써 봅니다. 아래 여섯 가지가 들어 있는지로 10점 만점에 몇 점인지 알려 드립니다.')}</p>
       ${table(['좋은 질문의 구조 (CO-STAR)', '내용', '배점'], COSTAR.map(c => [c[0], c[1], c[2] + '점']))}
       <p class="try-src">기준: 쉴라 테오(Sheila Teo)의 CO-STAR 기법 · <a href="https://medium.com/data-science/how-i-won-singapores-gpt-4-prompt-engineering-competition-34c195a93d41" target="_blank" rel="noopener noreferrer">How I Won Singapore's GPT-4 Prompt Engineering Competition (Medium)</a>. 항목별 배점은 이 실습을 위해 임의로 정한 것입니다.</p>
       <div class="result-card try-hint"><strong>힌트 · 이렇게 요청해 보세요</strong>
@@ -219,7 +219,7 @@
           <li>결과물은 어떤 파일, 어느 정도 분량인가요? <span>예: 워드 한 장으로</span></li>
         </ol>
         <p class="try-frame">문장 틀: 너는 ( ) 담당자야. 첨부한 ( )을 ( )이 읽을 수 있게 ( )해줘. ( ) 형식으로, ( ) 분량으로 만들어줘.</p></div>
-      ${noteBox(st.id + '.try', '내가 쓰는 프롬프트', '예: 너는 … 담당자야. 첨부한 회의록을 …')}
+      ${noteBox(st.id + '.try', '내가 쓰는 프롬프트', '예: 너는 … 담당자야. 첨부한 … 을 …')}
       <div class="try-actions"><button class="g-btn" type="button" id="tryEval">평가받기</button></div>
       <div id="tryResult" class="try-result" aria-live="polite"></div>
       <details class="fold cn-fold try-fold"><summary>실습 프롬프트 보기 (직접 써 본 뒤에)</summary><div class="fold-b">${st.promptsTop.map(q => promptBox(D.texts[q.key], q.label)).join('')}</div></details>`;
