@@ -1348,3 +1348,8 @@ main{padding-bottom:72px}
 .op-msg{min-height:22px;margin:0;font-size:14px;font-weight:700;color:var(--accent)}
 .op-how{margin:4px 0 0;padding-left:20px;color:var(--ink-soft);font-size:14px;line-height:1.7}
 .g-nav a{white-space:nowrap}
+/* ===== 개인 실습 ===== */
+.sq{display:grid;gap:14px}
+.solo-next{border:1px solid var(--rule-strong);background:rgba(11,100,244,.06)}
+.hb-acc summary b{white-space:nowrap}
+@media (min-width:901px){.step-flow ol.n6{grid-template-columns:repeat(6,minmax(0,1fr))}}
