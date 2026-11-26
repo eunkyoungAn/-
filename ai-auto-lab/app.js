@@ -19,7 +19,7 @@
   const SEQ = [];
   D.parts.forEach(p => { p.stages.forEach(s => SEQ.push({ id: s.id, part: p, stage: s })); if (p.review) SEQ.push({ id: p.review.id, part: p, review: p.review }); });
   const find = id => SEQ.find(x => x.id === id);
-  const label = x => x.stage ? `${x.part.short} · ${x.stage.no}단계 ${x.stage.title}` : `${x.part.short} · 마무리 ${x.review.title}`;
+  const label = x => x.stage ? (x.stage.solo ? `${x.part.short} · ${x.stage.title}` : `${x.part.short} · ${x.stage.no}단계 ${x.stage.title}`) : `${x.part.short} · 마무리 ${x.review.title}`;
 
   /* ---------- 공용 ---------- */
   async function copyText(text, btn) {
@@ -109,11 +109,25 @@
     const two = n => String(n).padStart(2, '0');
     $('#homeParts').innerHTML = D.parts.map(p => `<section class="hb-sec" id="sec-${p.id}">
       <div class="hb-head"><h2>${esc(p.title)}</h2><p>${esc(p.desc)}</p></div>
-      <div class="hb-acc">${p.stages.map((s, i) => `<details name="hb-${p.id}"${i === 0 ? ' open' : ''}><summary><b>${two(s.no)}</b><span>${esc(s.title)}</span></summary>
+      <div class="hb-acc">${p.stages.map((s, i) => `<details name="hb-${p.id}"${i === 0 ? ' open' : ''}><summary><b>${s.solo ? '개인' : two(s.no)}</b><span>${esc(s.title)}</span></summary>
         <div class="hb-acc-b"><p>${esc(s.goal[0])}</p><span class="hb-tab">산출물 · ${esc(s.output)}</span>${done(find(s.id)) ? '<span class="hb-tab">검수 완료</span>' : ''}<a class="hb-go" href="#${s.id}">이 단계 시작 →</a></div></details>`).join('')}
       ${p.review ? `<details name="hb-${p.id}"><summary><b>끝</b><span>${esc(p.review.title)}</span></summary><div class="hb-acc-b"><p>${p.id === 'mail' ? '보내기 전에 체크리스트로 다시 읽습니다.' : '결과를 시트에 기록하고 오늘 한 일을 돌아봅니다.'}</p><a class="hb-go" href="#${p.review.id}">마무리 시작 →</a></div></details>` : ''}</div>
       <div class="sheet-actions mt14"><a class="g-btn" href="#${p.stages[0].id}">1단계부터 시작</a></div></section>`).join('');
     renderProgress();
+  }
+  /* ---------- 개인 실습: 단계 안의 문제와 정답 확인 ---------- */
+  function stageQuiz(st) {
+    const box = $('#stageQuiz'); if (!box) return;
+    S.sq = S.sq || {}; const mine = S.sq[st.id] = S.sq[st.id] || {};
+    const mark = '①②③④';
+    const ok = st.quiz.filter((q, i) => mine[i] === q.ans).length, n = st.quiz.filter((q, i) => mine[i] != null).length;
+    box.innerHTML = st.quiz.map((q, i) => { const pick = mine[i], done = pick != null;
+      return `<article class="qz${done ? ' done' : ''}"><header><b>문제 ${i + 1}</b></header><h3>${esc(q.q)}</h3>
+        <div class="qz-opts">${q.opts.map((o, k) => `<button type="button" data-q="${i}" data-k="${k}" class="${done ? (k === q.ans ? 'ok' : (k === pick ? 'no' : '')) : ''}"${done ? ' disabled' : ''}><i>${mark[k]}</i><span>${esc(o)}</span>${done && k === q.ans ? '<em>정답</em>' : ''}${done && k === pick && k !== q.ans ? '<em>내 답</em>' : ''}</button>`).join('')}</div>
+        ${done ? `<p class="qz-why"><b>${pick === q.ans ? '맞았습니다.' : '다시 볼까요.'}</b> ${esc(q.why)}</p>` : ''}</article>`; }).join('') +
+      `<div class="qz-score"><div><span>맞힌 문제</span><strong>${ok} / ${st.quiz.length}</strong></div><p>${n < st.quiz.length ? `${st.quiz.length - n}문제가 남았습니다. 내 결과와 엑셀을 보고 답합니다.` : (ok === st.quiz.length ? '모두 맞혔습니다.' : '틀린 문제는 엑셀에서 직접 확인합니다.')}</p><button class="g-btn ghost" type="button" id="sqReset">다시 풀기</button></div>`;
+    box.querySelectorAll('.qz-opts button').forEach(bt => bt.addEventListener('click', () => { mine[bt.dataset.q] = Number(bt.dataset.k); save(); stageQuiz(st); }));
+    $('#sqReset').addEventListener('click', () => { S.sq[st.id] = {}; save(); stageQuiz(st); });
   }
   /* ---------- 점검 퀴즈 (객관식 5문제) ---------- */
   function renderQuiz() {
@@ -226,7 +240,7 @@
   }
   function renderStage(x) {
     const st = x.stage, p = x.part;
-    $('#bcStage').textContent = `${p.short} › ${st.no}단계 ${st.title}`;
+    $('#bcStage').textContent = st.solo ? `${p.short} › ${st.title}` : `${p.short} › ${st.no}단계 ${st.title}`;
     $('#shEyebrow').textContent = `${p.short} · ${st.kicker} · ${st.role}`;
     $('#shTitle').textContent = st.title;
     $('#shSum').textContent = st.goal.join(' ');
@@ -252,10 +266,13 @@
     if (st.extra) secs.push(['extra', st.extra.title, st.extra.html]);
     let chk = checklist(st.id, st.checks) + `<h3>성찰 질문</h3><p>${esc(st.reflect)}</p>`;
     if (st.table && st.table.after) chk += tableBlock(st.table);
+    if (st.nextSolo) chk += `<div class="go-studio solo-next mt16"><p><b>강사와 함께하는 실습은 여기까지입니다.</b> 이제 같은 순서를 혼자 해 봅니다. ${esc(st.nextSolo.title)}</p><a class="g-btn" href="${esc(st.nextSolo.href)}">개인 실습 시작</a></div>`;
+    if (st.quiz) secs.push(['quiz', '문제와 정답 확인', '<div class="sq" id="stageQuiz"></div>']);
     secs.push(['check', '검수', chk]);
     paint(st.id, secs);
     $('#stageBody').insertAdjacentHTML('afterbegin', stepFlow(p, st.id));
     if (st.tryPrompt) bindTry(st);
+    if (st.quiz) stageQuiz(st);
   }
   function renderReview(x) {
     const r = x.review, p = x.part;
