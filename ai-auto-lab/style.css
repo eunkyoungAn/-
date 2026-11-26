@@ -1074,3 +1074,10 @@ main .step-flow li.on a{border-color:var(--accent)}
 .try-empty{color:var(--accent);font-weight:700}
 .try-fold{margin-top:18px}
 .try-result td:nth-child(2),.try-result th:nth-child(2){white-space:nowrap}
+
+/* ===== 할루시네이션 ===== */
+#sec-hallu .hallu-doc{margin:14px 0 10px;font-weight:700}
+#sec-hallu .result-card ul.plain,#sec-hallu .result-card ol.plain{margin:8px 0 0}
+#sec-hallu .result-card li{margin:6px 0}
+#sec-hallu .hallu-sum{margin-bottom:8px}
+#sec-hallu details.fold{max-width:none}
