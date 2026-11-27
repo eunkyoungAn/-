@@ -923,7 +923,7 @@ window.LAB = {
       "실습 자료 「신규 여행상품 아이데이션 회의록」 (아래 단추로 받기)"
      ],
      "steps": [
-      "위 <b>회의록 파일 받기</b>를 눌러 실습 자료를 내 컴퓨터에 내려받습니다.",
+      "위 <b>회의록 받기</b>를 눌러 실습 자료를 내 컴퓨터에 내려받습니다. 한글(hwpx)과 워드(docx) 가운데 편한 것을 고릅니다.",
       "1단계에서 만든 프로젝트를 엽니다.",
       "프로젝트 화면의 <b>[파일 추가]</b>를 누르고 회의록 파일을 올립니다.",
       "프로젝트 파일 목록에 회의록이 보이는지 확인합니다."
@@ -962,9 +962,16 @@ window.LAB = {
       ]
      },
      "linkButton": {
-      "label": "회의록 파일 받기",
+      "label": "회의록 받기 (한글)",
       "desc": "실습 자료 「신규 여행상품 아이데이션 회의록」 한글(hwpx) 파일입니다.",
-      "href": "files/meeting-report.hwpx"
+      "href": "files/meeting-report.hwpx",
+      "download": "실습자료_신규 여행상품 아이데이션 회의록.hwpx"
+     },
+     "linkButton2": {
+      "label": "회의록 받기 (워드)",
+      "desc": "같은 내용의 워드(docx) 파일입니다. 한글 파일이 열리지 않거나 AI가 읽지 못할 때 씁니다.",
+      "href": "files/meeting-report.docx",
+      "download": "실습자료_신규 여행상품 아이데이션 회의록.docx"
      }
     },
     {
@@ -1838,6 +1845,12 @@ window.LAB = {
    "보고서 실습 회의록",
    "meeting-report.hwpx · 신규 여행상품 아이데이션 회의록 (교육용 가상자료)",
    "files/meeting-report.hwpx",
+   true
+  ],
+  [
+   "보고서 실습 회의록 (워드)",
+   "meeting-report.docx · 같은 회의록의 워드 파일 (교육용 가상자료)",
+   "files/meeting-report.docx",
    true
   ],
   [
