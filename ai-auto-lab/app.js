@@ -250,6 +250,7 @@
     if (st.tryPrompt) goal += tryBox(st);
     else if (st.promptsTop) goal += st.promptsTop.map(q => promptBox(D.texts[q.key], q.label)).join('');
     if (st.linkButton) goal += `<div class="go-studio mt16"><p><b>${esc(st.linkButton.label)}</b> — ${esc(st.linkButton.desc)}</p><a class="g-btn" href="${esc(st.linkButton.href)}" ${st.linkButton.download ? `download="${esc(st.linkButton.download)}"` : 'target="_blank" rel="noopener noreferrer"'}>${esc(st.linkButton.label)}</a></div>`;
+    if (st.linkButton2) goal += `<div class="go-studio mt16"><p><b>${esc(st.linkButton2.label)}</b> — ${esc(st.linkButton2.desc)}</p><a class="g-btn" href="${esc(st.linkButton2.href)}" ${st.linkButton2.download ? `download="${esc(st.linkButton2.download)}"` : 'target="_blank" rel="noopener noreferrer"'}>${esc(st.linkButton2.label)}</a></div>`;
     if (st.copyButton) goal += `<div class="go-studio mt16"><p><b>운영 시트 사본 만들기</b> — 내 드라이브에 복사됩니다. 자동화 코드도 함께 복사됩니다.</p><a class="g-btn" href="${esc(D.sheetCopy)}" target="_blank" rel="noopener noreferrer">시트 사본 만들기</a></div>`;
     if (st.warn) goal += `<div class="safety-box mt16"><strong>꼭 지킬 것</strong><p>${esc(st.warn)}</p></div>`;
     secs.push(['goal', '학습 목표와 준비', goal]);
