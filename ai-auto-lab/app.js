@@ -99,6 +99,7 @@
       ['보고서', '#report', '팀장님 제출용 한 장 요약'],
       ['데이터분석', '#data', '후보별 표·막대그래프와 최종 보고서'],
       ['할루시네이션', '#hallu', 'AI 답을 확인하는 다섯 가지 습관'],
+      ['관심정보 모으기', [['#track', '준비 중', 'Gemini · ChatGPT · Claude']]],
       ['점검', [['#quiz', '퀴즈', '객관식 다섯 문제']]],
       ['의견 주세요!', [['#opinion', '의견', '다음 교육에서 배우고 싶은 과정']]],
       ['자료실', '#materials', '실습 파일, 요청문, 지침, 참고 코드']
@@ -450,6 +451,7 @@
       ['시작하기 전에', [['ai-test/', '맨 처음', 'AI 역량검사'], ['who/', '그다음', '나는 어떤 AI 사용자? 맞춰 보기']]],
       ...D.parts.map(p => [p.title, [...p.stages.map(s => ['#' + s.id, s.no + '단계', s.title]), ...(p.review ? [['#' + p.review.id, '마무리', p.review.title]] : [])]]),
       ['할루시네이션', [['#hallu', '정리', 'OpenAI · Anthropic 기준 줄이는 방법']]],
+      ['관심정보 모으기', [['#track', '준비 중', 'Gemini · ChatGPT · Claude']]],
       ['점검', [['#quiz', '퀴즈', '객관식 다섯 문제']]],
       ['의견 주세요!', [['#opinion', '의견', '다음 교육에서 배우고 싶은 과정']]],
       ['자료실', [['#materials', '자료', '파일, 요청문, 참고 코드']]],
@@ -462,7 +464,7 @@
   }
 
   /* ---------- 라우팅 ---------- */
-  const HOME_SECS = ['ai', 'gpt', 'practice', 'intro', 'before', 'goals', 'mail', 'card', 'materials', 'safety', 'help', 'sources', 'report', 'data', 'hallu', 'course', 'info', 'quiz', 'opinion'];
+  const HOME_SECS = ['ai', 'gpt', 'practice', 'intro', 'before', 'goals', 'mail', 'card', 'materials', 'safety', 'help', 'sources', 'report', 'data', 'hallu', 'course', 'info', 'quiz', 'opinion', 'track'];
   function route() {
     const h = (location.hash || '#home').replace('#', '');
     const [view, sub] = h.split('-');
@@ -476,7 +478,7 @@
     else if (x && x.review) { $('#viewStage').hidden = false; renderReview(x); }
     else { $('#viewHome').hidden = false; renderHome(); if (HOME_SECS.includes(view)) target = document.getElementById('sec-' + view); }
     if (sub && view !== 'start') target = document.getElementById(h);
-    requestAnimationFrame(() => { if (target) { const dt = target.closest('details'); if (dt) dt.open = true; target.scrollIntoView({ block: 'start' }); } else window.scrollTo(0, 0); });
+    requestAnimationFrame(() => { if (target) { const dt = target.closest('details'); if (dt) dt.open = true; target.scrollIntoView({ block: 'start' }); const h = location.hash; [250, 700].forEach(ms => setTimeout(() => { if (location.hash === h && Math.abs(target.getBoundingClientRect().top) > 140) target.scrollIntoView({ block: 'start' }); }, ms)); } else window.scrollTo(0, 0); });
   }
 
   renderStatic();
