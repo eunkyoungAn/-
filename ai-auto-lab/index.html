@@ -9,7 +9,7 @@
 <title>AI 활용 스마트 문서작성 | 커리어캐쳐</title>
 <meta name="description" content="Gemini와 Apps Script로 메일을 한 번에 보내고, 시트 한 줄로 카드뉴스를 만드는 실습실.">
 <link rel="stylesheet" href="fonts/pretendard.css">
-<link rel="stylesheet" href="style.css?v=20261127c">
+<link rel="stylesheet" href="style.css?v=20261128a">
 </head>
 <body>
 <header class="g-header">
@@ -188,7 +188,45 @@
       </section>
 
       <section class="hb-sec" id="sec-track">
-        <div class="hb-head"><h2>관심정보 모으기</h2><p>Gemini, ChatGPT, Claude에서 관심 있는 정보를 꾸준히 모아 보는 방법입니다. 내용 준비 중입니다.</p></div>
+        <div class="hb-head"><h2>관심정보 모으기</h2><p>관심 주제의 새 소식을 AI가 정해진 시간에 찾아 정리해 주도록 맡기는 방법입니다. ChatGPT, Gemini, Claude 세 곳 모두 정리했습니다.</p></div>
+
+        <div class="hx-key"><small>결론부터</small><strong>요청문 하나를 "매일 아침 반복"으로 예약해 두면, 찾아보지 않아도 소식이 정리되어 옵니다.</strong></div>
+
+        <h3 class="dl-h">공통 순서</h3>
+        <div class="hx-flow">
+          <div><b>1 · 주제 정하기</b><strong>무엇을 따라갈지 한 줄로</strong><span>예: 생성형 AI 교육, 직업상담 정책, 우리 기관 지원사업</span></div><i aria-hidden="true">→</i>
+          <div><b>2 · 요청문 예약하기</b><strong>언제, 몇 개, 어떤 형식으로</strong><span>아래 요청문을 복사해 주제만 바꿔 보냄</span></div><i aria-hidden="true">→</i>
+          <div class="good"><b>3 · 받아서 확인하기</b><strong>출처 링크를 눌러 대조</strong><span>AI가 모은 소식도 초안. 중요한 것은 원문 확인</span></div>
+        </div>
+
+        <h3 class="dl-h">복사해서 쓰는 요청문</h3>
+        <div id="trackPrompt"></div>
+
+        <h3 class="dl-h">세 곳에서 예약하는 방법</h3>
+        <div class="hx-three tk-three">
+          <article class=""><header><em>예약 작업 (Scheduled tasks)</em><strong>ChatGPT</strong></header><div class="hx-who"><b>무료 계정</b><span>사용 가능. 동시에 3개, 하루 1회까지, 아침·오후·밤 같은 시간대로 실행</span></div><div class="hx-who"><b>만드는 법</b><span>채팅에서 요청문을 보내고 "매일 아침 반복해줘"라고 요청. 또는 [Scheduled] 화면에서 직접 만들기</span></div><div class="hx-who"><b>유료 계정</b><span>Plus는 동시에 5개. 정확한 시각 지정, 1시간 간격까지 가능</span></div></article>
+          <article class=""><header><em>예약 작업 (Schedules)</em><strong>Gemini</strong></header><div class="hx-who"><b>무료 계정</b><span>개인 Google 계정(만 18세 이상)으로 하루 1회, 대략적인 시간대, 동시에 10개. 활동 기록 저장이 켜져 있어야 함</span></div><div class="hx-who"><b>만드는 법</b><span>채팅에서 할 일과 시간을 함께 말하기. 또는 [Scheduled] 화면에서 만들기</span></div><div class="hx-who"><b>유료 계정</b><span>Google AI Pro·Ultra는 정확한 시각, 하루 여러 번, 동시에 50개</span></div></article>
+          <article class=""><header><em>예약 작업 (Scheduled tasks)</em><strong>Claude</strong></header><div class="hx-who"><b>무료 계정</b><span>예약 기능 없음 (유료 플랜 전용)</span></div><div class="hx-who"><b>무료에서는</b><span>프로젝트 지침에 요청문을 저장해 두고, 볼 때마다 "오늘 소식 정리해줘" 한 줄로 직접 실행</span></div><div class="hx-who"><b>유료 계정</b><span>대화에서 할 일과 주기를 말한 뒤 [Schedule] 누르기. 또는 왼쪽 [Scheduled] → [New task]</span></div></article>
+        </div>
+        <p class="hx-src">[자료 근거] 각 회사 도움말 기준(접속일 2026. 11. 28.). OpenAI, <a href="https://help.openai.com/en/articles/10291617-scheduled-tasks-in-chatgpt" target="_blank" rel="noopener noreferrer">Scheduled tasks in ChatGPT</a> · Google, <a href="https://support.google.com/gemini/answer/17094710" target="_blank" rel="noopener noreferrer">Create &amp; manage schedules for tasks in Gemini</a> · Anthropic, <a href="https://support.claude.com/en/articles/13854387-schedule-recurring-tasks-in-claude-cowork" target="_blank" rel="noopener noreferrer">Schedule recurring tasks in Claude Cowork</a></p>
+
+        <h3 class="dl-h">잘 모으는 요령</h3>
+        <ol class="hx-five tk-four">
+          <li><b>1</b><strong>주제는 좁게</strong><span>"AI"보다 "공공기관 AI 교육 지원사업"처럼 구체적으로</span></li>
+          <li><b>2</b><strong>개수와 기간을 정하기</strong><span>"최근 24시간, 3~5개"처럼 범위를 정해 줌</span></li>
+          <li><b>3</b><strong>출처를 요구하기</strong><span>기관 이름, 링크, 날짜를 함께 적게 함</span></li>
+          <li><b>4</b><strong>없으면 없다고</strong><span>새 소식이 없을 때 억지로 채우지 않게 함</span></li>
+        </ol>
+
+        <div class="hx-key end"><small>다시 결론</small><strong>모으는 일은 AI에게, 믿을지 판단하는 일은 사람이 합니다. 링크를 눌러 원문을 확인합니다.</strong></div>
+
+        <details class="fold cn-fold"><summary>확인 필요 사항</summary><div class="fold-b">
+          <ul class="plain">
+            <li>[확인 필요] 무료 계정의 개수·횟수 한도는 자주 바뀝니다. 수업 전에 각 도움말에서 다시 확인합니다.</li>
+            <li>[확인 필요] 메뉴 이름은 영어 도움말 기준입니다. 한국어 화면에서는 "예약" 같은 다른 이름으로 보일 수 있습니다.</li>
+            <li>[확인 필요] Gemini 도움말은 페이지 판에 따라 조건이 다르게 적혀 있습니다. 내 계정에서 예약이 만들어지는지 먼저 시험합니다.</li>
+            <li>[확인 필요] 새 소식을 찾으려면 웹 검색 기능이 켜져 있어야 합니다.</li>
+          </ul></div></details>
       </section>
 
       <section class="hb-sec" id="sec-quiz">
@@ -295,8 +333,8 @@
   <span class="g-contact"><strong>CareerCatcher</strong> 안은경 · <a href="mailto:dms5147@gmail.com">dms5147@gmail.com</a></span>
 </div></footer>
 
-<script src="data.js?v=20261127c"></script>
-<script src="code.js?v=20261127c"></script>
-<script src="app.js?v=20261127c"></script>
+<script src="data.js?v=20261128a"></script>
+<script src="code.js?v=20261128a"></script>
+<script src="app.js?v=20261128a"></script>
 </body>
 </html>

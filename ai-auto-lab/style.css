@@ -1353,3 +1353,9 @@ main{padding-bottom:72px}
 .solo-next{border:1px solid var(--rule-strong);background:rgba(11,100,244,.06)}
 .hb-acc summary b{white-space:nowrap}
 @media (min-width:901px){.step-flow ol.n6{grid-template-columns:repeat(6,minmax(0,1fr))}}
+/* ===== 관심정보 모으기 ===== */
+.tk-three header{text-align:left;padding:20px 20px 16px}
+.tk-three header strong{font-size:22px}
+.tk-three .hx-who{grid-template-columns:78px minmax(0,1fr)}
+#sec-track .prompt-box{max-width:none;margin-top:12px}
+@media (min-width:981px){.hx-five.tk-four{grid-template-columns:repeat(4,minmax(0,1fr))}}
